@@ -1,0 +1,199 @@
+---
+title: "Cleaning_raw_biometrics"
+author: "Tiff Stephens"
+date: "11/30/2017"
+output: html_document
+---
+
+
+```{r Libraries, echo = FALSE, include=FALSE}
+library(dplyr); library(tidyr); library(ggplot2)
+theme_set(theme_classic())
+```
+
+Import data
+```{r}
+# datachunk: TAS
+
+sg.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/seagrass_2017/master/RAW_seagrass_biometrics_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+# Checking the data
+```{r}
+# datachunk: WR
+
+str(sg.bio)
+range(sg.bio$rhi_length, na.rm = TRUE)
+range(sg.bio$node1, na.rm = TRUE)
+hist(sg.bio$node2)
+hist(sg.bio$leaf_width1)
+```
+
+Change numerics to factors
+# Is this necessary? 
+```{r}
+# datachunk: WR
+
+#sg.bio$quadrat <- as.factor(sg.bio$quadrat)
+#sg.bio$plant <- as.factor(sg.bio$plant)
+```
+
+
+
+# Cleaning Data for Analysis
+
+Calculate dry weights of all flora and fauna; remove pad + foil data uneccessary for analysis
+```{r}
+# datachunk: TAS
+
+
+# piped calculations for all
+sg.bio = sg.bio %>% 
+  mutate(epiphyte_mass_dw = pad_epiphyte_mass_g - pad_mass_g) %>%
+  mutate(rhi_mass_dw = rhi_foil_dw_g - rhi_foil) %>%
+  mutate(shoot_mass_dw = shoot_foil_dw - shoot_foil) %>%
+  mutate(xs_shoot_mass_dw = xs_shoot_foil_dw - xs_shoot_foil) %>%
+  mutate(xs_pad_mass_dw = xs_epiphyte_pad_mass_g - xs_pad_mass_g) %>%
+  mutate(iso_mass_dw = iso_foil_dw - iso_foil) %>%
+  mutate(gamm_amph_mass_dw = gamm_amph_foil_dw - gamm_amph_foil) %>%
+  mutate(caprel_mass_dw = caprel_foil_dw - caprel_foil) %>%
+  mutate(limpet_mass_dw = limpet_foil_dw - limpet_foil) %>%
+  mutate(gastropod_mass_dw = gastropod_foil_dw - gastropod_foil) %>%
+  mutate(crab_mass_dw = crab_foil_dw - crab_foil) 
+
+# check new column names
+colnames(sg.bio)
+
+# remove pad and foil weights from dataframe 
+#sg.bio = sg.bio %>% 
+ #select(-pad_epiphyte_mass_g, -pad_mass_g, -xs_epiphyte_pad_mass_g, -xs_pad_mass_g) %>% #pads
+  #select(-rhi_foil_dw_g, -rhi_foil, -shoot_foil, -shoot_foil_dw, -xs_shoot_foil_dw, -xs_shoot_foil) %>% #seagrass
+  #select(-iso_foil_dw, -iso_foil, -gamm_amph_foil_dw, -gamm_amph_foil, -caprel_foil_dw, -caprel_foil, -crab_foil_dw, -crab_foil) %>% #crustaceans
+  #select(-limpet_foil_dw, -limpet_foil, -gastropod_foil_dw, -gastropod_foil) #molluscs
+
+# check new column names
+#colnames(sg.bio)
+```
+
+
+Calculate leaf areas for each blade measured
+```{r, echo=FALSE}
+# datachunk: TAS
+
+
+# calculate the leaf area (cm^2) per blade per plant
+sg.bio = sg.bio %>% 
+  mutate(leaf_area1 = leaf_length1 * leaf_width1, na.rm = TRUE) %>%
+  mutate(leaf_area2 = leaf_length2 * leaf_width2, na.rm = TRUE) %>%
+  mutate(leaf_area3 = leaf_length3 * leaf_width3, na.rm = TRUE) %>%
+  mutate(leaf_area4 = leaf_length4 * leaf_width4, na.rm = TRUE) %>%
+  mutate(leaf_area5 = leaf_length5 * leaf_width5, na.rm = TRUE) %>%
+  mutate(leaf_area6 = leaf_length6 * leaf_width6, na.rm = TRUE) %>%
+  mutate(leaf_area7 = leaf_length7 * leaf_width7, na.rm = TRUE) %>%
+  mutate(leaf_area8 = leaf_length8 * leaf_width8, na.rm = TRUE) %>%
+  mutate(leaf_area9 = leaf_length9 * leaf_width9, na.rm = TRUE) %>%
+  mutate(leaf_area10 = leaf_length10 * leaf_width10, na.rm = TRUE)
+
+# check new column names
+colnames(sg.bio)
+```
+
+Calculate total leaf area for each plant
+```{r}
+# datachunk: TAS
+
+
+# calculate total leaf area per plant (there is no biomass data per blade so need to combine all blades)
+sg.bio$tot_leaf_area <- rowSums(sg.bio[,c("leaf_area1", "leaf_area2", "leaf_area3", "leaf_area4", "leaf_area5", "leaf_area6", "leaf_area7", "leaf_area8", "leaf_area9", "leaf_area10")], na.rm = TRUE)
+
+# check new column names
+colnames(sg.bio)
+```
+
+Calculate mean canopy height (all blades from each plant included)
+```{r}
+# datachunk: TAS
+
+
+# mean height of all blades
+sg.bio = mutate(sg.bio, mean_leaf_length = rowMeans(select(sg.bio, starts_with("leaf_length")), na.rm = TRUE))
+
+# check new column names
+colnames(sg.bio)
+```
+
+Determine max canopy height per plant (only tallest blade from each plant included)
+```{r, warning = FALSE, message = FALSE}
+# datachunk: TAS
+
+sg.bio$max_canopy_height = apply(sg.bio[, 12:21], 1, max, na.rm = TRUE)
+
+colnames(sg.bio)
+```
+
+```{r}
+#write.csv(eg.bio,'CLEAN_seagrass_biometrics_2017.csv')
+```
+
+
+
+```{r}
+# datachunk: TAS 
+
+library(DT) 
+
+sg.bio = sg.bio %>%
+  separate(collection_date, c("Day", "Month", "Year"), sep = "/")
+
+ggplot(sg.bio, aes(site, mean_leaf_length)) +
+  geom_col() +
+  coord_flip() +
+  facet_wrap(~Month)
+
+
+```
+
+
+```{r}
+
+ggplot(sg.bio = aes())
+```
+
+
+
+
+
+
+
+
+
+
+# TO DO: 
+
++ Fill absent grazers with 0s so that cacluations below will work (insert this code before the mass_dw calculations)
++ example -- eg.bio[,89:94][is.na(eg.bio[,89:94])] <- 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
