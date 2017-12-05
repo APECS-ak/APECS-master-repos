@@ -1,0 +1,271 @@
+---
+title: "Preliminary OM and IM results"
+author: "Tiff Stephens"
+date: "12/1/2017"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include=FALSE}
+library(knitr); library(dplyr); library(tidyr); library(ggplot2); library(DT); library(cowplot); library(leaflet)
+theme_set(theme_classic())
+```
+
+
+### 1. Import cleaned .csv file and look at dataframe.
+```{r, echo = FALSE, include = FALSE}
+# read clean file from github
+cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/sediment_2017/master/CLEAN_core_matter.csv", stringsAsFactors = FALSE, header = TRUE)
+
+# check 
+str(cr.mat)
+```
+
+
+
+### 2. Remove excess columns. <br>
+
+#### (e.g. pan + crucible data recorded prior to final calcualted weights)
+```{r}
+
+# remove pan, crucible, and sediment combo weights not necessary for analysis
+cr.mat = cr.mat %>% 
+  select(-na.rm, -pan_number, -pan_weight, -pan_sed_ww_pre_60C, -pan_sed_dw_post_60C, -pan_sed_dw_pre_450C, -pan_sed_dw_post450C, -crucible_weight, -crucible_sed_dw_pre_950C, -crucible_sed_dw_post_950C, -sed_ww_pre_60C, -sed_dw_post_60C, -sed_dw_pre_450C, -sed_dw_post_450C, -sed_dw_pre_950C, -sed_dw_post_950C)
+
+
+colnames(cr.mat)
+```
+
+<br>
+
+### 3. Where are the processed cores from?
+```{r}
+# new data frame for all cores
+locations_all = cr.mat %>%
+  distinct(cr.mat, latitude, longitude, site) %>%
+  drop_na()
+
+# map "locations_all"
+leaflet(locations_all) %>%
+  addTiles() %>%
+  addMarkers(~longitude, ~latitude, popup = ~site, label = ~site)
+```
+
+<br>
+
+### 4. Plotting
+#### All sites
+```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
+levels=c("Low","Mid","High") # order zones
+
+# plot organic matter
+plot_om_all = ggplot(cr.mat, aes(core_depth, om_density)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Organic Matter (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~site, ncol = 1)
+
+# plot inorganic matter
+plot_im_all = ggplot(cr.mat, aes(core_depth, im_density)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Organic Matter (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~site, ncol = 1)
+
+# organize om and im side-by-side
+plot_grid(plot_om_all, plot_im_all, align = "hv", ncol = 2)
+```
+
+<br>
+
+#### You will notice that site L06 is way different than the rest, so far. This core was loaded with chunky woody debris; it's real data but an outlier compared to the other sites. Here are two images of the sliced core from site L06:
+
+```{r, include = FALSE}
+img1_path = "images/woodchunk1.JPG"
+img2_path = "images/woodchunk2.JPG"
+```
+
+```{r out.width = "50%", echo = FALSE}
+include_graphics(img1_path)
+include_graphics(img2_path)
+```
+
+
+<br>
+
+#### For the sake of looking at regional patterns, let's remove site L06 until we have more sites processed:
+
+```{r}
+cr.mat_noL06 = cr.mat[-c(1:30),] # remove L06 (for now) because organic matter is off the scale
+```
+
+<br>
+<br>
+
+
+#### Here are the data, by site, without L06:
+```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
+levels=c("Low","Mid","High") # order zones
+
+# plot organic matter
+plot_om_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, om_density)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Organic Matter (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~site, ncol = 1)
+
+# plot inorganic matter
+plot_im_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, im_density)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Organic Matter (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~site, ncol = 1)
+
+# organize om and im side-by-side
+plot_grid(plot_om_sites_exL06, plot_im_sites_exL06, align = "hv", ncol = 2)
+```
+
+
+
+
+
+
+
+
+<br>
+<br>
+
+#### Here are the data grouped by sea otter zone (witout L06)
+```{r fig2, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
+
+cr.mat_noL06$otter_region=factor(cr.mat_noL06$otter_region, levels=c("Low","Mid","High")) # order zones
+
+
+# plot organic matter
+plot_om = ggplot(cr.mat_noL06, aes(core_depth, om_density)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Organic Matter (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~otter_region, ncol = 1)
+
+#plopt inorganic matter
+plot_im = ggplot(cr.mat_noL06, aes(core_depth, im_density)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Inorganic Matter (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~otter_region, ncol = 1)
+
+# organize om and im side-by-side
+plot_grid(plot_om, plot_im, align = "hv", ncol = 2)
+```
+
+```{r, echo = FALSE, message = FALSE}
+# make new dataframe for mapping
+#locations = cr.mat_noL06 %>%
+  #distinct(cr.mat_noL06, latitude, longitude, site) %>%
+  #drop_na()
+
+# turn into leaflet map
+#leaflet(locations) %>%
+  #addTiles() %>%
+  #addMarkers(~longitude, ~latitude, popup = ~site, label = ~site)
+```
+
+<br>
+
+#### It looks like the low sea otter zone has more organic matter in the sediments, and the mid sites have a nice range that tracks through depth. I'm looking forward to more replicates! It will also be great to have grain size analysis...hopefully some day.  
+
+<br>
+
+#### OM and IM ratios: I just noticed that the depths for IM at one site are misaligned, meaning that the data were probably entered into the wrong lines. This will be looked into. In the mean time, it appears that the OM:IM ratio, across all sites, decreases with depth. Makes sense! Here, data are summarized across sites because the pattern looked similar across sites. 
+```{r, echo = FALSE, warning = FALSE}
+# plot organic matter
+plot_omim_ratio = ggplot(cr.mat_noL06, aes(core_depth, om.im_ratio)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("OM:IM Ratio (g cm^3)")
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+
+# organize om and im side-by-side
+plot_grid(plot_omim_ratio, align = "hv", ncol = 1)
+```
+
+
+
+<br>
+<br>
+<br>
+<br>
+
+### Plots of dry bulk density (DBD) of the sediment. 
+
+<br>
+
+#### These are important to look at because it is used to calculate the OM and IM per volume. In the mean time, it also gives hints about the sediment type/quality; a higher DBD implies lower porosity and compaction. 
+```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
+levels=c("Low","Mid","High") # order zones
+
+# plot organic matter
+plot_DBD_site = ggplot(cr.mat, aes(core_depth, dry_bulk_density)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Sediment Dry Bulk Density (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~site, ncol = 1)
+
+plot_DBD_region = ggplot(cr.mat, aes(core_depth, dry_bulk_density)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Sediment Dry Bulk Density (g cm^3") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~otter_region, ncol = 1)
+
+
+# organize om and im side-by-side
+plot_grid(plot_DBD_site, plot_DBD_region, align = "hv", ncol = 2)
+```
+
+
