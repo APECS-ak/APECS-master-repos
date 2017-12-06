@@ -16,7 +16,7 @@ theme_set(theme_classic())
 ### 1. Import cleaned .csv file and look at dataframe.
 ```{r, echo = FALSE, include = FALSE}
 # read clean file from github
-cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/sediment_2017/master/CLEAN_core_matter.csv", stringsAsFactors = FALSE, header = TRUE)
+cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/CLEAN_core_matter.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # check 
 str(cr.mat)
