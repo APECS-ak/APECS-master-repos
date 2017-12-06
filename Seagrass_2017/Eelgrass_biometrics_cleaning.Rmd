@@ -1,0 +1,146 @@
+---
+title: "Data cleaning and preparation"
+author: "Wendel Raymond"
+date: "November 29, 2017"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r Libraries, echo = FALSE, include=FALSE}
+library(dplyr); library(tidyr); library(ggplot2)
+theme_set(theme_classic())
+```
+
+# Data cleaning and preparation
+Below are the steps and rational for cleaning raw eelgrass biometrics data so that it is ready for further analysis. 
+Data are from the 2017 field season sampling eelgrass sites on Prince of Wales Island Alaska.
+
+## Raw Data
+These raw data represent the QU/QC data that was collected in the lab. There are a few special instances where there are missing values. These instances can be dealt with in a few ways.
+
+```{r import data, cache = TRUE, echo = FALSE, include = FALSE}
+# seagrass biometrics
+eg.bio <- read.csv("ALL_DATA/seagrass_biometrics_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+colnames(eg.bio)[1] <- "site" # for some reason the sie column has a weird name
+```
+
+Here are is the data
+```{r str eg.bio, echo = FASLE}
+str(eg.bio)
+```
+
+## Cleaning missing values
+A few times when processing samples either a grazer was lost or the grazer was so small that it did not register a mass on the scale. In these instances we want to still account for the animal but we need to fill in a value for the foil masses. 
+
+If a grazer column has a count but has NA for foil weights then we will fill in dummy values for the foil masses so that the grazer mass is equal to 0.0001 grams, the smalles amount measurable by the scale. This does not have to be the way we do this. This is just one way.
+```{r filling missing values}
+
+# Fix issue 1
+miss.dat1 <- eg.bio %>% 
+  filter(plant == 1) %>% # row that holds all grazer data
+  filter(site == "2017_H_03" & quadrat == 5)
+
+miss.dat1$gastropod_foil <- 0.0001
+miss.dat1$gastropod_foil_dw <- 0.0002
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat1, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat1) %>% 
+  arrange(site, quadrat, plant)
+
+# Fix issue 2
+miss.dat2 <- eg.bio %>% 
+  filter(plant == 1) %>% 
+  filter(site == "2017_H_03" & quadrat == 8)
+
+miss.dat2$caprel_foil <- 0.0001
+miss.dat2$caprel_foil_dw <- 0.0002
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat2, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat2) %>% 
+  arrange(site, quadrat, plant)
+
+# Fix issue 3
+miss.dat3 <- eg.bio %>% 
+  filter(plant == 1) %>% 
+  filter(site == "2017_H_04" & quadrat == 7)
+
+miss.dat3$caprel_foil <- 0.0001
+miss.dat3$caprel_foil_dw <- 0.0002
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat3, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat3) %>% 
+  arrange(site, quadrat, plant)
+
+# Fix issue 4
+miss.dat4 <- eg.bio %>% 
+  filter(plant == 1) %>% 
+  filter(site == "2017_L_02" & quadrat == 6)
+
+miss.dat3$caprel_foil <- 0.0001
+miss.dat3$caprel_foil_dw <- 0.0002
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat4, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat4) %>% 
+  arrange(site, quadrat, plant)
+
+# Fix issue 5
+miss.dat5 <- eg.bio %>% 
+  filter(plant == 1) %>% 
+  filter(site == "2017_L_02" & quadrat == 8)
+
+miss.dat5$caprel_foil <- 0.0001
+miss.dat5$caprel_foil_dw <- 0.0002
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat5, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat5) %>% 
+  arrange(site, quadrat, plant)
+
+# Fix issue 6
+miss.dat6 <- eg.bio %>% 
+  filter(plant == 1) %>% # row that holds all grazer data
+  filter(site == "2017_L_04" & quadrat == 2)
+
+miss.dat6$gastropod_foil <- 0.0001
+miss.dat6$gastropod_foil_dw <- 0.0002
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat6, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat6) %>% 
+  arrange(site, quadrat, plant)
+
+# Fix issue 7
+miss.dat7 <- eg.bio %>% 
+  filter(plant == 1) %>% # row that holds all grazer data
+  filter(site == "2017_M_04" & quadrat == 3)
+
+miss.dat7$gamm_amph_count <- 1
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat7, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat7) %>% 
+  arrange(site, quadrat, plant)
+
+# Fix issue 8
+miss.dat8 <- eg.bio %>% 
+  filter(plant == 1) %>% 
+  filter(site == "2017_M_07" & quadrat == 5)
+
+miss.dat8$caprel_foil <- 0.0001
+miss.dat8$caprel_foil_dw <- 0.0002
+
+eg.bio <- eg.bio %>% 
+  anti_join(miss.dat8, by = c("site", "plant", "quadrat")) %>% 
+  bind_rows(miss.dat8) %>% 
+  arrange(site, quadrat, plant)
+```
+
+## Export cleaned data ##
+```{r}
+write.csv(eg.bio, "ALL_DATA/seagrass_biometrics_CLEAN.csv", row.names = FALSE)
+```
