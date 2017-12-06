@@ -21,7 +21,7 @@ These raw data represent the QU/QC data that was collected in the lab. There are
 
 ```{r import data, cache = TRUE, echo = FALSE, include = FALSE}
 # seagrass biometrics
-eg.bio <- read.csv("ALL_DATA/RAW_seagrass_biometrics_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+eg.bio <- read.csv("ALL_DATA/seagrass_biometrics_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 colnames(eg.bio)[1] <- "site" # for some reason the sie column has a weird name
 ```
 
@@ -142,5 +142,5 @@ eg.bio <- eg.bio %>%
 
 ## Export cleaned data ##
 ```{r}
-write.csv(eg.bio, "ALL_DATA/seagrass_biometrics_CLEAN.csv")
+write.csv(eg.bio, "ALL_DATA/seagrass_biometrics_CLEAN.csv", row.names = FALSE)
 ```
