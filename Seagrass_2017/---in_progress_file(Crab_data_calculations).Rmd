@@ -104,11 +104,20 @@ Summaries by site only
 crab.site <- crab %>% 
   filter(taxon == "Decapoda") %>% # make sure we only have crabs
   group_by(site) %>% 
-  summarise(total_crab = n(),
+  summarise(unique(date_set),
+            unique(date_pulled),
+            unique(date_set_juliean),
+            unique(date_pulled_julian),
+            unique(time_soak_hr),
+            total_crab = n(),
             crab_width = mean(carapace_width_mm), 
             crab_width_se = st.er(carapace_width_mm),
             crab_mass = mean(mass_g),
             crab_mass_se = st.er(mass_g))
+
+# clean up column names
+colnames(crab.site)[1:6] <- c("site", "date_set", "date_pulled", "date_set_julian", "date_pulled_julian", "time_soak_hr")
+
 ```
 
 #### Diversity calculations
