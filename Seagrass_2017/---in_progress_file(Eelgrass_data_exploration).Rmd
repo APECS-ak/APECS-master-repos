@@ -1,0 +1,359 @@
+---
+title: '--- in_progress_file(Eelgrass_data_exploration)'
+author: "Wendel Raymond"
+date: "December 6, 2017"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Exploration of eelgrass data
+This script explores the data collected in summer 2017 in order to get a sense of what we collected and where to take analyses from here.
+
+```{r libraries, echo = FALSE, warning = FALSE}
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+library(ggplot2)
+library(cowplot)
+
+theme_set(theme_classic())
+```
+
+```{r standard error function, echo = FALSE}
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+## Data
+There are a few potential data set to load for these analyses. Currently loaded are eelgrass and grazer data (add additions here and in code :))
+```{r loading data}
+eg.dat <- read.csv("ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAsFactors = TRUE, header = TRUE)
+
+# clean up some column names to avoid confusion later on
+colnames(eg.dat)[3] <- "date_eelgrass_tran"
+colnames(eg.dat)[4] <- "date_julian_eelgrass_tran"
+```
+
+## Exploratory analyses
+These analyses focus on looking for patterns and relationships in the data. The primary hypothesis that we will eventaually be testing is whether or not sea otter mediate a trophic cascade in the Southeast Alaska eelgrass commnities.
+
+### Eelgrass data
+Plots and summary stats.
+
+#### Effect of sea otter index
+Primary producers
+```{r Primary producers sea otter index}
+## shoot density ##
+SHDN.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = shoot_dens), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = shoot_dens - shoot_dens_se, ymax = shoot_dens + shoot_dens_se), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('Shoot density +/- se' ~(m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Aboveground biomass ##
+ABGB.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = abvgnd_mass), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('Above ground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Belowground biomass ##
+BLGB.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = blwgnd_mass), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = blwgnd_mass - blwgnd_mass_se, ymax = blwgnd_mass + blwgnd_mass_se), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('Below ground mass +/- se' ~(g/m^-2))) +
+  lims(y = c(0, 80)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Second rhizome node ##
+RHI2.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = node2), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = node2 - node2_se, ymax = node2 + node2_se), size = 1) +
+  labs(x = "Sea otter Index", y = "Rhizome node #2 (cm)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Epiphyte mass ##
+EPIM.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = epi_mass), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = epi_mass - epi_mass_se, ymax = epi_mass + epi_mass_se), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('Epiphyte mass  +/- se (g)')) +
+  lims(y = c(0, 0.04)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Epiphyte load ##
+EPIL.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = epiphmass_shootmass), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('Epiphyte load +/- se' ~(g/g^-2))) +
+  lims(y = c(0, 0.25)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Macroalgae ##
+MAPC.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = macro_dens), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = macro_dens - macro_dens_se, ymax = macro_dens + macro_dens_se), size = 1) +
+  labs(x = "Sea otter index", y = "Macroalgae cover (%)") +
+  lims(y = c(0, 75)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+## Diotoms ##
+DTPC.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = diatom_dens), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = diatom_dens - diatom_dens_se, ymax = diatom_dens + diatom_dens_se), size = 1) +
+  labs(x = "Sea otter index", y = "Diatom cover (%)") +
+  lims(y = c(0, 100)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+Nutrients - day of sampling
+```{r nutrients day of sampling}
+## Day of nutrients ##
+NO.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = NOX_site), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = NOX_site - NOX_site_se, ymax = NOX_site + NOX_site_se), size = 1) +
+  labs(x = "Sea otter index", y = "Nitrate +/- se (umol/L)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+NH4.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = NH4_site), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = NH4_site - NH4_site_se, ymax = NH4_site + NH4_site_se), size = 1) +
+  labs(x = "Sea otter index", y = "Ammonium +/- se (umol/L)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+PO4.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = PO4_site), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = PO4_site - PO4_site_se, ymax = PO4_site + PO4_site_se), size = 1) +
+  labs(x = "Sea otter index", y = "Phosphate +/- se (umol/L)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+TN.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = Ntotal_site), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = Ntotal_site - Ntotal_site_se, ymax = Ntotal_site + Ntotal_site_se), size = 1) +
+  labs(x = "Sea otter index", y = "Total N +/- se (umol/L)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+NP.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = NP_site), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = NP_site - NP_site_se, ymax = NP_site + NP_site_se), size = 1) +
+  labs(x = "Sea otter index", y = "N:P +/- se") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+```
+
+Nutrients - nutrient day
+```{r nutrients nutrient day}
+NO1m.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = NOX_1m_ND), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = NOX_1m_ND - NOX_1m_ND_se, ymax = NOX_1m_ND + NOX_1m_ND_se), size = 1) +
+  labs(x = "Sea otter index", y = "Nitrate +/- se (umol/L)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+NH41m.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = NH4_1m_ND), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = NH4_1m_ND - NH4_1m_ND_se, ymax = NH4_1m_ND + NH4_1m_ND_se), size = 1) +
+  labs(x = "Sea otter index", y = "Ammonium +/- se (umol/L)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+PO41m.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = PO4_1m_ND), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = PO4_1m_ND - PO4_1m_ND_se, ymax = PO4_1m_ND + PO4_1m_ND_se), size = 1) +
+  labs(x = "Sea otter index", y = "Phosphate +/- se (umol/L)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+TN1m.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = Ntotal_1m_ND), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = Ntotal_1m_ND - Ntotal_1m_ND_se, ymax = Ntotal_1m_ND + Ntotal_1m_ND_se), size = 1) +
+  labs(x = "Sea otter index", y = "Total N +/- se (umol/L)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+NP1m.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = NP_1m_ND), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = NP_1m_ND - NP_1m_ND_se, ymax = NP_1m_ND + NP_1m_ND_se), size = 1) +
+  labs(x = "Sea otter index", y = "N:P +/- se") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+Grazers
+```{r grazers sea otter index}
+## Grazer mass ##
+GRZM.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = grazer_mass), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = grazer_mass - grazer_mass_se, ymax = grazer_mass + grazer_mass_se), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('Grazer mass +/- se (g)')) +
+  lims(y = c(0, 0.25)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Grazer load ##
+GRZL.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = grazermass_shootmass), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('Grazer load +/- se' ~(g/g^-2))) +
+  lims(y = c(0, 0.25)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Crustacean load ##
+CRSL.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = crusmass_shootmass), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = crusmass_shootmass - crusmass_shootmass_se, ymax = crusmass_shootmass + crusmass_shootmass_se), size = 1) +
+  labs(x = "Sea otter index", y = bquote('Crustacean load +/- se' ~(g/g^-2))) +
+  lims(y = c(0, 0.15)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+## Gastropod load ##
+GASL.SOII <- ggplot(eg.dat) +
+  geom_point(aes(x = PCA2, y = gastmass_shootmass), size = 4) +
+  geom_errorbar(aes(x = PCA2, ymin = gastmass_shootmass - gastmass_shootmass_se, ymax = gastmass_shootmass + gastmass_shootmass_se), size = 1) +
+  labs(x = "Sea otter index", y = bquote('Gastropod load +/- se' ~(g/g^-2))) +
+  lims(y = c(0, 0.10)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+#### Effect of time
+
+Primary producers
+```{r primary producers jday}
+## Shoot density ##
+SHDN.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = shoot_dens - shoot_dens_se, ymax = shoot_dens + shoot_dens_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = shoot_dens, color = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Shoot density +/- se' ~(m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Aboveground biomass ##
+ABGB.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = abvgnd_mass, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Belowground biomass ##
+BLGB.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = blwgnd_mass - blwgnd_mass_se, ymax = blwgnd_mass + blwgnd_mass_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = blwgnd_mass, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Belowground mass +/- se' ~(g/m^-2))) +
+  lims(y = c(0, 80)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Second rhizome node ##
+RHI2.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = node2 - node2_se, ymax = node2 + node2_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = node2, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = "Rhizome node #2 (cm)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Epiphyte mass ##
+EPIM.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = epi_mass - epi_mass_se, ymax = epi_mass + epi_mass_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = epi_mass, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Epiphyte mass  +/- se (g)')) +
+  lims(y = c(0, 0.04)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Epiphyte load ##
+EPIL.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = epiphmass_shootmass, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Epiphyte mass / Shoot mass +/- se' ~(g/g^-2))) +
+  lims(y = c(0, 0.25)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Macroalgae ##
+MAPC.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = macro_dens - macro_dens_se, ymax = macro_dens + macro_dens_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = macro_dens, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = "Macroalgae cover (%)") +
+  lims(y = c(0,75)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Diatoms ##
+DTPC.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = diatom_dens - diatom_dens_se, ymax = diatom_dens + diatom_dens_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = diatom_dens, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = "Diatom cover (%)") +
+  lims(y = c(0,125)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+ 
+Nutrients - day of sampling
+```{r}
+NO.JDAY <- ggplot(eg.dat) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = NOX_site), size = 4) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = NOX_site - NOX_site_se, ymax = NOX_site + NOX_site_se), size = 1) +
+  labs(x = "Date", y = "Nitrate +/- se") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+NH4.JDAY <- ggplot(eg.dat) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = NH4_site), size = 4) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = NH4_site - NH4_site_se, ymax = NH4_site + NH4_site_se), size = 1) +
+  labs(x = "Date", y = "Ammonium +/- se") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+PO4.JDAY <- ggplot(eg.dat) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = PO4_site), size = 4) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = PO4_site - PO4_site_se, ymax = PO4_site + PO4_site_se), size = 1) +
+  labs(x = "Date", y = "Phosphate +/- se") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+TN.JDAY <- ggplot(eg.dat) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = Ntotal_site), size = 4) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = Ntotal_site - Ntotal_site_se, ymax = Ntotal_site + Ntotal_site_se), size = 1) +
+  labs(x = "Date", y = "Total N +/- se") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+NP.JDAY <- ggplot(eg.dat) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = NP_site), size = 4) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = NP_site - NP_site_se, ymax = NP_site + NP_site_se), size = 1) +
+  labs(x = "Date", y = "N:P +/- se") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+Grazers
+```{r}
+## Grazer mass ##
+GRZM.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = grazer_mass - grazer_mass_se, ymax = grazer_mass + grazer_mass_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = grazer_mass, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Grazer mass +/- se (g)')) +
+  lims(y = c(0, 0.25)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Grazer load ##
+GRZL.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = grazermass_shootmass, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Grazer load +/- se' ~(g/g))) +
+  lims(y = c(0, 0.25)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Crustacean load ##
+CRSL.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = crusmass_shootmass - crusmass_shootmass_se, ymax = crusmass_shootmass + crusmass_shootmass_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = crusmass_shootmass, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Crustacean load +/- se' ~(g/g))) +
+  lims(y = c(0, 0.15)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Gastropod load ##
+GASL.JDAY <- ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian_eelgrass_tran, ymin = gastmass_shootmass - gastmass_shootmass_se, ymax = gastmass_shootmass + gastmass_shootmass_se), size = 1) +
+  geom_point(aes(x = date_julian_eelgrass_tran, y = gastmass_shootmass, col = PCA2), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Gastropod load +/- se' ~(g/g))) +
+  lims(y = c(0, 0.10)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
