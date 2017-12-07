@@ -357,3 +357,4 @@ GASL.JDAY <- ggplot(eg.dat) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 ```
 
+
