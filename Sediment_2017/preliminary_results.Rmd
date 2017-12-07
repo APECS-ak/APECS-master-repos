@@ -16,12 +16,11 @@ theme_set(theme_classic())
 ### 1. Import cleaned .csv file and look at dataframe.
 ```{r, echo = FALSE, include = FALSE}
 # read clean file from github
-cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/sediment_2017/master/CLEAN_core_matter.csv", stringsAsFactors = FALSE, header = TRUE)
+cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/CLEAN_core_matter.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # check 
 str(cr.mat)
 ```
-
 
 
 ### 2. Remove excess columns. <br>
@@ -36,6 +35,7 @@ cr.mat = cr.mat %>%
 
 colnames(cr.mat)
 ```
+
 
 <br>
 
@@ -60,7 +60,7 @@ leaflet(locations_all) %>%
 levels=c("Low","Mid","High") # order zones
 
 # plot organic matter
-plot_om_all = ggplot(cr.mat, aes(core_depth, om_density)) +
+plot_om_all = ggplot(cr.mat, aes(core_depth, om_content)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -72,7 +72,7 @@ plot_om_all = ggplot(cr.mat, aes(core_depth, om_density)) +
   facet_wrap(~site, ncol = 1)
 
 # plot inorganic matter
-plot_im_all = ggplot(cr.mat, aes(core_depth, im_density)) +
+plot_im_all = ggplot(cr.mat, aes(core_depth, im_content)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -119,7 +119,7 @@ cr.mat_noL06 = cr.mat[-c(1:30),] # remove L06 (for now) because organic matter i
 levels=c("Low","Mid","High") # order zones
 
 # plot organic matter
-plot_om_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, om_density)) +
+plot_om_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, om_content)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -131,7 +131,7 @@ plot_om_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, om_density)) +
   facet_wrap(~site, ncol = 1)
 
 # plot inorganic matter
-plot_im_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, im_density)) +
+plot_im_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, im_content)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -163,7 +163,7 @@ cr.mat_noL06$otter_region=factor(cr.mat_noL06$otter_region, levels=c("Low","Mid"
 
 
 # plot organic matter
-plot_om = ggplot(cr.mat_noL06, aes(core_depth, om_density)) +
+plot_om = ggplot(cr.mat_noL06, aes(core_depth, om_content)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -175,7 +175,7 @@ plot_om = ggplot(cr.mat_noL06, aes(core_depth, om_density)) +
   facet_wrap(~otter_region, ncol = 1)
 
 #plopt inorganic matter
-plot_im = ggplot(cr.mat_noL06, aes(core_depth, im_density)) +
+plot_im = ggplot(cr.mat_noL06, aes(core_depth, im_content)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
