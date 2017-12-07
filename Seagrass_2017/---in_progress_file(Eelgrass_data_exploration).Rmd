@@ -30,7 +30,9 @@ st.er <- function(x, na.rm = TRUE) {
 ## Data
 There are a few potential data set to load for these analyses. Currently loaded are eelgrass and grazer data (add additions here and in code :))
 ```{r loading data}
-eg.dat <- read.csv("ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAsFactors = TRUE, header = TRUE)
+eg.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
+
+crab.dat <- read.csv("../ALL_DATA/crab_simple_site_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # clean up some column names to avoid confusion later on
 colnames(eg.dat)[3] <- "date_eelgrass_tran"
@@ -357,4 +359,46 @@ GASL.JDAY <- ggplot(eg.dat) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 ```
 
+## Exporting plots
+Lets save all these exploratory plots for other to easily access
+```{r exporting plots}
+ggsave(plot = ABGB.JDAY, "Figures/aboveground_mass_jday.png", dpi = 500)
+ggsave(plot = ABGB.SOII, "Figures/aboveground_mass_seaotter.png", dpi = 500)
+ggsave(plot = BLGB.JDAY, "Figures/belowground_mass_jday.png", dpi = 500)
+ggsave(plot = BLGB.SOII, "Figures/belowground_mass_seaotter.png", dpi = 500)
+ggsave(plot = CRSL.JDAY, "Figures/crustacean_mass_jday.png", dpi = 500)
+ggsave(plot = CRSL.SOII, "Figures/crustacean_mass_seaotter.png", dpi = 500)
+ggsave(plot = DTPC.JDAY, "Figures/diatom_pc_jday.png", dpi = 500)
+ggsave(plot = DTPC.SOII, "Figures/diatom_pc_SOII.png", dpi = 500)
+ggsave(plot = EPIL.JDAY, "Figures/epiphyte_load_jday.png", dpi = 500)
+ggsave(plot = EPIL.SOII, "Figures/epiphyte_load_seaotter.png", dpi = 500)
+ggsave(plot = EPIM.JDAY, "Figures/epiphyte_mass_jday.png", dpi = 500)
+ggsave(plot = EPIM.SOII, "Figures/epiphyte_mass_seaotter.png", dpi = 500)
+ggsave(plot = GASL.JDAY, "Figures/gastropod_load_jday.png", dpi = 500)
+ggsave(plot = GASL.SOII, "Figures/gastropod_load_seaotter.png", dpi = 500)
+ggsave(plot = GRZL.JDAY, "Figures/grazer_load_jday.png", dpi = 500)
+ggsave(plot = GRZL.SOII, "Figures/grazer_load_seaotter.png", dpi = 500)
+ggsave(plot = GRZM.JDAY, "Figures/grazer_mass_jday.png", dpi = 500)
+ggsave(plot = GRZM.SOII, "Figures/grazer_mass_seaotter.png", dpi = 500)
+ggsave(plot = MAPC.JDAY, "Figures/macroalgae_pc_jday.png", dpi = 500)
+ggsave(plot = MAPC.SOII, "Figures/macroalgae_pc_seaotter.png", dpi = 500)
+ggsave(plot = NH4.JDAY, "Figures/ammonium_jday.png", dpi = 500)
+ggsave(plot = NH4.SOII, "Figures/ammonium_seaotter.png", dpi = 500)
+ggsave(plot = NO.JDAY, "Figures/nitrate_jday.png", dpi = 500)
+ggsave(plot = NO.SOII, "Figures/nitrate_seaotter.png", dpi = 500)
+ggsave(plot = NO1m.SOII, "Figures/nitrate_nutday_1m_seaotter.png", dpi = 500)
+ggsave(plot = NP.JDAY, "Figures/ntop_jday.png", dpi = 500)
+ggsave(plot = NP.SOII, "Figures/ntop_SOII.png", dpi = 500)
+ggsave(plot = NP1m.SOII, "Figures/totalN_nutday_1m_SOII.png", dpi = 500)
+ggsave(plot = PO4.JDAY, "Figures/phosphate_jday.png", dpi = 500)
+ggsave(plot = PO4.SOII, "Figures/phosphate_seaotter.png", dpi = 500)
+ggsave(plot = PO41m.SOII, "Figures/phosphate_nutday_1m_seaotter.png", dpi = 500)
+ggsave(plot = RHI2.JDAY, "Figures/rhizome_node2_jday.png", dpi = 500)
+ggsave(plot = RHI2.SOII, "Figures/rhizome_node2_seaotter.png", dpi = 500)
+ggsave(plot = SHDN.JDAY, "Figures/shoot_density_jday.png", dpi = 500)
+ggsave(plot = SHDN.SOII, "Figures/shoot_density_seaotter.png", dpi = 500)
+ggsave(plot = TN.JDAY, "Figures/totaln_jday.png", dpi = 500)
+ggsave(plot = TN.SOII, "Figures/totaln_jday.png", dpi = 500)
+ggsave(plot = TN1m.SOII, "Figures/totaln_nutday_1m_jday.png", dpi = 500)
+```
 
