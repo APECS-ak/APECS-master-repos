@@ -1,4 +1,4 @@
-"site","date_set","date_pulled","date_set_julian","date_pulled_julian","time_soak_hr","total_crab","crab_width","crab_width_se","crab_mass","crab_mass_se","shan_divese","simp_divese"
+"site","date_set","date_pulled","date_set_julian","date_pulled_julian","time_soak_hr","total_crab","crab_width","crab_width_se","crab_mass","crab_mass_se","shan_diverse","simp_diverse"
 "2017_H_01",2017-05-29,2017-05-30,"149","150",20.95,26,52.3076923076923,2.72129450574212,41.5881614357736,4.09906506420948,0.58249224388496,0.393491124260355
 "2017_H_02",2017-05-29,2017-05-30,"149","150",23.83,7,50.5714285714286,2.12532510518299,35.595473266231,2.39489445174526,0.682908104700472,0.489795918367347
 "2017_H_03",2017-06-24,2017-06-25,"175","176",24.78,2,52.5,1.5,31.7056621715304,1.98624415212173,0,0
