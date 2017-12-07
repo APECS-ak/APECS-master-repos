@@ -1,0 +1,81 @@
+---
+title: '---in_progress_file(Crab_data_calculations).Rmd'
+author: "Wendel Raymond"
+date: "December 6, 2017"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r libraries, echo = FALSE}
+library(dplyr)
+library(tidyr)
+library(vegan)
+library(ggplot2)
+```
+
+```{r functions, echo = FALSE}
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+# Crab pot calculations
+From the raw data this script will export a file summarized by site ready for analysis. The goal will be to summarise this data at the site level. Summaries will occur in a few differnet ways to prep the data for different types on analysis.
+
+## Data import
+All we need is the crab data and the crab length wiehgt conversions. This can be merged with other data that already has been summarised in other scripts. The merging can either happen here or in other scripts depending on the purpose.
+
+```{r data import}
+crab <- read.csv("ALL_DATA/seagrass_crab_pot_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+crabLW <- read.csv("ALL_DATA/crab_length_weight_conversion_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+Checking the data
+```{r checking data}
+str(crab)
+str(crabLW)
+```
+
+## Cleaning up dat columns
+Since setting and retreiving crab pots did not happen at the same time as the eelgrass tansect there should be a separate date for the crab pots
+
+```{r converting to julian day}
+crab$date_set <- as.Date(crab$date_set, format = "%m/%d/%Y")
+crab$date_set_juliean <- format(crab$date_set, "%j")
+crab$date_pulled <- as.Date(crab$date_pulled , format = "%m/%d/%Y")
+crab$date_pulled_julian <- format(crab$date_pulled, "%j")
+```
+
+## Calculations
+The first thing to do is to add the length - weight conversions to the staring data frame so that we cna convert carapase widths the biomass. This will be done by adding the species specific coeffients to the data frame. Note the this conversion is to what is considered sea otter eidible biomass. Also note that fish are recorded in this data that might be useful, but from this point on we are going to remove all fishes
+
+```{r crabs only}
+crab <- crab %>% 
+  filter(taxon == "Decapoda")
+```
+
+Now we will add length weight conversion coeffients
+```{r adding length to weight conversion}
+crab <- merge(crab, crabLW, by = "sp_code")
+crab <- crab[,c(1:21, 23:29)] # remove duplicated 
+colnames(crab)[14] <- "taxon"
+```
+
+Calculate mass
+```{r calcualte mass}
+crab$mass_g <- (crab$a_mean * (crab$carapace_width_mm)^crab$b_mean)
+range(crab$mass_g, na.rm = TRUE)
+
+ggplot(crab, aes(mass_g)) +
+  geom_histogram()
+
+ggplot(crab, aes(mass_g)) +
+  geom_histogram() +
+  facet_wrap(~site)
+```
+
+### Summary calculations
+
+

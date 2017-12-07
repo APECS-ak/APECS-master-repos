@@ -1,0 +1,7 @@
+sp_code,common_name,scientific_name,taxon,a_mean,a_lowCI,a_highCI,b_mean,b_lowCI,b_highCI,notes
+CRABDUN,Dungeness crab,Metacarcinus magister,Decapoda,0.00531,-0.00118,0.0118,2.1949,1.9551,2.4346,
+CRABDEC,Decorator crab,Oregonia gracilis,Decapoda,0.00882,0.001466,0.01617,2.1525,1.9381,2.3699,kelp crab used
+CRABRR,Red rock crab,Cancer productus,Decapoda,0.00142,-0.00781,0.01064,2.4625,1.2347,3.6904,
+CRABHEL,Helmet crab,Telmessus cheiragonus,Decapoda,0.00882,0.001466,0.01617,2.1525,1.9381,2.3699,kelp crab used
+CRABGRA,Graceful rock crab,Metacarcinus gracilis,Decapoda,0.00531,-0.00118,0.0118,2.1949,1.9551,2.4346,dungeness crab used
+UNRKCB,Unidentified rock crab,Cancridae,Decapoda,0.00337,-0.0045,0.0112,2.3287,1.5949,3.0625,average of red rock and dungeness
