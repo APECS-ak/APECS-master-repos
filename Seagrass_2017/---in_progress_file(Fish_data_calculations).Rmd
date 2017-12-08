@@ -1,0 +1,80 @@
+---
+title: '---in_progress_file(Fish_data_calculations)'
+author: "Wendel Raymond"
+date: "December 8, 2017"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r libraries, echo = FALSE}
+library(dplyr)
+library(tidyr)
+library(vegan)
+library(ggplot2)
+library(rfishbase)
+
+theme_set(theme_classic())
+```
+
+```{r functions, echo = FALSE}
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+# Beach seine calculations
+From the raw data this script will export a file summarized by site ready for analysis. The goal will be to summaries this data at the site level. Summaries will occur in a few different ways to prep the data for different types on analysis. There are X files generated here. Simple summaries...(fill in more here as appropriate). For best results this script should be run in the Seagrass_2017 R project.
+
+## Data import
+All we need is the raw beach seine data. We will attempt to calculate biomass by using the 'rfishbase' package.
+
+```{r data import}
+fish <- read.csv("../ALL_DATA/seagrass_beach_seine_data_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+str(fish)
+```
+
+## Extracting a species list
+We want a full list of species for many purposes. One of which is that such a list interfaces with rfishbase commands.
+
+```{r species list}
+sp <- fish %>% 
+  filter(taxon == "Vertebrata") %>%
+  distinct(species_common, species_scientific, sp_code)
+```
+
+Extract length - weight relationships. **Note** that the original extracted values are in cm-g. One will either need to convert fork lengths in seine data to cm or convert the L-W conversion factors to mm-g. a’(cm, g) = a (mm, g) X 10^b a’(cm, g) = a (cm, kg) X 1000 a’(cm, g) = a (mm, mg)*10^b/1000 a’(cm,g) = a (mm, kg) X 10^b X 1000.
+
+This is not totally operational yet. There are some bugs in the package.
+```{r extracting length - weight}
+#test <- length_weight(sp[,2])
+```
+
+## Apply lengths to unmeasured fishes
+When beach seining we only measured the first 30 individuals of a species, and counted the rest. We can use the measured fishes to create a distribution from which we can assign lengths to the unmeasured fishes.
+
+The first step is to separate the measured fish from the unmeasured fish.
+```{r measured - unmeasured split}
+fish.m <- fish %>%
+  filter(taxon == "Vertebrata") %>%
+  filter(fork_length > 0)
+
+fish.um <- fish %>%
+  filter(taxon == "Vertebrata") %>% 
+  filter(unmeasured != "estimate") %>% # assume that infield estimates are accurate
+  filter(unmeasured > 0)
+```
+
+Assign lengths to unmeasured fish based on sampled distribution. This assignment should happen at the site level. i.e. use the distribution of fishes at a site to assign unmeasured fishes at that site. There was only one seine per site and only one sine per day so site and date are essentially unique identifiers for how we want to restrict our analysis.  
+```{r}
+for(i in unique(fish$site)){
+# when site and speices between fish.m and fish.um match then
+# generate distribution from fish.m
+# randomly assign lengths to the n umeasured fishes in fish.um (n unmeasured fishes is value of fish.um$unmeasured)
+# store loop output somewhere useful
+}
+
+```
+
