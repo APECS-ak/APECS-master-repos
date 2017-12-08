@@ -30,19 +30,19 @@ We want to combine a few sets of data here so that we can run meaning full analy
 
 ```{r data import, echo = FALSE}
 # Eelgrass Site
-eg.site <- read.csv("ALL_DATA/seagrass_site_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+eg.site <- read.csv("../ALL_DATA/seagrass_site_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # Eelgrass Biometrics (lab data)
-eg.bio <- read.csv("ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+eg.bio <- read.csv("../ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # Eelgrass Transect
-eg.tran <- read.csv("ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+eg.tran <- read.csv("../ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # Sea Otter Impact Index
-so.index <- read.csv("ALL_DATA/sea_otter_impact_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # Nutrients
-nuts <- read.csv("ALL_DATA/seagrass_nutrients_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+nuts <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 ```
 
