@@ -317,7 +317,7 @@ tran.dat <- eg.tran %>%
   distinct(primary_obeserver, secondary_observer, transect_start_time, transect_end_time, depth_m)
   
 ### Master - more will be added later ###
-dat <- data.frame(cbind(eg.site[, c(1:3, 32, 4:9)], tran.dat[, 2:5], nuts.site.eg [,2:11], nuts.site.nday.1m [,2:11], nuts.site.nday.4m [,2:11], so.index[, 6:13], eg.site[, 14:26]))
+dat <- data.frame(cbind(eg.site[, c(1:3, 32, 4:9)], tran.dat[, 2:5], nuts.site.eg [,2:11], nuts.site.nday.1m [,2:11], nuts.site.nday.4m [,2:11], so.index[, 6:12], eg.site[, 14:26]))
 ```
 
 Final set of calculations at site level.
@@ -403,5 +403,5 @@ dat$specific_conductivity_transect <- as.numeric(dat$specific_conductivity_trans
 Export data to ALL_DATA folder for use
 ```{r export}
 #####----- Export -----#####
-write.csv(dat, "ALL_DATA/eelgrass_and_grazer_2017_derived.csv", row.names = FALSE)
+write.csv(dat, "../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", row.names = FALSE)
 ```
