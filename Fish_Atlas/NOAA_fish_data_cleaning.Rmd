@@ -1,0 +1,50 @@
+---
+title: "NOAA_fish_data_cleaning"
+author: "Wendel Raymond"
+date: "December 7, 2017"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# NOAA nearshore fish atlas 
+These data represent fish community data collected in Southeast Alaska. This script will do some bacis data cleaning to prepare it for further analysis. Data are freely available from the online repository [nearshore fish atlas of Alaska](https://alaskafisheries.noaa.gov/habitat/fishatlas).
+
+```{r libraries echo = FALSE}
+library(dplyr)
+library(tidyr)
+```
+
+## Load data
+This script, at least for now, uses a query from Anne Beaudreau that exported all Southeast Alaska data. Wendel asked Anne do to this. At some point it would be better to show that data aquasition in this script.
+
+```{r load data}
+fish <- read.csv("../ALL_DATA/SEAK_Fish_data_5.16.2017.csv", stringsAsFactors = FALSE, header = TRUE)
+
+str(fish)
+```
+
+## Clean up 
+General data cleaning tasks
+```{r data clean up}
+fish$SpCode <- as.character(fish$SpCode)
+unique(fish$SpCode)
+
+unique(fish$Habitat)
+levels(fish$Habitat)[levels(fish$Habitat)=="Sand-gravel"] <- "Sand-Gravel"
+levels(fish$Habitat)[levels(fish$Habitat)=="Surfgrass"] <- "Eelgrass"
+
+# Change all eelgrass to Seagrass because we know that its not all eelgrass
+levels(fish$Habitat)[levels(fish$Habitat)=="Eelgrass"] <- "Seagrass"
+
+# Convert Unmeasuted NAs to 0
+fish$Unmeasured[is.na(fish$Unmeasured)] <- 0
+
+str(fish)
+```
+
+## Export clean csv
+```{r export}
+write.csv(fish, "../ALL_DATA/noaa_seak_fish_atlas_CLEAN")
+```
+
