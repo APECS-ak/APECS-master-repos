@@ -146,7 +146,7 @@ ggplot(dat, aes(site, sea_otter_index)) +
 ## Data export
 ```{r export}
 # Data Export
-write.csv(dat, "sea_otter_impact_index_2017.csv", row.names = FALSE)
+write.csv(dat, "../ALL_DATA/sea_otter_impact_index_2017.csv", row.names = FALSE)
 ```
 
 ### Other old plots
