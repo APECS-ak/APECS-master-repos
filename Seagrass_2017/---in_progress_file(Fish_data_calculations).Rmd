@@ -34,6 +34,10 @@ All we need is the raw beach seine data. We will attempt to calculate biomass by
 fish <- read.csv("../ALL_DATA/seagrass_beach_seine_data_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 str(fish)
+
+fish$unmeasured <- as.numeric(fish$unmeasured)
+fish$date <- as.Date(fish$date, format = "%m/%d/%Y")
+fish$date_julian <- format(fish$date, "%j")
 ```
 
 ## Extracting a species list
@@ -52,9 +56,7 @@ This is not totally operational yet. There are some bugs in the package.
 #test <- length_weight(sp[,2])
 ```
 
-## Apply lengths to unmeasured fishes
-When beach seining we only measured the first 30 individuals of a species, and counted the rest. We can use the measured fishes to create a distribution from which we can assign lengths to the unmeasured fishes.
-
+## Separate measured and unmeasured fish
 The first step is to separate the measured fish from the unmeasured fish.
 ```{r measured - unmeasured split}
 fish.m <- fish %>%
@@ -66,6 +68,63 @@ fish.um <- fish %>%
   filter(unmeasured != "estimate") %>% # assume that infield estimates are accurate
   filter(unmeasured > 0)
 ```
+
+## Basic summaries
+Things like total fishes etc.
+```{r basic summaries}
+fish.sum <- fish.m %>%
+  group_by(site) %>% 
+  summarise(measured = n())
+
+fish.sum.um <- fish.um %>%
+  group_by(site) %>% 
+  summarise(um = sum(unmeasured))
+
+fish.sum <- merge(fish.sum, fish.sum.um, by = "site")
+fish.sum$total <- fish.sum$measured + fish.sum$um
+
+ggplot(fish.sum, aes(site, total)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Diversity Summaries
+species richness etc
+```{r converting to wide format}
+fish.m <- fish.m %>% 
+  group_by(site, sp_code) %>% 
+  summarise(N = n())
+
+fish.count <- merge(fish.m, fish.um, by = c("site", "sp_code"), all = TRUE)
+fish.count$total <- fish.count$N + fish.count$unmeasured
+fish.count <- cbind(fish.count[,c(1, 2, 18)])
+
+fish.count.wide <- spread(fish.count, key = sp_code, value = total) 
+fish.count.wide[is.na(fish.count.wide)] <- 0
+
+# Site data
+fish.site.dat <- fish[, c(1:8, 16)] %>% 
+  distinct(site, date, date_julian, start_time, end_time, slope, tide_height, tide_time)
+
+# Merge site and n data
+fish.count.wide <- merge(fish.site.dat, fish.count.wide, by = "site")
+
+# Other calculations
+fish.count.wide$total <- rowSums(fish.count.wide[, 9:64])
+fish.count.wide$shan_diverse <- diversity(fish.count.wide[9:64], index = "shannon")
+fish.count.wide$simp_diverse <- diversity(fish.count.wide[9:64], index = "simpson")  
+
+# clean up names
+colnames(fish.count.wide)[2] <- "date_fish"
+colnames(fish.count.wide[8]) <- "date_julian_fish"
+
+# Export
+write.csv(fish.count.wide, "../ALL_DATA/fish_simple_site_2017_derived.csv", row.names = FALSE)
+```
+
+
+## Apply lengths to unmeasured fishes
+When beach seining we only measured the first 30 individuals of a species, and counted the rest. We can use the measured fishes to create a distribution from which we can assign lengths to the unmeasured fishes.
 
 Assign lengths to unmeasured fish based on sampled distribution. This assignment should happen at the site level. i.e. use the distribution of fishes at a site to assign unmeasured fishes at that site. There was only one seine per site and only one sine per day so site and date are essentially unique identifiers for how we want to restrict our analysis.  
 ```{r}
