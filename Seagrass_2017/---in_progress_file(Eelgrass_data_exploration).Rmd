@@ -34,17 +34,28 @@ eg.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAs
 
 crab.dat <- read.csv("../ALL_DATA/crab_simple_site_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
 
+fish.dat <- read.csv("../ALL_DATA/fish_simple_site_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
+
 # clean up some column names to avoid confusion later on
 colnames(eg.dat)[3] <- "date_eelgrass_tran"
 colnames(eg.dat)[4] <- "date_julian_eelgrass_tran"
+
+colnames(crab.dat)[12] <- "shan_diverse_crab"
+colnames(crab.dat)[13] <- "simp_diverse_crab"
+
+colnames(fish.dat)[65] <- "total_fish"
+colnames(fish.dat)[8] <- "date_julian_fish"
+colnames(fish.dat)[66] <- "shan_diverse_fish"
+colnames(fish.dat)[67] <- "simp_diverse_fish"
+
 ```
 
 Checking data
 ```{r checking the data}
 str(eg.dat)
 str(crab.dat)
+str(fish.dat)
 ```
-
 
 ## Exploratory analyses
 These analyses focus on looking for patterns and relationships in the data. The primary hypothesis that we will eventaually be testing is whether or not sea otter mediate a trophic cascade in the Southeast Alaska eelgrass commnities.
@@ -421,41 +432,157 @@ CRBSP.SOII <- ggplot(eg.dat, aes(sea_otter_index, simp_diverse)) +
 Plots of simple crab measures against time
 ```{r crabs time}
 ## Crab Mass ##
-CRBM.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, crab_mass)) +
+CRBM.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, crab_mass, col = sea_otter_index)) +
   geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
   geom_errorbar(aes(ymin = crab_mass - crab_mass_se, ymax = crab_mass + crab_mass_se), size = 1, width = 0) +
   labs(x = "Date", y = "Crab mass +/- se (g)") +
   lims(y = c(0, 300)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 ## Crab size ##
-CRBS.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, crab_width)) +
+CRBS.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, crab_width, col = sea_otter_index)) +
   geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
   geom_errorbar(aes(ymin = crab_width - crab_width_se, ymax = crab_width + crab_width_se), size = 1, width = 0) +
   labs(x = "Date", y = "Crab carapase width +/- se (mm)") +
   lims(y = c(0, 150)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 ## Total crabs ##
-CRBT.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, total_crab)) +
+CRBT.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, total_crab, col = sea_otter_index)) +
   geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Date", y = "Total crabs") +
   lims(y = c(0, 30)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 ## Crab Diversity - shannon weiner ##
-CRBSW.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, shan_diverse)) +
+CRBSW.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, shan_diverse, col = sea_otter_index)) +
   geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Date", y = "S-W diversity") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 ## Crab Diversity - simpson ##
-CRBSP.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, simp_diverse)) +
+CRBSP.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, simp_diverse, col = sea_otter_index)) +
   geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Date", y = "Simpson diversity") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+## Fish data
+Fish data were collected using a 37m beach seine at each of our eelgrass sites. All fishes were counted identified and the first 30 individuals of a species were measured.
+
+First we need to merge the fish data with the rest of the master data so we can run comparisons.
+```{r merge fish with eelgrass}
+eg.dat <- merge(eg.dat, fish.dat, by = "site")
+
+str(eg.dat)
+```
+
+### Exploratory plots and summaries
+
+#### Effect of sea otters
+Plots of simple univariate crab measures as a funciton of sea ottes.
+```{r fish sea otter index}
+## Total Fishes ##
+FSHT.SOII <- ggplot(eg.dat, aes(sea_otter_index, total_fish)) +
+  geom_point(size = 4) +
+  labs(x = "Sea otter index", y = "Total fishes") +
+  lims(y = c(0, 4000)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+## Fish Diversity - shannon weiner ##
+FSHSW.SOII <- ggplot(eg.dat, aes(sea_otter_index, shan_diverse)) +
+  geom_point(size = 4) +
+  labs(x = "Sea otter index", y = "S-W diversity") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+## Fish Diversity - simpson ##
+FSHSP.SOII <- ggplot(eg.dat, aes(sea_otter_index, simp_diverse)) +
+  geom_point(size = 4) +
+  labs(x = "Sea otter index", y = "Simpson diversity") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
 ```
 
+#### Effect of time
+Plots of simple fish measures against time
+```{r fish time}
+## Total fish ##
+FSHT.JDAY <- ggplot(eg.dat, aes(date_julian, total_fish, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = "Total fishes") +
+  lims(y = c(0, 4000)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Crab Diversity - shannon weiner ##
+FSHSW.JDAY <- ggplot(eg.dat, aes(date_julian, shan_diverse, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = "S-W diversity") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Crab Diversity - simpson ##
+FSHSP.JDAY <- ggplot(eg.dat, aes(date_julian, simp_diverse, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = "Simpson diversity") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+## Secondary Analyses
+Beyond the main hypothesis of the looking at sea otters, we are interested in other relationships between and among differnet species, functional groups, sea otter and time.
+
+For these expoloratory analyses we will need to merge all the data.
+```{r merga all data}
+# add fish
+eg.dat <- merge(eg.dat, fish.dat, by = "site")
+
+# add crabs
+eg.dat <- merge(eg.dat, crab.dat, by = "site")
+```
+
+There are a lot of potnetial combinations, but here are ones that we are particulary interested in and/or we suspect there might be an interesting relationship based off literature/exerience.
+
+```{r secondary analyses}
+# Grazer load vs Epiphyte load #
+EPIL.GRZL <- ggplot(eg.dat, aes(grazermass_shootmass, epiphmass_shootmass, col = sea_otter_index)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(x = grazermass_shootmass, ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se)) +
+  geom_errorbarh(aes(y = epiphmass_shootmass, x = grazermass_shootmass, xmin = grazermass_shootmass - grazermass_shootmass_se, xmax = grazermass_shootmass + grazermass_shootmass_se)) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Grazer load +/- se (g/g)", y = "Epiphyte load +/- se (g/g)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+# Crab mass vs Grazer load #
+GRZM.CRBM <- ggplot(eg.dat, aes(crab_mass, grazermass_shootmass, col = sea_otter_index)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(x = crab_mass, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se)) +
+  geom_errorbarh(aes(y = grazermass_shootmass, x = crab_mass, xmin = crab_mass - crab_mass_se, xmax = crab_mass + crab_mass_se)) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Crab mass +/- se (g)", y = "grazer load +/- se (g/g)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+# Nutrients vs epiphytes #
+EPIL.NTOT <- ggplot(eg.dat, aes(Ntotal_site, epiphmass_shootmass, col = sea_otter_index)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(x = Ntotal_site, ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se)) +
+  geom_errorbarh(aes(x = Ntotal_site, y = epiphmass_shootmass, xmin = Ntotal_site - Ntotal_site_se, xmax = Ntotal_site + Ntotal_site_se)) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Notal N +/- se (umol)", y = "Epiphyte load +/- se (g/g)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+# Grazers load vs total fishes #
+GRZL.FSHT <- ggplot(eg.dat, aes(log(total_fish), grazermass_shootmass, col = sea_otter_index)) +
+  geom_point(size = 2) +
+  geom_errorbar(aes(log(total_fish), ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se)) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "log total fish", y = "Grazer load +/- se (g/g)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
 
 ## Exporting plots
 Lets save all these exploratory plots for other to easily access
@@ -498,6 +625,7 @@ ggsave(plot = SHDN.SOII, "Figures/shoot_density_seaotter.png", dpi = 500)
 ggsave(plot = TN.JDAY, "Figures/totaln_jday.png", dpi = 500)
 ggsave(plot = TN.SOII, "Figures/totaln_jday.png", dpi = 500)
 ggsave(plot = TN1m.SOII, "Figures/totaln_nutday_1m_jday.png", dpi = 500)
+
 ggsave(plot = CRBS.JDAY, "Figures/crab_size_jday.png", dpi = 500)
 ggsave(plot = CRBS.SOII, "Figures/crab_size_seaotter.png", dpi = 500)
 ggsave(plot = CRBM.JDAY, "Figures/crab_mass_jday.png", dpi = 500)
@@ -508,5 +636,17 @@ ggsave(plot = CRBSW.JDAY, "Figures/crab_diversity_shannon_jday.png", dpi = 500)
 ggsave(plot = CRBSW.SOII, "Figures/crab_diversity_shannon_seaotter.png", dpi = 500)
 ggsave(plot = CRBT.JDAY, "Figures/crab_totaln_jday.png", dpi = 500)
 ggsave(plot = CRBT.SOII, "Figures/crab_totaln_seaotter.png", dpi = 500)
+
+ggsave(plot = FSHT.JDAY, "Figures/fish_totaln_jday.png", dpi = 500)
+ggsave(plot = FSHT.SOII, "Figures/fish_totaln_seaotter.png", dpi = 500)
+ggsave(plot = FSHSP.JDAY, "Figures/fish_diversity_simpson_jday.png", dpi = 500)
+ggsave(plot = FSHSP.SOII, "Figures/fish_diversity_simpson_seaotter.png", dpi = 500)
+ggsave(plot = FSHSW.JDAY, "Figures/fish_diversity_shannon_jday.png", dpi = 500)
+ggsave(plot = FSHSW.SOII, "Figures/fish_diversity_shannon_seaotter.png", dpi = 500)
+
+ggsave(plot = EPIL.GRZL, "Figures/epiphyte_load_grazer_load.png", dpi = 500)
+ggsave(plot= EPIL.NTOT, "Figures/epiphyte_load_totaln.png", dpi = 500)
+ggsave(plot = GRZM.CRBM, "Figures/grazer_mass_crab_mass.png", dpi = 500)
+ggsave(plot = GRZL.FSHT, "Figures/grazer_load_total_fish.png", dpi = 500)
 ```
 
