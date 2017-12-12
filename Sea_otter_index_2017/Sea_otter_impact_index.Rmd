@@ -24,6 +24,18 @@ We measured sea otters in five ways.
 
 1. **Site specific sea otter density**. At each eelgrass site we conducted two replicate boat based sea otter surveys. These surveys were bounded by a 3.8 km over-water distance from the location of the eelgrass transect. This method excluded land and was chosen to relfect the linear distance that a sea otter would swim. The boat drove the perimeter of this survey area at ~ 15 km/h and a minumium of 3 (?) observers counted otters within the survey area. The survey took care to drive into inlets and other areas that had a restricted view to ensure that the whole area was surveyed. The number and location of sea otters was recorded. Data from all surveys were pooled and a sea otter density was calculated for all survey areas. We calculated density by deviding the number of sea otter counted in the survey area by the total area of the survey area. This calculation wsa performed in ArcGIS and is imported already calculated. At some point it would be good to transfer that analysis here but someone (probably wendel) needs to get a lot better at spatial statistics in R first.
 
+For people that whan to replicate this calculation in ArcGIS (because the R code does not exist yet) here are the basic steps. The end result can be optained in a few differnet ways so this is not necessarily *the* way to do it.
+1. Import the sites where surveys took place.
+2. Create a water polygon. A polygon of the water area, not the land area
+3. Ensure that the survey sites are IN the water polygon. This is very important. This can be done with a select by location query. 
+4. Convert that water polygon to raster. Try to make the grid cells fiarly small. 50 meters should do it. Assign a value of 1 to each grid cell.
+5. Again, make sure that the site points are in a raster grid cell and that *that* grid cells is direcly adjacent to at least one other grid cell.
+6. Run a cost distance calulcation to select the raster cells within 3.8 km of each site. Save that selection as raster or polygon. This is the *survey area* for the site.
+7. Import the sea otter survey points.
+8. Run a selection by location query to select the sea otter points that intesect the survey area for each site. Sum the sea otters in that area.
+9. For each survey area calucalte the total area.
+10. Divide the number of sea otters in a curvey area by the area of the survey area. Boom you have density. 
+
 2. **Sea otter pits**. At each eelgrass site we conducted the number of sea otter pits. Along three vertically stacked 100m transects. The lowest transect was placed at approximately -0.5 m MLLW. Pits were counted in 10 10 m bins along each transect but for this analysis are all pooled together. A "pit" was defined a depression in the substrate greater than 30cm in any one direction and at least ~5 cm deep.
 ```{r sea otter pit data}
 pits <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -36,7 +48,7 @@ shell <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFact
 
 4. **Sea otter duration**. Each eelgrass site was assigned a sea otter duration based off USFWS aerial surveys. This assignment was done in ArcGIS and is imported directly.
 
-5. **Sea otter population model density**. Tim Tinker has recently developed a spatially expplicit density dependent growth model for sea otter in Southeast Alaska. His derived populaiton density estimates were assigned to each site. This data was an extraction from his paper.
+5. **Sea otter population model density**. Tim Tinker has recently developed a spatially expplicit density dependent growth model for sea otter in Southeast Alaska. His derived populaiton density estimates were assigned to each site. This data was an extraction from his paper. This paper is currently in review, if you need a value contact Wendel.
 
 ```{r density, duration, and pop mod data import}
 dat <- read.csv("../ALL_DATA/sea_otter_index_pre_derived_measures_2017.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -51,7 +63,7 @@ pits.site <- pits %>%
     group_by(Site) %>% 
     summarise(n_pits = sum(PitBin))
 
-pits.site <- pits.site[2:22,] # removes weird row
+pits.site <- pits.site[2:22,] # removes weird row with nothing in it
 
 # Simple plot
 ggplot(pits.site) +
