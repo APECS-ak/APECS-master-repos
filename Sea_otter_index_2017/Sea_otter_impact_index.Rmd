@@ -8,7 +8,7 @@ editor_options:
 ---
 
 # Sea otter impact index
-Sea otters are hard to keep track of. Until the 2017 field season the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summarises and then combined these measures to creat a sea otter impact index. 
+Sea otters are hard to keep track of. Until the 2017 field season the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summaries and then combined these measures to create a sea otter impact index. 
 
 ```{r libraries, echo = FALSE}
 library(dplyr)
@@ -22,7 +22,7 @@ theme_set(theme_classic())
 ## Sea otter measures
 We measured sea otters in five ways.
 
-1. **Site specific sea otter density**. At each eelgrass site we conducted two replicate boat based sea otter surveys. These surveys were bounded by a 3.8 km over-water distance from the location of the eelgrass transect. This method excluded land and was chosen to relfect the linear distance that a sea otter would swim. The boat drove the perimeter of this survey area at ~ 15 km/h and a minumium of 3 (?) observers counted otters within the survey area. The survey took care to drive into inlets and other areas that had a restricted view to ensure that the whole area was surveyed. The number and location of sea otters was recorded. Data from all surveys were pooled and a sea otter density was calculated for all survey areas. We calculated density by deviding the number of sea otter counted in the survey area by the total area of the survey area. This calculation wsa performed in ArcGIS and is imported already calculated. At some point it would be good to transfer that analysis here but someone (probably wendel) needs to get a lot better at spatial statistics in R first.
+1. **Site specific sea otter density**. At each eelgrass site we conducted two replicate boat based sea otter surveys. These surveys were bounded by a 3.8 km over-water distance from the location of the eelgrass transect. This method excluded land and was chosen to reflect the linear distance that a sea otter would swim. The boat drove the perimeter of this survey area at ~ 15 km/h and a minimum of 3 (?) observers counted otters within the survey area. The survey took care to drive into inlets and other areas that had a restricted view to ensure that the whole area was surveyed. The number and location of sea otters was recorded. Data from all surveys were pooled and a sea otter density was calculated for all survey areas. We calculated density by deviding the number of sea otter counted in the survey area by the total area of the survey area. This calculation wsa performed in ArcGIS and is imported already calculated. At some point it would be good to transfer that analysis here but someone (probably wendel) needs to get a lot better at spatial statistics in R first.
 
 For people that whan to replicate this calculation in ArcGIS (because the R code does not exist yet) here are the basic steps. The end result can be optained in a few differnet ways so this is not necessarily *the* way to do it.
 1. Import the sites where surveys took place.
@@ -41,21 +41,21 @@ For people that whan to replicate this calculation in ArcGIS (because the R code
 pits <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
-3. **Sea otter clams**. At each eelgrass site we collected dead clam shells along the same three transects described in the pit surveys. We only collected shells that had at least part of both valves. Clams were collected in 25 m bins along the transect but are pooled together for this analysis. All clams were measured, identified to species, and assigned a predation catagory. SOMEONE ELSE PLEASE WRITE HOW THE CRITERIA WORKS.
+3. **Sea otter clams**. At each eelgrass site we collected dead clam shells along the same three transects described in the pit surveys. We only collected shells that had at least part of both valves. Clams were collected in 25 m bins along the transect but are pooled together for this analysis. All clams were measured, identified to species, and assigned a predation category. SOMEONE ELSE PLEASE WRITE HOW THE CRITERIA WORKS.
 ```{r sea otter clams data}
 shell <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 4. **Sea otter duration**. Each eelgrass site was assigned a sea otter duration based off USFWS aerial surveys. This assignment was done in ArcGIS and is imported directly.
 
-5. **Sea otter population model density**. Tim Tinker has recently developed a spatially expplicit density dependent growth model for sea otter in Southeast Alaska. His derived populaiton density estimates were assigned to each site. This data was an extraction from his paper. This paper is currently in review, if you need a value contact Wendel.
+5. **Sea otter population model density**. Tim Tinker has recently developed a spatially explicit density dependent growth model for sea otter in Southeast Alaska. His derived population density estimates were assigned to each site. This data was an extraction from his paper. This paper is currently in review, if you need a value contact Wendel.
 
 ```{r density, duration, and pop mod data import}
 dat <- read.csv("../ALL_DATA/sea_otter_index_pre_derived_measures_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 ## Summaries
-Pit and clam shell data need to be summarised from its raw form to data we want to use for index calculation. As mentioned above pit and shell data will be pooled across transect at the site level.
+Pit and clam shell data need to be summarized from its raw form to data we want to use for index calculation. As mentioned above pit and shell data will be pooled across transect at the site level.
 
 Number of sea otter pits
 ```{r sea otter pits}
@@ -92,7 +92,7 @@ ggplot(prop.shell) +
 ```
 
 ## Merging existing and calcualted sea otter measures
-Now that we have all the data we can merge the summaries calcualted here and the data the was imported directly.
+Now that we have all the data we can merge the summaries calculated here and the data the was imported directly.
 
 ```{r merge}
 dat <- merge(dat, pits.site, by.x = "site", by.y = "Site")
@@ -101,7 +101,7 @@ dat <- merge(dat, prop.shell[, c(1,4)], by.x = "site", by.y = "Site")
 ```
 
 ## Sea otter impact index
-We will be using a principle compnents analysis to create the sea otter impact index 
+We will be using a principle components analysis to create the sea otter impact index 
 ```{r data exploration}
 # Correlations
 corrgram(dat[,6:11])
@@ -121,7 +121,7 @@ hist(log(dat$density2_km2_2017 + 1))
 hist(log(dat$n_pits + 1))
 hist(log(dat$prop_SO_shells + 1))
 ```
-Histograms inticate that the data are right skewed. Log transformation hellps this somewhat.
+Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
 
 Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
 ```{r transformations}
@@ -137,7 +137,7 @@ dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
 dat.std <- scale(dat, center = FALSE, scale = apply(dat, 2, max))
 ```
 
-Now we can calulcate the PCA
+Now we can calculate the PCA
 ```{r PCA}
 # PCA on transformed AND standarized data with duration and Tims pop est.
 pca <- princomp(dat.std.l)
