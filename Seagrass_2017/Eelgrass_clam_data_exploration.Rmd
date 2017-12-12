@@ -1,0 +1,97 @@
+---
+title: "Eelgrass_clam_data_exploration"
+author: "Wendel Raymond"
+date: "December 12, 2017"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Clam data exploration
+At each of the eelgrass sites we surveyed for sea otter pits and assesed predation pressure on clams. Here we explore that data.
+
+```{r, echo = FALSE, warning = FALSE, message = FASLE}
+library(dplyr)
+library(ggplot2)
+
+theme_set(theme_classic())
+```
+
+```{r functions, echo = FALSE}
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+## Data Import
+We will import both the clam and pit data. Both of these data where collected on along three vertically stacked 100m transects. The lowest was the same as the eelgrass transect and was at ~ -0.5m MLLW. The next one was on the edge of the eelgrass bed. We did not formally measure the tidal height but based off previous observations this is about 0m MLLW. The highest transect was outside the eelgrass all together, **Tiff** can you provide details.
+
+Sediment and pit counts were bined in 10 m segments. Clams where binned in 25 m segments. 
+```{r data import}
+clam <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+clam$Transect <- as.factor(clam$Transect)
+levels(clam$Transect)[levels(clam$Transect)=="Outer"] <- "Outside"
+
+pit <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+## Data summaries
+Given how the data where collected summarizing the data could happen in many ways. Pooling across all transects, and all bins, or not, or some combination. For the seaotter index we pooled across all transect and all bins.
+
+### Transects within sites
+Here we can look at the within site variation of clams and pits.
+
+Pits first
+```{r pits - site variation}
+pit.sum <- pit %>%
+  group_by(Site, Transect) %>% 
+  summarise(pits = mean(PitBin),
+            pits_se = st.er(PitBin))
+
+pit.sum <- pit.sum[2:64,] # remove NA row
+
+# quick plot
+ggplot(pit.sum, aes(Transect, pits, fill = Transect)) +
+  geom_col() +
+  geom_errorbar(aes(x = Transect, ymin = pits - pits_se, ymax = pits + pits_se), width = 0) +
+  labs(x = "Transect", y = "Pits +/- se")
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~Site)
+```
+
+Clams. Now the clams are a bit different because there is also species data and predation type data. Therfore, analysis could go a lot of ways.
+
+First it makes sense to looks at predation type in each transect within a site
+```{r clams - site variation}
+clam.sum <- clam %>% 
+  group_by(Site, Transect, Death) %>% 
+  summarise(n_death = n()) %>% 
+  mutate(prop_death = n_death / sum(n_death))
+
+# quick plot
+ggplot(clam.sum, aes(x = Transect, y = prop_death, fill = Death)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Transect", y = "Proportion") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~Site)
+```
+
+Sediment. We also characterized sediment type along the transects.
+```{r sediments - site variation}
+sed.sum <- pit %>%
+  group_by(Site, Transect) %>% 
+  summarise(sed = mean(Sed_avg),
+            sed_se = st.er(Sed_avg))
+
+sed.sum <- sed.sum[2:64,] # remove NA row
+
+# quick plot
+ggplot(sed.sum, aes(Transect, sed, fill = Transect)) +
+  geom_col() +
+  geom_errorbar(aes(x = Transect, ymin = sed - sed_se, ymax = sed + sed_se), width = 0) +
+  labs(x = "Transect", y = "Sediment +/- se") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~Site)
+```
+
