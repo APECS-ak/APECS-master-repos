@@ -8,7 +8,7 @@ editor_options:
 ---
 
 # Exploratory analyses summer 2017
-We collected a lot of data this past summer which are creating more questions than answers. Here are the highlights of analyses so far. For more see the [Figures](https://github.com/APECS-ak/APECS-master-repos/tree/master/Seagrass_2017/Figures) folder in the Seagrass 2017 sections of the APECS-ak GitHub repository. I also hope that this summary document helps convince everyone (especially people that will be running lots of analyses) that things like R Markdown and GitHUb are really useful for a collaborative project.
+We collected a lot of data this past summer which are creating more questions than answers. Here are the highlights of analyses so far. For more see the [Figures](https://github.com/APECS-ak/APECS-master-repos/tree/master/Seagrass_2017/Figures) folder in the Seagrass 2017 sections of the APECS-ak GitHub repository. I also hope that this summary document helps convince everyone (especially people that will be running lots of analyses) that things like R Markdown and GitHub are really useful for a collaborative project.
 
 ```{r libraries, echo = FALSE, warning = FALSE, message = FALSE}
 library(ggplot2)
