@@ -137,17 +137,22 @@ $(document).ready(function () {
 <p>What we have done is sturctured our data and code into two types of general folders. One folder, ‘ALL_DATA’ will hold all data for the project. Yes all the data. Raw data, cleaned data, and the ‘digested’ data from these parent data.</p>
 <div id="csv-nameing-convention" class="section level3">
 <h3>.csv nameing convention</h3>
-<p>All data <strong>MUST</strong> be a .csv. If you add or generate files please follow the file naming convention XXXX</p>
+<p>All data <strong>MUST</strong> be a .csv. If you add or generate files please follow the general file nameing convention of “description_year_type.csv”. For example sea_otter_diet_data_2017_RAW.csv would be appropriate. What does “type”. This is to help identifiy if the data is raw, cleaned, or derived. Raw data should be self explanatory. Clean data comes from raw data via some sort of script that cleans it up by adding missing values etc. Notes that some data may not need to be cleaned for analysis. Derived data comes from clean or raw data via a script that does some sort of calulation. For example a lot of the eelgrass data needed calulations performed on it to get the data values we actually want for analysis (biomass for example).</p>
 </div>
 </div>
 <div id="what-do-i-have-to-do" class="section level2">
 <h2>What do I <em>have</em> to do?</h2>
 <p>We encourage everybody to create a GitHub account so that you can access the data and the code if you need to. If you are someone that is going to be running analyses then we <em>strongly</em> encourage you to learn the basics of GitHub and how it interfaces with RStudio. Tiff and Wendel feel like they have enough of a basic understnading to get these people up to speed. Fortuently there are great resources online, and here in Juneau (Matt Jones and Byrce Mecum) that do this stuff for a living.</p>
 </div>
-<div id="best-practices-for-working-in-the-apecs-repository" class="section level2">
-<h2>Best practices for working in the APECS repository</h2>
+<div id="getting-started-with-all-this-git-and-github-business" class="section level2">
+<h2>Getting started with all this git and GitHub business</h2>
+<p>Tiff and Wendel can help you with this but fortunetly these tasks are well outlined by an NCEAS working group <a href="https://nceas.github.io/sasap-training/materials/reproducible-analysis-in-r/">here</a>. Other than showing you how to set up git and GitHub, this site has great examples of how to use RMarkdown, dplyr and ggplot if you are interested.</p>
+</div>
+<div id="best-practices-for-working-in-the-apecs-repository---this-is-important" class="section level2">
+<h2>Best practices for working in the APECS repository - this is important</h2>
 <p>One of the pitfalls of GitHub is that when a version of somthing on your computer does not match the version on GitHub your get whats called a merge conflict. These are not the end of the world but they can create headaches for everone. After some consultation and testing Tiff and Wendel have identified a series of steps to minimize the changes of these conflicts. You should <strong>alwayse</strong> follow this set of steps when working in any of the projects in the APECS repository.</p>
 <ol style="list-style-type: decimal">
+<li>Make sure you are working in the folder that you want and in the R project that is appropriate. For example if you are working on sediment data you should load the approrptae R project that is in sediment folder. This applies to all the different folders in the APECS repo.</li>
 <li>Pull</li>
 <li>Do your work</li>
 <li>Save it locally (on your machine)</li>
