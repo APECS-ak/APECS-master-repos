@@ -8,7 +8,7 @@ editor_options:
 ---
 
 # Exploratory analyses summer 2017
-We collected a lot of data this past summer which are creating more questions than answers. Here are the highlights of analyses so far. For more see the [Figures](https://github.com/APECS-ak/APECS-master-repos/tree/master/Seagrass_2017/Figures) folder in the Seagrass 2017 sections of the APECS-ak GitHub repository. I also hope that this summary document helps convince everyone (especially people that will be running lots of analyses) that things like RMarkdown and GitHUb are really useful for a collaborative project.
+We collected a lot of data this past summer which are creating more questions than answers. Here are the highlights of analyses so far. For more see the [Figures](https://github.com/APECS-ak/APECS-master-repos/tree/master/Seagrass_2017/Figures) folder in the Seagrass 2017 sections of the APECS-ak GitHub repository. I also hope that this summary document helps convince everyone (especially people that will be running lots of analyses) that things like R Markdown and GitHUb are really useful for a collaborative project.
 
 ```{r libraries, echo = FALSE, warning = FALSE, message = FALSE}
 library(ggplot2)
@@ -52,7 +52,7 @@ pit <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", strin
 ```
 
 ## Where we worked
-We covered a lot of gorund this past summer
+We covered a lot of ground this past summer
 ```{r map, echo=FALSE, warning = FALSE}
 # Eelgrass Icon
 egIcon <- makeIcon(
@@ -70,10 +70,10 @@ leaflet(eg.dat) %>%
 ## Sea otters
 Our primary questions for this part of the APECS project what effect, if any, do sea otters have in eelgrass ecosystems in Southeast Alaska. To get at this we have compared many of our response metrics to our sea otter index. Since we only sampled sites once we are also concerned that time is an important factor to keep control of. So the following set of plots will present the sea otter index and time for comparison.
 
-This schematic summarizes the "Elkhorn Slough Model" of sea otters and seagrass/eelgrass. When sea otters moved in they reduced the crab populaiton, releasing grazers from predation which lead to heavy grazing on epiphytes. This lead to increased seagrass growth and  biomass.
+This schematic summarizes the "Elkhorn Slough Model" of sea otters and seagrass/eelgrass. When sea otters moved in they reduced the crab population, releasing grazers from predation which lead to heavy grazing on epiphytes. This lead to increased seagrass growth and  biomass.
 ![](../Images/Castro_seagrass_seaotter_elkhorn.png)
 
-The sea otter index is a number or score assigned to each of our sites that combines our boat based sea otter surveys, calm and pit survey, known sea otter duration, and population model desity estimates. This was done using a PCA and is plotted below. Note that this color scheme is used throughout the document. Red = lots of sea otter impacts. Blue = less sea otter impacts.
+The sea otter index is a number or score assigned to each of our sites that combines our boat based sea otter surveys, calm and pit survey, known sea otter duration, and population model density estimates. This was done using a PCA and is plotted below. Note that this color scheme is used throughout the document. Red = lots of sea otter impacts. Blue = less sea otter impacts.
 ```{r SOII plot, echo = FALSE, warning = FALSE, fig.height = 6, fig.width = 7}
 ggplot(eg.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
   geom_point(size = 4)+
@@ -224,7 +224,7 @@ DTPC.JDAY <- ggplot(eg.dat) +
 plot_grid(SHDN.SOII, SHDN.JDAY, ABGB.SOII, ABGB.JDAY, BLGB.SOII, BLGB.JDAY, nrow = 3, ncol = 2)
 ```
 
-**Set 2** - epiphytes, diatom and macoalgae percent cover.
+**Set 2** - epiphytes, diatom and macroalgae percent cover.
 
 ```{r, echo = FALSE, warning = FALSE, fig.width=10,fig.height=11}
 ## Panel - Primary Producers 2 ##
@@ -273,7 +273,7 @@ NP1m.SOII <- ggplot(eg.dat) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 ```
 
-Total nitrogen and N:P on the day of sampling (when we did the eelgrass data collectiong) and on nutirent day (when we sampled every site in one day).
+Total nitrogen and N:P on the day of sampling (when we did the eelgrass data collection) and on nutrient day (when we sampled every site in one day).
 
 ```{r, echo = FALSE, warning = FALSE, fig.width=10,fig.height=11}
 ## Panel - Nutrients ##
