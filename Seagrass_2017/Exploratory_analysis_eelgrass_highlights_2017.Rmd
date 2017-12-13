@@ -10,10 +10,18 @@ editor_options:
 # Exploratory analyses summer 2017
 We collected a lot of data this past summer which are creating more questions than answers. Here are the highlights of analyses so far. For more see the [Figures](https://github.com/APECS-ak/APECS-master-repos/tree/master/Seagrass_2017/Figures) folder in the Seagrass 2017 sections of the APECS-ak GitHub repository. I also hope that this summary document helps convince everyone (especially people that will be running lots of analyses) that things like RMarkdown and GitHUb are really useful for a collaborative project.
 
-```{r libraries, echo = FALSE, warning = FALSE}
+```{r libraries, echo = FALSE, warning = FALSE, message = FALSE}
 library(ggplot2)
 library(cowplot)
 library(leaflet)
+library(dplyr)
+```
+
+```{r functions, echo = FALSE}
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
 ```
 
 ```{r data, echo=FALSE, warning = FALSE}
@@ -35,6 +43,12 @@ colnames(fish.dat)[65] <- "total_fish"
 colnames(fish.dat)[8] <- "date_julian_fish"
 colnames(fish.dat)[66] <- "shan_diverse_fish"
 colnames(fish.dat)[67] <- "simp_diverse_fish"
+
+clam <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+clam$Transect <- as.factor(clam$Transect)
+levels(clam$Transect)[levels(clam$Transect)=="Outer"] <- "Outside"
+
+pit <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 ## Where we worked
@@ -56,18 +70,21 @@ leaflet(eg.dat) %>%
 ## Sea otters
 Our primary questions for this part of the APECS project what effect, if any, do sea otters have in eelgrass ecosystems in Southeast Alaska. To get at this we have compared many of our response metrics to our sea otter index. Since we only sampled sites once we are also concerned that time is an important factor to keep control of. So the following set of plots will present the sea otter index and time for comparison.
 
-The sea otter index is a number or score assigned to each of our sites that combines our boat based sea otter surveys, calm and pit survey, known sea otter duration, and population model desity estimates. This was done using a PCA and is plotted below.
-```{r SOII plot, echo = FALSE, warning = FALSE}
+This schematic summarizes the "Elkhorn Slough Model" of sea otters and seagrass/eelgrass. When sea otters moved in they reduced the crab populaiton, releasing grazers from predation which lead to heavy grazing on epiphytes. This lead to increased seagrass growth and  biomass.
+![](../Images/Castro_seagrass_seaotter_elkhorn.png)
+
+The sea otter index is a number or score assigned to each of our sites that combines our boat based sea otter surveys, calm and pit survey, known sea otter duration, and population model desity estimates. This was done using a PCA and is plotted below. Note that this color scheme is used throughout the document. Red = lots of sea otter impacts. Blue = less sea otter impacts.
+```{r SOII plot, echo = FALSE, warning = FALSE, fig.height = 6, fig.width = 7}
 ggplot(eg.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
   geom_point(size = 4)+
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(axis.text.x = element_text(angle = 90))
 ```
 
 ### Plots - Primary Producers
-Set 1 - shoot density, above and belowgraound biomass.
+**Set 1** - shoot density, above and belowgraound biomass.
 
 ```{r, echo = FALSE, warning = FALSE}
 #####-----load plots-----######
@@ -207,7 +224,7 @@ DTPC.JDAY <- ggplot(eg.dat) +
 plot_grid(SHDN.SOII, SHDN.JDAY, ABGB.SOII, ABGB.JDAY, BLGB.SOII, BLGB.JDAY, nrow = 3, ncol = 2)
 ```
 
-Set 2 - epiphytes, diatom and macoalgae percent cover.
+**Set 2** - epiphytes, diatom and macoalgae percent cover.
 
 ```{r, echo = FALSE, warning = FALSE, fig.width=10,fig.height=11}
 ## Panel - Primary Producers 2 ##
@@ -342,7 +359,7 @@ plot_grid(GRZL.SOII, GRZL.JDAY, CRSL.SOII, CRSL.JDAY, GASL.SOII, GASL.JDAY, nrow
 ```
 
 ## Crabs
-These are simple univariate summaries. Multivariate analysis will happen later.
+These are simple univariate summaries. Multivariate analysis will definitely be helpful, but are more time consuming. We would rather have more defined hypotheses before we dive into that analysis.
 ```{r, echo = FALSE, warning = FALSE}
 eg.dat <- merge(eg.dat, crab.dat, by = "site")
 #####----- Crab plots -----#####
@@ -442,12 +459,13 @@ plot_grid(FSHT.SOII, FSHT.JDAY, FSHSW.SOII, FSHSW.JDAY, nrow = 2, ncol = 2)
 ```
 
 ## Other comparisons
-Beyond our primary question we are curious what else may be driving patterns.
+Grazers, epiphytes, crabs, and fish.
+
 ```{r, echo = FALSE, warning = FALSE}
 #####----- Other plots -----#####
 # Grazer load vs Epiphyte load #
 EPIL.GRZL <- ggplot(eg.dat, aes(grazermass_shootmass, epiphmass_shootmass, col = sea_otter_index)) +
-  geom_point(size = 2) +
+  geom_point(size = 4) +
   geom_errorbar(aes(x = grazermass_shootmass, ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se)) +
   geom_errorbarh(aes(y = epiphmass_shootmass, x = grazermass_shootmass, xmin = grazermass_shootmass - grazermass_shootmass_se, xmax = grazermass_shootmass + grazermass_shootmass_se)) +
   scale_color_gradient(low = "blue", high = "red") +
@@ -456,7 +474,7 @@ EPIL.GRZL <- ggplot(eg.dat, aes(grazermass_shootmass, epiphmass_shootmass, col =
 
 # Crab mass vs Grazer load #
 GRZM.CRBM <- ggplot(eg.dat, aes(crab_mass, grazermass_shootmass, col = sea_otter_index)) +
-  geom_point(size = 2) +
+  geom_point(size = 4) +
   geom_errorbar(aes(x = crab_mass, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se)) +
   geom_errorbarh(aes(y = grazermass_shootmass, x = crab_mass, xmin = crab_mass - crab_mass_se, xmax = crab_mass + crab_mass_se)) +
   scale_color_gradient(low = "blue", high = "red") +
@@ -465,7 +483,7 @@ GRZM.CRBM <- ggplot(eg.dat, aes(crab_mass, grazermass_shootmass, col = sea_otter
 
 # Nutrients vs epiphytes #
 EPIL.NTOT <- ggplot(eg.dat, aes(Ntotal_site, epiphmass_shootmass, col = sea_otter_index)) +
-  geom_point(size = 2) +
+  geom_point(size = 4) +
   geom_errorbar(aes(x = Ntotal_site, ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se)) +
   geom_errorbarh(aes(x = Ntotal_site, y = epiphmass_shootmass, xmin = Ntotal_site - Ntotal_site_se, xmax = Ntotal_site + Ntotal_site_se)) +
   scale_color_gradient(low = "blue", high = "red") +
@@ -474,7 +492,7 @@ EPIL.NTOT <- ggplot(eg.dat, aes(Ntotal_site, epiphmass_shootmass, col = sea_otte
 
 # Grazers load vs total fishes #
 GRZL.FSHT <- ggplot(eg.dat, aes(log(total_fish), grazermass_shootmass, col = sea_otter_index)) +
-  geom_point(size = 2) +
+  geom_point(size = 4) +
   geom_errorbar(aes(log(total_fish), ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se)) +
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "log total fish", y = "Grazer load +/- se (g/g)") +
@@ -484,3 +502,55 @@ GRZL.FSHT <- ggplot(eg.dat, aes(log(total_fish), grazermass_shootmass, col = sea
 plot_grid(EPIL.GRZL, GRZM.CRBM, EPIL.NTOT, GRZL.FSHT, nrow = 2, ncol = 2)
 ```
  
+Summary from clam and pit surveys.
+**Sea otter pits**
+```{r pits - site variation, echo = FALSE, fig.width=10,fig.height=11}
+pit.sum <- pit %>%
+  group_by(Site, Transect) %>% 
+  summarise(pits = mean(PitBin),
+            pits_se = st.er(PitBin))
+
+pit.sum <- pit.sum[2:64,] # remove NA row
+
+# quick plot
+ggplot(pit.sum, aes(Transect, pits, fill = Transect)) +
+  geom_col() +
+  geom_errorbar(aes(x = Transect, ymin = pits - pits_se, ymax = pits + pits_se), width = 0) +
+  labs(x = "Transect", y = "Pits +/- se") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~Site)
+```
+
+**Clams**
+```{r, echo = FALSE, fig.width=10,fig.height=11}
+clam.sum <- clam %>% 
+  group_by(Site, Transect, Death) %>% 
+  summarise(n_death = n()) %>% 
+  mutate(prop_death = n_death / sum(n_death))
+
+# quick plot
+ggplot(clam.sum, aes(x = Transect, y = prop_death, fill = Death)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Transect", y = "Proportion") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~Site)
+```
+
+**Sediments** Sediment value corresponds to size category. Smaller the number, smaller the grain size. 
+```{r, echo = FALSE, fig.width=10,fig.height=11}
+sed.sum <- pit %>%
+  group_by(Site, Transect) %>% 
+  summarise(sed = mean(Sed_avg),
+            sed_se = st.er(Sed_avg))
+
+sed.sum <- sed.sum[2:64,] # remove NA row
+
+# quick plot
+ggplot(sed.sum, aes(Transect, sed, fill = Transect)) +
+  geom_col() +
+  geom_errorbar(aes(x = Transect, ymin = sed - sed_se, ymax = sed + sed_se), width = 0) +
+  labs(x = "Transect", y = "Sediment +/- se") +
+  theme(axis.text.x = element_text(angle = 90)) +
+  facet_wrap(~Site)
+```
+
