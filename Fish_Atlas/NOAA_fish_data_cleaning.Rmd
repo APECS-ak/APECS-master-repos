@@ -45,6 +45,6 @@ str(fish)
 
 ## Export clean csv
 ```{r export}
-write.csv(fish, "../ALL_DATA/noaa_seak_fish_atlas_CLEAN")
+write.csv(fish, "../ALL_DATA/noaa_seak_fish_atlas_CLEAN.csv")
 ```
 
