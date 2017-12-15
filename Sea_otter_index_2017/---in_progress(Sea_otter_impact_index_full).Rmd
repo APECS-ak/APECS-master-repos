@@ -1,0 +1,26 @@
+---
+title: '---in_progress(Sea_otter_impact_index_full)'
+author: "Wendel Raymond"
+date: "December 14, 2017"
+output: html_document
+---
+
+# Sea otter impact index
+Sea otters are hard to keep track of. Until the 2017 field season the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summaries and then combined these measures to create a sea otter impact index. 
+
+In this script we will calcualte the sea otter impact index from raw data to final index. This will be in contrast to relying on hard to track ArcGIS processing.
+
+## Packages
+Since we will be working with spatial data we need to load a bunch of packages that deal with spatial data.
+```{r libraries}
+library(dplyr)
+library(dplyr)
+library(ggplot2)
+library(spatstat)
+library(maptools)
+library(rgdal)
+library(rgeos)
+library(raster)
+library(gdistance)
+```
+
