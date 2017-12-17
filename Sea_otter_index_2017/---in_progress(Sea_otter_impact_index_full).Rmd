@@ -3,6 +3,8 @@ title: '---in_progress(Sea_otter_impact_index_full)'
 author: "Wendel Raymond"
 date: "December 14, 2017"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Sea otter impact index
@@ -22,5 +24,21 @@ library(rgdal)
 library(rgeos)
 library(raster)
 library(gdistance)
+library(leaflet)
+```
+
+## Data
+You will need data on.
+1. Sites from which sea otter surveys were centered from (points)
+2. Sea otter survey data (points with an "n sea otter" data attribute)
+```{r}
+sites <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_Sites_2017_All_UTM")
+```
+
+## Plot sites
+```{r}
+leaflet(sites) %>% 
+  addTiles() %>% 
+  addMarkers(~longitude, ~latitude, popup = ~site)
 ```
 
