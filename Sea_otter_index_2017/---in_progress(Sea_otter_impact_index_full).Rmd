@@ -33,12 +33,17 @@ You will need data on.
 2. Sea otter survey data (points with an "n sea otter" data attribute)
 ```{r}
 sites <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_Sites_2017_All_UTM")
+
+otts <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_All_17Oct17_UTM")
+
+otts@data$n_otters <- as.numeric(otts@data$n_otters)
 ```
 
-## Plot sites
+## Plot sites and sea otters
 ```{r}
-leaflet(sites) %>% 
+leaflet() %>% 
   addTiles() %>% 
-  addMarkers(~longitude, ~latitude, popup = ~site)
+  addMarkers(data = sites, ~longitude, ~latitude, label = ~site) %>% 
+  addCircleMarkers(data = otts, ~longitude, ~latitude, color = "red", stroke = FALSE, radius = 5, fillOpacity = ~(n_otters/max(n_otters)))
 ```
 
