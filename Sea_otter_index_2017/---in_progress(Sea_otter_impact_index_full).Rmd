@@ -31,18 +31,33 @@ library(leaflet)
 You will need data on.
 1. Sites from which sea otter surveys were centered from (points)
 2. Sea otter survey data (points with an "n sea otter" data attribute)
-```{r}
+3. The 2003 and 2010 USFWS aerial surveys distribution polygons
+4. Tim's, in review, survey population density polygons 
+```{r data}
+## Sites ##
 sites <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_Sites_2017_All_UTM")
+sites <- sites[1:39,] # remove the blank row thats in there
 
+## Sea otters that where observed ##
 otts <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_All_17Oct17_UTM")
+otts@data$n_otters <- as.numeric(otts@data$n_otters) # data is imported as a factor
 
-otts@data$n_otters <- as.numeric(otts@data$n_otters)
+## USFWS polygons ##
+# 2003 Sea Otters
+sd2003 <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
+
+# 2010 Sea Otters
+sd2010 <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
+
+## Tim's survey density blocks ##
 ```
 
 ## Plot sites and sea otters
-```{r}
+```{r plotting everything}
 leaflet() %>% 
   addTiles() %>% 
+  addPolygons(data = sd2010, stroke = NA, fillColor = "orange", fillOpacity = 0.8, group = "2014") %>% 
+  addPolygons(data = sd2003, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "2010") %>%
   addMarkers(data = sites, ~longitude, ~latitude, label = ~site) %>% 
   addCircleMarkers(data = otts, ~longitude, ~latitude, color = "red", stroke = FALSE, radius = 5, fillOpacity = ~(n_otters/max(n_otters)))
 ```
