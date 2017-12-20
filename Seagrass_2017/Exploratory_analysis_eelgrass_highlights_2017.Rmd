@@ -52,7 +52,7 @@ pit <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", strin
 ```
 
 ## Where we worked
-We covered a lot of ground this past summer
+We covered a lot of ground this past summer. Click on an eelgrass icon to see the site name!
 ```{r map, echo=FALSE, warning = FALSE}
 # Eelgrass Icon
 egIcon <- makeIcon(
@@ -73,7 +73,7 @@ Our primary questions for this part of the APECS project what effect, if any, do
 This schematic summarizes the "Elkhorn Slough Model" of sea otters and seagrass/eelgrass. When sea otters moved in they reduced the crab population, releasing grazers from predation which lead to heavy grazing on epiphytes. This lead to increased seagrass growth and  biomass.
 ![](../Images/Castro_seagrass_seaotter_elkhorn.png)
 
-The sea otter index is a number or score assigned to each of our sites that combines our boat based sea otter surveys, calm and pit survey, known sea otter duration, and population model density estimates. This was done using a PCA and is plotted below. Note that this color scheme is used throughout the document. Red = lots of sea otter impacts. Blue = less sea otter impacts.
+The sea otter index is a number or score assigned to each of our sites that combines our boat based sea otter surveys, calm and pit survey, known sea otter duration, and population model density estimates. This was done using a PCA and is plotted below. *Note that this color scheme is used throughout the document. Red = lots of sea otter impacts. Blue = less sea otter impacts.*
 ```{r SOII plot, echo = FALSE, warning = FALSE, fig.height = 6, fig.width = 7}
 ggplot(eg.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
   geom_point(size = 4)+
@@ -89,6 +89,8 @@ From our exploratory analyses, which is only plots at this point so statistical 
 Sea otters do appear to have a strong effect on crab biomass, which is what we expected. However, there is no relationship between crab biomass and grazer biomass. This makes us wonder if crabs are not a major predator of grazers in our system. One possible explanation is that crabs may be eating a lot of clams instead of grazers (see plots on proportion of predation type on clams). In terms of grazers effect on epiphytes, the plot is noisy but after consulting some literature this is possibly the expected relationship. 
 
 The fish data needs some more analysis but it would be interesting to see in any species or groups of species have convincing relationships with grazers. In other seagrass systems (Baltic Sea for example) fishes are a major predator on grazers. 
+
+Moving forward (as of 12/20/2017) we are developing hypotheses to test with the hopes of writing a paper focused on the trophic structure of eelgrass beds around POW and how sea otters effect (or don't) them. Stay tuned!
 
 ### Plots - Primary Producers
 **Set 1** - shoot density, above and belowground biomass.
@@ -509,11 +511,13 @@ GRZL.FSHT <- ggplot(eg.dat, aes(log(total_fish), grazermass_shootmass, col = sea
 plot_grid(EPIL.GRZL, GRZM.CRBM, EPIL.NTOT, GRZL.FSHT, nrow = 2, ncol = 2)
 ```
 
-Log transformed grazer load vs epiphyte load
-```{r}
+Log transformed grazer load vs epiphyte load.
+
+```{r, echo = FALSE, fig.width=6, fig.height=7}
 # log Grazer load vs log Epiphyte load #
 ggplot(eg.dat, aes(log(grazermass_shootmass), log(epiphmass_shootmass), col = sea_otter_index)) +
   geom_point(size = 4) +
+  geom_smooth(method = lm) +
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "log Grazer load +/- se (g/g)", y = "log Epiphyte load +/- se (g/g)") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
