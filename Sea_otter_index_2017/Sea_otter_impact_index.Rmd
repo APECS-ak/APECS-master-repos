@@ -162,7 +162,7 @@ write.csv(dat, "../ALL_DATA/sea_otter_impact_index_2017.csv", row.names = FALSE)
 ```
 
 ### Other old plots
-Code will need adjusting to reflect column names changes
+Code will need adjusting to reflect column names changes.
 ```{r old plots}
 # plots
 ggplot() +
