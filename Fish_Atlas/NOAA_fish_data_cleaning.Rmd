@@ -7,7 +7,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-# NOAA nearshore fish atlas 
+# NOAA nearshore fish atlas ####THIS IS A TEST TO MAKE SURE WR IS COMMUNICATING WITH BH'S MESSAGES####
 These data represent fish community data collected in Southeast Alaska. This script will do some bacis data cleaning to prepare it for further analysis. Data are freely available from the online repository [nearshore fish atlas of Alaska](https://alaskafisheries.noaa.gov/habitat/fishatlas).
 
 ```{r libraries, echo = FALSE}
