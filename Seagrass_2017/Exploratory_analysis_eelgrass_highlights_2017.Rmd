@@ -83,8 +83,15 @@ ggplot(eg.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_ot
   theme(axis.text.x = element_text(angle = 90))
 ```
 
+## Overview
+From our exploratory analyses, which is only plots at this point so statistical tests, there appears to be little to no effect of sea otters on our responses of interest. There are some interesting patters with shoot density and aboveground biomass which may be evidence of a sea otter effect. However, in the case of shoot density it is important to remember that many things can impact shoot density, like sediment size. Alternatively low shoot density in high sea otter sites could be the results of direct disturbance (sea otter pits). In the case of aboveround biomass it is important too look at the plot versus time, where there is a very clear positive relationship.
+
+Sea otters do appear to have a strong effect on crab biomass, which is what we expected. However, there is no relationship between crab biomass and grazer biomass. This makes us wonder if crabs are not a major predator of grazers in our system. One possible explanation is that crabs may be eating a lot of clams instead of grazers (see plots on proportion of predation type on clams). In terms of grazers effect on epiphytes, the plot is noisy but after consulting some literature this is possibly the expected relationship. 
+
+The fish data needs some more analysis but it would be interesting to see in any species or groups of species have convincing relationships with grazers. In other seagrass systems (Baltic Sea for example) fishes are a major predator on grazers. 
+
 ### Plots - Primary Producers
-**Set 1** - shoot density, above and belowgraound biomass.
+**Set 1** - shoot density, above and belowground biomass.
 
 ```{r, echo = FALSE, warning = FALSE}
 #####-----load plots-----######
@@ -501,6 +508,17 @@ GRZL.FSHT <- ggplot(eg.dat, aes(log(total_fish), grazermass_shootmass, col = sea
 ```{r, , echo = FALSE, warning = FALSE, fig.width=10,fig.height=11}
 plot_grid(EPIL.GRZL, GRZM.CRBM, EPIL.NTOT, GRZL.FSHT, nrow = 2, ncol = 2)
 ```
+
+Log transformed grazer load vs epiphyte load
+```{r}
+# log Grazer load vs log Epiphyte load #
+ggplot(eg.dat, aes(log(grazermass_shootmass), log(epiphmass_shootmass), col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "log Grazer load +/- se (g/g)", y = "log Epiphyte load +/- se (g/g)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
  
 Summary from clam and pit surveys.
 **Sea otter pits**
