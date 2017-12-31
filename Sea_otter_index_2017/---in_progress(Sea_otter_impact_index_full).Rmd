@@ -33,23 +33,28 @@ You will need data on.
 2. Sea otter survey data (points with an "n sea otter" data attribute)
 3. The 2003 and 2010 USFWS aerial surveys distribution polygons
 4. Tim's, in review, survey population density polygons 
+5. Southeast Alaska water polygon
 ```{r data}
 ## Sites ##
-sites <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_Sites_2017_All_UTM")
+sites <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_Sites_2017_All_UTM")
 sites <- sites[1:39,] # remove the blank row thats in there
 
 ## Sea otters that where observed ##
-otts <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_All_17Oct17_UTM")
+otts <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_All_17Oct17_UTM")
 otts@data$n_otters <- as.numeric(otts@data$n_otters) # data is imported as a factor
 
 ## USFWS polygons ##
 # 2003 Sea Otters
-sd2003 <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
+sd2003 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
 
 # 2010 Sea Otters
-sd2010 <- readOGR(dsn = "C:/Users/Wendubs/Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
+sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
 
 ## Tim's survey density blocks ##
+poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
+
+## Southeast Alaska water polygon
+h2o <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General", layer = "SEAK_water_UTM")
 ```
 
 ## Plot sites and sea otters
@@ -58,7 +63,38 @@ leaflet() %>%
   addTiles() %>% 
   addPolygons(data = sd2010, stroke = NA, fillColor = "orange", fillOpacity = 0.8, group = "2014") %>% 
   addPolygons(data = sd2003, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "2010") %>%
+  #addPolygons(data = poparea, stroke = NA, fillColor = "red", fillOpacity = 0.8, group = "Population Area") %>% 
   addMarkers(data = sites, ~longitude, ~latitude, label = ~site) %>% 
   addCircleMarkers(data = otts, ~longitude, ~latitude, color = "red", stroke = FALSE, radius = 5, fillOpacity = ~(n_otters/max(n_otters)))
+```
+
+## Calculating survey density
+The general steps are as follows
+1. Calculate survey area centered at each survey site and bounded by 2 nm "as the otter swims"
+2. Calculate area of above survey area
+3. Calculate density by counting number of otters in each area (and each survey instance if necessary) and dividing by the survey area
+
+### Calcualte / generate survey area
+Using the site points we will generate a unique polygon for each site that is bounded by 2 nm from the site "as the otter swims". The other way to think about this 2 nm over water.
+
+Covert of water polygon to raster. We want the cells to be a certian size so you need to inspect extent of the polygon so htat you can devide in a way so that you have the cell sizes you want. We cant 50 meter raster cells so the x and y excents should be devidied so that each cell will be ~50 X 50 meters large.
+```{r polygon to raster}
+# check extent
+extent(h2o)
+
+# create blank raster with appropriate dimentions
+r <- raster(ncol = (848183.9 - 75165.99) / 50, nrow = (6686378 - 6040098) / 50)
+
+# create raster
+h2o.rast <- rasterize(h2o, r)
+
+# assign values to raster
+h2o.rast@data@values <- 50
+```
+
+Create survey area for each site by selecting raster cells within 2nm == 3704 meters from the sites.
+```{r survey area}
+h2o.trans <- transition(h2o.rast, transitionFunction = mean, directions = 8)
+
 ```
 
