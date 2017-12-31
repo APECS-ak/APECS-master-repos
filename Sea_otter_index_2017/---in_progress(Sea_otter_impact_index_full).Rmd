@@ -37,7 +37,7 @@ You will need data on.
 ```{r data}
 ## Sites ##
 sites <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_Sites_2017_All_UTM")
-sites <- sites[1:39,] # remove the blank row thats in there
+sites <- sites[1:38,] # remove the blank row thats in there
 
 ## Sea otters that where observed ##
 otts <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_All_17Oct17_UTM")
@@ -53,8 +53,8 @@ sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/S
 ## Tim's survey density blocks ##
 poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
 
-## Southeast Alaska water polygon
-h2o <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General", layer = "SEAK_water_UTM")
+## Prince of Wales Water Polygon
+h2o <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "POW_water_UTM")
 ```
 
 ## Plot sites and sea otters
@@ -63,9 +63,12 @@ leaflet() %>%
   addTiles() %>% 
   addPolygons(data = sd2010, stroke = NA, fillColor = "orange", fillOpacity = 0.8, group = "2014") %>% 
   addPolygons(data = sd2003, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "2010") %>%
-  #addPolygons(data = poparea, stroke = NA, fillColor = "red", fillOpacity = 0.8, group = "Population Area") %>% 
   addMarkers(data = sites, ~longitude, ~latitude, label = ~site) %>% 
   addCircleMarkers(data = otts, ~longitude, ~latitude, color = "red", stroke = FALSE, radius = 5, fillOpacity = ~(n_otters/max(n_otters)))
+
+leaflet() %>% 
+  addTiles() %>% 
+  addPolygons(data = poparea, stroke = NA, fillColor = "red", fillOpacity = 0.8, group = "Population Area")
 ```
 
 ## Calculating survey density
@@ -83,18 +86,28 @@ Covert of water polygon to raster. We want the cells to be a certian size so you
 extent(h2o)
 
 # create blank raster with appropriate dimentions
-r <- raster(ncol = (848183.9 - 75165.99) / 50, nrow = (6686378 - 6040098) / 50)
+r <- raster(ncol = (848183.9 - 75165.99) / 100, nrow = (6686378 - 6040098) / 100)
 
 # create raster
 h2o.rast <- rasterize(h2o, r)
+crs(h2o.rast) <- "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0"
 
 # assign values to raster
-h2o.rast@data@values <- 50
+h2o.rast@data@values <- 100
 ```
 
 Create survey area for each site by selecting raster cells within 2nm == 3704 meters from the sites.
 ```{r survey area}
-h2o.trans <- transition(h2o.rast, transitionFunction = mean, directions = 8)
+# Transition layer with 4 directions
+h2o.trans.4 <- transition(h2o.rast, transitionFunction = function(x){50}, directions = 4)
+h2o.trans.4 <- geoCorrection(h2o.trans.4, type = "r", scl = FALSE)
+
+# Transition layer with 8 directions
+h2o.trans.8 <- transition(h2o.rast, transitionFunction = function(x){100}, directions = 8)
+h2o.trans.8 <- geoCorrection(h2o.trans.8, type = "r", scl = FALSE)
+
+
+surv.area <- accCost(h2o.trans.8, sites)
 
 ```
 
