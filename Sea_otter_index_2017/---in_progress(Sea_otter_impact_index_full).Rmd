@@ -55,8 +55,8 @@ poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Ha
 poparea <- spTransform(poparea, CRS("+init=epsg:4326"))
 
 ## Prince of Wales Water Polygon
-h2o <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "POW_water_UTM")
-h2o <- spTransform(h2o, CRS("+init=epsg:4326"))
+h2o.utm <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "POW_water_UTM")
+h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
 ## Plot sites and sea otters
@@ -98,7 +98,7 @@ leaflet() %>%
   addPolygons(data = buff, stroke = NA, fillColor = "red", fillOpacity = 0.8, group = "POW")
 
 ## Second, clip generic buffer so that its only water ##
-buff.water <- gIntersection(h2o, buff, byid = TRUE)
+buff.water <- gIntersection(h2o.latlong, buff, byid = TRUE)
 
 # Let see how it looks
 leaflet() %>% 
@@ -106,7 +106,7 @@ leaflet() %>%
   addPolygons(data = buff.water, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "POW")
 
 ## Make raster of water area ##
-# Covert back to UTMs for eahc measurment
+# Covert back to UTMs for each measurment
 buff.water.utm <- spTransform(buff.water, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0"))
 
 # Save extent
@@ -114,7 +114,12 @@ water.ext <- extent(buff.water.utm)
 
 # create raster with appropriate dimentions. Not that dividing by 50 means that each cell will be 50 by 50 meters
 r <- raster(xmn = water.ext@xmin, xmx = water.ext@xmax, ymn = water.ext@ymin, ymx = water.ext@ymax, ncol = (water.ext@xmax - water.ext@xmin) / 50, nrow = (water.ext@ymax - water.ext@ymin) / 50, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")
+
+# Rasterize, append data essentially, confirm projection
 water.rast <- rasterize(buff.water.utm, r, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")
+
+# Clip again to make sure
+water.rast <- mask(water.rast, h2o.utm)
 
 # assign raster values, 50 because each cell is 50 by 50 meters
 water.rast[water.rast%in%c(1:21)] <- 50
@@ -131,11 +136,30 @@ leaflet() %>%
 
 Create the as the water swims survey area, i.e. the actual survey area.
 ```{r survey area}
-# Transition layer with 8 directions START HERE NEXT TIME
-h2o.trans.8 <- transition(h2o.rast, transitionFunction = function(x){100}, directions = 8)
-h2o.trans.8 <- geoCorrection(h2o.trans.8, type = "r", scl = FALSE)
-7
-surv.area <- accCost(h2o.trans.8, sites)
+## First, make a transition layer to use in cummulative cost distance ##
+# Transition layer
+water.trans <- transition(water.rast, transitionFunction = function(x){100}, directions = 8)
+water.trans <- geoCorrection(water.trans, type = "r", scl = FALSE)
+
+## Second, calculate cummulative cost distance
+# Calculation
+surv.area <- accCost(water.trans, sites.eg)
 surv.area
+plot(surv.area)
+
+# Multiply by 50 to get real cost haves in term for distnace
+values(surv.area) <- (values(surv.area) * 50)
+plot(surv.area)
+hist(values(surv.area), breaks = 10)
+
+# "Crop"" raster to only retain values <= 3700
+surv.area[values(surv.area) > 3700] <- NA
+plot(surv.area)
+hist(values(surv.area), breaks = 50, xlim = c(0,4000))
+```
+
+Split raster up so that there are individual polygons for each site. 
+```{r}
+## START HERE NEXT TIME ##
 ```
 
