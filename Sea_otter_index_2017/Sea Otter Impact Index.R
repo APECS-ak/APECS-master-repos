@@ -42,7 +42,7 @@ pairs(dat.l, pch = 16)
 
 #####----- Standaradizations -----#####
 # Standardize to column (sea otter measure) maximum
-dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
+dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max)) #BH: Why are you standardizing the data? Seems unjustified. I would provide a good reason for this, or don't do it.
 dat.std <- scale(dat, center = FALSE, scale = apply(dat, 2, max))
 
 #####----- PCA -----#####
