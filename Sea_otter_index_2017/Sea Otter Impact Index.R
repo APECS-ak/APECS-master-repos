@@ -10,7 +10,8 @@ library(ggplot2)
 theme_set(theme_classic())
 
 #####----- Load Data -----#####
-seaotter <- read.csv("Otter_Index_data_2017_19Oct2017.csv")
+seaotter <- read.csv("Otter_Index_data_2017_19Oct2017.csv") #BH: I can't find this file and assume that it is the index file in the folder.
+
 
 #####----- Data prep and exploration -----#####
 # Correlations
