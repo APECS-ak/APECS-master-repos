@@ -1,4 +1,4 @@
-Site,Date,YYYYMMDD,Transect,TransectBin,Tansect_m,PitBin,Sed1_Type,Sed2_Type,Sed1_No,Sed2_No,Sed_avg,FieldCollector,
+Site,Date,YYYYMMDD,Transect,TransectBin,Transect_m,PitBin,Sed1_Type,Sed2_Type,Sed1_No,Sed2_No,Sed_avg,FieldCollector,
 2017_H_04,7/7/2013,20170707,Edge,1,10,0,Sandy mud,Mud,2,1,1.5,Tiff Stephens,
 2017_H_04,7/7/2013,20170707,Edge,2,20,0,Sandy mud,Mud,2,1,1.5,Tiff Stephens,
 2017_H_04,7/7/2013,20170707,Edge,3,30,6,Sand,Pebble,4,6,5,Tiff Stephens,
