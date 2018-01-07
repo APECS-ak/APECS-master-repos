@@ -8,7 +8,8 @@ editor_options:
 ---
 ```{r}
 # Load your libraries
-library(dplyr)
+library(dplyr); library(tidyr); library(ggplot2)
+theme_set(theme_classic())
 ```
 
 This Rmd file is for cleaning the RAW discrete sediment data for each seagrass site.
