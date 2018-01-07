@@ -3,28 +3,77 @@ title: "seagrass_seaotter_pit_sediment_2017_cleaningscript"
 author: "Tiff Stephens"
 date: "1/6/2018"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+# Load your libraries
+library(dplyr)
 ```
 
-## R Markdown
+This Rmd file is for cleaning the RAW discrete sediment data for each seagrass site.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+First, import the RAW data:
+```{r}
+#chunk: TAS
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+df.sedpit <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
-```{r cars}
-summary(cars)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+Now, understand the structure of the data, look at the data, visualize the data. 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+# check out the overall structure of the dataframe
+str(df.sedpit)
+
+# first, look at the numeric and factor classifications of variables. Many factors are ordinal; there classifications need to reflect this. 
+#df.sedpit$trans_bin <- as.ordered(df.sedpit$trans_bin)
+#df.sedpit$trans_m <- as.ordered(df.sedpit$trans_m)
+#df.sedpit$sed1_no <- as.ordered(df.sedpit$sed1_no)
+#df.sedpit$sed2_no <- as.ordered(df.sedpit$sed2_no)
+#df.sedpit$sedno_avg <- as.ordered(df.sedpit$sedno_avg)
+
+# the last column of the df is useless/empty, exclude it from the working df. Check that it was removed successfully (it was)
+df.sedpit <- within(df.sedpit, rm(X))
+str(df.sedpit)
+
+# no look at the tail-end of the observations...
+tail(df.sedpit, n = 15) # change the number of rows by modifying n value
+
+# ...this reveals that the last 10 rows are empty; exclude those and re-check df. 
+df.sedpit <- df.sedpit[-c(631:640),]
+tail(df.sedpit, n = 15)
+str(df.sedpit)
+
+# OK! All obvious useless variables + observations are removed from the edges of the df.
+# irregularities within the df can be explored using histograms of numeric data
+hist(df.sedpit$PitBin)
+hist(df.sedpit$Sed1_No)
+hist(df.sedpit$Sed2_No)
+hist(df.sedpit$Sed_avg)
+
+
+summary(df.sedpit)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+```{r}
+write.csv(cr.mat,'seagrass_seaotter_pit_sediment_2017_CLEAN.csv')
+```
+
+
+
+
+
+
+
+
+
+
+

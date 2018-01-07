@@ -68,7 +68,7 @@ colnames(cr.mat)
 
 
 ```{r}
-write.csv(cr.mat,'CLEAN_core_matter.csv')
+write.csv(cr.mat,'core_matter_2017_CLEAN.csv')
 ```
 
 
