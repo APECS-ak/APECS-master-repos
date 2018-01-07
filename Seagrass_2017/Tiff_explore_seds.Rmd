@@ -3,21 +3,196 @@ title: "Tiff_explore_sediments"
 author: "Tiff Stephens"
 date: "1/6/2018"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+library(dplyr); library(tidyr); library(plyr); library(ggplot2)
+theme_set(theme_classic())
 ```
 
 The intention of this Rmd script is to explore how sediment (primary and secondary) might influence the patterns in seagrass biometrics.
 
-
-The first thing that we'll do is import the sediment and pit data. 
-
+We will be using the sediment_pit, biometrics, and transect dataframes from the seagrass sites. The first thing that we'll do is import these cleaned files. 
 ```{r}
+df.sedpit <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_seaotter_pit_sediment_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
+df.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.trans <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
+
+df.sedpit: calculate useful variables using existing data; delete unwanted variables for this analysis
+```{r}
+str(df.sedpit)
+
+# need to find the mean of the primary and secondary sediment types
+df.sedpit$sedno_avg <- rowMeans(subset(df.sedpit, select = c(sed1_no, sed2_no)), na.rm = TRUE)
+
+# don't need these columns
+df.sedpit <- within(df.sedpit, rm(X)) # odd extra first column
+df.sedpit <- within(df.sedpit, rm(sed1_type)) # redundant with the numeric values
+df.sedpit <- within(df.sedpit, rm(sed2_type)) # redundant with the numeric values
+df.sedpit <- within(df.sedpit, rm(field_collector)) # who cares for this
+df.sedpit <- within(df.sedpit, rm(trans_m)) # don't need to binning factors
+
+str(df.sedpit)
+```
+
+
+df.bio
+```{r}
+str(df.bio)
+
+# so many obvious unwanted variables in the df for desired analysis; start by removing those
+colnames(df.bio) # find which columns to delete in bulk (don't need grazers + epiphytes)
+df.bio <- df.bio[, -c(40:71)] # delete columns (grazers + epiphytes)
+colnames(df.bio) # recheck column names for accuracy (last should be "shoot_foil_dw")
+
+
+# need to calculate the weights of shoots + rhizomes + epiphytes
+df.bio <- df.bio %>% 
+  mutate(epiphyte_mass_dw = pad_epiphyte_mass_g - pad_mass_g) %>%
+  mutate(rhi_mass_dw = rhi_foil_dw_g - rhi_foil) %>%
+  mutate(shoot_mass_dw = shoot_foil_dw - shoot_foil)
+
+# delete derivitive weights not necessary for analysis
+df.bio <- df.bio %>% 
+  select(-pad_epiphyte_mass_g, -pad_mass_g) %>% #pads
+  select(-rhi_foil_dw_g, -rhi_foil, -shoot_foil, -shoot_foil_dw) #seagrass
+
+colnames(df.bio)
+
+
+### Now we need to handle all the leaves. For expected analyses, leaf width/length/area might not matter but it will be interesting to look, anyway. 
+
+## LEAF AREA, FIRST
+# calculate the leaf area (cm^2) per blade per plant
+df.bio <- df.bio %>% 
+  mutate(leaf_area1 = leaf_length1 * leaf_width1, na.rm = TRUE) %>%
+  mutate(leaf_area2 = leaf_length2 * leaf_width2, na.rm = TRUE) %>%
+  mutate(leaf_area3 = leaf_length3 * leaf_width3, na.rm = TRUE) %>%
+  mutate(leaf_area4 = leaf_length4 * leaf_width4, na.rm = TRUE) %>%
+  mutate(leaf_area5 = leaf_length5 * leaf_width5, na.rm = TRUE) %>%
+  mutate(leaf_area6 = leaf_length6 * leaf_width6, na.rm = TRUE) %>%
+  mutate(leaf_area7 = leaf_length7 * leaf_width7, na.rm = TRUE) %>%
+  mutate(leaf_area8 = leaf_length8 * leaf_width8, na.rm = TRUE) %>%
+  mutate(leaf_area9 = leaf_length9 * leaf_width9, na.rm = TRUE) %>%
+  mutate(leaf_area10 = leaf_length10 * leaf_width10, na.rm = TRUE)
+
+# mean leaf area of all blades per quadrat
+df.bio <- mutate(df.bio, mean_leaf_area = rowMeans(select(df.bio, starts_with("leaf_area")), na.rm = TRUE))
+
+# calculate total leaf area per plant (there is no biomass data per blade so need to combine all blades)
+#df.bio$tot_leaf_area <- rowSums(df.bio[,c("leaf_area1", "leaf_area2", "leaf_area3", "leaf_area4", "leaf_area5", "leaf_area6", "leaf_area7", "leaf_area8", "leaf_area9", "leaf_area10")], na.rm = TRUE)
+
+# total leaf area per plant per quadrat
+df.bio <- mutate(df.bio, tot_leaf_area = rowSums(select(df.bio, starts_with("leaf_area")), na.rm = TRUE))
+
+# after all of that, we no longer need areas for individual blades...
+colnames(df.bio) # find which columns to delete in bulk (don't need grazers + epiphytes)
+df.bio <- df.bio[, -c(37:47)] # delete columns (grazers + epiphytes)
+colnames(df.bio) # recheck column names for accuracy (make sure "shoot_mass_dw" and "mean_leaf_area" are there)
+
+
+
+
+## LEAF LENGTH, SECOND
+# mean leaf length per plant (or mean canopy height)
+df.bio <- mutate(df.bio, mean_leaf_length = rowMeans(select(df.bio, starts_with("leaf_length")), na.rm = TRUE))
+
+# max leaf length (canopy height) per plant
+colnames(df.bio)
+df.bio$max_canopy_height = apply(df.bio[, 12:21], 1, max, na.rm = TRUE) # ignore warning messages
+
+# after all of that, we no longer need lengths for individual blades...
+colnames(df.bio) # find which columns to delete in bulk (don't need grazers + epiphytes)
+df.bio <- df.bio[, -c(12:21)] # delete columns (grazers + epiphytes)
+colnames(df.bio) # recheck column names for accuracy (make sure "shoot_mass_dw" and "mean_leaf_area" are there)
+
+
+
+## LEAF WIDTH, THIRD
+# mean leaf width per plant
+df.bio <- mutate(df.bio, mean_leaf_width = rowMeans(select(df.bio, starts_with("leaf_width")), na.rm = TRUE))
+
+# max leaf width per plant
+colnames(df.bio)
+df.bio$max_leaf_width = apply(df.bio[, 12:21], 1, max, na.rm = TRUE) # ignore warning messages
+
+# after all of that, we no longer need lengths for individual blades...
+colnames(df.bio) # find which columns to delete in bulk (don't need grazers + epiphytes)
+df.bio <- df.bio[, -c(12:21)] # delete columns (grazers + epiphytes)
+colnames(df.bio) # recheck column names for accuracy (make sure "shoot_mass_dw" and "mean_leaf_area" are there)
+
+
+# check the overall structure of df.bio
+str(df.bio) 
+
+
+
+# RHIZOMES and NODES, let's deal with those.
+# mean node length per plant
+df.bio <- mutate(df.bio, mean_node_length = rowMeans(select(df.bio, starts_with("node")), na.rm = TRUE))
+
+# not all rhizomes were 5 cm, need to standardize Find rhizome mass per cm
+df.bio <- df.bio %>% 
+  mutate(rhi_mass_fw_percm = rhi_mass_fw / rhi_length, na.rm = TRUE) %>%
+  mutate(rhi_mass_dw_percm = rhi_mass_dw / rhi_length, na.rm = TRUE)
+df.bio <- within(df.bio, rm(na.rm))
+str(df.bio)
+
+
+# find total nodes per rhizome segment
+nodes_only <- df.bio %>% 
+  select(node1, node2, node3, node4, node5)
+
+df.bio <- df.bio %>%
+  mutate(tot_nodes = rowSums(nodes_only!=0, na.rm = TRUE)) %>%
+  mutate(node1_dw = (node1 / rhi_length) * rhi_mass_dw, na.rm = TRUE) %>%
+  mutate(node2_dw = (node2 / rhi_length) * rhi_mass_dw, na.rm = TRUE) %>%
+  mutate(node3_dw = (node3 / rhi_length) * rhi_mass_dw, na.rm = TRUE) %>%
+  mutate(node4_dw = (node4 / rhi_length) * rhi_mass_dw, na.rm = TRUE) %>%
+  mutate(node5_dw = (node5 / rhi_length) * rhi_mass_dw, na.rm = TRUE) %>%
+  select(-na.rm)
+  
+# rename node length variables for clarity
+colnames(df.bio)[which(names(df.bio) == "node1")] <- "node1_lgth"
+colnames(df.bio)[which(names(df.bio) == "node2")] <- "node2_lgth"
+colnames(df.bio)[which(names(df.bio) == "node3")] <- "node3_lgth"
+colnames(df.bio)[which(names(df.bio) == "node4")] <- "node4_lgth"
+colnames(df.bio)[which(names(df.bio) == "node5")] <- "node5_lgth"
+colnames(df.bio)
+```
+
+
+
+
+df.trans
+```{r}
+str(df.trans)
+
+# don't need these columns
+df.trans <- within(df.trans, rm(primary_observer))
+df.trans <- within(df.trans, rm(secondary_observer))
+df.trans <- within(df.trans, rm(start_time))
+df.trans <- within(df.trans, rm(end_time))
+df.trans <- within(df.trans, rm(notes))
+str(df.trans)
+
+
+df.trans <- df.trans %>%
+  mutate(algae_cover_m2 = macroalgae_cover_0.25msq * 1, na.rm = TRUE) %>%
+  mutate(epiphyte_cover_m2 = diatom_cover_0.25msq * 1, na.rm = TRUE) %>%
+  mutate(seagrass_count_m2 = eelgrass_shoots_0.25msq * 4, na.rm = TRUE) %>%
+  mutate(flower_count_m2 = flowering_shoots_0.25msq * 4, na.rm = TRUE) %>%
+  select(-na.rm, -macroalgae_cover_0.25msq, -diatom_cover_0.25msq, -eelgrass_shoots_0.25msq, -flowering_shoots_0.25msq)
+str(df.trans)
+```
 
 
 
