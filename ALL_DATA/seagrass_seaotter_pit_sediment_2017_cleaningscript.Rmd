@@ -3,6 +3,8 @@ title: "Untitled"
 author: "Tiff Stephens"
 date: "1/6/2018"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 ```{r}
 # Load your libraries
@@ -17,7 +19,7 @@ df.sedpit <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-r
 ```
 
 ```{r}
-Now, understand the structure of the data, look at the data, visualize the data.
+#Now, understand the structure of the data, look at the data, visualize the data.
 
 # check out the overall structure of the dataframe
 str(df.sedpit)
@@ -43,10 +45,10 @@ str(df.sedpit)
 
 # OK! All obvious useless variables + observations are removed from the edges of the df.
 # irregularities within the df can be explored using histograms of numeric data
-hist(df.sedpit$PitBin)
-hist(df.sedpit$Sed1_No)
-hist(df.sedpit$Sed2_No)
-hist(df.sedpit$Sed_avg)
+hist(df.sedpit$pit_bin)
+hist(df.sedpit$sed1_no)
+hist(df.sedpit$sed2_no)
+hist(df.sedpit$sedno_avg)
 
 
 summary(df.sedpit)
@@ -54,7 +56,7 @@ summary(df.sedpit)
 ```
 
 ```{r}
-write.csv(cr.mat,'seagrass_seaotter_pit_sediment_2017_CLEAN.csv')
+write.csv(df.sedpit,'seagrass_seaotter_pit_sediment_2017_CLEAN.csv')
 ```
 
 
