@@ -1,4 +1,4 @@
-site,date,YYYYMMDD,primary_obeserver,secondary_observer,start_time,end_time,depth_m,quadrat,macroalgae_cover_0.25msq,diatom_cover_0.25msq,eelgrass_shoots_0.25msq,flowering_shoots_0.25msq,notes
+site,date,YYYYMMDD,primary_observer,secondary_observer,start_time,end_time,depth_m,quadrat,macroalgae_cover_0.25msq,diatom_cover_0.25msq,eelgrass_shoots_0.25msq,flowering_shoots_0.25msq,notes
 2017_H_01,4/29/2017,20170429,BH,WR,1055,1115,-0.5,1,5,NA,54,0,
 2017_H_01,4/29/2017,20170429,BH,WR,1055,1115,-0.5,2,0,NA,41,0,
 2017_H_01,4/29/2017,20170429,BH,WR,1055,1115,-0.5,3,0,NA,59,0,
