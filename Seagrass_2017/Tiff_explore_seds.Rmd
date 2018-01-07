@@ -9,10 +9,14 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+The intention of this Rmd script is to explore how sediment (primary and secondary) might influence the patterns in seagrass biometrics.
 
 
+The first thing that we'll do is import the sediment and pit data. 
 
+```{r}
 
+```
 
 
 
