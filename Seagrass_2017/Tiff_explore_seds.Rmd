@@ -162,6 +162,8 @@ df.bio <- within(df.bio, rm(na.rm))
 str(df.bio)
 
 
+
+
 # find total nodes per rhizome segment
 nodes_only <- df.bio %>% 
   select(node1, node2, node3, node4, node5)
@@ -686,10 +688,13 @@ str(df.bio2)
 ### 3. Join all three DFs together! 
 
 ```{r, include = FALSE }
-str(df.bio2)
+df.all <- left_join(df.trans2, df.sedpit2, by = c("site"))
+df.all <- left_join(df.all, df.bio2, by = c("site"))
 
-df.all <- left_join(df.sedpit2, df.trans2, by = c("site", "date"))
-df.all <- left_join(df.all, df.bio2, by = c("site", "date"))
+
+df.all <- within(df.all, rm(date))
+df.all <- within(df.all, rm(date.y))
+colnames(df.all)[which(names(df.all) == "date.x")] <- "date"
 
 str(df.all)
 ```
@@ -702,60 +707,104 @@ str(df.all)
 #### df.sedpit ---> df.sedpit_transects
 There are 3 transects (inside, edge, outside) per site, and 10 subtransects per transect. The goal for reshaping df.sedpit is to calculate the total pits and mean sediment values per transect, per site. For now, transects will not be averaged within sites.
 ```{r, include = FALSE}
-# sum all pits in each transect per site
-pits_all <- df.sedpit %>% 
-  select(site, date, trans_type, pit_bin)
-
-m.pits_all <- melt(pits_all, id = 1:3, na.rm = TRUE)
-
-trim_pits <- dcast(m.pits_all, site + date + trans_type ~ ., sum)
-colnames(trim_pits)[which(names(trim_pits) == ".")] <- "tot_pits"
 
 
+##### want to calculate:
+# seagrass biomass per plant (HAVE ALREADY)
+# seagrass biomass per area (need shoot count per area, need biomass per plant)
+# rhiome biomass per area (need shoot count per area, need rhizome biomass per cm per plant)
 
+colnames(df.bio)
 
-# average all sed1 in each transect per site
-sed1_all <- df.sedpit %>% 
-  select(site, date, trans_type, sed1_no)
+# extract shoot biomass and reshape to quadrat for working with count data
+shoot_mass_perp <- df.bio %>% 
+  select(site, date, quadrat, shoot_mass_dw)
 
-m.sed1_all <- melt(sed1_all, id = 1:3, na.rm = TRUE)
+m.shoot_mass_perp <- melt(shoot_mass_perp, id = 1:3, na.rm = TRUE)
 
-trim_sed1 <- dcast(m.sed1_all, site + date + trans_type ~ ., mean)
-colnames(trim_sed1)[which(names(trim_sed1) == ".")] <- "sed1_mean"
+trim_shoot_mass_perp <- dcast(m.shoot_mass_perp, site + date + quadrat ~ ., mean)
+colnames(trim_shoot_mass_perp)[which(names(trim_shoot_mass_perp) == ".")] <- "shoot_mass_perp"
 
 
 
+# extract rhizome biomass and reshape to quadrat for working with count data
+rhizome_mass_percm_perp <- df.bio %>% 
+  select(site, date, quadrat, rhi_mass_dw_percm)
 
-# average all sed2 in each transect per site
-sed2_all <- df.sedpit %>% 
-  select(site, date, trans_type, sed2_no)
+m.rhizome_mass_percm_perp <- melt(rhizome_mass_percm_perp, id = 1:3, na.rm = TRUE)
 
-m.sed2_all <- melt(sed2_all, id = 1:3, na.rm = TRUE)
-
-trim_sed2 <- dcast(m.sed2_all, site + date + trans_type ~ ., mean)
-colnames(trim_sed2)[which(names(trim_sed2) == ".")] <- "sed2_mean"
-
+trim_rhizome_mass_percm_perp <- dcast(m.rhizome_mass_percm_perp, site + date + quadrat ~ ., mean)
+colnames(trim_rhizome_mass_percm_perp)[which(names(trim_rhizome_mass_percm_perp) == ".")] <- "rhizome_mass_percm_perp"
 
 
 
-# MERGING back together
-
-df.sedpit_transects <- left_join(trim_pits, trim_sed1, by = c("site", "date", "trans_type"))
-df.sedpit_transects <- left_join(df.sedpit_transects, trim_sed2, by = c("site", "date", "trans_type"))
-
-# find the mean of the primary and secondary sediment types
-df.sedpit_transects$sed_all_mean <- rowMeans(subset(df.sedpit_transects, select = c(sed1_mean, sed2_mean)), na.rm = TRUE)
+# gather shoot count data
+shoot_count_perm <- df.trans %>% 
+  select(site, date, quadrat, seagrass_count_m2)
 
 
 
-#remove extra dataframes to keep working space clean
-rm(pits_all, m.pits_all, sed1_all, m.sed1_all, sed2_all, m.sed2_all, trim_pits, trim_sed1, trim_sed2)
+# join shoot and rhizome masses + shoot counts
+mass.temp <- left_join(trim_rhizome_mass_percm_perp, trim_shoot_mass_perp, by = c("site", "date", "quadrat"))
+mass.temp <- left_join(mass.temp, shoot_count_perm, by = c("site", "quadrat"))
+
+mass.temp <- within(mass.temp, rm(date.y))
+colnames(mass.temp)[which(names(mass.temp) == "date.x")] <- "date"
+
+# remove extra DFs to keep working space clean
+rm(shoot_mass_perp, m.shoot_mass_perp, trim_shoot_mass_perp, rhizome_mass_percm_perp, m.rhizome_mass_percm_perp, trim_rhizome_mass_percm_perp, shoot_count_perm)
+
+
+
+
+
+# calculate the masses per area per quadrat! 
+mass.temp <- mass.temp %>%
+  mutate(shoot_mass_m2 = shoot_mass_perp * seagrass_count_m2, na.rm = TRUE) %>%
+  mutate(rhi_mass_percm_m2 = rhizome_mass_percm_perp * seagrass_count_m2, na.rm = TRUE)
+
+
+colnames(shoot_mass_m2)
+
+# extract rhizome biomass and reshape to quadrat for working with count data
+shoot_mass_m2 <- mass.temp %>% 
+  select(site, date, quadrat, shoot_mass_m2)
+
+m.shoot_mass_m2 <- melt(shoot_mass_m2, id = 1:3, na.rm = TRUE)
+
+trim_shoot_mass_m2 <- dcast(m.shoot_mass_m2, site + date ~ ., mean)
+colnames(trim_shoot_mass_m2)[which(names(trim_shoot_mass_m2) == ".")] <- "shoot_mass_m2"
+
+
+
+rhi_mass_percm_m2 <- mass.temp %>% 
+  select(site, date, quadrat, rhi_mass_percm_m2)
+
+m.rhi_mass_percm_m2 <- melt(rhi_mass_percm_m2, id = 1:3, na.rm = TRUE)
+
+trim_rhi_mass_percm_m2 <- dcast(m.rhi_mass_percm_m2, site + date ~ ., mean)
+colnames(trim_rhi_mass_percm_m2)[which(names(trim_rhi_mass_percm_m2) == ".")] <- "rhi_mass_percm_m2"
+
+rm(shoot_mass_m2, m.shoot_mass_m2, rhi_mass_percm_m2, m.rhi_mass_percm_m2)
+
+
+
+# join shoot and rhizome masses + shoot counts
+colnames(mass.temp)
+
+df.all <- left_join(df.all, trim_rhi_mass_percm_m2, by = c("site"))
+df.all <- left_join(df.all, trim_shoot_mass_m2, by = c("site"))
+
+rm(trim_rhi_mass_percm_m2, trim_shoot_mass_m2, mass.temp)
+
+
+df.all <- within(df.all, rm(date))
+df.all <- within(df.all, rm(date.y))
+colnames(df.all)[which(names(df.all) == "date.x")] <- "date"
 ```
+
 
 ```{r}
-head(df.sedpit)
-head(df.sedpit_transects)
+
 ```
-
-
 
