@@ -91,14 +91,22 @@ ggplot(fish.sum, aes(site, total)) +
 ## Diversity Summaries
 species richness etc
 ```{r converting to wide format}
+# Group measured fish by site and species. It will now be in the same format at the unmeasured subset of the data
 fish.m <- fish.m %>% 
   group_by(site, sp_code) %>% 
   summarise(N = n())
 
+# Merge measured and unmeasured fish data, make sure to convert any NAs in N and unmeasured columns to 0
 fish.count <- merge(fish.m, fish.um, by = c("site", "sp_code"), all = TRUE)
+fish.count$unmeasured[is.na(fish.count$unmeasured)] <- 0
+
+# Create total column
 fish.count$total <- fish.count$N + fish.count$unmeasured
+
+# Clean up
 fish.count <- cbind(fish.count[,c(1, 2, 18)])
 
+# Covert to wide format, species are columns
 fish.count.wide <- spread(fish.count, key = sp_code, value = total) 
 fish.count.wide[is.na(fish.count.wide)] <- 0
 
