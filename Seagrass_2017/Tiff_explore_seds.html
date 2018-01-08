@@ -188,435 +188,60 @@ df.trans &lt;- read.csv(&quot;https://raw.githubusercontent.com/APECS-ak/APECS-m
 ##  $ node4_dw                 : num  0.00103 0.00305 0.00238 0.00306 0.00146 ...
 ##  $ node5_dw                 : num  0.00103 0.00305 0.00159 0.00153 0.00218 ...</code></pre>
 </div>
-<div id="reshape-each-df-prep-each-df-for-site-level-replication-for-analysis" class="section level3">
-<h3>2. Reshape each DF: prep each DF for site-level replication for analysis</h3>
-<div id="df.sedpit-df.sedpit2" class="section level4">
-<h4>df.sedpit —&gt; df.sedpit2</h4>
-<pre class="r"><code>head(df.sedpit)</code></pre>
-<pre><code>##        site     date YYYYMMDD trans_type trans_bin pit_bin sed1_no sed2_no
-## 1 2017_H_04 7/7/2013 20170707       Edge         1       0       2       1
-## 2 2017_H_04 7/7/2013 20170707       Edge         2       0       2       1
-## 3 2017_H_04 7/7/2013 20170707       Edge         3       6       4       6
-## 4 2017_H_04 7/7/2013 20170707       Edge         4       9       2       4
-## 5 2017_H_04 7/7/2013 20170707       Edge         5       0       2       3
-## 6 2017_H_04 7/7/2013 20170707       Edge         6       1       2       8</code></pre>
-<pre class="r"><code># sum all pits in each transect per site
-pits_all &lt;- df.sedpit %&gt;% 
-  select(site, date, pit_bin)
-
-m.pits_all &lt;- melt(pits_all, id = 1:2, na.rm = TRUE)
-
-trim_pits &lt;- dcast(m.pits_all, site + date ~ ., sum)
-colnames(trim_pits)[which(names(trim_pits) == &quot;.&quot;)] &lt;- &quot;tot_pits&quot;
-
-
-
-
-# average all sed1 in each transect per site
-sed1_all &lt;- df.sedpit %&gt;% 
-  select(site, date, sed1_no)
-
-m.sed1_all &lt;- melt(sed1_all, id = 1:2, na.rm = TRUE)
-
-trim_sed1 &lt;- dcast(m.sed1_all, site + date ~ ., mean)
-colnames(trim_sed1)[which(names(trim_sed1) == &quot;.&quot;)] &lt;- &quot;sed1_mean&quot;
-
-
-
-
-# average all sed2 in each transect per site
-sed2_all &lt;- df.sedpit %&gt;% 
-  select(site, date, sed2_no)
-
-m.sed2_all &lt;- melt(sed2_all, id = 1:2, na.rm = TRUE)
-
-trim_sed2 &lt;- dcast(m.sed2_all, site + date ~ ., mean)
-colnames(trim_sed2)[which(names(trim_sed2) == &quot;.&quot;)] &lt;- &quot;sed2_mean&quot;
-
-
-
-
-# MERGING back together
-
-df.sedpit2 &lt;- left_join(trim_pits, trim_sed1, by = c(&quot;site&quot;, &quot;date&quot;))
-df.sedpit2 &lt;- left_join(df.sedpit2, trim_sed2, by = c(&quot;site&quot;, &quot;date&quot;))
-
-# find the mean of the primary and secondary sediment types
-df.sedpit2$sed_all_mean &lt;- rowMeans(subset(df.sedpit2, select = c(sed1_mean, sed2_mean)), na.rm = TRUE)
-
-
-
-#remove extra dataframes to keep working space clean
-rm(pits_all, m.pits_all, sed1_all, m.sed1_all, sed2_all, m.sed2_all, trim_pits, trim_sed1, trim_sed2)</code></pre>
-<pre class="r"><code>head(df.sedpit)</code></pre>
-<pre><code>##        site     date YYYYMMDD trans_type trans_bin pit_bin sed1_no sed2_no
-## 1 2017_H_04 7/7/2013 20170707       Edge         1       0       2       1
-## 2 2017_H_04 7/7/2013 20170707       Edge         2       0       2       1
-## 3 2017_H_04 7/7/2013 20170707       Edge         3       6       4       6
-## 4 2017_H_04 7/7/2013 20170707       Edge         4       9       2       4
-## 5 2017_H_04 7/7/2013 20170707       Edge         5       0       2       3
-## 6 2017_H_04 7/7/2013 20170707       Edge         6       1       2       8</code></pre>
-<pre class="r"><code>head(df.sedpit2)</code></pre>
-<pre><code>##        site      date tot_pits sed1_mean sed2_mean sed_all_mean
-## 1 2017_H_01 8/18/2013      114  2.566667  3.166667     2.866667
-## 2 2017_H_02 8/21/2013       23  1.633333  2.166667     1.900000
-## 3 2017_H_03 8/20/2013        3  2.800000  1.000000     1.900000
-## 4 2017_H_04  7/7/2013       49  2.166667  3.500000     2.833333
-## 5 2017_H_05 7/24/2013       83  2.600000  4.166667     3.383333
-## 6 2017_H_06 7/23/2013      244  1.566667  2.300000     1.933333</code></pre>
-</div>
-<div id="df.transect-df.transect2" class="section level4">
-<h4>df.transect –&gt; df.transect2</h4>
-<pre class="r"><code>str(df.trans)</code></pre>
-<pre><code>## 'data.frame':    168 obs. of  9 variables:
-##  $ site             : chr  &quot;2017_H_01&quot; &quot;2017_H_01&quot; &quot;2017_H_01&quot; &quot;2017_H_01&quot; ...
-##  $ date             : chr  &quot;4/29/2017&quot; &quot;4/29/2017&quot; &quot;4/29/2017&quot; &quot;4/29/2017&quot; ...
-##  $ YYYYMMDD         : int  20170429 20170429 20170429 20170429 20170429 20170429 20170429 20170429 20170529 20170529 ...
-##  $ depth_m          : num  -0.5 -0.5 -0.5 -0.5 -0.5 -0.5 -0.5 -0.5 -0.5 -0.5 ...
-##  $ quadrat          : int  1 2 3 4 5 6 7 8 1 2 ...
-##  $ algae_cover_m2   : num  5 0 0 0 0 0 0 0 0 0 ...
-##  $ epiphyte_cover_m2: num  NA NA NA NA NA NA NA NA 20 30 ...
-##  $ seagrass_count_m2: num  216 164 236 184 264 240 288 220 168 192 ...
-##  $ flower_count_m2  : num  0 0 0 0 0 0 0 0 0 0 ...</code></pre>
-<pre class="r"><code># calculate mean macroalgae (% cover) per site
-macroalgae &lt;- df.trans %&gt;% 
-  select(site, date, depth_m, algae_cover_m2)
-
-m.macroalgae &lt;- melt(macroalgae, id = 1:3, na.rm = TRUE)
-
-trim_macroalgae &lt;- dcast(m.macroalgae, site + date + depth_m ~ ., mean)
-colnames(trim_macroalgae)[which(names(trim_macroalgae) == &quot;.&quot;)] &lt;- &quot;macroalgae_mean&quot;
-
-
-
-
-# calculate mean epiphyte (% cover) per site
-epiphyte &lt;- df.trans %&gt;% 
-  select(site, date, depth_m, epiphyte_cover_m2)
-
-m.epiphyte &lt;- melt(epiphyte, id = 1:3, na.rm = TRUE)
-
-trim_epiphyte &lt;- dcast(m.epiphyte, site + date + depth_m ~ ., mean)
-colnames(trim_epiphyte)[which(names(trim_epiphyte) == &quot;.&quot;)] &lt;- &quot;epiphyte_mean&quot;
-
-
-
-
-# calculate mean shoots (per m^2) per site
-shoot_count &lt;- df.trans %&gt;% 
-  select(site, date, depth_m, seagrass_count_m2)
-
-m.shoot_count &lt;- melt(shoot_count, id = 1:3, na.rm = TRUE)
-
-trim_shoot_count &lt;- dcast(m.shoot_count, site + date + depth_m ~ ., mean)
-colnames(trim_shoot_count)[which(names(trim_shoot_count) == &quot;.&quot;)] &lt;- &quot;shoot_count_mean&quot;
-
-
-
-
-# calculate mean shoots (per m^2) per site
-flower_count &lt;- df.trans %&gt;% 
-  select(site, date, depth_m, flower_count_m2)
-
-m.flower_count &lt;- melt(flower_count, id = 1:3, na.rm = TRUE)
-
-trim_flower_count &lt;- dcast(m.flower_count, site + date + depth_m ~ ., mean)
-colnames(trim_flower_count)[which(names(trim_flower_count) == &quot;.&quot;)] &lt;- &quot;flower_count_mean&quot;
-
-
-
-
-
-# MERGING back together
-df.trans2 &lt;- left_join(trim_macroalgae, trim_epiphyte, by = c(&quot;site&quot;, &quot;date&quot;, &quot;depth_m&quot;))
-df.trans2 &lt;- left_join(df.trans2, trim_shoot_count, by = c(&quot;site&quot;, &quot;date&quot;, &quot;depth_m&quot;))
-df.trans2 &lt;- left_join(df.trans2, trim_flower_count, by = c(&quot;site&quot;, &quot;date&quot;, &quot;depth_m&quot;))
-
-
-# remove extra DFs to keep working space clean
-rm(macroalgae, m.macroalgae, epiphyte, m.epiphyte, shoot_count, m.shoot_count, flower_count, m.flower_count, trim_epiphyte, trim_macroalgae, trim_flower_count, trim_shoot_count)</code></pre>
-<pre class="r"><code>head(df.trans)</code></pre>
-<pre><code>##        site      date YYYYMMDD depth_m quadrat algae_cover_m2
-## 1 2017_H_01 4/29/2017 20170429    -0.5       1              5
-## 2 2017_H_01 4/29/2017 20170429    -0.5       2              0
-## 3 2017_H_01 4/29/2017 20170429    -0.5       3              0
-## 4 2017_H_01 4/29/2017 20170429    -0.5       4              0
-## 5 2017_H_01 4/29/2017 20170429    -0.5       5              0
-## 6 2017_H_01 4/29/2017 20170429    -0.5       6              0
-##   epiphyte_cover_m2 seagrass_count_m2 flower_count_m2
-## 1                NA               216               0
-## 2                NA               164               0
-## 3                NA               236               0
-## 4                NA               184               0
-## 5                NA               264               0
-## 6                NA               240               0</code></pre>
-<pre class="r"><code>head(df.trans2)</code></pre>
-<pre><code>##        site      date depth_m macroalgae_mean epiphyte_mean
-## 1 2017_H_01 4/29/2017   -0.50           0.625            NA
-## 2 2017_H_02 5/29/2017   -0.50           0.000         44.75
-## 3 2017_H_03 6/25/2017   -0.50           0.000        100.00
-## 4 2017_H_04 6/24/2017   -0.61           0.000         91.25
-## 5 2017_H_05 7/25/2017   -0.65           0.000        100.00
-## 6 2017_H_06 7/24/2017   -0.70           0.000         96.50
-##   shoot_count_mean flower_count_mean
-## 1            226.5               0.0
-## 2            245.0               0.0
-## 3            220.5               6.0
-## 4            180.5               0.0
-## 5            205.0               2.5
-## 6            186.0               2.0</code></pre>
-</div>
-<div id="df.bio-df.bio2-leaf-data" class="section level4">
-<h4>df.bio –&gt; df.bio2 (leaf data)</h4>
-</div>
-<div id="df.bio-df.bio2-rhizome-data" class="section level4">
-<h4>df.bio –&gt; df.bio2 (rhizome data)</h4>
-<pre class="r"><code>colnames(df.bio)</code></pre>
-<pre><code>##  [1] &quot;site&quot;                      &quot;date&quot;                     
-##  [3] &quot;YYYYMMDD&quot;                  &quot;quadrat&quot;                  
-##  [5] &quot;plant&quot;                     &quot;rhi_length&quot;               
-##  [7] &quot;node1_lgth&quot;                &quot;node2_lgth&quot;               
-##  [9] &quot;node3_lgth&quot;                &quot;node4_lgth&quot;               
-## [11] &quot;node5_lgth&quot;                &quot;epiphyte_mass_dw&quot;         
-## [13] &quot;rhi_mass_dw&quot;               &quot;shoot_mass_dw&quot;            
-## [15] &quot;mean_leaf_area_perblade&quot;   &quot;tot_leaf_area_perplant&quot;   
-## [17] &quot;mean_leaf_length_perplant&quot; &quot;max_leaf_length_perplant&quot; 
-## [19] &quot;mean_leaf_width_perblade&quot;  &quot;max_leaf_width_perplant&quot;  
-## [21] &quot;mean_node_length&quot;          &quot;rhi_mass_dw_percm&quot;        
-## [23] &quot;tot_nodes&quot;                 &quot;node1_dw&quot;                 
-## [25] &quot;node2_dw&quot;                  &quot;node3_dw&quot;                 
-## [27] &quot;node4_dw&quot;                  &quot;node5_dw&quot;</code></pre>
-<pre class="r"><code>rhi_length &lt;- df.bio %&gt;% 
-  select(site, date, rhi_length)
-
-m.rhi_length &lt;- melt(rhi_length, id = 1:2, na.rm = TRUE)
-
-trim_rhi_length &lt;- dcast(m.rhi_length, site + date ~ ., mean)
-colnames(trim_rhi_length)[which(names(trim_rhi_length) == &quot;.&quot;)] &lt;- &quot;rhi_length&quot;
-
-
-
-
-rhi_mass_tot &lt;- df.bio %&gt;% 
-  select(site, date, rhi_mass_dw)
-
-m.rhi_mass_tot &lt;- melt(rhi_mass_tot, id = 1:2, na.rm = TRUE)
-
-trim_rhi_mass_tot &lt;- dcast(m.rhi_mass_tot, site + date ~ ., mean)
-colnames(trim_rhi_mass_tot)[which(names(trim_rhi_mass_tot) == &quot;.&quot;)] &lt;- &quot;rhi_mass_tot&quot;
-
-
-
-
-
-rhi_mass_percm &lt;- df.bio %&gt;% 
-  select(site, date, rhi_mass_dw_percm)
-
-m.rhi_mass_percm &lt;- melt(rhi_mass_percm, id = 1:2, na.rm = TRUE)
-
-trim_rhi_mass_percm &lt;- dcast(m.rhi_mass_percm, site + date ~ ., mean)
-colnames(trim_rhi_mass_percm)[which(names(trim_rhi_mass_percm) == &quot;.&quot;)] &lt;- &quot;rhi_mass_percm&quot;
-
-
-
-
-
-
-node1_lgth &lt;- df.bio %&gt;% 
-  select(site, date, node1_lgth)
-
-m.node1_lgth &lt;- melt(node1_lgth, id = 1:2, na.rm = TRUE)
-
-trim_node1_lgth &lt;- dcast(m.node1_lgth, site + date ~ ., mean)
-colnames(trim_node1_lgth)[which(names(trim_node1_lgth) == &quot;.&quot;)] &lt;- &quot;node1_lgth&quot;
-
-
-
-
-node2_lgth &lt;- df.bio %&gt;% 
-  select(site, date, node2_lgth)
-
-m.node2_lgth &lt;- melt(node2_lgth, id = 1:2, na.rm = TRUE)
-
-trim_node2_lgth &lt;- dcast(m.node2_lgth, site + date ~ ., mean)
-colnames(trim_node2_lgth)[which(names(trim_node2_lgth) == &quot;.&quot;)] &lt;- &quot;node2_lgth&quot;
-
-
-
-
-node3_lgth &lt;- df.bio %&gt;% 
-  select(site, date, node3_lgth)
-
-m.node3_lgth &lt;- melt(node3_lgth, id = 1:2, na.rm = TRUE)
-
-trim_node3_lgth &lt;- dcast(m.node3_lgth, site + date ~ ., mean)
-colnames(trim_node3_lgth)[which(names(trim_node3_lgth) == &quot;.&quot;)] &lt;- &quot;node3_lgth&quot;
-
-
-
-
-node4_lgth &lt;- df.bio %&gt;% 
-  select(site, date, node4_lgth)
-
-m.node4_lgth &lt;- melt(node4_lgth, id = 1:2, na.rm = TRUE)
-
-trim_node4_lgth &lt;- dcast(m.node4_lgth, site + date ~ ., mean)
-colnames(trim_node4_lgth)[which(names(trim_node4_lgth) == &quot;.&quot;)] &lt;- &quot;node4_lgth&quot;
-
-
-
-
-node5_lgth &lt;- df.bio %&gt;% 
-  select(site, date, node5_lgth)
-
-m.node5_lgth &lt;- melt(node5_lgth, id = 1:2, na.rm = TRUE)
-
-trim_node5_lgth &lt;- dcast(m.node5_lgth, site + date ~ ., mean)
-colnames(trim_node5_lgth)[which(names(trim_node5_lgth) == &quot;.&quot;)] &lt;- &quot;node5_lgth&quot;
-
-
-
-
-node1_dw &lt;- df.bio %&gt;% 
-  select(site, date, node1_dw)
-
-m.node1_dw &lt;- melt(node1_dw, id = 1:2, na.rm = TRUE)
-
-trim_node1_dw &lt;- dcast(m.node1_dw, site + date ~ ., mean)
-colnames(trim_node1_dw)[which(names(trim_node1_dw) == &quot;.&quot;)] &lt;- &quot;node1_dw&quot;
-
-
-
-
-node2_dw &lt;- df.bio %&gt;% 
-  select(site, date, node2_dw)
-
-m.node2_dw &lt;- melt(node2_dw, id = 1:2, na.rm = TRUE)
-
-trim_node2_dw &lt;- dcast(m.node2_dw, site + date ~ ., mean)
-colnames(trim_node2_dw)[which(names(trim_node2_dw) == &quot;.&quot;)] &lt;- &quot;node2_dw&quot;
-
-
-
-
-node3_dw &lt;- df.bio %&gt;% 
-  select(site, date, node3_dw)
-
-m.node3_dw &lt;- melt(node3_dw, id = 1:2, na.rm = TRUE)
-
-trim_node3_dw &lt;- dcast(m.node3_dw, site + date ~ ., mean)
-colnames(trim_node3_dw)[which(names(trim_node3_dw) == &quot;.&quot;)] &lt;- &quot;node3_dw&quot;
-
-
-
-
-node4_dw &lt;- df.bio %&gt;% 
-  select(site, date, node4_dw)
-
-m.node4_dw &lt;- melt(node4_dw, id = 1:2, na.rm = TRUE)
-
-trim_node4_dw &lt;- dcast(m.node4_dw, site + date ~ ., mean)
-colnames(trim_node4_dw)[which(names(trim_node4_dw) == &quot;.&quot;)] &lt;- &quot;node4_dw&quot;
-
-
-
-
-node5_dw &lt;- df.bio %&gt;% 
-  select(site, date, node5_dw)
-
-m.node5_dw &lt;- melt(node5_dw, id = 1:2, na.rm = TRUE)
-
-trim_node5_dw &lt;- dcast(m.node5_dw, site + date ~ ., mean)
-colnames(trim_node5_dw)[which(names(trim_node5_dw) == &quot;.&quot;)] &lt;- &quot;node5_dw&quot;
-
-
-
-
-
-
-
-
-# MERGING back together
-df.bio2 &lt;- left_join(df.bio2, trim_rhi_length, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_rhi_mass_tot, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_rhi_mass_percm, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node1_dw, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node2_dw, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node3_dw, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node4_dw, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node5_dw, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node1_lgth, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node2_lgth, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node3_lgth, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node4_lgth, by = c(&quot;site&quot;, &quot;date&quot;))
-df.bio2 &lt;- left_join(df.bio2, trim_node5_lgth, by = c(&quot;site&quot;, &quot;date&quot;))
-
-
-
-# remove extra DFs to keep working space clean
-rm(rhi_length, rhi_mass_tot, rhi_mass_percm, node1_lgth, node2_lgth, node3_lgth, node4_lgth, node5_lgth, node1_dw, node2_dw, node3_dw, node4_dw, node5_dw, m.rhi_length, m.rhi_mass_tot, m.rhi_mass_percm, m.node1_lgth, m.node2_lgth, m.node3_lgth, m.node4_lgth, m.node5_lgth, m.node1_dw, m.node2_dw, m.node3_dw, m.node4_dw, m.node5_dw, trim_rhi_length, trim_rhi_mass_tot, trim_rhi_mass_percm, trim_node1_lgth, trim_node1_dw, trim_node2_lgth, trim_node2_dw, trim_node3_lgth, trim_node3_dw, trim_node4_lgth, trim_node4_dw, trim_node5_lgth, trim_node5_dw)
-
-
-# check DF
-str(df.bio2)</code></pre>
-<pre><code>## 'data.frame':    21 obs. of  23 variables:
-##  $ site            : chr  &quot;2017_H_01&quot; &quot;2017_H_02&quot; &quot;2017_H_03&quot; &quot;2017_H_04&quot; ...
-##  $ date            : chr  &quot;29/4/17&quot; &quot;28/5/17&quot; &quot;25/6/17&quot; &quot;24/6/17&quot; ...
-##  $ epiphyte_mass   : num  0.007 0.01124 0.0022 0.00721 0.01411 ...
-##  $ shoot_mass_mean : num  0.0495 0.1831 0.4307 0.4141 0.4093 ...
-##  $ leaf_area_blade : num  4.09 14.23 27.11 25.93 31.1 ...
-##  $ leaf_area_plant : num  22.4 76.9 158.2 161.4 143.8 ...
-##  $ leaf_length_max : num  21.7 47 78.8 82.9 92.3 ...
-##  $ leaf_length_mean: num  15.3 33 51.2 51 65.9 ...
-##  $ leaf_width_max  : num  0.295 0.458 0.55 0.542 0.487 ...
-##  $ leaf_width_mean : num  0.252 0.413 0.501 0.482 0.468 ...
-##  $ rhi_length      : num  4.34 4.67 4.86 4.92 4.99 ...
-##  $ rhi_mass_tot    : num  0.0403 0.0793 0.0794 0.0932 0.0718 ...
-##  $ rhi_mass_percm  : num  0.00928 0.01671 0.01613 0.01889 0.01439 ...
-##  $ node1_dw        : num  0.00501 0.01952 0.02015 0.02502 0.0208 ...
-##  $ node2_dw        : num  0.0045 0.0219 0.0315 0.0292 0.0228 ...
-##  $ node3_dw        : num  0.0034 0.013 0.0281 0.0235 0.0182 ...
-##  $ node4_dw        : num  0.00268 0.00907 0.01266 0.01186 0.01615 ...
-##  $ node5_dw        : num  0.00232 0.00595 0.00588 0.00942 0.01475 ...
-##  $ node1_lgth      : num  0.51 1.13 1.26 1.32 1.44 ...
-##  $ node2_lgth      : num  0.44 1.29 1.87 1.53 1.6 ...
-##  $ node3_lgth      : num  0.34 0.731 1.595 1.168 1.27 ...
-##  $ node4_lgth      : num  0.273 0.506 0.983 0.62 1.133 ...
-##  $ node5_lgth      : num  0.241 0.34 0.467 0.545 1 ...</code></pre>
+<div id="reshape-dfs-prep-each-df-for-site-level-replication-for-analysis" class="section level3">
+<h3>2. Reshape DFs: prep each DF for site-level replication for analysis</h3>
+<p>df.sedpit —&gt; df.sedpit2</p>
+<p>df.transect –&gt; df.transect2</p>
+<p>df.bio –&gt; df.bio2</p>
+<div id="before-we-join-all-the-dfs-together-biomass-per-area-still-needs-to-be-added.-this-was-handled-differently-than-the-rest-because-of-the-order-of-operations-for-calculations-were-different." class="section level4">
+<h4>Before we join all the DFs together, biomass per area still needs to be added. This was handled differently than the rest because of the order of operations for calculations were different.</h4>
+<p>scratch –&gt; df.mass_area</p>
 </div>
 </div>
-<div id="join-all-three-dfs-together" class="section level3">
-<h3>3. Join all three DFs together!</h3>
-<div id="df.sedpit-df.sedpit_transects" class="section level4">
-<h4>df.sedpit —&gt; df.sedpit_transects</h4>
-<p>There are 3 transects (inside, edge, outside) per site, and 10 subtransects per transect. The goal for reshaping df.sedpit is to calculate the total pits and mean sediment values per transect, per site. For now, transects will not be averaged within sites. #```{r, include = FALSE} # sum all pits in each transect per site pits_all &lt;- df.sedpit %&gt;% select(site, date, trans_type, pit_bin)</p>
-<p>m.pits_all &lt;- melt(pits_all, id = 1:3, na.rm = TRUE)</p>
-<p>trim_pits &lt;- dcast(m.pits_all, site + date + trans_type ~ ., sum) colnames(trim_pits)[which(names(trim_pits) == “.”)] &lt;- “tot_pits”</p>
+<div id="join-all-dfs-together" class="section level3">
+<h3>3. Join all DFs together</h3>
+<pre class="r"><code>df.all &lt;- left_join(df.trans2, df.sedpit2, by = c(&quot;site&quot;))
+df.all &lt;- left_join(df.all, df.bio2, by = c(&quot;site&quot;))
+df.all &lt;- left_join(df.all, df.mass_area, by = c(&quot;site&quot;))</code></pre>
+<div id="check-out-the-final-structure-of-the-df" class="section level4">
+<h4>Check out the final structure of the DF</h4>
+<pre class="r"><code>str(df.all)</code></pre>
+<pre><code>## 'data.frame':    21 obs. of  34 variables:
+##  $ site             : chr  &quot;2017_H_01&quot; &quot;2017_H_02&quot; &quot;2017_H_03&quot; &quot;2017_H_04&quot; ...
+##  $ date             : chr  &quot;4/29/2017&quot; &quot;5/29/2017&quot; &quot;6/25/2017&quot; &quot;6/24/2017&quot; ...
+##  $ depth_m          : num  -0.5 -0.5 -0.5 -0.61 -0.65 -0.7 -0.52 -0.5 -0.5 -0.5 ...
+##  $ macroalgae_mean  : num  0.625 0 0 0 0 ...
+##  $ epiphyte_mean    : num  NA 44.8 100 91.2 100 ...
+##  $ shoot_count_mean : num  226 245 220 180 205 ...
+##  $ flower_count_mean: num  0 0 6 0 2.5 2 1.5 0 0.5 0 ...
+##  $ tot_pits         : int  114 23 3 49 83 244 128 0 2 1 ...
+##  $ sed1_mean        : num  2.57 1.63 2.8 2.17 2.6 ...
+##  $ sed2_mean        : num  3.17 2.17 1 3.5 4.17 ...
+##  $ sed_all_mean     : num  2.87 1.9 1.9 2.83 3.38 ...
+##  $ epiphyte_mass    : num  0.007 0.01124 0.0022 0.00721 0.01411 ...
+##  $ shoot_mass_mean  : num  0.0495 0.1831 0.4307 0.4141 0.4093 ...
+##  $ leaf_area_blade  : num  4.09 14.23 27.11 25.93 31.1 ...
+##  $ leaf_area_plant  : num  22.4 76.9 158.2 161.4 143.8 ...
+##  $ leaf_length_max  : num  21.7 47 78.8 82.9 92.3 ...
+##  $ leaf_length_mean : num  15.3 33 51.2 51 65.9 ...
+##  $ leaf_width_max   : num  0.295 0.458 0.55 0.542 0.487 ...
+##  $ leaf_width_mean  : num  0.252 0.413 0.501 0.482 0.468 ...
+##  $ rhi_length       : num  4.34 4.67 4.86 4.92 4.99 ...
+##  $ rhi_mass_tot     : num  0.0403 0.0793 0.0794 0.0932 0.0718 ...
+##  $ rhi_mass_percm   : num  0.00928 0.01671 0.01613 0.01889 0.01439 ...
+##  $ node1_dw         : num  0.00501 0.01952 0.02015 0.02502 0.0208 ...
+##  $ node2_dw         : num  0.0045 0.0219 0.0315 0.0292 0.0228 ...
+##  $ node3_dw         : num  0.0034 0.013 0.0281 0.0235 0.0182 ...
+##  $ node4_dw         : num  0.00268 0.00907 0.01266 0.01186 0.01615 ...
+##  $ node5_dw         : num  0.00232 0.00595 0.00588 0.00942 0.01475 ...
+##  $ node1_lgth       : num  0.51 1.13 1.26 1.32 1.44 ...
+##  $ node2_lgth       : num  0.44 1.29 1.87 1.53 1.6 ...
+##  $ node3_lgth       : num  0.34 0.731 1.595 1.168 1.27 ...
+##  $ node4_lgth       : num  0.273 0.506 0.983 0.62 1.133 ...
+##  $ node5_lgth       : num  0.241 0.34 0.467 0.545 1 ...
+##  $ rhi_mass_percm_m2: num  2.08 4.09 3.57 3.39 2.95 ...
+##  $ shoot_mass_m2    : num  11.1 46.1 95.6 74.6 83.5 ...</code></pre>
 </div>
-</div>
-<div id="average-all-sed1-in-each-transect-per-site" class="section level1">
-<h1>average all sed1 in each transect per site</h1>
-<p>sed1_all &lt;- df.sedpit %&gt;% select(site, date, trans_type, sed1_no)</p>
-<p>m.sed1_all &lt;- melt(sed1_all, id = 1:3, na.rm = TRUE)</p>
-<p>trim_sed1 &lt;- dcast(m.sed1_all, site + date + trans_type ~ ., mean) colnames(trim_sed1)[which(names(trim_sed1) == “.”)] &lt;- “sed1_mean”</p>
-</div>
-<div id="average-all-sed2-in-each-transect-per-site" class="section level1">
-<h1>average all sed2 in each transect per site</h1>
-<p>sed2_all &lt;- df.sedpit %&gt;% select(site, date, trans_type, sed2_no)</p>
-<p>m.sed2_all &lt;- melt(sed2_all, id = 1:3, na.rm = TRUE)</p>
-<p>trim_sed2 &lt;- dcast(m.sed2_all, site + date + trans_type ~ ., mean) colnames(trim_sed2)[which(names(trim_sed2) == “.”)] &lt;- “sed2_mean”</p>
-</div>
-<div id="merging-back-together" class="section level1">
-<h1>MERGING back together</h1>
-<p>df.sedpit_transects &lt;- left_join(trim_pits, trim_sed1, by = c(“site”, “date”, “trans_type”)) df.sedpit_transects &lt;- left_join(df.sedpit_transects, trim_sed2, by = c(“site”, “date”, “trans_type”))</p>
-</div>
-<div id="find-the-mean-of-the-primary-and-secondary-sediment-types" class="section level1">
-<h1>find the mean of the primary and secondary sediment types</h1>
-<p>df.sedpit_transects$sed_all_mean &lt;- rowMeans(subset(df.sedpit_transects, select = c(sed1_mean, sed2_mean)), na.rm = TRUE)</p>
-</div>
-<div id="remove-extra-dataframes-to-keep-working-space-clean" class="section level1">
-<h1>remove extra dataframes to keep working space clean</h1>
-<p>rm(pits_all, m.pits_all, sed1_all, m.sed1_all, sed2_all, m.sed2_all, trim_pits, trim_sed1, trim_sed2)</p>
 </div>
 
 
