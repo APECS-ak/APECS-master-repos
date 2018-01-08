@@ -1,7 +1,7 @@
 ---
-title: "Tiff_explore_sediments"
+title: "Exploration of sediment influence on seagrass"
 author: "Tiff Stephens"
-date: "1/6/2018"
+#date: "1/6/2018"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -10,11 +10,11 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(dplyr); library(tidyr); library(plyr); library(ggplot2)
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(ggplot2)
 theme_set(theme_classic())
 ```
 
-The intention of this Rmd script is to explore how sediment (primary and secondary) might influence the patterns in seagrass biometrics.
+### The intention of this Rmd script is to explore how sediment (primary and secondary) might influence the patterns in seagrass biometrics.
 
 We will be using the sediment_pit, biometrics, and transect dataframes from the seagrass sites. The first thing that we'll do is import these cleaned files. 
 ```{r}
@@ -26,12 +26,11 @@ df.trans <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-re
 ```
 
 
-df.sedpit: calculate useful variables using existing data; delete unwanted variables for this analysis
-```{r}
-str(df.sedpit)
 
-# need to find the mean of the primary and secondary sediment types
-df.sedpit$sedno_avg <- rowMeans(subset(df.sedpit, select = c(sed1_no, sed2_no)), na.rm = TRUE)
+### 1. Tidy: delete unwanted variables from each dataframe to reduce clutter
+```{r, include = FALSE}
+str(df.sedpit)
+na.omit(df.sedpit)
 
 # don't need these columns
 df.sedpit <- within(df.sedpit, rm(X)) # odd extra first column
@@ -39,18 +38,45 @@ df.sedpit <- within(df.sedpit, rm(sed1_type)) # redundant with the numeric value
 df.sedpit <- within(df.sedpit, rm(sed2_type)) # redundant with the numeric values
 df.sedpit <- within(df.sedpit, rm(field_collector)) # who cares for this
 df.sedpit <- within(df.sedpit, rm(trans_m)) # don't need to binning factors
-
-str(df.sedpit)
 ```
 
 
-df.bio
-```{r}
+```{r, include = FALSE}
+str(df.trans)
+na.omit(df.trans)
+
+# don't need these columns
+df.trans <- within(df.trans, rm(primary_observer))
+df.trans <- within(df.trans, rm(secondary_observer))
+df.trans <- within(df.trans, rm(start_time))
+df.trans <- within(df.trans, rm(end_time))
+df.trans <- within(df.trans, rm(notes))
+str(df.trans)
+
+# convert everything to meter-squared values
+df.trans <- df.trans %>%
+  mutate(algae_cover_m2 = macroalgae_cover_0.25msq * 1, na.rm = TRUE) %>%
+  mutate(epiphyte_cover_m2 = diatom_cover_0.25msq * 1, na.rm = TRUE) %>%
+  mutate(seagrass_count_m2 = eelgrass_shoots_0.25msq * 4, na.rm = TRUE) %>%
+  mutate(flower_count_m2 = flowering_shoots_0.25msq * 4, na.rm = TRUE) %>%
+  select(-na.rm, -macroalgae_cover_0.25msq, -diatom_cover_0.25msq, -eelgrass_shoots_0.25msq, -flowering_shoots_0.25msq)
+str(df.trans)
+```
+
+
+```{r, include = FALSE}
 str(df.bio)
+na.omit(df.bio)
+
+# change column name for consistency with other DFs
+colnames(df.bio)[which(names(df.bio) == "collection_date")] <- "date"
+
 
 # so many obvious unwanted variables in the df for desired analysis; start by removing those
 colnames(df.bio) # find which columns to delete in bulk (don't need grazers + epiphytes)
 df.bio <- df.bio[, -c(40:71)] # delete columns (grazers + epiphytes)
+df.bio <- within(df.bio, rm(rhi_mass_fw))
+df.bio <- within(df.bio, rm(shoot_mass_fw))
 colnames(df.bio) # recheck column names for accuracy (last should be "shoot_foil_dw")
 
 
@@ -64,7 +90,6 @@ df.bio <- df.bio %>%
 df.bio <- df.bio %>% 
   select(-pad_epiphyte_mass_g, -pad_mass_g) %>% #pads
   select(-rhi_foil_dw_g, -rhi_foil, -shoot_foil, -shoot_foil_dw) #seagrass
-
 colnames(df.bio)
 
 
@@ -84,54 +109,45 @@ df.bio <- df.bio %>%
   mutate(leaf_area9 = leaf_length9 * leaf_width9, na.rm = TRUE) %>%
   mutate(leaf_area10 = leaf_length10 * leaf_width10, na.rm = TRUE)
 
-# mean leaf area of all blades per quadrat
-df.bio <- mutate(df.bio, mean_leaf_area = rowMeans(select(df.bio, starts_with("leaf_area")), na.rm = TRUE))
+# mean leaf area per blade
+df.bio <- mutate(df.bio, mean_leaf_area_perblade = rowMeans(select(df.bio, starts_with("leaf_area")), na.rm = TRUE))
 
 # calculate total leaf area per plant (there is no biomass data per blade so need to combine all blades)
 #df.bio$tot_leaf_area <- rowSums(df.bio[,c("leaf_area1", "leaf_area2", "leaf_area3", "leaf_area4", "leaf_area5", "leaf_area6", "leaf_area7", "leaf_area8", "leaf_area9", "leaf_area10")], na.rm = TRUE)
 
-# total leaf area per plant per quadrat
-df.bio <- mutate(df.bio, tot_leaf_area = rowSums(select(df.bio, starts_with("leaf_area")), na.rm = TRUE))
+# total leaf area per plant
+df.bio <- mutate(df.bio, tot_leaf_area_perplant = rowSums(select(df.bio, starts_with("leaf_area")), na.rm = TRUE))
 
 # after all of that, we no longer need areas for individual blades...
-colnames(df.bio) # find which columns to delete in bulk (don't need grazers + epiphytes)
-df.bio <- df.bio[, -c(37:47)] # delete columns (grazers + epiphytes)
-colnames(df.bio) # recheck column names for accuracy (make sure "shoot_mass_dw" and "mean_leaf_area" are there)
-
+colnames(df.bio) # find which columns to delete in bulk
+df.bio <- df.bio[, -c(35:45)] 
 
 
 
 ## LEAF LENGTH, SECOND
 # mean leaf length per plant (or mean canopy height)
-df.bio <- mutate(df.bio, mean_leaf_length = rowMeans(select(df.bio, starts_with("leaf_length")), na.rm = TRUE))
+df.bio <- mutate(df.bio, mean_leaf_length_perplant = rowMeans(select(df.bio, starts_with("leaf_length")), na.rm = TRUE))
 
-# max leaf length (canopy height) per plant
+# max leaf length per plant
 colnames(df.bio)
-df.bio$max_canopy_height = apply(df.bio[, 12:21], 1, max, na.rm = TRUE) # ignore warning messages
+df.bio$max_leaf_length_perplant = apply(df.bio[, 12:21], 1, max, na.rm = TRUE) # ignore warning messages
 
 # after all of that, we no longer need lengths for individual blades...
-colnames(df.bio) # find which columns to delete in bulk (don't need grazers + epiphytes)
-df.bio <- df.bio[, -c(12:21)] # delete columns (grazers + epiphytes)
-colnames(df.bio) # recheck column names for accuracy (make sure "shoot_mass_dw" and "mean_leaf_area" are there)
+colnames(df.bio) # find which columns to delete in bulk
+df.bio <- df.bio[, -c(12:21)] # delete columns
 
 
 
 ## LEAF WIDTH, THIRD
-# mean leaf width per plant
-df.bio <- mutate(df.bio, mean_leaf_width = rowMeans(select(df.bio, starts_with("leaf_width")), na.rm = TRUE))
+# mean leaf width per blade
+df.bio <- mutate(df.bio, mean_leaf_width_perblade = rowMeans(select(df.bio, starts_with("leaf_width")), na.rm = TRUE))
 
 # max leaf width per plant
-colnames(df.bio)
-df.bio$max_leaf_width = apply(df.bio[, 12:21], 1, max, na.rm = TRUE) # ignore warning messages
+df.bio$max_leaf_width_perplant = apply(df.bio[, 12:21], 1, max, na.rm = TRUE) # ignore warning messages
 
 # after all of that, we no longer need lengths for individual blades...
-colnames(df.bio) # find which columns to delete in bulk (don't need grazers + epiphytes)
-df.bio <- df.bio[, -c(12:21)] # delete columns (grazers + epiphytes)
-colnames(df.bio) # recheck column names for accuracy (make sure "shoot_mass_dw" and "mean_leaf_area" are there)
-
-
-# check the overall structure of df.bio
-str(df.bio) 
+colnames(df.bio) # find which columns to delete in bulk
+df.bio <- df.bio[, -c(12:21)] # delete columns
 
 
 
@@ -141,7 +157,6 @@ df.bio <- mutate(df.bio, mean_node_length = rowMeans(select(df.bio, starts_with(
 
 # not all rhizomes were 5 cm, need to standardize Find rhizome mass per cm
 df.bio <- df.bio %>% 
-  mutate(rhi_mass_fw_percm = rhi_mass_fw / rhi_length, na.rm = TRUE) %>%
   mutate(rhi_mass_dw_percm = rhi_mass_dw / rhi_length, na.rm = TRUE)
 df.bio <- within(df.bio, rm(na.rm))
 str(df.bio)
@@ -167,31 +182,499 @@ colnames(df.bio)[which(names(df.bio) == "node3")] <- "node3_lgth"
 colnames(df.bio)[which(names(df.bio) == "node4")] <- "node4_lgth"
 colnames(df.bio)[which(names(df.bio) == "node5")] <- "node5_lgth"
 colnames(df.bio)
+
+rm(nodes_only)
+
+
+
+# there are some values that show up as non-numeric or zeros when they should be NA (consistent rows)...fixing those! 
+df.bio[293:295,"mean_leaf_area_perblade"] = NA
+df.bio[663,"mean_leaf_area_perblade"] = NA
+df.bio[680,"mean_leaf_area_perblade"] = NA
+df.bio[704:705,"mean_leaf_area_perblade"] = NA
+
+df.bio[293:295,"tot_leaf_area_perplant"] = NA
+df.bio[663,"tot_leaf_area_perplant"] = NA
+df.bio[680,"tot_leaf_area_perplant"] = NA
+df.bio[704:705,"tot_leaf_area_perplant"] = NA
+
+df.bio[293:295,"mean_leaf_length_perplant"] = NA
+df.bio[663,"mean_leaf_length_perplant"] = NA
+df.bio[680,"mean_leaf_length_perplant"] = NA
+df.bio[704:705,"mean_leaf_length_perplant"] = NA
+
+df.bio[293:295,"max_leaf_length_perplant"] = NA
+df.bio[663,"max_leaf_length_perplant"] = NA
+df.bio[680,"max_leaf_length_perplant"] = NA
+df.bio[704:705,"max_leaf_length_perplant"] = NA
+
+df.bio[293:295,"mean_leaf_width_perblade"] = NA
+df.bio[663,"mean_leaf_width_perblade"] = NA
+df.bio[680,"mean_leaf_width_perblade"] = NA
+df.bio[704:705,"mean_leaf_width_perblade"] = NA
+
+df.bio[293:295,"max_leaf_width_perplant"] = NA
+df.bio[663,"max_leaf_width_perplant"] = NA
+df.bio[680,"max_leaf_width_perplant"] = NA
+df.bio[704:705,"max_leaf_width_perplant"] = NA
+
+df.bio[293:295,"mean_node_length"] = NA
+df.bio[663,"mean_node_length"] = NA
+df.bio[680,"mean_node_length"] = NA
+df.bio[704:705,"mean_node_length"] = NA
+
+df.bio[293:295,"tot_nodes"] = NA
+df.bio[663,"tot_nodes"] = NA
+df.bio[680,"tot_nodes"] = NA
+df.bio[704:705,"tot_nodes"] = NA
+
+# check the overall structure of df.bio
+str(df.bio) 
+```
+
+All of the coding steps are included in the .Rmd file but not displayed here. However, here is the structure of each df, up to this point:
+```{r}
+str(df.sedpit)
+str(df.trans)
+str(df.bio)
 ```
 
 
 
 
-df.trans
+### 2. Reshape each DF: prep each DF for site-level replication for analysis
+
+#### df.sedpit ---> df.sedpit2
+```{r}
+head(df.sedpit)
+
+# sum all pits in each transect per site
+pits_all <- df.sedpit %>% 
+  select(site, date, pit_bin)
+
+m.pits_all <- melt(pits_all, id = 1:2, na.rm = TRUE)
+
+trim_pits <- dcast(m.pits_all, site + date ~ ., sum)
+colnames(trim_pits)[which(names(trim_pits) == ".")] <- "tot_pits"
+
+
+
+
+# average all sed1 in each transect per site
+sed1_all <- df.sedpit %>% 
+  select(site, date, sed1_no)
+
+m.sed1_all <- melt(sed1_all, id = 1:2, na.rm = TRUE)
+
+trim_sed1 <- dcast(m.sed1_all, site + date ~ ., mean)
+colnames(trim_sed1)[which(names(trim_sed1) == ".")] <- "sed1_mean"
+
+
+
+
+# average all sed2 in each transect per site
+sed2_all <- df.sedpit %>% 
+  select(site, date, sed2_no)
+
+m.sed2_all <- melt(sed2_all, id = 1:2, na.rm = TRUE)
+
+trim_sed2 <- dcast(m.sed2_all, site + date ~ ., mean)
+colnames(trim_sed2)[which(names(trim_sed2) == ".")] <- "sed2_mean"
+
+
+
+
+# MERGING back together
+
+df.sedpit2 <- left_join(trim_pits, trim_sed1, by = c("site", "date"))
+df.sedpit2 <- left_join(df.sedpit2, trim_sed2, by = c("site", "date"))
+
+# find the mean of the primary and secondary sediment types
+df.sedpit2$sed_all_mean <- rowMeans(subset(df.sedpit2, select = c(sed1_mean, sed2_mean)), na.rm = TRUE)
+
+
+
+#remove extra dataframes to keep working space clean
+rm(pits_all, m.pits_all, sed1_all, m.sed1_all, sed2_all, m.sed2_all, trim_pits, trim_sed1, trim_sed2)
+```
+
+```{r}
+head(df.sedpit)
+head(df.sedpit2)
+```
+
+
+
+
+
+
+
+
+#### df.transect --> df.transect2
 ```{r}
 str(df.trans)
 
-# don't need these columns
-df.trans <- within(df.trans, rm(primary_observer))
-df.trans <- within(df.trans, rm(secondary_observer))
-df.trans <- within(df.trans, rm(start_time))
-df.trans <- within(df.trans, rm(end_time))
-df.trans <- within(df.trans, rm(notes))
-str(df.trans)
+# calculate mean macroalgae (% cover) per site
+macroalgae <- df.trans %>% 
+  select(site, date, depth_m, algae_cover_m2)
+
+m.macroalgae <- melt(macroalgae, id = 1:3, na.rm = TRUE)
+
+trim_macroalgae <- dcast(m.macroalgae, site + date + depth_m ~ ., mean)
+colnames(trim_macroalgae)[which(names(trim_macroalgae) == ".")] <- "macroalgae_mean"
 
 
-df.trans <- df.trans %>%
-  mutate(algae_cover_m2 = macroalgae_cover_0.25msq * 1, na.rm = TRUE) %>%
-  mutate(epiphyte_cover_m2 = diatom_cover_0.25msq * 1, na.rm = TRUE) %>%
-  mutate(seagrass_count_m2 = eelgrass_shoots_0.25msq * 4, na.rm = TRUE) %>%
-  mutate(flower_count_m2 = flowering_shoots_0.25msq * 4, na.rm = TRUE) %>%
-  select(-na.rm, -macroalgae_cover_0.25msq, -diatom_cover_0.25msq, -eelgrass_shoots_0.25msq, -flowering_shoots_0.25msq)
-str(df.trans)
+
+
+# calculate mean epiphyte (% cover) per site
+epiphyte <- df.trans %>% 
+  select(site, date, depth_m, epiphyte_cover_m2)
+
+m.epiphyte <- melt(epiphyte, id = 1:3, na.rm = TRUE)
+
+trim_epiphyte <- dcast(m.epiphyte, site + date + depth_m ~ ., mean)
+colnames(trim_epiphyte)[which(names(trim_epiphyte) == ".")] <- "epiphyte_mean"
+
+
+
+
+# calculate mean shoots (per m^2) per site
+shoot_count <- df.trans %>% 
+  select(site, date, depth_m, seagrass_count_m2)
+
+m.shoot_count <- melt(shoot_count, id = 1:3, na.rm = TRUE)
+
+trim_shoot_count <- dcast(m.shoot_count, site + date + depth_m ~ ., mean)
+colnames(trim_shoot_count)[which(names(trim_shoot_count) == ".")] <- "shoot_count_mean"
+
+
+
+
+# calculate mean shoots (per m^2) per site
+flower_count <- df.trans %>% 
+  select(site, date, depth_m, flower_count_m2)
+
+m.flower_count <- melt(flower_count, id = 1:3, na.rm = TRUE)
+
+trim_flower_count <- dcast(m.flower_count, site + date + depth_m ~ ., mean)
+colnames(trim_flower_count)[which(names(trim_flower_count) == ".")] <- "flower_count_mean"
+
+
+
+
+
+# MERGING back together
+df.trans2 <- left_join(trim_macroalgae, trim_epiphyte, by = c("site", "date", "depth_m"))
+df.trans2 <- left_join(df.trans2, trim_shoot_count, by = c("site", "date", "depth_m"))
+df.trans2 <- left_join(df.trans2, trim_flower_count, by = c("site", "date", "depth_m"))
+
+
+# remove extra DFs to keep working space clean
+rm(macroalgae, m.macroalgae, epiphyte, m.epiphyte, shoot_count, m.shoot_count, flower_count, m.flower_count, trim_epiphyte, trim_macroalgae, trim_flower_count, trim_shoot_count)
+```
+
+```{r}
+head(df.trans)
+head(df.trans2)
+```
+
+
+
+
+
+
+#### df.bio --> df.bio2 (leaf data)
+```{r, include = FALSE}
+colnames(df.bio)
+
+########## there are a lot of variables...let's do this by tissue type. 
+
+# leaves + epiphytes first
+epiphyte_mass <- df.bio %>% 
+  select(site, date, epiphyte_mass_dw)
+
+m.epiphyte_mass <- melt(epiphyte_mass, id = 1:2, na.rm = TRUE)
+
+trim_epiphyte_mass <- dcast(m.epiphyte_mass, site + date ~ ., mean)
+colnames(trim_epiphyte_mass)[which(names(trim_epiphyte_mass) == ".")] <- "epiphyte_mass"
+
+
+
+
+shoot_mass <- df.bio %>% 
+  select(site, date, shoot_mass_dw)
+
+m.shoot_mass <- melt(shoot_mass, id = 1:2, na.rm = TRUE)
+
+trim_shoot_mass <- dcast(m.shoot_mass, site + date ~ ., mean)
+colnames(trim_shoot_mass)[which(names(trim_shoot_mass) == ".")] <- "shoot_mass_mean"
+
+
+
+
+leaf_area_blade <- df.bio %>% 
+  select(site, date, mean_leaf_area_perblade)
+
+m.leaf_area_blade <- melt(leaf_area_blade, id = 1:2, na.rm = TRUE)
+
+trim_leaf_area_blade <- dcast(m.leaf_area_blade, site + date ~ ., mean)
+colnames(trim_leaf_area_blade)[which(names(trim_leaf_area_blade) == ".")] <- "leaf_area_blade"
+
+
+
+
+leaf_area_plant <- df.bio %>% 
+  select(site, date, tot_leaf_area_perplant)
+
+m.leaf_area_plant <- melt(leaf_area_plant, id = 1:2, na.rm = TRUE)
+
+trim_leaf_area_plant <- dcast(m.leaf_area_plant, site + date ~ ., mean)
+colnames(trim_leaf_area_plant)[which(names(trim_leaf_area_plant) == ".")] <- "leaf_area_plant"
+
+
+
+
+leaf_length_mean <- df.bio %>% 
+  select(site, date, mean_leaf_length_perplant)
+
+m.leaf_length_mean <- melt(leaf_length_mean, id = 1:2, na.rm = TRUE)
+
+trim_leaf_length_mean <- dcast(m.leaf_length_mean, site + date ~ ., mean)
+colnames(trim_leaf_length_mean)[which(names(trim_leaf_length_mean) == ".")] <- "leaf_length_mean"
+
+
+
+
+leaf_length_max <- df.bio %>% 
+  select(site, date, max_leaf_length_perplant)
+
+m.leaf_length_max <- melt(leaf_length_max, id = 1:2, na.rm = TRUE)
+
+trim_leaf_length_max <- dcast(m.leaf_length_max, site + date ~ ., mean)
+colnames(trim_leaf_length_max)[which(names(trim_leaf_length_max) == ".")] <- "leaf_length_max"
+
+
+
+
+leaf_width_mean <- df.bio %>% 
+  select(site, date, mean_leaf_width_perblade)
+
+m.leaf_width_mean <- melt(leaf_width_mean, id = 1:2, na.rm = TRUE)
+
+trim_leaf_width_mean <- dcast(m.leaf_width_mean, site + date ~ ., mean)
+colnames(trim_leaf_width_mean)[which(names(trim_leaf_width_mean) == ".")] <- "leaf_width_mean"
+
+
+
+
+leaf_width_max <- df.bio %>% 
+  select(site, date, max_leaf_width_perplant)
+
+m.leaf_width_max <- melt(leaf_width_max, id = 1:2, na.rm = TRUE)
+
+trim_leaf_width_max <- dcast(m.leaf_width_max, site + date ~ ., mean)
+colnames(trim_leaf_width_max)[which(names(trim_leaf_width_max) == ".")] <- "leaf_width_max"
+
+
+
+
+
+# MERGING back together
+df.bio2 <- left_join(trim_epiphyte_mass, trim_shoot_mass, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_leaf_area_blade, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_leaf_area_plant, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_leaf_length_max, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_leaf_length_mean, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_leaf_width_max, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_leaf_width_mean, by = c("site", "date"))
+
+
+# remove extra DFs to keep working space clean
+rm(epiphyte_mass, m.epiphyte_mass, trim_epiphyte_mass, leaf_area_blade, leaf_area_plant, leaf_length_max, leaf_length_mean, leaf_width_max, leaf_width_mean, m.leaf_area_blade, m.leaf_area_plant, m.leaf_length_max, m.leaf_length_mean, m.leaf_width_max, m.leaf_width_mean, trim_leaf_area_blade, trim_leaf_area_plant, trim_leaf_length_max, trim_leaf_length_mean, trim_leaf_width_max, trim_leaf_width_mean, shoot_mass, m.shoot_mass, trim_shoot_mass)
+
+
+# check DF
+str(df.bio2)
+```
+
+#### df.bio --> df.bio2 (rhizome data)
+```{r}
+colnames(df.bio)
+
+
+rhi_length <- df.bio %>% 
+  select(site, date, rhi_length)
+
+m.rhi_length <- melt(rhi_length, id = 1:2, na.rm = TRUE)
+
+trim_rhi_length <- dcast(m.rhi_length, site + date ~ ., mean)
+colnames(trim_rhi_length)[which(names(trim_rhi_length) == ".")] <- "rhi_length"
+
+
+
+
+rhi_mass_tot <- df.bio %>% 
+  select(site, date, rhi_mass_dw)
+
+m.rhi_mass_tot <- melt(rhi_mass_tot, id = 1:2, na.rm = TRUE)
+
+trim_rhi_mass_tot <- dcast(m.rhi_mass_tot, site + date ~ ., mean)
+colnames(trim_rhi_mass_tot)[which(names(trim_rhi_mass_tot) == ".")] <- "rhi_mass_tot"
+
+
+
+
+
+rhi_mass_percm <- df.bio %>% 
+  select(site, date, rhi_mass_dw_percm)
+
+m.rhi_mass_percm <- melt(rhi_mass_percm, id = 1:2, na.rm = TRUE)
+
+trim_rhi_mass_percm <- dcast(m.rhi_mass_percm, site + date ~ ., mean)
+colnames(trim_rhi_mass_percm)[which(names(trim_rhi_mass_percm) == ".")] <- "rhi_mass_percm"
+
+
+
+
+
+
+node1_lgth <- df.bio %>% 
+  select(site, date, node1_lgth)
+
+m.node1_lgth <- melt(node1_lgth, id = 1:2, na.rm = TRUE)
+
+trim_node1_lgth <- dcast(m.node1_lgth, site + date ~ ., mean)
+colnames(trim_node1_lgth)[which(names(trim_node1_lgth) == ".")] <- "node1_lgth"
+
+
+
+
+node2_lgth <- df.bio %>% 
+  select(site, date, node2_lgth)
+
+m.node2_lgth <- melt(node2_lgth, id = 1:2, na.rm = TRUE)
+
+trim_node2_lgth <- dcast(m.node2_lgth, site + date ~ ., mean)
+colnames(trim_node2_lgth)[which(names(trim_node2_lgth) == ".")] <- "node2_lgth"
+
+
+
+
+node3_lgth <- df.bio %>% 
+  select(site, date, node3_lgth)
+
+m.node3_lgth <- melt(node3_lgth, id = 1:2, na.rm = TRUE)
+
+trim_node3_lgth <- dcast(m.node3_lgth, site + date ~ ., mean)
+colnames(trim_node3_lgth)[which(names(trim_node3_lgth) == ".")] <- "node3_lgth"
+
+
+
+
+node4_lgth <- df.bio %>% 
+  select(site, date, node4_lgth)
+
+m.node4_lgth <- melt(node4_lgth, id = 1:2, na.rm = TRUE)
+
+trim_node4_lgth <- dcast(m.node4_lgth, site + date ~ ., mean)
+colnames(trim_node4_lgth)[which(names(trim_node4_lgth) == ".")] <- "node4_lgth"
+
+
+
+
+node5_lgth <- df.bio %>% 
+  select(site, date, node5_lgth)
+
+m.node5_lgth <- melt(node5_lgth, id = 1:2, na.rm = TRUE)
+
+trim_node5_lgth <- dcast(m.node5_lgth, site + date ~ ., mean)
+colnames(trim_node5_lgth)[which(names(trim_node5_lgth) == ".")] <- "node5_lgth"
+
+
+
+
+node1_dw <- df.bio %>% 
+  select(site, date, node1_dw)
+
+m.node1_dw <- melt(node1_dw, id = 1:2, na.rm = TRUE)
+
+trim_node1_dw <- dcast(m.node1_dw, site + date ~ ., mean)
+colnames(trim_node1_dw)[which(names(trim_node1_dw) == ".")] <- "node1_dw"
+
+
+
+
+node2_dw <- df.bio %>% 
+  select(site, date, node2_dw)
+
+m.node2_dw <- melt(node2_dw, id = 1:2, na.rm = TRUE)
+
+trim_node2_dw <- dcast(m.node2_dw, site + date ~ ., mean)
+colnames(trim_node2_dw)[which(names(trim_node2_dw) == ".")] <- "node2_dw"
+
+
+
+
+node3_dw <- df.bio %>% 
+  select(site, date, node3_dw)
+
+m.node3_dw <- melt(node3_dw, id = 1:2, na.rm = TRUE)
+
+trim_node3_dw <- dcast(m.node3_dw, site + date ~ ., mean)
+colnames(trim_node3_dw)[which(names(trim_node3_dw) == ".")] <- "node3_dw"
+
+
+
+
+node4_dw <- df.bio %>% 
+  select(site, date, node4_dw)
+
+m.node4_dw <- melt(node4_dw, id = 1:2, na.rm = TRUE)
+
+trim_node4_dw <- dcast(m.node4_dw, site + date ~ ., mean)
+colnames(trim_node4_dw)[which(names(trim_node4_dw) == ".")] <- "node4_dw"
+
+
+
+
+node5_dw <- df.bio %>% 
+  select(site, date, node5_dw)
+
+m.node5_dw <- melt(node5_dw, id = 1:2, na.rm = TRUE)
+
+trim_node5_dw <- dcast(m.node5_dw, site + date ~ ., mean)
+colnames(trim_node5_dw)[which(names(trim_node5_dw) == ".")] <- "node5_dw"
+
+
+
+
+
+
+
+
+# MERGING back together
+df.bio2 <- left_join(df.bio2, trim_rhi_length, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_rhi_mass_tot, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_rhi_mass_percm, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node1_dw, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node2_dw, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node3_dw, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node4_dw, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node5_dw, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node1_lgth, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node2_lgth, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node3_lgth, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node4_lgth, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node5_lgth, by = c("site", "date"))
+
+
+
+# remove extra DFs to keep working space clean
+rm(rhi_length, rhi_mass_tot, rhi_mass_percm, node1_lgth, node2_lgth, node3_lgth, node4_lgth, node5_lgth, node1_dw, node2_dw, node3_dw, node4_dw, node5_dw, m.rhi_length, m.rhi_mass_tot, m.rhi_mass_percm, m.node1_lgth, m.node2_lgth, m.node3_lgth, m.node4_lgth, m.node5_lgth, m.node1_dw, m.node2_dw, m.node3_dw, m.node4_dw, m.node5_dw, trim_rhi_length, trim_rhi_mass_tot, trim_rhi_mass_percm, trim_node1_lgth, trim_node1_dw, trim_node2_lgth, trim_node2_dw, trim_node3_lgth, trim_node3_dw, trim_node4_lgth, trim_node4_dw, trim_node5_lgth, trim_node5_dw)
+
+
+# check DF
+str(df.bio2)
 ```
 
 
@@ -200,6 +683,79 @@ str(df.trans)
 
 
 
+### 3. Join all three DFs together! 
+
+```{r, include = FALSE }
+str(df.bio2)
+
+df.all <- left_join(df.sedpit2, df.trans2, by = c("site", "date"))
+df.all <- left_join(df.all, df.bio2, by = c("site", "date"))
+
+str(df.all)
+```
+
+
+
+
+
+
+#### df.sedpit ---> df.sedpit_transects
+There are 3 transects (inside, edge, outside) per site, and 10 subtransects per transect. The goal for reshaping df.sedpit is to calculate the total pits and mean sediment values per transect, per site. For now, transects will not be averaged within sites.
+```{r, include = FALSE}
+# sum all pits in each transect per site
+pits_all <- df.sedpit %>% 
+  select(site, date, trans_type, pit_bin)
+
+m.pits_all <- melt(pits_all, id = 1:3, na.rm = TRUE)
+
+trim_pits <- dcast(m.pits_all, site + date + trans_type ~ ., sum)
+colnames(trim_pits)[which(names(trim_pits) == ".")] <- "tot_pits"
+
+
+
+
+# average all sed1 in each transect per site
+sed1_all <- df.sedpit %>% 
+  select(site, date, trans_type, sed1_no)
+
+m.sed1_all <- melt(sed1_all, id = 1:3, na.rm = TRUE)
+
+trim_sed1 <- dcast(m.sed1_all, site + date + trans_type ~ ., mean)
+colnames(trim_sed1)[which(names(trim_sed1) == ".")] <- "sed1_mean"
+
+
+
+
+# average all sed2 in each transect per site
+sed2_all <- df.sedpit %>% 
+  select(site, date, trans_type, sed2_no)
+
+m.sed2_all <- melt(sed2_all, id = 1:3, na.rm = TRUE)
+
+trim_sed2 <- dcast(m.sed2_all, site + date + trans_type ~ ., mean)
+colnames(trim_sed2)[which(names(trim_sed2) == ".")] <- "sed2_mean"
+
+
+
+
+# MERGING back together
+
+df.sedpit_transects <- left_join(trim_pits, trim_sed1, by = c("site", "date", "trans_type"))
+df.sedpit_transects <- left_join(df.sedpit_transects, trim_sed2, by = c("site", "date", "trans_type"))
+
+# find the mean of the primary and secondary sediment types
+df.sedpit_transects$sed_all_mean <- rowMeans(subset(df.sedpit_transects, select = c(sed1_mean, sed2_mean)), na.rm = TRUE)
+
+
+
+#remove extra dataframes to keep working space clean
+rm(pits_all, m.pits_all, sed1_all, m.sed1_all, sed2_all, m.sed2_all, trim_pits, trim_sed1, trim_sed2)
+```
+
+```{r}
+head(df.sedpit)
+head(df.sedpit_transects)
+```
 
 
 
