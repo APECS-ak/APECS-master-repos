@@ -153,7 +153,7 @@ hist(values(surv.area), breaks = 50, xlim = c(0,4000))
 
 Split raster up so that there are individual polygons for each site. 
 ```{r}
-## START HERE NEXT TIME ##
+## START HERE NEXT TIME with for loop for site based rasters etc ##
 ```
 
 # 2. Duration of sea otter occupation
@@ -174,7 +174,6 @@ sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/S
 poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
 poparea <- spTransform(poparea, CRS("+init=epsg:4326"))
 ```
-
 
 # 4. Number of sea otter pits
 
