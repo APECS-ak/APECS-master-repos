@@ -10,7 +10,13 @@ editor_options:
 # Sea otter impact index
 Sea otters are hard to keep track of. Until the 2017 field season the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summaries and then combined these measures to create a sea otter impact index. 
 
-In this script we will calcualte the sea otter impact index from raw data to final index. This will be in contrast to relying on hard to track ArcGIS processing.
+In this script we will calcualte the sea otter impact index from raw data to final index. This will be in contrast to relying on hard to track ArcGIS processing. The original index uses the folloing data that will be attributed to each site.
+
+1. Sea otter density from 2017 boat based sea otter surveys (otters/km2)
+2. The duration of sea otter occupation based in USFWS aerial surveys (years)
+3. Sea otter density derived from Tinker et al. population model estimates (otters/km2)
+4. Number of sea otter pits counted at a site (count)
+5. Proportion of sea otter cracked shells (proportion)
 
 ## Packages
 Since we will be working with spatial data we need to load a bunch of packages that deal with spatial data.
@@ -26,6 +32,9 @@ library(raster)
 library(gdistance)
 library(leaflet)
 ```
+
+# 1. Sea otter density from boat based surveys
+Two replicate surveys were conducted, a density will be calculated for each survey.
 
 ## Data
 You will need data on.
@@ -43,17 +52,6 @@ sites.eg <- subset(sites, site_type %in% "Eelgrass")
 otts <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_All_17Oct17_UTM")
 otts@data$n_otters <- as.numeric(otts@data$n_otters) # data is imported as a factor
 
-## USFWS polygons ##
-# 2003 Sea Otters
-sd2003 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
-
-# 2010 Sea Otters
-sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
-
-## Tim's survey density blocks ##
-poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
-poparea <- spTransform(poparea, CRS("+init=epsg:4326"))
-
 ## Prince of Wales Water Polygon
 h2o.utm <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "POW_water_UTM")
 h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
@@ -63,15 +61,10 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```{r plotting everything}
 leaflet() %>% 
   addTiles() %>% 
-  addPolygons(data = sd2010, stroke = NA, fillColor = "orange", fillOpacity = 0.8, group = "2014") %>% 
-  addPolygons(data = sd2003, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "2010") %>%
-  addPolygons(data = h2o, stroke = NA, fillColor = "red", fillOpacity = 0.8, group = "POW") %>% 
+  addPolygons(data = h2o.latlong, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "POW") %>% 
   addMarkers(data = sites.eg, ~longitude, ~latitude, label = ~site) %>% 
   addCircleMarkers(data = otts, ~longitude, ~latitude, color = "red", stroke = FALSE, radius = 5, fillOpacity = ~(n_otters/max(n_otters)))
 
-leaflet() %>% 
-  addTiles() %>% 
-  addPolygons(data = buff, stroke = NA, fillColor = "red", fillOpacity = 0.8, group = "POW")
 ```
 
 ## Calculating survey density
@@ -112,7 +105,7 @@ buff.water.utm <- spTransform(buff.water, CRS("+proj=utm +zone=8 +ellps=GRS80 +t
 # Save extent
 water.ext <- extent(buff.water.utm)
 
-# create raster with appropriate dimentions. Not that dividing by 50 means that each cell will be 50 by 50 meters
+# create raster with appropriate dimensions. Not that dividing by 50 means that each cell will be 50 by 50 meters
 r <- raster(xmn = water.ext@xmin, xmx = water.ext@xmax, ymn = water.ext@ymin, ymx = water.ext@ymax, ncol = (water.ext@xmax - water.ext@xmin) / 50, nrow = (water.ext@ymax - water.ext@ymin) / 50, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")
 
 # Rasterize, append data essentially, confirm projection
@@ -131,14 +124,14 @@ water.rast.latlong <- projectRaster(water.rast, crs ="+init=epsg:4326")
 # Let see how it looks
 leaflet() %>% 
   addTiles() %>% 
-  addRasterImage(water.rast.latlong, colors = "red", opacity = 0.8)
+  addRasterImage(water.rast.latlong, colors = "green", opacity = 0.8)
 ```
 
 Create the as the water swims survey area, i.e. the actual survey area.
 ```{r survey area}
 ## First, make a transition layer to use in cummulative cost distance ##
 # Transition layer
-water.trans <- transition(water.rast, transitionFunction = function(x){100}, directions = 8)
+water.trans <- transition(water.rast, transitionFunction = function(x){50}, directions = 8)
 water.trans <- geoCorrection(water.trans, type = "r", scl = FALSE)
 
 ## Second, calculate cummulative cost distance
@@ -147,7 +140,7 @@ surv.area <- accCost(water.trans, sites.eg)
 surv.area
 plot(surv.area)
 
-# Multiply by 50 to get real cost haves in term for distnace
+# Multiply by 50 to get real cost haves in terms of distance (meters)
 values(surv.area) <- (values(surv.area) * 50)
 plot(surv.area)
 hist(values(surv.area), breaks = 10)
@@ -163,3 +156,26 @@ Split raster up so that there are individual polygons for each site.
 ## START HERE NEXT TIME ##
 ```
 
+# 2. Duration of sea otter occupation
+
+```{r}
+## USFWS polygons ##
+# 2003 Sea Otters
+sd2003 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
+
+# 2010 Sea Otters
+sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
+
+```
+
+# 3. Sea otter density from Tinker et. al
+```{r}
+## Tim's survey density blocks ##
+poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
+poparea <- spTransform(poparea, CRS("+init=epsg:4326"))
+```
+
+
+# 4. Number of sea otter pits
+
+# 5. Proportion of sea otter crakced clam shells
