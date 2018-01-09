@@ -10,7 +10,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(dplyr); library(tidyr); library(plyr); library(reshape2); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf)
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf); library(knitr); library(cowplot); library(ggpmisc)
 theme_set(theme_classic())
 ```
 
@@ -197,11 +197,11 @@ df.bio <- df.bio %>%
   select(-na.rm)
   
 # rename node length variables for clarity
-colnames(df.bio)[which(names(df.bio) == "node1")] <- "node1_lgth"
-colnames(df.bio)[which(names(df.bio) == "node2")] <- "node2_lgth"
-colnames(df.bio)[which(names(df.bio) == "node3")] <- "node3_lgth"
-colnames(df.bio)[which(names(df.bio) == "node4")] <- "node4_lgth"
-colnames(df.bio)[which(names(df.bio) == "node5")] <- "node5_lgth"
+colnames(df.bio)[which(names(df.bio) == "node1")] <- "node1_length"
+colnames(df.bio)[which(names(df.bio) == "node2")] <- "node2_length"
+colnames(df.bio)[which(names(df.bio) == "node3")] <- "node3_length"
+colnames(df.bio)[which(names(df.bio) == "node4")] <- "node4_length"
+colnames(df.bio)[which(names(df.bio) == "node5")] <- "node5_length"
 colnames(df.bio)
 
 rm(nodes_only)
@@ -275,7 +275,7 @@ pits_all <- df.sedpit %>%
 m.pits_all <- melt(pits_all, id = 1:2, na.rm = TRUE) # prepares temporary DF for breakdown using dcast
 
 trim_pits <- dcast(m.pits_all, site + date ~ ., sum) # sums all pits per site, trimming class info to just site and date
-colnames(trim_pits)[which(names(trim_pits) == ".")] <- "tot_pits" # give data column appropriate name
+colnames(trim_pits)[which(names(trim_pits) == ".")] <- "pits_tot_site" # give data column appropriate name
 
 
 
@@ -286,7 +286,7 @@ sed1_all <- df.sedpit %>%
 m.sed1_all <- melt(sed1_all, id = 1:2, na.rm = TRUE)
 
 trim_sed1 <- dcast(m.sed1_all, site + date ~ ., mean)
-colnames(trim_sed1)[which(names(trim_sed1) == ".")] <- "sed1_mean"
+colnames(trim_sed1)[which(names(trim_sed1) == ".")] <- "sed1_site"
 
 
 
@@ -298,7 +298,7 @@ sed2_all <- df.sedpit %>%
 m.sed2_all <- melt(sed2_all, id = 1:2, na.rm = TRUE)
 
 trim_sed2 <- dcast(m.sed2_all, site + date ~ ., mean)
-colnames(trim_sed2)[which(names(trim_sed2) == ".")] <- "sed2_mean"
+colnames(trim_sed2)[which(names(trim_sed2) == ".")] <- "sed2_site"
 
 
 
@@ -308,7 +308,7 @@ df.sedpit2 <- left_join(trim_pits, trim_sed1, by = c("site", "date"))
 df.sedpit2 <- left_join(df.sedpit2, trim_sed2, by = c("site", "date"))
 
 # find the mean of the primary and secondary sediment types for later analysis
-df.sedpit2$sed_all_mean <- rowMeans(subset(df.sedpit2, select = c(sed1_mean, sed2_mean)), na.rm = TRUE)
+df.sedpit2$sedmean_site <- rowMeans(subset(df.sedpit2, select = c(sed1_site, sed2_site)), na.rm = TRUE)
 
 
 # remove [now] extra dataframes to keep working space clean
@@ -416,7 +416,7 @@ macroalgae <- df.trans %>%
 m.macroalgae <- melt(macroalgae, id = 1:3, na.rm = TRUE)
 
 trim_macroalgae <- dcast(m.macroalgae, site + date + depth_m ~ ., mean)
-colnames(trim_macroalgae)[which(names(trim_macroalgae) == ".")] <- "macroalgae_mean"
+colnames(trim_macroalgae)[which(names(trim_macroalgae) == ".")] <- "macroalgae_percent_cover"
 
 
 
@@ -428,7 +428,7 @@ epiphyte <- df.trans %>%
 m.epiphyte <- melt(epiphyte, id = 1:3, na.rm = TRUE)
 
 trim_epiphyte <- dcast(m.epiphyte, site + date + depth_m ~ ., mean)
-colnames(trim_epiphyte)[which(names(trim_epiphyte) == ".")] <- "epiphyte_mean"
+colnames(trim_epiphyte)[which(names(trim_epiphyte) == ".")] <- "epiphyte_percent_cover"
 
 
 
@@ -440,7 +440,7 @@ shoot_count <- df.trans %>%
 m.shoot_count <- melt(shoot_count, id = 1:3, na.rm = TRUE)
 
 trim_shoot_count <- dcast(m.shoot_count, site + date + depth_m ~ ., mean)
-colnames(trim_shoot_count)[which(names(trim_shoot_count) == ".")] <- "shoot_count_mean"
+colnames(trim_shoot_count)[which(names(trim_shoot_count) == ".")] <- "shoot_density_m2"
 
 
 
@@ -452,7 +452,7 @@ flower_count <- df.trans %>%
 m.flower_count <- melt(flower_count, id = 1:3, na.rm = TRUE)
 
 trim_flower_count <- dcast(m.flower_count, site + date + depth_m ~ ., mean)
-colnames(trim_flower_count)[which(names(trim_flower_count) == ".")] <- "flower_count_mean"
+colnames(trim_flower_count)[which(names(trim_flower_count) == ".")] <- "flower_density_m2"
 
 
 
@@ -630,57 +630,57 @@ colnames(trim_rhi_mass_percm)[which(names(trim_rhi_mass_percm) == ".")] <- "rhi_
 
 
 
-node1_lgth <- df.bio %>% 
-  select(site, date, node1_lgth)
+node1_length <- df.bio %>% 
+  select(site, date, node1_length)
 
-m.node1_lgth <- melt(node1_lgth, id = 1:2, na.rm = TRUE)
+m.node1_length <- melt(node1_length, id = 1:2, na.rm = TRUE)
 
-trim_node1_lgth <- dcast(m.node1_lgth, site + date ~ ., mean)
-colnames(trim_node1_lgth)[which(names(trim_node1_lgth) == ".")] <- "node1_lgth"
-
-
-
-
-node2_lgth <- df.bio %>% 
-  select(site, date, node2_lgth)
-
-m.node2_lgth <- melt(node2_lgth, id = 1:2, na.rm = TRUE)
-
-trim_node2_lgth <- dcast(m.node2_lgth, site + date ~ ., mean)
-colnames(trim_node2_lgth)[which(names(trim_node2_lgth) == ".")] <- "node2_lgth"
+trim_node1_length <- dcast(m.node1_length, site + date ~ ., mean)
+colnames(trim_node1_length)[which(names(trim_node1_length) == ".")] <- "node1_length"
 
 
 
 
-node3_lgth <- df.bio %>% 
-  select(site, date, node3_lgth)
+node2_length <- df.bio %>% 
+  select(site, date, node2_length)
 
-m.node3_lgth <- melt(node3_lgth, id = 1:2, na.rm = TRUE)
+m.node2_length <- melt(node2_length, id = 1:2, na.rm = TRUE)
 
-trim_node3_lgth <- dcast(m.node3_lgth, site + date ~ ., mean)
-colnames(trim_node3_lgth)[which(names(trim_node3_lgth) == ".")] <- "node3_lgth"
-
-
-
-
-node4_lgth <- df.bio %>% 
-  select(site, date, node4_lgth)
-
-m.node4_lgth <- melt(node4_lgth, id = 1:2, na.rm = TRUE)
-
-trim_node4_lgth <- dcast(m.node4_lgth, site + date ~ ., mean)
-colnames(trim_node4_lgth)[which(names(trim_node4_lgth) == ".")] <- "node4_lgth"
+trim_node2_length <- dcast(m.node2_length, site + date ~ ., mean)
+colnames(trim_node2_length)[which(names(trim_node2_length) == ".")] <- "node2_length"
 
 
 
 
-node5_lgth <- df.bio %>% 
-  select(site, date, node5_lgth)
+node3_length <- df.bio %>% 
+  select(site, date, node3_length)
 
-m.node5_lgth <- melt(node5_lgth, id = 1:2, na.rm = TRUE)
+m.node3_length <- melt(node3_length, id = 1:2, na.rm = TRUE)
 
-trim_node5_lgth <- dcast(m.node5_lgth, site + date ~ ., mean)
-colnames(trim_node5_lgth)[which(names(trim_node5_lgth) == ".")] <- "node5_lgth"
+trim_node3_length <- dcast(m.node3_length, site + date ~ ., mean)
+colnames(trim_node3_length)[which(names(trim_node3_length) == ".")] <- "node3_length"
+
+
+
+
+node4_length <- df.bio %>% 
+  select(site, date, node4_length)
+
+m.node4_length <- melt(node4_length, id = 1:2, na.rm = TRUE)
+
+trim_node4_length <- dcast(m.node4_length, site + date ~ ., mean)
+colnames(trim_node4_length)[which(names(trim_node4_length) == ".")] <- "node4_length"
+
+
+
+
+node5_length <- df.bio %>% 
+  select(site, date, node5_length)
+
+m.node5_length <- melt(node5_length, id = 1:2, na.rm = TRUE)
+
+trim_node5_length <- dcast(m.node5_length, site + date ~ ., mean)
+colnames(trim_node5_length)[which(names(trim_node5_length) == ".")] <- "node5_length"
 
 
 
@@ -753,16 +753,16 @@ df.bio2 <- left_join(df.bio2, trim_node2_dw, by = c("site", "date"))
 df.bio2 <- left_join(df.bio2, trim_node3_dw, by = c("site", "date"))
 df.bio2 <- left_join(df.bio2, trim_node4_dw, by = c("site", "date"))
 df.bio2 <- left_join(df.bio2, trim_node5_dw, by = c("site", "date"))
-df.bio2 <- left_join(df.bio2, trim_node1_lgth, by = c("site", "date"))
-df.bio2 <- left_join(df.bio2, trim_node2_lgth, by = c("site", "date"))
-df.bio2 <- left_join(df.bio2, trim_node3_lgth, by = c("site", "date"))
-df.bio2 <- left_join(df.bio2, trim_node4_lgth, by = c("site", "date"))
-df.bio2 <- left_join(df.bio2, trim_node5_lgth, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node1_length, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node2_length, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node3_length, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node4_length, by = c("site", "date"))
+df.bio2 <- left_join(df.bio2, trim_node5_length, by = c("site", "date"))
 
 
 
 # remove extra DFs to keep working space clean
-rm(rhi_length, rhi_mass_tot, rhi_mass_percm, node1_lgth, node2_lgth, node3_lgth, node4_lgth, node5_lgth, node1_dw, node2_dw, node3_dw, node4_dw, node5_dw, m.rhi_length, m.rhi_mass_tot, m.rhi_mass_percm, m.node1_lgth, m.node2_lgth, m.node3_lgth, m.node4_lgth, m.node5_lgth, m.node1_dw, m.node2_dw, m.node3_dw, m.node4_dw, m.node5_dw, trim_rhi_length, trim_rhi_mass_tot, trim_rhi_mass_percm, trim_node1_lgth, trim_node1_dw, trim_node2_lgth, trim_node2_dw, trim_node3_lgth, trim_node3_dw, trim_node4_lgth, trim_node4_dw, trim_node5_lgth, trim_node5_dw)
+rm(rhi_length, rhi_mass_tot, rhi_mass_percm, node1_length, node2_length, node3_length, node4_length, node5_length, node1_dw, node2_dw, node3_dw, node4_dw, node5_dw, m.rhi_length, m.rhi_mass_tot, m.rhi_mass_percm, m.node1_length, m.node2_length, m.node3_length, m.node4_length, m.node5_length, m.node1_dw, m.node2_dw, m.node3_dw, m.node4_dw, m.node5_dw, trim_rhi_length, trim_rhi_mass_tot, trim_rhi_mass_percm, trim_node1_length, trim_node1_dw, trim_node2_length, trim_node2_dw, trim_node3_length, trim_node3_dw, trim_node4_length, trim_node4_dw, trim_node5_length, trim_node5_dw)
 
 
 # check DF
@@ -925,30 +925,30 @@ Classifications: (1) mud, (2) muddy sand, (3) sandy mud, (4) sand, (5) coarse sa
 map1 <- leaflet(df.all) %>% addTiles() %>% 
   addCircleMarkers(
     lng = ~longitude, lat =  ~latitude,
-    radius = ~(sed1_mean) * 2,
+    radius = ~(sed1_site) * 2,
     stroke = FALSE, fillOpacity = 0.5, 
     color = ~'Red',
-    label = as.character(df.all$sed1_mean)
+    label = as.character(df.all$sed1_site)
   )
 
 
 map2 <- leaflet(df.all) %>% addTiles() %>% 
   addCircleMarkers(
     lng = ~longitude, lat =  ~latitude,
-    radius = ~(sed2_mean) * 2,
+    radius = ~(sed2_site) * 2,
     stroke = FALSE, fillOpacity = 0.6, 
     color = ~'Orange',
-    label = as.character(df.all$sed2_mean)
+    label = as.character(df.all$sed2_site)
   )
 
 
 map3 <- leaflet(df.all) %>% addTiles() %>% 
   addCircleMarkers(
     lng = ~longitude, lat =  ~latitude,
-    radius = ~(sed_all_mean) * 2,
+    radius = ~(sedmean_site) * 2,
     stroke = FALSE, fillOpacity = 0.7, 
     color = ~'Gold',
-    label = as.character(df.all$sed_all_mean)
+    label = as.character(df.all$sedmean_site)
   )
 
 
@@ -1103,9 +1103,45 @@ leaf_widgets[1].sync(leaf_widgets[0]);
 ) %>%
   browsable
 ```
+<br><br>
+
+#### OK! Mapping patterns is fun, but anything else is overkill. 
+
+<br><br><br><br>
+
+
+### 5. Exploratory analysis
+
+<br><br>
+
+#### 5A. Sediment x seagrass
+<br><br>
+
+```{r}
+colnames(df.all)
+
+my.formula <- y ~ x
+p1 = ggplot(df.all, aes(sedmean_site, shoot_mass_m2)) +
+  geom_point(size=4)+
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE)+
+  stat_poly_eq(formula = my.formula, 
+                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                parse = TRUE) +
+    stat_fit_glance(method = 'lm',
+                  method.args = list(formula = my.formula),
+                  geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 4), sep = "")),
+                  label.x.npc = 'right', label.y.npc = 0.35, size = 3)
+plot(p1)
 
 
 
 
+m1 <- lm(shoot_mass_m2~sed1_in, data = df.all)  #Create a linear model
+resid(m1) #List of residuals
+plot(density(resid(m1))) #A density plot
+qqnorm(resid(m1)) # A quantile normal plot - good for checking normality
+qqline(resid(m1))
+```
 
 
