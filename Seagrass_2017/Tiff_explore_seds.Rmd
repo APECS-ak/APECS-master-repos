@@ -10,7 +10,7 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(dplyr); library(tidyr); library(plyr); library(reshape2); library(ggplot2); library(DT)
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf)
 theme_set(theme_classic())
 ```
 
@@ -25,19 +25,6 @@ colnames(sed.table) <- c('Numeric Ordinal ID', 'Adjective ID')
 <br><br>
 ```{r, echo = FALSE}
 datatable(sed.table, options = list(backgroundPosition = 'center'), width = 400)
-          
-
-
-#datatable(sed.table) %>% formatStyle(names(sed.table),
- # backgroundSize = '98% 88%',
- # backgroundRepeat = 'no-repeat',
- # backgroundPosition = 'center'
-#)
-
-#datatable(head(sed.table, width = 400), options = list(
-  #columnDefs = list(list(className = 'dt-center')),
-  #pageLength = 10
-#))
 ```
 
 <br><br><br><br>
@@ -45,13 +32,15 @@ datatable(sed.table, options = list(backgroundPosition = 'center'), width = 400)
 
 
 
-#### To attack this, we need the sediment_pit, biometrics, and transect dataframes from the seagrass sites. First, import these cleaned files from the GitHub repositry. 
+#### To attack this, we need the sediment_pit, biometrics, and transect dataframes from the seagrass sites. Also throw in the coordinate info. Import all of these cleaned files from the GitHub repositry. 
 ```{r}
 df.sedpit <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_seaotter_pit_sediment_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.trans <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.coords <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 <br><br><br><br>
 
@@ -888,10 +877,11 @@ colnames(df.mass_area)
 ### 3. Join all DFs together
 <br>
 
-OK. From the previous reshaping, we have 5 DFs (df.trans2, df.sedpit2, df.sedpit_trans, df.bio2, df.mass_area) that we want to join into one big DF. This results in 47 columns of unique variables...that's a lot but we aren't concerned about ALL of them...they are just there for exploration, afterall. 
+OK. From the previous reshaping, we have 6 DFs (df.coords, df.trans2, df.sedpit2, df.sedpit_trans, df.bio2, df.mass_area) that we want to join into one big DF. This results in 49 columns of unique variables/info (!)...that's a lot but we aren't concerned about ALL of them...they are just there for exploration, afterall. 
 
 ```{r}
-df.all <- left_join(df.trans2, df.sedpit2, by = c("site"))
+df.all <- left_join(df.coords, df.trans2, by = c("site"))
+df.all <- left_join(df.all, df.sedpit2, by = c("site"))
 df.all <- left_join(df.all, df.sedpit_trans, by = c("site"))
 df.all <- left_join(df.all, df.bio2, by = c("site"))
 df.all <- left_join(df.all, df.mass_area, by = c("site"))
@@ -902,6 +892,7 @@ df.all <- left_join(df.all, df.mass_area, by = c("site"))
 df.all <- within(df.all, rm(date.y))
 df.all <- within(df.all, rm(date.x.x))
 df.all <- within(df.all, rm(date.y.y))
+df.all <- within(df.all, rm(date))
 colnames(df.all)[which(names(df.all) == "date.x")] <- "date"
 ```
 <br>
@@ -919,11 +910,199 @@ str(df.all)
 
 
 
+### 4. Large-scale pattern in sediment type
+These maps represent the numeric ordinal data, where the circle size scales with the numeric classification (larger circle = larger numeric).
+<br>
+
+Classifications: (1) mud, (2) muddy sand, (3) sandy mud, (4) sand, (5) coarse sand, (6) pebble, (7) gravel, (8) cobble, (9) boulder, (10) reef
+<br>
 
 
 
+#### First set of maps compare primary, secondary, and their mean for the entire site (transects averaged). 
+##### RED -- primary sediment; ORANGE -- secondary sediment; YELLOW -- mean of primary and secondary
+```{r, echo = FALSE}
+map1 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~(sed1_mean) * 2,
+    stroke = FALSE, fillOpacity = 0.5, 
+    color = ~'Red',
+    label = as.character(df.all$sed1_mean)
+  )
 
 
+map2 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~(sed2_mean) * 2,
+    stroke = FALSE, fillOpacity = 0.6, 
+    color = ~'Orange',
+    label = as.character(df.all$sed2_mean)
+  )
+
+
+map3 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~(sed_all_mean) * 2,
+    stroke = FALSE, fillOpacity = 0.7, 
+    color = ~'Gold',
+    label = as.character(df.all$sed_all_mean)
+  )
+
+
+
+tagList(
+  tags$head(tags$script(
+    type="text/javascript",
+    src="https://cdn.rawgit.com/turban/Leaflet.Sync/master/L.Map.Sync.js"
+  )),
+  tags$div(style="display:inline;width:33%;float:left;",map1),
+  tags$div(style="display:inline;width:33%;float:left;",map2),
+  tags$div(style="display:inline;width:33%;float:left;",map3),
+  onStaticRenderComplete(
+'
+var leaf_widgets = Array.prototype.map.call(
+  document.querySelectorAll(".leaflet"),
+  function(ldiv){
+    return HTMLWidgets.find("#" + ldiv.id);
+  }
+);
+
+// make this easy since we know only two maps
+leaf_widgets[0].sync(leaf_widgets[1]);
+leaf_widgets[1].sync(leaf_widgets[0]);
+'
+  )
+) %>%
+  browsable
+```
+
+<br><br><br><br>
+
+#### Second set of maps compare inside, edge, and outside sediments, across sites (mean primary and secondary).
+##### GREEN -- inside transect; BLUE -- edge transect; PURPLE -- outside transect
+```{r, echo = FALSE}
+map4 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~(sedmean_in) * 2,
+    stroke = FALSE, fillOpacity = 0.5, 
+    color = ~'Green',
+    label = as.character(df.all$sedmean_in)
+  )
+
+
+map5 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~(sedmean_edge) * 2,
+    stroke = FALSE, fillOpacity = 0.5, 
+    color = ~'Blue',
+    label = as.character(df.all$sedmean_edge)
+  )
+
+
+map6 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~(sedmean_out) * 2,
+    stroke = FALSE, fillOpacity = 0.5, 
+    color = ~'Purple',
+    label = as.character(df.all$sedmean_out)
+  )
+
+
+
+tagList(
+  tags$head(tags$script(
+    type="text/javascript",
+    src="https://cdn.rawgit.com/turban/Leaflet.Sync/master/L.Map.Sync.js"
+  )),
+  tags$div(style="display:inline;width:33%;float:left;",map4),
+  tags$div(style="display:inline;width:33%;float:left;",map5),
+  tags$div(style="display:inline;width:33%;float:left;",map6),
+  onStaticRenderComplete(
+'
+var leaf_widgets = Array.prototype.map.call(
+  document.querySelectorAll(".leaflet"),
+  function(ldiv){
+    return HTMLWidgets.find("#" + ldiv.id);
+  }
+);
+
+// make this easy since we know only two maps
+leaf_widgets[0].sync(leaf_widgets[1]);
+leaf_widgets[1].sync(leaf_widgets[0]);
+'
+  )
+) %>%
+  browsable
+```
+
+
+<br><br><br><br><br>
+
+#### Third set of maps compare #pits dug at inside, edge, and outside transects (larger circle = more pits).
+##### BLACK -- inside transect; D.RED -- edge transect; D.BLUE -- outside transect
+```{r, echo = FALSE}
+map7 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~log(pits_in) * 3,
+    stroke = FALSE, fillOpacity = 0.5, 
+    color = ~'Black',
+    label = as.character(df.all$pits_in)
+  )
+
+
+map8 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~log(pits_edge) * 3,
+    stroke = FALSE, fillOpacity = 0.5, 
+    color = ~'DarkRed',
+    label = as.character(df.all$pits_edge)
+  )
+
+
+map9 <- leaflet(df.all) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude, lat =  ~latitude,
+    radius = ~log(pits_out) * 3,
+    stroke = FALSE, fillOpacity = 0.5, 
+    color = ~'DarkBlue',
+    label = as.character(df.all$pits_out)
+  )
+
+
+
+tagList(
+  tags$head(tags$script(
+    type="text/javascript",
+    src="https://cdn.rawgit.com/turban/Leaflet.Sync/master/L.Map.Sync.js"
+  )),
+  tags$div(style="display:inline;width:33%;float:left;",map7),
+  tags$div(style="display:inline;width:33%;float:left;",map8),
+  tags$div(style="display:inline;width:33%;float:left;",map9),
+  onStaticRenderComplete(
+'
+var leaf_widgets = Array.prototype.map.call(
+  document.querySelectorAll(".leaflet"),
+  function(ldiv){
+    return HTMLWidgets.find("#" + ldiv.id);
+  }
+);
+
+// make this easy since we know only two maps
+leaf_widgets[0].sync(leaf_widgets[1]);
+leaf_widgets[1].sync(leaf_widgets[0]);
+'
+  )
+) %>%
+  browsable
+```
 
 
 
