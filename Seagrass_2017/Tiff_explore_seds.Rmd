@@ -10,13 +10,42 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
-library(dplyr); library(tidyr); library(plyr); library(reshape2); library(ggplot2)
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(ggplot2); library(DT)
 theme_set(theme_classic())
 ```
 
-### The intention of this Rmd script is to explore how sediment (primary and secondary) might influence the patterns in seagrass biometrics.
 
-We will be using the sediment_pit, biometrics, and transect dataframes from the seagrass sites. The first thing that we'll do is import these cleaned files. 
+<br><br>
+
+#### The intention of this .Rmd script is to explore how sediment type (primary and secondary classifications) influences various variables that we measured in Summer 2017. The sediment type data presented here is qualitative, with a quantitative edge -- i.e. sediment type was classified as 1 of 10 types (1:10 :: fine:big). 
+```{r, include = FALSE}
+sed.table <- matrix(c('1','2','3','4','5','6','7','8','9','10', 'Mud', 'Sandy mud', 'Muddy sand', 'Sand', 'Coarse sand', 'Pebble', 'Gravel', 'Cobble', 'Boulder', 'Reef'), ncol = 2)
+colnames(sed.table) <- c('Numeric Ordinal ID', 'Adjective ID')
+```
+<br><br>
+```{r, echo = FALSE}
+datatable(sed.table, options = list(backgroundPosition = 'center'), width = 400)
+          
+
+
+#datatable(sed.table) %>% formatStyle(names(sed.table),
+ # backgroundSize = '98% 88%',
+ # backgroundRepeat = 'no-repeat',
+ # backgroundPosition = 'center'
+#)
+
+#datatable(head(sed.table, width = 400), options = list(
+  #columnDefs = list(list(className = 'dt-center')),
+  #pageLength = 10
+#))
+```
+
+<br><br><br><br>
+
+
+
+
+#### To attack this, we need the sediment_pit, biometrics, and transect dataframes from the seagrass sites. First, import these cleaned files from the GitHub repositry. 
 ```{r}
 df.sedpit <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_seaotter_pit_sediment_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
@@ -24,10 +53,11 @@ df.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repo
 
 df.trans <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
-
+<br><br><br><br>
 
 
 ### 1. Tidy: delete unwanted variables from each dataframe to reduce clutter
+<br>
 ```{r, include = FALSE}
 str(df.sedpit)
 na.omit(df.sedpit)
@@ -240,29 +270,27 @@ str(df.sedpit)
 str(df.trans)
 str(df.bio)
 ```
-
+<br><br><br><br>
 
 
 
 ### 2. Reshape DFs: prep each DF for site-level replication for analysis
+<br>
 
-df.sedpit ---> df.sedpit2
-```{r, include=FALSE}
-head(df.sedpit)
-
-# sum all pits in each transect per site
+#### df.sedpit ---> df.sedpit2 (only the code for this DF is displayed as an example)
+```{r}
+# calculate sum of all pits per site
 pits_all <- df.sedpit %>% 
-  select(site, date, pit_bin)
+  select(site, date, pit_bin) # takes only the pit data from DF
 
-m.pits_all <- melt(pits_all, id = 1:2, na.rm = TRUE)
+m.pits_all <- melt(pits_all, id = 1:2, na.rm = TRUE) # prepares temporary DF for breakdown using dcast
 
-trim_pits <- dcast(m.pits_all, site + date ~ ., sum)
-colnames(trim_pits)[which(names(trim_pits) == ".")] <- "tot_pits"
-
-
+trim_pits <- dcast(m.pits_all, site + date ~ ., sum) # sums all pits per site, trimming class info to just site and date
+colnames(trim_pits)[which(names(trim_pits) == ".")] <- "tot_pits" # give data column appropriate name
 
 
-# average all sed1 in each transect per site
+
+# average all primary sediment values within each site
 sed1_all <- df.sedpit %>% 
   select(site, date, sed1_no)
 
@@ -274,7 +302,7 @@ colnames(trim_sed1)[which(names(trim_sed1) == ".")] <- "sed1_mean"
 
 
 
-# average all sed2 in each transect per site
+# average all secondary sediment values per site
 sed2_all <- df.sedpit %>% 
   select(site, date, sed2_no)
 
@@ -286,28 +314,109 @@ colnames(trim_sed2)[which(names(trim_sed2) == ".")] <- "sed2_mean"
 
 
 
-# MERGING back together
-
+# joining manipulated sub-DFs back together
 df.sedpit2 <- left_join(trim_pits, trim_sed1, by = c("site", "date"))
 df.sedpit2 <- left_join(df.sedpit2, trim_sed2, by = c("site", "date"))
 
-# find the mean of the primary and secondary sediment types
+# find the mean of the primary and secondary sediment types for later analysis
 df.sedpit2$sed_all_mean <- rowMeans(subset(df.sedpit2, select = c(sed1_mean, sed2_mean)), na.rm = TRUE)
 
 
-
-#remove extra dataframes to keep working space clean
+# remove [now] extra dataframes to keep working space clean
 rm(pits_all, m.pits_all, sed1_all, m.sed1_all, sed2_all, m.sed2_all, trim_pits, trim_sed1, trim_sed2)
 ```
+<br>
 
 
 
 
+#### df.sedpit ---> df.sedpit_trans (reshape df.sedpit in a slightly different way than above to keep transects seperated)
+```{r, include = FALSE}
+# calculate sum of all pits per transect, within each site
+pits_trans <- df.sedpit %>% 
+  select(site, date, trans_type, pit_bin) # takes only the pit data from DF, per transect
+
+m.pits_trans <- melt(pits_trans, id = 1:3, na.rm = TRUE) # prepares temporary DF for breakdown using dcast
+
+trim_pits_trans <- dcast(m.pits_trans, site + date + trans_type ~ ., sum) # sums all pits per site, trimming class info to just site and date
+colnames(trim_pits_trans)[which(names(trim_pits_trans) == ".")] <- "pits_trans" # give data column appropriate name
+
+
+
+# average all primary sediment values within each site
+sed1_trans <- df.sedpit %>% 
+  select(site, date, trans_type, sed1_no)
+
+m.sed1_trans <- melt(sed1_trans, id = 1:3, na.rm = TRUE)
+
+trim_sed1_trans <- dcast(m.sed1_trans, site + date + trans_type ~ ., mean)
+colnames(trim_sed1_trans)[which(names(trim_sed1_trans) == ".")] <- "sed1_trans"
 
 
 
 
-df.transect --> df.transect2
+# average all secondary sediment values per site
+sed2_trans <- df.sedpit %>% 
+  select(site, date, trans_type, sed2_no)
+
+m.sed2_trans <- melt(sed2_trans, id = 1:3, na.rm = TRUE)
+
+trim_sed2_trans <- dcast(m.sed2_trans, site + date + trans_type ~ ., mean)
+colnames(trim_sed2_trans)[which(names(trim_sed2_trans) == ".")] <- "sed2_trans"
+
+
+
+
+# use dcast to expand the 'trans_type' column, so that each transect has it's own row for each variable (this is necessary for later looking at just the inside transect for biomass stuff)
+
+# pits
+c.pits_trans <- dcast(trim_pits_trans, site + date ~ trans_type) # dcast spread
+colnames(c.pits_trans)[which(names(c.pits_trans) == "Edge")] <- "pits_edge" # apply unique names
+colnames(c.pits_trans)[which(names(c.pits_trans) == "Inside")] <- "pits_in"
+colnames(c.pits_trans)[which(names(c.pits_trans) == "Outside")] <- "pits_out"
+
+
+# sed1
+c.sed1_trans <- dcast(trim_sed1_trans, site + date ~ trans_type)
+colnames(c.sed1_trans)[which(names(c.sed1_trans) == "Edge")] <- "sed1_edge"
+colnames(c.sed1_trans)[which(names(c.sed1_trans) == "Inside")] <- "sed1_in"
+colnames(c.sed1_trans)[which(names(c.sed1_trans) == "Outside")] <- "sed1_out"
+
+
+# sed1
+c.sed2_trans <- dcast(trim_sed2_trans, site + date ~ trans_type)
+colnames(c.sed2_trans)[which(names(c.sed2_trans) == "Edge")] <- "sed2_edge"
+colnames(c.sed2_trans)[which(names(c.sed2_trans) == "Inside")] <- "sed2_in"
+colnames(c.sed2_trans)[which(names(c.sed2_trans) == "Outside")] <- "sed2_out"
+
+
+
+
+# joining manipulated sub-DFs back together
+df.sedpit_trans <- left_join(c.pits_trans, c.sed1_trans, by = c("site", "date"))
+df.sedpit_trans <- left_join(df.sedpit_trans, c.sed2_trans, by = c("site", "date"))
+
+
+
+# find the means of the primary and secondary sediments for later analysis
+df.sedpit_trans$sedmean_edge <- rowMeans(subset(df.sedpit_trans, select = c(sed1_edge, sed2_edge)), na.rm = TRUE)
+df.sedpit_trans$sedmean_in <- rowMeans(subset(df.sedpit_trans, select = c(sed1_in, sed2_in)), na.rm = TRUE)
+df.sedpit_trans$sedmean_out <- rowMeans(subset(df.sedpit_trans, select = c(sed1_out, sed2_out)), na.rm = TRUE)
+
+
+# remove [now] extra dataframes to keep working space clean
+rm(pits_trans, m.pits_trans, sed1_trans, m.sed1_trans, sed2_trans, m.sed2_trans, trim_pits_trans, trim_sed1_trans, trim_sed2_trans, c.pits_trans, c.sed1_trans, c.sed2_trans)
+```
+
+```{r}
+colnames(df.sedpit_trans)
+# final column names for this DF
+```
+<br>
+
+
+
+#### df.transect --> df.transect2 (theory + code similar to df.sedpit process)
 ```{r, include=FALSE}
 str(df.trans)
 
@@ -370,13 +479,15 @@ df.trans2 <- left_join(df.trans2, trim_flower_count, by = c("site", "date", "dep
 rm(macroalgae, m.macroalgae, epiphyte, m.epiphyte, shoot_count, m.shoot_count, flower_count, m.flower_count, trim_epiphyte, trim_macroalgae, trim_flower_count, trim_shoot_count)
 ```
 
+```{r}
+colnames(df.trans2)
+# final column names for this DF
+```
+<br>
 
 
 
-
-
-
-df.bio --> df.bio2
+#### df.bio --> df.bio2 (theory + code similar to df.sedpit process)
 ```{r, include = FALSE}
 colnames(df.bio)
 
@@ -669,12 +780,17 @@ rm(rhi_length, rhi_mass_tot, rhi_mass_percm, node1_lgth, node2_lgth, node3_lgth,
 str(df.bio2)
 ```
 
+```{r}
+colnames(df.bio2)
+# final column names for this DF
+```
+<br><br>
 
 
 
 #### Before we join all the DFs together, biomass per area still needs to be added. This was handled differently than the rest because of the order of operations for calculations were different. 
 
-scratch --> df.mass_area
+#### scratch --> df.mass_area
 ```{r, include = FALSE}
 
 # extract shoot biomass and reshape to quadrat for working with count data
@@ -758,12 +874,25 @@ df.mass_area <- left_join(trim_rhi_mass_percm_m2, trim_shoot_mass_m2, by = c("si
 rm(trim_rhi_mass_percm_m2, trim_shoot_mass_m2, mass.temp)
 ```
 
+```{r}
+colnames(df.mass_area)
+# final column names for this DF
+```
+<br><br><br><br>
+
+
+
+
 
 
 ### 3. Join all DFs together
+<br>
+
+OK. From the previous reshaping, we have 5 DFs (df.trans2, df.sedpit2, df.sedpit_trans, df.bio2, df.mass_area) that we want to join into one big DF. This results in 47 columns of unique variables...that's a lot but we aren't concerned about ALL of them...they are just there for exploration, afterall. 
 
 ```{r}
 df.all <- left_join(df.trans2, df.sedpit2, by = c("site"))
+df.all <- left_join(df.all, df.sedpit_trans, by = c("site"))
 df.all <- left_join(df.all, df.bio2, by = c("site"))
 df.all <- left_join(df.all, df.mass_area, by = c("site"))
 ```
@@ -775,12 +904,13 @@ df.all <- within(df.all, rm(date.x.x))
 df.all <- within(df.all, rm(date.y.y))
 colnames(df.all)[which(names(df.all) == "date.x")] <- "date"
 ```
-
+<br>
 
 #### Check out the final structure of the DF
 ```{r}
 str(df.all)
 ```
+<br><br><br><br>
 
 
 
@@ -794,4 +924,9 @@ str(df.all)
 
 
 
-### 4. PLOTS
+
+
+
+
+
+
