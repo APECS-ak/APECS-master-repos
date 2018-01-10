@@ -41,6 +41,9 @@ df.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repo
 df.trans <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.coords <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
+
+
+df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sea_otter_impact_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 <br><br><br><br>
 
@@ -572,7 +575,7 @@ colnames(trim_leaf_width_max)[which(names(trim_leaf_width_max) == ".")] <- "leaf
 
 
 
-# MERGING back together
+# Join back together
 df.bio2 <- left_join(trim_epiphyte_mass, trim_shoot_mass, by = c("site", "date"))
 df.bio2 <- left_join(df.bio2, trim_leaf_area_blade, by = c("site", "date"))
 df.bio2 <- left_join(df.bio2, trim_leaf_area_plant, by = c("site", "date"))
@@ -580,6 +583,11 @@ df.bio2 <- left_join(df.bio2, trim_leaf_length_max, by = c("site", "date"))
 df.bio2 <- left_join(df.bio2, trim_leaf_length_mean, by = c("site", "date"))
 df.bio2 <- left_join(df.bio2, trim_leaf_width_max, by = c("site", "date"))
 df.bio2 <- left_join(df.bio2, trim_leaf_width_mean, by = c("site", "date"))
+
+
+# need to standardize epiphyte mass per blade area; there is a weak, positive relationship between epiphyte mass per plant and leaf area per plant. 
+df.bio2 <- df.bio2 %>%
+  mutate(epi_mass_leafarea_mg.cm2 = (epiphyte_mass_perplant*1000) / leaf_area_plant)
 
 
 # remove extra DFs to keep working space clean
@@ -765,6 +773,8 @@ df.bio2 <- left_join(df.bio2, trim_node5_length, by = c("site", "date"))
 rm(rhi_length, rhi_mass_tot, rhi_mass_percm, node1_length, node2_length, node3_length, node4_length, node5_length, node1_dw, node2_dw, node3_dw, node4_dw, node5_dw, m.rhi_length, m.rhi_mass_tot, m.rhi_mass_percm, m.node1_length, m.node2_length, m.node3_length, m.node4_length, m.node5_length, m.node1_dw, m.node2_dw, m.node3_dw, m.node4_dw, m.node5_dw, trim_rhi_length, trim_rhi_mass_tot, trim_rhi_mass_percm, trim_node1_length, trim_node1_dw, trim_node2_length, trim_node2_dw, trim_node3_length, trim_node3_dw, trim_node4_length, trim_node4_dw, trim_node5_length, trim_node5_dw)
 
 
+
+
 # check DF
 str(df.bio2)
 ```
@@ -831,8 +841,29 @@ mass.temp <- mass.temp %>%
 
 
 
+#################################################################################
+# testing calc of sd per variable in prep for weighted regression
+sd.shootmass <- ddply(mass.temp,~site,summarise,mean=mean(shoot_mass_m2),sd=sd(shoot_mass_m2))
 
-# extract rhizome biomass and reshape to quadrat for working with count data
+# extract standard deviations from shoot_mass_m2
+shoot_mass_m2_sd <- sd.shootmass %>%
+  select(site, sd)
+colnames(shoot_mass_m2_sd)[which(names(shoot_mass_m2_sd) == "sd")] <- "shoot_mass_m2_sd"
+
+
+
+# testing calc of sd per variable in prep for weighted regression
+sd.rhimass <- ddply(mass.temp,~site,summarise,mean=mean(rhi_mass_percm_m2),sd=sd(rhi_mass_percm_m2))
+
+# extract standard deviations from shoot_mass_m2
+rhi_mass_percm_m2_sd <- sd.rhimass %>%
+  select(site, sd)
+colnames(rhi_mass_percm_m2_sd)[which(names(rhi_mass_percm_m2_sd) == "sd")] <- "rhi_mass_percm_m2_sd"
+################################################################################
+
+
+
+# extract biomass and reshape to quadrat for working with count data
 shoot_mass_m2 <- mass.temp %>% 
   select(site, date, quadrat, shoot_mass_m2)
 
@@ -855,12 +886,14 @@ rm(shoot_mass_m2, m.shoot_mass_m2, rhi_mass_percm_m2, m.rhi_mass_percm_m2)
 
 
 
-# join shoot and rhizome masses + shoot counts
+# join shoot and rhizome masses + shoot counts...and sd values for shoot_mass_m2
 colnames(mass.temp)
 
 df.mass_area <- left_join(trim_rhi_mass_percm_m2, trim_shoot_mass_m2, by = c("site", "date"))
+df.mass_area <- left_join(df.mass_area, shoot_mass_m2_sd, by = c("site"))
+df.mass_area <- left_join(df.mass_area, rhi_mass_percm_m2_sd, by = c("site"))
 
-rm(trim_rhi_mass_percm_m2, trim_shoot_mass_m2, mass.temp)
+rm(trim_rhi_mass_percm_m2, trim_shoot_mass_m2, mass.temp, shoot_mass_m2_sd, sd.shootmass, rhi_mass_percm_m2_sd,sd.rhimass)
 ```
 
 ```{r}
@@ -869,6 +902,13 @@ colnames(df.mass_area)
 ```
 <br><br><br><br>
 
+df.SOI: it would also be useful to have the SOI PCA1 values for plots, later...extract those.
+```{r, include = FALSE}
+# extract biomass and reshape to quadrat for working with count data
+df.soi <- df.soi %>% 
+  select(site, sea_otter_index)
+colnames(df.soi)[which(names(df.soi) == "sea_otter_index")] <- "so_index"
+```
 
 
 
@@ -877,7 +917,7 @@ colnames(df.mass_area)
 ### 3. Join all DFs together
 <br>
 
-OK. From the previous reshaping, we have 6 DFs (df.coords, df.trans2, df.sedpit2, df.sedpit_trans, df.bio2, df.mass_area) that we want to join into one big DF. This results in 50 columns of unique names (after Julian day conversion)...that's a lot but we aren't concerned about ALL of them...they are just there for exploration, afterall. 
+OK. From the previous reshaping, we have 7 DFs (df.coords, df.soi, df.trans2, df.sedpit2, df.sedpit_trans, df.bio2, df.mass_area) that we want to join into one big DF.
 
 ```{r}
 df.all <- left_join(df.coords, df.trans2, by = c("site"))
@@ -885,6 +925,7 @@ df.all <- left_join(df.all, df.sedpit2, by = c("site"))
 df.all <- left_join(df.all, df.sedpit_trans, by = c("site"))
 df.all <- left_join(df.all, df.bio2, by = c("site"))
 df.all <- left_join(df.all, df.mass_area, by = c("site"))
+df.all <- left_join(df.all, df.soi, by = c("site"))
 ```
 
 ```{r, include = FALSE}
@@ -914,7 +955,21 @@ df.all$julian_day <- yday(df.all$date)
 
 
 ```{r, include = FALSE}
-df.all <- df.all[c(1,2,3,4,5,50,6,15,16,17,11,19,18,20,22,21,23,25,24,26,12,13,14,7,8,27,10,28,9,49,32,31,34,33,29,30,35,36,37,48,43,44,45,46,47,38,39,40,41,42)]
+colnames(df.all)
+
+df.all <- df.all[c('site','site_name','latitude','longitude','date','julian_day','depth_m','so_index','pits_in','pits_edge','pits_out','pits_tot_site','sed1_in','sed1_edge','sed1_out','sed2_in','sed2_edge','sed2_out','sedmean_in','sedmean_edge','sedmean_out','sed1_site','sed2_site','sedmean_site','macroalgae_percent_cover','epiphyte_percent_cover','epiphyte_mass_perplant','epi_mass_leafarea_mg.cm2','flower_density_m2','shoot_mass_perplant','shoot_density_m2','shoot_mass_m2','leaf_length_mean','leaf_length_max','leaf_width_mean','leaf_width_max','leaf_area_blade','leaf_area_plant','rhi_length','rhi_mass_tot','rhi_mass_percm','rhi_mass_percm_m2','node1_length','node2_length','node3_length','node4_length','node5_length','node1_dw','node2_dw','node3_dw','node4_dw','node5_dw','shoot_mass_m2_sd','rhi_mass_percm_m2_sd')]
+
+
+# we don't need these variables, but waited this long to remove them in case we want them later. Easy recovery.
+#df.all <- within(df.all, rm(shoot_mass_fw))
+df.all <- df.all[, -c(38:39,42:51)] # delete rhi_length, rhi_mass_tot, and all nodes
+colnames(df.all)
+
+
+
+
+# old way to reorganize based on column number...this is sloppy in dynamic coding script
+#df.all <- df.all[c(1,2,3,4,5,52,6,15,16,17,11,19,18,20,22,21,23,25,24,26,12,13,14,7,8,27,10,28,9,49,32,31,34,33,29,30,35,36,37,48,43,44,45,46,47,38,39,40,41,42,50,51)]
 ```
 <br>
 
@@ -1140,17 +1195,24 @@ leaf_widgets[1].sync(leaf_widgets[0]);
 #### 5A. Sediment x seagrass
 <br><br>
 
+
 ```{r}
 colnames(df.all)
 
+
+df.all[, 9:12][df.all[, 9:12] == 0] <- NA
+df.all[, 1:11][df.all[, 1:11] == -0.5] <- NA
+
+
 my.formula <- y ~ x
-p1 = ggplot(df.all, aes(sedmean_site, shoot_mass_m2)) +
-  geom_point(size=4)+
-  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE)+
+p1 = ggplot(df.all, aes(leaf_length_max, epi_mass_leafarea_mg.cm2, color = so_index)) +
+  geom_point(size=4) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #xlab("Sea otter density\n")+ylab("\nAboveground biomass residuals") +
   stat_poly_eq(formula = my.formula, 
                 aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
                 parse = TRUE) +
-    stat_fit_glance(method = 'lm',
+   stat_fit_glance(method = 'lm',
                   method.args = list(formula = my.formula),
                   geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 4), sep = "")),
@@ -1158,13 +1220,10 @@ p1 = ggplot(df.all, aes(sedmean_site, shoot_mass_m2)) +
 plot(p1)
 
 
+ln.m1 <- lm(rhi_mass_tot ~ sed2_site, data = df.all)
+summary(ln.m1)
 
 
-m1 <- lm(shoot_mass_m2~sed1_in, data = df.all)  #Create a linear model
-resid(m1) #List of residuals
-plot(density(resid(m1))) #A density plot
-qqnorm(resid(m1)) # A quantile normal plot - good for checking normality
-qqline(resid(m1))
 ```
 
 
