@@ -1,0 +1,49 @@
+---
+title: "Wendel_explore_time"
+author: "Wendel Raymond"
+date: "January 9, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Exploratory analysis has indicated that there is a temporal signal in pretty much all of our data. Some measures appear to be more sensitive to time than other. Here I will explore options for accounting of time statistically so that we can run linear models.
+
+```{r Libraries}
+library(dplyr)
+library(ggplot2)
+```
+
+We will we using the eelgrass trasect data to explore strategies to dealing with time. However, other data, in differnet files, will also need to be screened for temporal effects.
+
+```{r Data, echo = FALSE, results=FALSE}
+eg.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
+
+str(eg.dat)
+```
+
+Lets look at some example data so that we can think about things
+```{r example data, echo = FALSE}
+ggplot(eg.dat) +
+  geom_point(aes(x = sea_otter_index, y = abvgnd_mass), size = 4) +
+  geom_errorbar(aes(x = sea_otter_index, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('Above ground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = date_julian, y = abvgnd_mass), size = 4) +
+  labs(x = "Date", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+ggplot(eg.dat) +
+  geom_point(aes(x = sea_otter_index, y = abvgnd_mass, col = date_julian), size = 4) +
+  geom_errorbar(aes(x = sea_otter_index, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  scale_color_gradient(low = "black", high = "orange") +
+  labs(x = "Sea otter Index", y = bquote('Above ground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+```
+
+
+
+
