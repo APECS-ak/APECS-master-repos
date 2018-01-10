@@ -10,7 +10,7 @@ editor_options:
 # Sea otter impact index
 Sea otters are hard to keep track of. Until the 2017 field season the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summaries and then combined these measures to create a sea otter impact index. 
 
-In this script we will calcualte the sea otter impact index from raw data to final index. This will be in contrast to relying on hard to track ArcGIS processing. The original index uses the folloing data that will be attributed to each site.
+In this script we will calculate the sea otter impact index from raw data to final index. This will be in contrast to relying on hard to track ArcGIS processing. The original index uses the following data that will be attributed to each site.
 
 1. Sea otter density from 2017 boat based sea otter surveys (otters/km2)
 2. The duration of sea otter occupation based in USFWS aerial surveys (years)
@@ -39,17 +39,15 @@ Two replicate surveys were conducted, a density will be calculated for each surv
 You will need data on.
 1. Sites from which sea otter surveys were centered from (points)
 2. Sea otter survey data (points with an "n sea otter" data attribute)
-3. The 2003 and 2010 USFWS aerial surveys distribution polygons
-4. Tim's, in review, survey population density polygons 
-5. Southeast Alaska water polygon
+3. A polygon of the water around the study area. In this case I am using a polygon of all the coastal waters of POW.
 ```{r data}
 ## Sites ##
 sites <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_Sites_2017_All_UTM")
 sites.eg <- subset(sites, site_type %in% "Eelgrass")
 
 ## Sea otters that where observed ##
-otts <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_All_17Oct17_UTM")
-otts@data$n_otters <- as.numeric(otts@data$n_otters) # data is imported as a factor
+otts <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "Otter_Survey_All_10Jan18_UTM")
+otts@data$n_otters <- as.numeric(as.character(otts@data$n_otters)) # data is imported as a factor
 
 ## Prince of Wales Water Polygon
 h2o.utm <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Eelgrass/Data/2017 Field Season/GIS", layer = "POW_water_UTM")
@@ -57,6 +55,7 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
 ## Plot sites and sea otters
+Lets see what this all looks like.
 ```{r plotting everything}
 leaflet() %>% 
   addTiles() %>% 
@@ -72,42 +71,35 @@ The general steps are as follows
 2. Calculate area of above survey area
 3. Calculate density by counting number of otters in each area (and each survey instance if necessary) and dividing by the survey area
 
-### Calcualte / generate survey area
-Using the site points we will generate a unique polygon for each site that is bounded by 2 nm from the site "as the otter swims". The other way to think about this 2 nm over water.
-
-Create raster of water area for each site.
-1. Create generitc 2, buffer from each site
-2. Clip **that** buffer by water so that the resulting polygon is just the water within 2nm of each site
-3. Covert water buffer polygons (made above) to rasters so we can do a cost distnace analysis
-
-For loop
+The following for loop generates a 2nm (== 3704 meter) as the otter swims survey area for each sites. It then selects the otters that were where sited in that survey area and generates a data table of that data. This is done for each site iterativley and the resulting data frames are pasted together. 
 ```{r loop to extract surveyed otters to sites}
-d <-data.frame()
+d <-data.frame() # set up blank data frame
 for(i in unique(1:21)){
-  s <- sites.eg[i,]
-  b <- gBuffer(s, byid = TRUE, width = 3704, quadsegs = 10)
-  b <- spTransform(b, CRS("+init=epsg:4326"))
-  bw <- gIntersection(h2o.latlong, b, byid = TRUE)
-  bw <- spTransform(bw, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0"))
-  e <- extent(bw)
-  r <- raster(xmn = e@xmin, xmx = e@xmax, ymn = e@ymin, ymx = e@ymax, ncol = (e@xmax - e@xmin) / 50, nrow = (e@ymax - e@ymin) / 50, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")
-  wr <- rasterize(bw, r, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")
-  wr[wr] <- 50
-  wt <- transition(wr, transitionFunction = function(x){50}, directions = 8)
-  wt <- geoCorrection(wt, type = "r", scl = FALSE)
-  sa <- accCost(wt, s)
-  values(sa) <- (values(sa) * 50)
-  sa[values(sa) > 3700] <- NA
-  p <- rasterToPolygons(sa, dissolve = TRUE)
-  p <- spTransform(p, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
-  a <- (2500 * length(p) / 1000000)
-  o <- over(p, otts)
-  o <- as.data.frame(unique(o))
-  o$area <- a
-  d <- rbind(d, o)
+  s <- sites.eg[i,] # subset sites 
+  b <- gBuffer(s, byid = TRUE, width = 3704, quadsegs = 10) # create 3704 meter radius buffer around site
+  b <- spTransform(b, CRS("+init=epsg:4326")) # change projection to for next step
+  bw <- gIntersection(h2o.latlong, b, byid = TRUE) # clip the buffer area by water so we only have water area left
+  bw <- spTransform(bw, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")) # change projection back to UTM
+  e <- extent(bw) # save the extent of the polygon for later use
+  r <- raster(xmn = e@xmin, xmx = e@xmax, ymn = e@ymin, ymx = e@ymax, ncol = (e@xmax - e@xmin) / 50, nrow = (e@ymax - e@ymin) / 50, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # create a raster with 50 X 50 meter grid cells
+  wr <- rasterize(bw, r, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # append water polygon data to raster
+  wr[wr] <- 50 # convert all raster cell values to a value of 50 (because 50 meters)
+  wt <- transition(wr, transitionFunction = function(x){50}, directions = 8) # conver raster to transition layer (required for accCost())
+  wt <- geoCorrection(wt, type = "r", scl = FALSE) # not really sure what this actually does but you have to do it
+  sa <- accCost(wt, s) # calculate the cumulative cost distance 
+  values(sa) <- (values(sa) * 50) # multiply cost values by 50 to reflect cost in terms of actual distance
+  sa[values(sa) > 3700] <- NA # Convert cost rasters > 3700 to NA, now the raster will reflect the true survey area
+  p <- rasterToPolygons(sa, dissolve = TRUE) # covert raster to polygon
+  p <- spTransform(p, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")) # define projection
+  a <- (2500 * length(p) / 1000000) # caculate area of the polygon in sq km
+  o <- over(p, otts) # identifies survyed otters that intersect/overlap with the polygon
+  o <- as.data.frame(unique(o)) # convert that subset of otters to a data frame
+  o$area <- a # append the area of the polygon to that data frame
+  d <- rbind(d, o) # bind this data frame to the master one. -----> now go back to the top and start again!
 }
 ```
 
+Now we need to clean up the data frame generated in the for loop so that it is usable. *This will differ for everyone*.
 ```{r clean up data from above}
 # Rename L05 to 2017_L_05
 levels(d$site)[levels(d$site) == "L05"] <- "2017_L_05"
@@ -118,18 +110,21 @@ ott.dat <- d %>%
   summarise(n = sum(n_otters))
 
 # Clean up NA row and funky site names
-ott.dat <- ott.dat[c(1:7, 9:17, 20:27),]
+ott.dat <- ott.dat[c(1:8, 10:20, 22:30),]
 
 # Fill in data
-fill <- data.frame(c("2017_H_04", "2017_H_06", "2017_M_02", "2017_M_03", "2017_M_02", "2017_M_03"), c("2017/07/21", "2017/07/21", "2017/06/21", "2017/06/21", "2017/08/05", "2017/08/05"), c(112,112,139,139,42,42))
+fill <- data.frame(c("2017_H_04", "2017_H_06", "2017_M_02", "2017_M_03"), c("2017/07/21", "2017/07/21", "2017/08/05", "2017/08/05"), c(81,81,14,14))
 colnames(fill) <- c("site", "survey_dat", "n")
 
-# Compine fill in data with original
+# Compine fill in data with original and re summarise
 ott.dat <- rbind.data.frame(ott.dat, fill)
+ott.dat2 <- ott.dat %>% 
+  group_by(site, survey_dat) %>% 
+  summarise(n_otters = sum(n))
 
 # Define survey 1 and 2
-ott.dat$survey <- as.factor(c(1,2,1,2,1,2,1,1,2,2,1,2,1,2,1,2,1,2,1,2,2,1,2,1,2,1,1,1,2,2))
-ott.dat.wide <- spread(ott.dat[,c(1,3,4)], key = survey, value = n)
+ott.dat2$survey <- as.factor(c(1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,2,1,2,1))
+ott.dat.wide <- spread(ott.dat2[,c(1,3,4)], key = survey, value = n_otters)
 
 # Merge with site data
 site.dat <- sites.eg@data[,c(1,2,6:9)]
@@ -144,7 +139,11 @@ site.dat[is.na(site.dat)] <- 0
 # Calculate density
 site.dat$dens_surv1 <- site.dat$n_surv1 / site.dat$area
 site.dat$dens_surv2 <- site.dat$n_surv2 / site.dat$area
+```
 
+Lets view the final table
+```{r view final table}
+DT::datatable(site.dat, caption = "Sea otter survey data")
 ```
 
 
@@ -153,18 +152,18 @@ site.dat$dens_surv2 <- site.dat$n_surv2 / site.dat$area
 ```{r}
 ## USFWS polygons ##
 # 2003 Sea Otters
-sd2003 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
+#sd2003 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
 
 # 2010 Sea Otters
-sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
+#sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
 
 ```
 
 # 3. Sea otter density from Tinker et. al
 ```{r}
 ## Tim's survey density blocks ##
-poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
-poparea <- spTransform(poparea, CRS("+init=epsg:4326"))
+#poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
+#poparea <- spTransform(poparea, CRS("+init=epsg:4326"))
 ```
 
 # 4. Number of sea otter pits
