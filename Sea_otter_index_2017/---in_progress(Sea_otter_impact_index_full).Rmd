@@ -30,6 +30,12 @@ library(raster)
 library(gdistance)
 library(spatstat)
 library(leaflet)
+library(DT)
+library(sf)
+library(compare)
+library(corrgram)
+
+theme_set(theme_classic())
 ```
 
 # 1. Sea otter density from boat based surveys
@@ -148,24 +154,236 @@ DT::datatable(site.dat, caption = "Sea otter survey data")
 
 
 # 2. Duration of sea otter occupation
+Now we need to assign a duration of sea otter occupation from USFWS surveys. What we are going to do is assign each site a sea otter duration based on if that site intersected the 2003 or 2010 sea otter distribution.
+
+## Data
+You will need data on. Note that what polygons you need will depend on you area of interest. This is for POW.
+1. Sites from which sea otter surveys were centered from (points) - you should already have this from above
+2. 2003 sea otter distrubution polygon
+3. 2010 sea otter distribution polygon
 
 ```{r}
 ## USFWS polygons ##
 # 2003 Sea Otters
-#sd2003 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
+sd2003 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2003") 
 
 # 2010 Sea Otters
-#sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
+sd2010 <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General/Sea Otter Distribution Polygons/South SEAK Sea Otter Distribution Polygons", layer="Clipped sea otter dist_2010") 
+```
 
+Let take a look
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  addPolygons(data = sd2010, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "2003") %>% 
+  addPolygons(data = sd2003, stroke = NA, fillColor = "orange", fillOpacity = 0.8, group = "2010") %>% 
+  addMarkers(data = sites.eg, ~longitude, ~latitude, label = ~site)
+```
+
+Assign year to site
+```{r}
+# 2003
+sd2003.utm <- spTransform(sd2003, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+disp.03 <- sites.eg[sd2003.utm,]
+disp.03 <- disp.03@data
+
+# 2010
+sd2010.utm <- spTransform(sd2010, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+disp.10 <- sites.eg[sd2010.utm,]
+disp.10 <- disp.10@data
+
+# Compare
+comp <- intersect(disp.03$site, disp.10$site)
+
+# Append to master data
+site.dat$sea_otter_duration <- ifelse(match(site.dat$site, comp), 14)
+site.dat$sea_otter_duration[is.na(site.dat$sea_otter_duration)] <- 7
+```
+
+Lets view the final table
+```{r view final table}
+DT::datatable(site.dat, caption = "Sea otter survey data")
 ```
 
 # 3. Sea otter density from Tinker et. al
+Like with the sea otter duration data we need to assign the modeled sea otter population density to each site.
+
+You will need data on. Note that what polygons you need will depend on you area of interest. This is for POW.
+1. Sites from which sea otter surveys were centered from (points) - you should already have this from above
+2. The population area polygons from Tim
+3. Table of population densities for each Subpop
+
 ```{r}
 ## Tim's survey density blocks ##
-#poparea <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
-#poparea <- spTransform(poparea, CRS("+init=epsg:4326"))
+poparea.utm <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/Sea Otter Harvest/GIS Files/Hab_All_1.27.2017", layer = "Hab_All_UTM")
+poparea.latlong <- spTransform(poparea.utm, CRS("+init=epsg:4326"))
+
+subpop.dens <- read.csv("../ALL_DATA/Subpop_density_Tinker.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+Let take a look
+```{r}
+leaflet() %>% 
+  addTiles() %>% 
+  addPolygons(data = poparea.latlong, stroke = NA, fillOpacity = 0.8, group = "2003") %>% 
+  addMarkers(data = sites.eg, ~longitude, ~latitude, label = ~site)
+```
+
+Looks like we only need three of these subpopulations so lets reduce the file to individual files.
+```{r}
+int <- over(sites.eg, poparea.utm)
+unique(int$Subpop)
+
+poparea.S02.utm <- poparea.utm[poparea.utm$Subpop == "S02",]
+poparea.S03.utm <- poparea.utm[poparea.utm$Subpop == "S03",]
+poparea.S06.utm <- poparea.utm[poparea.utm$Subpop == "S06",]
+```
+
+Assign population to site
+```{r}
+# S02
+S02 <- sites.eg[poparea.S02.utm,]
+S02 <- S02@data
+S02$dens <- subpop.dens$dens_km2[subpop.dens$Subpop == "S02"]
+
+#S03
+S03 <- sites.eg[poparea.S03.utm,]
+S03 <- S03@data
+S03$dens <- subpop.dens$dens_km2[subpop.dens$Subpop == "S03"]
+
+#S06
+S06 <- sites.eg[poparea.S06.utm,]
+S06 <- S06@data
+S06$dens <- subpop.dens$dens_km2[subpop.dens$Subpop == "S06"]
+
+# Merge all these together
+dens <- rbind.data.frame(S02, S03, S06)
+
+# Append to master data
+site.dat$pop_mod_dens <- ifelse(match(site.dat$site, dens$site), dens$dens)
+
+```
+
+Lets view the final table
+```{r view final table}
+DT::datatable(site.dat, caption = "Sea otter survey data")
 ```
 
 # 4. Number of sea otter pits
+We want to take into account the number of sea otter pits at a site. 
+
+## Data
+For this you will need
+1. The sea otter pit data
+```{r}
+pits <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+We now want to sum to the total number of pits at each site and append that to our master data
+```{r}
+# Summarise
+pits.site <- pits %>%  
+    group_by(site) %>% 
+    summarise(n_pits = sum(pit_bin))
+
+pits.site <- pits.site[2:22,] # removes weird row with nothing in it
+
+# Append to master
+site.dat$n_pits <- ifelse(match(site.dat$site, pits.site$site), pits.site$n_pits)
+```
 
 # 5. Proportion of sea otter crakced clam shells
+Finally we want to account for the proportion are clam shells that appear to have been cracked (consumed) by sea otters.
+
+## Data
+You will need
+1. Sea otter clam data
+```{r}
+shell <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+The data will need to be summed by site and then converted to a proportion and appended to the rest of the data
+```{r}
+shell.site <- shell %>%
+    group_by(Site, Death) %>% 
+    summarise(n_shells = n())
+
+# Proportion of shells that where sea otter cracked by site
+prop.shell <- shell.site %>% 
+  group_by(Site) %>% 
+  summarise(n_SO_shells = n_shells[Death == "Sea Otter"], n_Total_shells = sum(n_shells))
+
+prop.shell$prop_SO_shells <- (prop.shell$n_SO_shells / prop.shell$n_Total_shells)
+
+# Append to master
+site.dat$prop_otter_shells <- ifelse(match(site.dat$site, prop.shell$Site), prop.shell$prop_SO_shells)
+```
+
+# Calculating the actual index
+Congratulaiton! You can calculated and complied all the data you need to actually calculate the index
+
+## Data
+You will need the data frame that we have been building above "site.dat"
+
+## Sea otter impact index
+We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit.
+```{r data exploration}
+# Correlations
+corrgram(site.dat[,10:15])
+pairs(site.dat[,10:15])
+
+# histograms
+hist(site.dat$dens_surv1)
+hist(site.dat$dens_surv2)
+hist(site.dat$n_pits)
+hist(site.dat$prop_otter_shells)
+
+# log transformation
+hist(log(site.dat$dens_surv1 + 1))
+hist(log(site.dat$dens_surv2 + 1))
+hist(log(site.dat$n_pits + 1))
+hist(log(site.dat$prop_otter_shells + 1))
+```
+Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
+
+Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
+```{r transformations}
+# Separate values only
+dat.redu <- site.dat[, 10:15]
+
+# log transfor appropriate columns
+dat.l <- cbind(log(dat.redu[,1:2] + 1), dat.redu[,3:4], log(dat.redu[,5:6] + 1)) 
+pairs(dat.l)
+
+# Standardize to column (sea otter measure) maximum
+dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
+dat.std <- scale(dat, center = FALSE, scale = apply(dat, 2, max))
+```
+
+Now we can calculate the PCA
+```{r PCA}
+# PCA on transformed AND standarized data
+pca <- princomp(dat.std.l)
+summary(pca)
+loadings(pca)
+biplot(pca, cex = 1)
+screeplot(pca, ylim = c(0, 0.8))
+pca$scores 
+
+final.dat <- cbind(site.dat, pca$scores[,1])
+colnames(final.dat)[16] <- "sea_otter_index"
+
+# Switch sign of index so positive values are associated with more otters
+final.dat$sea_otter_index <- final.dat$sea_otter_index * -1
+
+ggplot(final.dat, aes(site, sea_otter_index)) +
+  geom_point(size = 4) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Site", y = "Sea otter index (PC1)")
+```
+
+## Data export
+```{r export}
+# Data Export
+write.csv(final.dat, "../ALL_DATA/sea_otter_impact_index_TEST.csv", row.names = FALSE)
+```
