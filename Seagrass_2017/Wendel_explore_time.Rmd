@@ -6,15 +6,22 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-
+# Accounting for time
 Exploratory analysis has indicated that there is a temporal signal in pretty much all of our data. Some measures appear to be more sensitive to time than other. Here I will explore options for accounting of time statistically so that we can run linear models.
 
-```{r Libraries}
+```{r Libraries, echo = FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
+library(nlme)
+
+theme_set(theme_classic())
 ```
 
-We will we using the eelgrass trasect data to explore strategies to dealing with time. However, other data, in differnet files, will also need to be screened for temporal effects.
+We will we using the eelgrass transect data to explore strategies to dealing with time. However, other data, in different files, will also need to be screened for temporal effects. After some research and consultation, there are 3 (kinda 4) ways to account for time in our models. In general "time" should be included directly in the statistical model. Yes, using the residuals is another option but there is no statistical benefit of doing that. It will actually be more time consuming because we will have to run a regression of response ~ time, then extract the residuals, and then run another test. This also increases out total number to test that we will run. So, models should take the general form of $y=\alpha + time + sea otter + other...$. Within this general model framework there are 3 ways to paramaterize time which I are explored below. They are.
+
+1. Time as a continuous variable $y=\alpha + time + sea otter + other...$. Time will essentially just be Julian day and assumed to relate linearly to y.
+2. Time as a categorical variable $y=\alpha + \delta_t +sea otter + other...$. Due to our sampling design we can group sites into 4 discrete sampling windows. If we go this direction we could consider using a mixed effects model with a random effect of time $y=\alpha + sea otter + other... + a_t$ where $a_t$ is the random intercept of time.
+3. Time as a smooth function $y=\alpha + s(time) + sea otter + other...$. This would be a semi-parametric GAM model where time is modeled non-parametrically but the other factors would be modeled parametrically. Now, I know what you are thinking, GAMs are kinda BS, but we can easily constrain the fitting of smooth time function to something relatively simple, biologically realistic and therefore reasonably interpretable (k <= 4 in gam() function of mgcv package).
 
 ```{r Data, echo = FALSE, results=FALSE}
 eg.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -22,7 +29,7 @@ eg.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAs
 str(eg.dat)
 ```
 
-Lets look at some example data so that we can think about things
+Lets look at some example data so that we can think about things.
 ```{r example data, echo = FALSE}
 ggplot(eg.dat) +
   geom_point(aes(x = sea_otter_index, y = abvgnd_mass), size = 4) +
@@ -31,7 +38,7 @@ ggplot(eg.dat) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
 
 ggplot(eg.dat) +
-  geom_errorbar(aes(x = date_julian, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_errorbar(aes(x = date_julian, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1, width = 0) +
   geom_point(aes(x = date_julian, y = abvgnd_mass), size = 4) +
   labs(x = "Date", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
@@ -44,6 +51,61 @@ ggplot(eg.dat) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
 ```
 
+## Option 1 - time as continuous
+Exploration of parameterizing time as continuous variable.
 
+```{r, echo=FALSE}
+## Model with only sea otter index for comparison ##
+mod1.1 <- lm(abvgnd_mass ~ sea_otter_index, data = eg.dat)
+summary(mod1.1)
 
+## Model with only time ##
+mod1.2 <- lm(abvgnd_mass ~ date_julian, data = eg.dat)
+summary(mod1.2)
+
+## Model with sea otter index and time ##
+mod1.3 <- lm(abvgnd_mass ~ sea_otter_index * date_julian, data = eg.dat)
+summary(mod1.3)
+```
+
+Lets compare the models. Remember, lets focus on how the models preform, rather than what coefficients are significant. Ok so Model 1.3 which includes sea otters and time has the best fit. Of course more parameters will make a model fit better but when you compare it to Models 1.1 and 1.3 you can see the incremental increase.
+
+```{r, echo = FALSE}
+## Make a little summary data frame ##
+op1comp <- as.data.frame(rbind(summary(mod1.1)$adj.r.squared, summary(mod1.2)$adj.r.squared, summary(mod1.3)$adj.r.squared))
+op1comp <- cbind(op1comp, as.data.frame(rbind(summary(mod1.1)$fstatistic, summary(mod1.2)$fstatistic, summary(mod1.3)$fstatistic)))
+op1comp <- cbind(c("Mod 1.1", "Mod 1.2", "Mod 1.3"), op1comp)
+colnames(op1comp) <- c("Model", "Rsq", "F", "df_1", "df_2")
+op1comp$Rsq <- round(op1comp$Rsq, 2)
+op1comp$F <- round(op1comp$F, 2)
+
+DT::datatable(op1comp)
+```
+
+## Option 2 - time as a 4 level factor
+Exploration of parameterizing time as a 4 factor variable. At least for this example I am going to omit the two april sites and then classify each site to 4 time levels that essentially aline with month of sampling.
+
+```{r, echo = FALSE}
+## Reduce data and convert to date ##
+eg.dat.redu <- eg.dat[eg.dat$site != "2017_H_01" & eg.dat$site != "2017_L_01",] 
+eg.dat.redu$date <- as.Date(eg.dat.redu$date, format = "%Y-%m-%d")
+
+## Assign months and convert to factor ##
+eg.dat.redu$date_bin <- as.factor(month(as.POSIXlt(eg.dat.redu$date, format="%Y-%m-%d")))
+
+```
+
+```{r, echo = FALSE}
+## Model with time as factor ##
+mod2.1 <- lm(abvgnd_mass ~ date_bin, data = eg.dat.redu)
+anova(mod2.1)
+
+## Model with time as factor and sea otter index ##
+mod2.2 <- lm(abvgnd_mass ~ sea_otter_index * date_bin, data = eg.dat.redu)
+anova(mod2.2)
+
+## Model with time as factor in mixed effects model ##
+mod2.3 <- lme(abvgnd_mass ~ sea_otter_index, random = ~ 1 | date_bin, method = "ML", data = eg.dat.redu)
+summary(mod2.3)
+```
 
