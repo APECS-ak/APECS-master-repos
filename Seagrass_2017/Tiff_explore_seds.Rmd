@@ -17,13 +17,39 @@ theme_set(theme_cowplot(font_size=12)) # default fontsize doesn't work well for 
 <br><br>
 
 #### The intention of this .Rmd script is to explore how sediment type (primary and secondary classifications) influences various variables that we measured in Summer 2017. The sediment type data presented here is qualitative, with sediment type classified as 1 of 10 types (1:10 :: fine:big). 
+<br><br>
 
-<br><br><br><br><br>
+Outline
+
+* 1: Identify and import necessary data
+* 2: Tidy and reshape data into complimentary structures
+* 3: Join all prepared dataframes together into one working dataframe
+* 4: Map general sediment trends
+* 5: Regressions of sediment and various dependent variables
+     + Aboveground biomass
+     + Belowground biomass
+     + Epiphyte biomass
+     + Pits * belowground biomass
+
+<br><br>
+
+General findings
+
+* Sediment types show a north-south trend, or sea otter trend. Sediments in the north (or otter central) have finer sediments than sites in the south (no otters). This could be natural geographic variation (either due to geology or hydrodynamics) or could be a result of long-term sea otter colonization (if sea otters increase seagrass density, thus particle entrapment). It could also reflect human error, in that we selected more sheltered sites in the north. 
+* Significant interactions with aboveground biomass do not appear to exist. 
+* Significant interactions with belowground biomass exist in some of the regressions (positively correlated). I chose to standardize the rhizome biomass by length (i.e. g per cm), and then multiplied this metric by shoot density to obtain an area metric for area. Relationships are slightly stronger when belowground biomass is presented as mass per cm of rhizome, not per area.
+* Significant interactions exist between sediments and epiphyte biomass (negatively correlated). Hmm. Nutrient flux potential due to sediment pore size (cool idea)? An artefact of hydrology (i.e. larger grain size could be indicative of more flow, more flow could rip away epiphytes? Thoughts. 
+* Pits * belowground biomass: there is interaction with outside pit number (negatively correlated)...this could be coincidence; interaction only exists when zero values are exluded from analysis. 
+
+***
+
+<br><br><br><br>
 
 
 
 
-#### 1. To attack this, we need the sediment_pit, biometrics, and transect dataframes from the seagrass sites. Also throw in the coordinate info. Import all of these cleaned files from the GitHub repositry. 
+#### 1. Importing data: we need the sediment_pit, biometrics, and transect dataframes from the seagrass sites. Also throw in the coordinate info and the sea otter index. All of these cleaned files are found in the GitHub repositry.
+
 ```{r, tidy = TRUE}
 df.sedpit <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_seaotter_pit_sediment_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
@@ -37,7 +63,11 @@ df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repo
 ```
 <br><br><br><br>
 
-#### 2. The next steps are to look at each imported DF, tidy them up, reshape them for the intended analyses, and join all reshaped DFs into one large DF (i.e. 'df.all'). All packages used are libraried at the top of this script. The sript echoed in this .html file but can be accessed in the .Rmd file. 
+
+***
+
+
+#### 2. Tidy: The next steps are to look at each imported DF, tidy them up, reshape them for the intended analyses, and join all reshaped DFs into one large DF (i.e. 'df.all'). All packages used are libraried at the top of this script. The sript echoed in this .html file but can be accessed in the .Rmd file. 
 ```{r, include = FALSE} 
 ### 1. Tidy: delete unwanted variables from each dataframe to reduce clutter
 ```
@@ -860,9 +890,11 @@ colnames(df.soi)[which(names(df.soi) == "sea_otter_index")] <- "so_index"
 <br><br><br><br>
 
 
+***
 
 
-#### 3. Now all of the prepared DFs will be joined together to form the 'df.all', the primary DF that will be used in the following analyses.
+
+#### 3. Join: Now all of the prepared DFs will be joined together to form the 'df.all', the primary DF that will be used in the following analyses.
 ```{r, tidy = TRUE}
 df.all <- left_join(df.coords, df.trans2, by = c("site"))
 df.all <- left_join(df.all, df.sedpit2, by = c("site"))
@@ -921,22 +953,39 @@ colnames(df.all)
 
 
 
-
+***
 
 
 
 
 
 #### 4. Large-scale pattern in sediment type: These maps represent the numeric ordinal data, where the circle size scales with the numeric classification (larger circle = larger numeric).
-```{r}
+<br><br> 
+```{r, include = FALSE}
 # Classifications: (1) mud, (2) muddy sand, (3) sandy mud, (4) sand, (5) coarse sand, (6) pebble, (7) gravel, (8) cobble, (9) boulder, (10) reef
 ```
 
-```{r, include = FALSE}
+```{r, echo = FALSE, include = FALSE}
 sed.table <- matrix(c('1','2','3','4','5','6','7','8','9','10', 'Mud', 'Sandy mud', 'Muddy sand', 'Sand', 'Coarse sand', 'Pebble', 'Gravel', 'Cobble', 'Boulder', 'Reef'), ncol = 2)
 
 colnames(sed.table) <- c('Numeric Ordinal ID', 'Adjective ID')
 ```
+
+##### Here is a break down of how the numbers match with the visual classifications of sediment type. Sorry about the weird format...tables are hard. 
+<br>
+
+| Numeric Ordinal ID | Adjective ID |
+|-------------------:|--------------|
+|                  1 | Mud          |
+|                  2 | Sandy mud    |
+|                  3 | Muddy sand   |
+|                  4 | Sand         |
+|                  5 | Coarse sand  |
+|                  6 | Pebble       |
+|                  7 | Gravel       |
+|                  8 | Cobble       |
+|                  9 | Boulder      |
+|                 10 | Reef         |
 
 <br><br> 
   
@@ -1135,7 +1184,7 @@ leaf_widgets[1].sync(leaf_widgets[0]);
 
 
 
-#### Regression of sediment versus sea otter index
+#### 4D. Regression of sediment versus sea otter index
 ```{r, include = FALSE}
 
 # plotting in scatter
@@ -1207,7 +1256,7 @@ ggplot(df.all, aes(fitted(m1), resid(m1))) +
 ```{r, echo = FALSE, fig.width = 12, fig.height = 5}
 plot_grid(p27, p28, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths = c(3.5, 3.5))
 ```
-<br><br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br>
 
 
 
@@ -1220,10 +1269,7 @@ plot_grid(p27, p28, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths 
 
 
 
-
-
-
-
+***
 
 ### 5. Exploratory analysis
 
@@ -2023,14 +2069,14 @@ plot_grid(title.cp11, cp11, ncol=1, rel_heights=c(0.1, 1))
 
 
 #### 5E. Pits vs belowground biomass
-```{r, include = FALSE}
+```{r, include = FALSE, warning = FALSE}
 colnames(df.all)
 
 
 # plotting in scatter
 my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
 
-# rhi_mass_percm_m2
+
 p23 = ggplot(df.all, aes(pits_tot_site, rhi_mass_percm, color = so_index)) +
   geom_point(size=3) +
   #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
@@ -2081,7 +2127,7 @@ p24 = ggplot(df.all, aes(pits_tot_site, rhi_mass_percm, color = so_index)) +
 plot(p24)
 ```
 
-```{r, include = FALSE}
+```{r, include = FALSE, warning = FALSE}
 # plotting in scatter
 colnames(df.all)
 
@@ -2141,7 +2187,7 @@ plot(p26)
 ```
 <br>
 
-```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+```{r, echo = FALSE, warning = FALSE, fig.width = 12, fig.height = 5}
 title.cp12 <- ggdraw() + draw_label("Belowground biomass (g per cm rhizome, DW) * Total pits, whole site", fontface='bold')
 
 cp12 <- plot_grid(p23, p24, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
@@ -2150,16 +2196,18 @@ plot_grid(title.cp12, cp12, ncol=1, rel_heights=c(0.1, 1))
 ```
 <br><br>
 
-```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+```{r, echo = FALSE, warning = FALSE, fig.width = 12, fig.height = 5}
 title.cp13 <- ggdraw() + draw_label("Belowground biomass (g per cm rhizome, DW) * Total pits, outside transect", fontface='bold')
 
 cp13 <- plot_grid(p25, p26, labels=c('C', 'D'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
 
 plot_grid(title.cp13, cp13, ncol=1, rel_heights=c(0.1, 1))
 ```
-<br><br><br><br><br><br>
+<br><br><br>
 
+***
 
+<br>
 
 
 
