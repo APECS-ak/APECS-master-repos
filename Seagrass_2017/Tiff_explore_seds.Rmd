@@ -39,7 +39,7 @@ General findings
 * Significant interactions with aboveground biomass do not appear to exist. 
 * Significant interactions with belowground biomass exist in some of the regressions (positively correlated). I chose to standardize the rhizome biomass by length (i.e. g per cm), and then multiplied this metric by shoot density to obtain an area metric for area. Relationships are slightly stronger when belowground biomass is presented as mass per cm of rhizome, not per area.
 * Significant interactions exist between sediments and epiphyte biomass (negatively correlated). Hmm. Nutrient flux potential due to sediment pore size (cool idea)? An artefact of hydrology (i.e. larger grain size could be indicative of more flow, more flow could rip away epiphytes? Thoughts. 
-* Pits * belowground biomass: there is interaction with outside pit number (negatively correlated)...this could be coincidence; interaction only exists when zero values are exluded from analysis. 
+* Pits * belowground biomass: there is interaction with outside pit number (negatively correlated)...this is difficult to explain. Big note: interaction only exists when zero values are exluded from analysis. 
 
 ***
 
@@ -67,7 +67,7 @@ df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repo
 ***
 
 
-#### 2. Tidy: The next steps are to look at each imported DF, tidy them up, reshape them for the intended analyses, and join all reshaped DFs into one large DF (i.e. 'df.all'). All packages used are libraried at the top of this script. The sript echoed in this .html file but can be accessed in the .Rmd file. 
+#### 2. Tidy and reshape: The next steps are to look at each imported DF, tidy them up, reshape them for the intended analyses, and join all reshaped DFs into one large DF (i.e. 'df.all'). All packages used are libraried at the top of this script. The sript echoed in this .html file but can be accessed in the .Rmd file. 
 ```{r, include = FALSE} 
 ### 1. Tidy: delete unwanted variables from each dataframe to reduce clutter
 ```
