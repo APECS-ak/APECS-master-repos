@@ -7,33 +7,24 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-
+```{r setup, include = FALSE}
 library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubridate); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf); library(knitr); library(cowplot); library(ggpmisc)
 theme_set(theme_classic())
+theme_set(theme_cowplot(font_size=12)) # default fontsize doesn't work well for online viewing
 ```
 
 
 <br><br>
 
-#### The intention of this .Rmd script is to explore how sediment type (primary and secondary classifications) influences various variables that we measured in Summer 2017. The sediment type data presented here is qualitative, with a quantitative edge -- i.e. sediment type was classified as 1 of 10 types (1:10 :: fine:big). 
-```{r, include = FALSE}
-sed.table <- matrix(c('1','2','3','4','5','6','7','8','9','10', 'Mud', 'Sandy mud', 'Muddy sand', 'Sand', 'Coarse sand', 'Pebble', 'Gravel', 'Cobble', 'Boulder', 'Reef'), ncol = 2)
-colnames(sed.table) <- c('Numeric Ordinal ID', 'Adjective ID')
-```
-<br><br>
-```{r, echo = FALSE}
-datatable(sed.table, options = list(backgroundPosition = 'center'), width = 400)
-```
+#### The intention of this .Rmd script is to explore how sediment type (primary and secondary classifications) influences various variables that we measured in Summer 2017. The sediment type data presented here is qualitative, with sediment type classified as 1 of 10 types (1:10 :: fine:big). 
 
-<br><br><br><br>
+<br><br><br><br><br>
 
 
 
 
-#### To attack this, we need the sediment_pit, biometrics, and transect dataframes from the seagrass sites. Also throw in the coordinate info. Import all of these cleaned files from the GitHub repositry. 
-```{r}
+#### 1. To attack this, we need the sediment_pit, biometrics, and transect dataframes from the seagrass sites. Also throw in the coordinate info. Import all of these cleaned files from the GitHub repositry. 
+```{r, tidy = TRUE}
 df.sedpit <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_seaotter_pit_sediment_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -42,14 +33,15 @@ df.trans <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-re
 
 df.coords <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
 
-
 df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sea_otter_impact_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 <br><br><br><br>
 
-
+#### 2. The next steps are to look at each imported DF, tidy them up, reshape them for the intended analyses, and join all reshaped DFs into one large DF (i.e. 'df.all'). All packages used are libraried at the top of this script. The sript echoed in this .html file but can be accessed in the .Rmd file. 
+```{r, include = FALSE} 
 ### 1. Tidy: delete unwanted variables from each dataframe to reduce clutter
-<br>
+```
+
 ```{r, include = FALSE}
 str(df.sedpit)
 na.omit(df.sedpit)
@@ -61,7 +53,6 @@ df.sedpit <- within(df.sedpit, rm(sed2_type)) # redundant with the numeric value
 df.sedpit <- within(df.sedpit, rm(field_collector)) # who cares for this
 df.sedpit <- within(df.sedpit, rm(trans_m)) # don't need to binning factors
 ```
-
 
 ```{r, include = FALSE}
 str(df.trans)
@@ -84,7 +75,6 @@ df.trans <- df.trans %>%
   select(-na.rm, -macroalgae_cover_0.25msq, -diatom_cover_0.25msq, -eelgrass_shoots_0.25msq, -flowering_shoots_0.25msq)
 str(df.trans)
 ```
-
 
 ```{r, include = FALSE}
 str(df.bio)
@@ -256,21 +246,15 @@ df.bio[704:705,"tot_nodes"] = NA
 str(df.bio) 
 ```
 
-All of the coding steps are included in the .Rmd file but not displayed here. However, here is the structure of each df, up to this point:
-```{r}
-str(df.sedpit)
-str(df.trans)
-str(df.bio)
-```
-<br><br><br><br>
 
 
 
+```{r, include = FALSE}
 ### 2. Reshape DFs: prep each DF for site-level replication for analysis
-<br>
+```
 
-#### df.sedpit ---> df.sedpit2 (only the code for this DF is displayed as an example)
-```{r}
+* df.sedpit ---> df.sedpit2 (sediment + pit data sumed/averaged across transects within a site)
+```{r, include = FALSE}
 # calculate sum of all pits per site
 pits_all <- df.sedpit %>% 
   select(site, date, pit_bin) # takes only the pit data from DF
@@ -317,12 +301,8 @@ df.sedpit2$sedmean_site <- rowMeans(subset(df.sedpit2, select = c(sed1_site, sed
 # remove [now] extra dataframes to keep working space clean
 rm(pits_all, m.pits_all, sed1_all, m.sed1_all, sed2_all, m.sed2_all, trim_pits, trim_sed1, trim_sed2)
 ```
-<br>
 
-
-
-
-#### df.sedpit ---> df.sedpit_trans (reshape df.sedpit in a slightly different way than above to keep transects seperated)
+* df.sedpit ---> df.sedpit_trans (reshapes sed + pit data to conserve transect structure within site)
 ```{r, include = FALSE}
 # calculate sum of all pits per transect, within each site
 pits_trans <- df.sedpit %>% 
@@ -400,15 +380,7 @@ df.sedpit_trans$sedmean_out <- rowMeans(subset(df.sedpit_trans, select = c(sed1_
 rm(pits_trans, m.pits_trans, sed1_trans, m.sed1_trans, sed2_trans, m.sed2_trans, trim_pits_trans, trim_sed1_trans, trim_sed2_trans, c.pits_trans, c.sed1_trans, c.sed2_trans)
 ```
 
-```{r}
-colnames(df.sedpit_trans)
-# final column names for this DF
-```
-<br>
-
-
-
-#### df.transect --> df.transect2 (theory + code similar to df.sedpit process)
+* df.transect --> df.transect2 (all mean site/transect data)
 ```{r, include=FALSE}
 str(df.trans)
 
@@ -471,15 +443,7 @@ df.trans2 <- left_join(df.trans2, trim_flower_count, by = c("site", "date", "dep
 rm(macroalgae, m.macroalgae, epiphyte, m.epiphyte, shoot_count, m.shoot_count, flower_count, m.flower_count, trim_epiphyte, trim_macroalgae, trim_flower_count, trim_shoot_count)
 ```
 
-```{r}
-colnames(df.trans2)
-# final column names for this DF
-```
-<br>
-
-
-
-#### df.bio --> df.bio2 (theory + code similar to df.sedpit process)
+* df.bio --> df.bio2 (all mean biometric data seagrass)
 ```{r, include = FALSE}
 colnames(df.bio)
 
@@ -779,17 +743,7 @@ rm(rhi_length, rhi_mass_tot, rhi_mass_percm, node1_length, node2_length, node3_l
 str(df.bio2)
 ```
 
-```{r}
-colnames(df.bio2)
-# final column names for this DF
-```
-<br><br>
-
-
-
-#### Before we join all the DFs together, biomass per area still needs to be added. This was handled differently than the rest because of the order of operations for calculations were different. 
-
-#### scratch --> df.mass_area
+* df.bio --> df.mass_area (calculates mean masses per area data)
 ```{r, include = FALSE}
 
 # extract shoot biomass and reshape to quadrat for working with count data
@@ -896,30 +850,20 @@ df.mass_area <- left_join(df.mass_area, rhi_mass_percm_m2_sd, by = c("site"))
 rm(trim_rhi_mass_percm_m2, trim_shoot_mass_m2, mass.temp, shoot_mass_m2_sd, sd.shootmass, rhi_mass_percm_m2_sd,sd.rhimass)
 ```
 
-```{r}
-colnames(df.mass_area)
-# final column names for this DF
-```
-<br><br><br><br>
-
-df.SOI: it would also be useful to have the SOI PCA1 values for plots, later...extract those.
+* df.soi: extracts sea otter index values
 ```{r, include = FALSE}
 # extract biomass and reshape to quadrat for working with count data
 df.soi <- df.soi %>% 
   select(site, sea_otter_index)
 colnames(df.soi)[which(names(df.soi) == "sea_otter_index")] <- "so_index"
 ```
+<br><br><br><br>
 
 
 
 
-
-### 3. Join all DFs together
-<br>
-
-OK. From the previous reshaping, we have 7 DFs (df.coords, df.soi, df.trans2, df.sedpit2, df.sedpit_trans, df.bio2, df.mass_area) that we want to join into one big DF.
-
-```{r}
+#### 3. Now all of the prepared DFs will be joined together to form the 'df.all', the primary DF that will be used in the following analyses.
+```{r, tidy = TRUE}
 df.all <- left_join(df.coords, df.trans2, by = c("site"))
 df.all <- left_join(df.all, df.sedpit2, by = c("site"))
 df.all <- left_join(df.all, df.sedpit_trans, by = c("site"))
@@ -938,9 +882,13 @@ colnames(df.all)[which(names(df.all) == "date.x")] <- "date"
 ```
 <br>
 
+We want to manipulate df.all in the following ways:
+
+* Add a new column, where we determine Julian Day for our dates
+* Reorder columns so titles for variables are easier to locate for later analysis (there are a lot of unique # variables)
+* Temporarily remove some variables from the df.all (e.g. node lengths)
 
 
-##### There exists invisible steps here, where date is converted to Julian Day and all columns are reordered so variable names are easier to locate for later analysis (since there are 50 of them)
 ```{r, include = FALSE}
 # what data class is the date column?
 str(df.all$date) # answer: chr; character
@@ -951,8 +899,6 @@ df.all$date <- as.Date(df.all$date, '%m/%d/%Y')
 # convert with yday into a new column "julian_date"
 df.all$julian_day <- yday(df.all$date)
 ```
-<br>
-
 
 ```{r, include = FALSE}
 colnames(df.all)
@@ -962,43 +908,42 @@ df.all <- df.all[c('site','site_name','latitude','longitude','date','julian_day'
 
 # we don't need these variables, but waited this long to remove them in case we want them later. Easy recovery.
 #df.all <- within(df.all, rm(shoot_mass_fw))
-df.all <- df.all[, -c(38:39,42:51)] # delete rhi_length, rhi_mass_tot, and all nodes
+df.all <- df.all[, -c(39:40,43:52)] # delete rhi_length, rhi_mass_tot, and all nodes
 colnames(df.all)
 
-
-
-
-# old way to reorganize based on column number...this is sloppy in dynamic coding script
-#df.all <- df.all[c(1,2,3,4,5,52,6,15,16,17,11,19,18,20,22,21,23,25,24,26,12,13,14,7,8,27,10,28,9,49,32,31,34,33,29,30,35,36,37,48,43,44,45,46,47,38,39,40,41,42,50,51)]
 ```
-<br>
 
-#### Check out the final structure of the DF
+Here are the column names in the final df.all:
+```{r, echo = FALSE, tidy = TRUE}
+colnames(df.all)
+```
+<br><br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+#### 4. Large-scale pattern in sediment type: These maps represent the numeric ordinal data, where the circle size scales with the numeric classification (larger circle = larger numeric).
 ```{r}
-str(df.all)
+# Classifications: (1) mud, (2) muddy sand, (3) sandy mud, (4) sand, (5) coarse sand, (6) pebble, (7) gravel, (8) cobble, (9) boulder, (10) reef
 ```
 
+```{r, include = FALSE}
+sed.table <- matrix(c('1','2','3','4','5','6','7','8','9','10', 'Mud', 'Sandy mud', 'Muddy sand', 'Sand', 'Coarse sand', 'Pebble', 'Gravel', 'Cobble', 'Boulder', 'Reef'), ncol = 2)
 
-<br><br><br><br>
+colnames(sed.table) <- c('Numeric Ordinal ID', 'Adjective ID')
+```
 
+<br><br> 
+  
+  
 
-
-
-
-
-
-
-### 4. Large-scale pattern in sediment type
-These maps represent the numeric ordinal data, where the circle size scales with the numeric classification (larger circle = larger numeric).
-<br>
-
-Classifications: (1) mud, (2) muddy sand, (3) sandy mud, (4) sand, (5) coarse sand, (6) pebble, (7) gravel, (8) cobble, (9) boulder, (10) reef
-<br>
-
-
-
-#### First set of maps compare primary, secondary, and their mean for the entire site (transects averaged). 
-##### RED -- primary sediment; ORANGE -- secondary sediment; YELLOW -- mean of primary and secondary
+#### 4A. First set of maps compare primary, secondary, and their mean for the entire site (transects averaged)
+##### <span style="color:red">Red: primary sediment type</span>; <span style="color:orange">Orange: secondary sediment type</span>; <span style="color:gold">Yellow: mean of primary and secondary types</span>
 ```{r, echo = FALSE}
 map1 <- leaflet(df.all) %>% addTiles() %>% 
   addCircleMarkers(
@@ -1040,7 +985,7 @@ tagList(
   tags$div(style="display:inline;width:33%;float:left;",map2),
   tags$div(style="display:inline;width:33%;float:left;",map3),
   onStaticRenderComplete(
-'
+    '
 var leaf_widgets = Array.prototype.map.call(
   document.querySelectorAll(".leaflet"),
   function(ldiv){
@@ -1056,11 +1001,13 @@ leaf_widgets[1].sync(leaf_widgets[0]);
 ) %>%
   browsable
 ```
+#.
+<br><br><br>  
 
-<br><br><br><br>
 
-#### Second set of maps compare inside, edge, and outside sediments, across sites (mean primary and secondary).
-##### GREEN -- inside transect; BLUE -- edge transect; PURPLE -- outside transect
+
+##### 4B. Second set of maps compare inside, edge, and outside sediments, across sites (mean primary and secondary).
+##### <span style="color:green">Green: inside transect sediment type</span>; <span style="color:blue">Blue: edge transect sediment type</span>; <span style="color:purple">Purple: outside transect sediment type</span>
 ```{r, echo = FALSE}
 map4 <- leaflet(df.all) %>% addTiles() %>% 
   addCircleMarkers(
@@ -1118,12 +1065,13 @@ leaf_widgets[1].sync(leaf_widgets[0]);
 ) %>%
   browsable
 ```
+#.
+<br><br><br>
 
 
-<br><br><br><br><br>
 
-#### Third set of maps compare #pits dug at inside, edge, and outside transects (larger circle = more pits).
-##### BLACK -- inside transect; D.RED -- edge transect; D.BLUE -- outside transect
+##### 4C. Third set of maps compare #pits dug at inside, edge, and outside transects (larger circle = more pits).
+##### <span style="color:black">Black: inside transect total pits</span>; <span style="color:darkred">Red: edge transect total pits</span>; <span style="color:darkblue">Blue: outside transect total pits</span>
 ```{r, echo = FALSE}
 map7 <- leaflet(df.all) %>% addTiles() %>% 
   addCircleMarkers(
@@ -1181,49 +1129,806 @@ leaf_widgets[1].sync(leaf_widgets[0]);
 ) %>%
   browsable
 ```
-<br><br>
+#.
+<br><br><br><br><br><br><br><br>
 
-#### OK! Mapping patterns is fun, but anything else is overkill. 
 
-<br><br><br><br>
+
+
+
+
+
+
 
 
 ### 5. Exploratory analysis
 
 <br><br>
 
-#### 5A. Sediment x seagrass
+#### Regressions: use sediment or pit values as independent factors
+<br>
+
+There are a lot of possible plots using df.all. Tiff looked at the regressions for all of those plots but only includes results for regressions that look significant, or might with either transformation or non-linear regression. 
+
 <br><br>
 
-
-```{r}
+#### 5A. Aboveground biomass:
+```{r, include = FALSE}
 colnames(df.all)
 
+# optional manipulation of specified values; for example, might want to convert 0s to NA in some instances
+#df.all[, 9:12][df.all[, 9:12] == 0] <- NA 
 
-df.all[, 9:12][df.all[, 9:12] == 0] <- NA
-df.all[, 1:11][df.all[, 1:11] == -0.5] <- NA
 
 
-my.formula <- y ~ x
-p1 = ggplot(df.all, aes(leaf_length_max, epi_mass_leafarea_mg.cm2, color = so_index)) +
-  geom_point(size=4) +
-  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  #xlab("Sea otter density\n")+ylab("\nAboveground biomass residuals") +
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p1 = ggplot(df.all, aes(sedmean_site, shoot_mass_m2, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Mean sediment class (site)\n")+ylab("\nAG biomass (g per msq, DW)") +
+  theme(legend.position="none") +
   stat_poly_eq(formula = my.formula, 
-                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
-                parse = TRUE) +
-   stat_fit_glance(method = 'lm',
-                  method.args = list(formula = my.formula),
-                  geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 4), sep = "")),
-                  label.x.npc = 'right', label.y.npc = 0.35, size = 3)
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
 plot(p1)
 
 
-ln.m1 <- lm(rhi_mass_tot ~ sed2_site, data = df.all)
-summary(ln.m1)
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.shoot_mass_m2 <- lm(shoot_mass_m2 ~ julian_day, data = df.all)
+r.julian.shoot_mass_m2 <- resid(m.julian.shoot_mass_m2)
+
+
+# shoot_mass_m2 w/ julian_day residuals
+p2 = ggplot(df.all, aes(sedmean_site, r.julian.shoot_mass_m2, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Mean sediment class (site)\n")+ylab("\nResiduals: AG biomass x julian (g per msq, DW)") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p2)
+
+
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(shoot_mass_m2 ~ sed1_site, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+###### STEPS FOR WEIGHTED REGRESSION ANALYSIS
+
+# linear regression
+#ln.m1 <- lm(shoot_mass_m2 ~ julian_day, data = df.all)
+#summary(ln.m1)
+
+# weighted regression NEED RESIDUALS FOR EACH DEPENDENT POINT
+#wt.shoot_mass_m2_sd <- 1/(df.all$shoot_mass_m2_sd)^2
+#wt.m1 <- lm(shoot_mass_m2 ~ julian_day, weights = wt.shoot_mass_m2_sd, data = df.all)
+#summary(wt.m1)
+
+# plot the data and the best fit model using weighted residuals
+#plot(shoot_mass_m2 ~ julian_day, data = df.all)
+#lines(df.all$julian_day, predict(ln.m1), col = 'blue')
+#lines(df.all$julian_day, predict(wt.m1), col = 'red')
+```
+
+```{r, include = FALSE}
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p3 = ggplot(df.all, aes(sed1_in, shoot_mass_m2, color = so_index)) +
+  geom_point(size=3) +
+ # geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Primary sediment class (inside transect)\n")+ylab("\nAG biomass (g per msq, DW)") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p3)
+
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.shoot_mass_m2 <- lm(shoot_mass_m2 ~ julian_day, data = df.all)
+r.julian.shoot_mass_m2 <- resid(m.julian.shoot_mass_m2)
+
+
+# shoot_mass_m2 w/ julian_day residuals
+p4 = ggplot(df.all, aes(sed1_in, r.julian.shoot_mass_m2, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Primary sediment class (inside transect)\n")+ylab("\nResiduals: AG biomass x julian (g per msq, DW)") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p4)
+
 
 
 ```
+<br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp1 <- ggdraw() + draw_label("Aboveground biomass * mean sediment class, whole site", fontface='bold')
+
+cp1 <- plot_grid(p1, p2, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp1, cp1, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp2 <- ggdraw() + draw_label("Aboveground biomass * primary sediment class, inside transect", fontface='bold')
+
+cp2 <- plot_grid(p3, p4, labels=c('C', 'D'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp2, cp2, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+#### 5B. Belowground biomass (biomass rhizome per cm, per msq):
+```{r, include = FALSE}
+colnames(df.all)
+
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# rhi_mass_percm_m2
+p5 = ggplot(df.all, aes(sedmean_site, log(rhi_mass_percm_m2), color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Mean sediment class (site)\n")+ylab("\nlog(BG biomass per cm rhizome (g per msq, DW))") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p5)
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(log(rhi_mass_percm_m2) ~ sedmean_site, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.rhi_mass_percm_m2 <- lm(log(rhi_mass_percm_m2) ~ julian_day, data = df.all)
+r.julian.rhi_mass_percm_m2 <- resid(m.julian.rhi_mass_percm_m2)
+
+
+# rhi_mass_percm_m2 w/ julian_day residuals
+p6 = ggplot(df.all, aes(sedmean_site, r.julian.rhi_mass_percm_m2, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Mean sediment class (site)\n")+ylab("\nResiduals: log(BG biomass per cm rhizome (g per msq, DW)) x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p6)
+```
+
+```{r, include = FALSE}
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p7 = ggplot(df.all, aes(sed1_in, log(rhi_mass_percm_m2), color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Primary sediment class (inside transect)\n")+ylab("\nlog(BG biomass per cm rhizome (g per msq, DW))") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p7)
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(log(rhi_mass_percm_m2) ~ sed1_in, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.rhi_mass_percm_m2 <- lm(log(rhi_mass_percm_m2) ~ julian_day, data = df.all)
+r.julian.rhi_mass_percm_m2 <- resid(m.julian.rhi_mass_percm_m2)
+
+
+# shoot_mass_m2 w/ julian_day residuals
+p8 = ggplot(df.all, aes(sed1_in, r.julian.shoot_mass_m2, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Primary sediment class (inside transect)\n")+ylab("\nResiduals: log(BG biomass per cm rhizome (g per msq, DW)) x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p8)
+```
+
+```{r, include = FALSE}
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p9 = ggplot(df.all, aes(sed2_in, rhi_mass_percm_m2, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p9)
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(rhi_mass_percm_m2 ~ sed2_in, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.rhi_mass_percm_m2 <- lm(rhi_mass_percm_m2 ~ julian_day, data = df.all)
+r.julian.rhi_mass_percm_m2 <- resid(m.julian.rhi_mass_percm_m2)
+
+
+# shoot_mass_m2 w/ julian_day residuals
+p10 = ggplot(df.all, aes(sed2_in, r.julian.rhi_mass_percm_m2, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Secondary sediment class (inside transect)\n")+ylab("\nResiduals: BG biomass per cm rhizome (g per msq, DW) x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p10)
+```
+<br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp3 <- ggdraw() + draw_label("Belowground biomass per cm rhizome (per m2) * mean sediment class, whole site", fontface='bold')
+
+cp3 <- plot_grid(p5, p6, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp3, cp3, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp4 <- ggdraw() + draw_label("Belowground biomass per cm rhizome (per m2) * primary sediment class, inside transect", fontface='bold')
+
+cp4 <- plot_grid(p7, p8, labels=c('C', 'D'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp4, cp4, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp5 <- ggdraw() + draw_label("Belowground biomass per cm rhizome (per m2) * secondary sediment class, inside transect", fontface='bold')
+
+cp5 <- plot_grid(p9, p10, labels=c('E', 'F'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp5, cp5, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+#### 5C. Belowground biomass (biomass rhizome per cm):
+```{r, include = FALSE}
+colnames(df.all)
+
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# rhi_mass_percm_m2
+p11 = ggplot(df.all, aes(sedmean_site, rhi_mass_percm, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Mean sediment class (site)\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p11)
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(rhi_mass_percm ~ sedmean_site, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.rhi_mass_percm <- lm(log(rhi_mass_percm) ~ julian_day, data = df.all)
+r.julian.rhi_mass_percm <- resid(m.julian.rhi_mass_percm)
+
+
+# rhi_mass_percm_m2 w/ julian_day residuals
+p12 = ggplot(df.all, aes(sedmean_site, r.julian.rhi_mass_percm, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Mean sediment class (site)\n")+ylab("\nResiduals: BG biomass (g per cm rhizome, DW) x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p12)
+```
+
+```{r, include = FALSE}
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p13 = ggplot(df.all, aes(sed1_in, rhi_mass_percm, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Primary sediment class (inside transect)\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p13)
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(rhi_mass_percm ~ sed1_in, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.rhi_mass_percm <- lm(rhi_mass_percm ~ julian_day, data = df.all)
+r.julian.rhi_mass_percm <- resid(m.julian.rhi_mass_percm)
+
+
+# shoot_mass_m2 w/ julian_day residuals
+p14 = ggplot(df.all, aes(sed1_in, r.julian.rhi_mass_percm, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Primary sediment class (inside transect)\n")+ylab("\nResiduals: BG biomass (g per cm rhizome, DW) x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p14)
+```
+
+```{r, include = FALSE}
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p15 = ggplot(df.all, aes(sed2_in, rhi_mass_percm, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p15)
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(rhi_mass_percm_m2 ~ sed2_in, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.rhi_mass_percm <- lm(rhi_mass_percm ~ julian_day, data = df.all)
+r.julian.rhi_mass_percm <- resid(m.julian.rhi_mass_percm)
+
+
+# shoot_mass_m2 w/ julian_day residuals
+p16 = ggplot(df.all, aes(sed2_in, r.julian.rhi_mass_percm, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Secondary sediment class (inside transect)\n")+ylab("\nResiduals: BG biomass (g per cm rhizome, DW) x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p16)
+```
+<br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp6 <- ggdraw() + draw_label("Belowground biomass per cm rhizome * mean sediment class, whole site", fontface='bold')
+
+cp6 <- plot_grid(p11, p12, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp6, cp6, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp7 <- ggdraw() + draw_label("Belowground biomass per cm rhizome * primary sediment class, inside transect", fontface='bold')
+
+cp7 <- plot_grid(p13, p14, labels=c('C', 'D'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp7, cp7, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp8 <- ggdraw() + draw_label("Belowground biomass per cm rhizome * secondary sediment class, inside transect", fontface='bold')
+
+cp8 <- plot_grid(p15, p16, labels=c('E', 'F'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp8, cp8, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+
+
+#### 5D. Epiphyte biomass (per plant):
+```{r, include = FALSE}
+colnames(df.all)
+
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# rhi_mass_percm_m2
+p17 = ggplot(df.all, aes(sedmean_site, log(epiphyte_mass_perplant), color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Mean sediment class (site)\n")+ylab("\nlog(Epiphyte biomass (g per plant, DW))") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p17)
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(log(epiphyte_mass_perplant) ~ sedmean_site, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.epiphyte_mass_perplant <- lm(log(epiphyte_mass_perplant) ~ julian_day, data = df.all)
+r.julian.epiphyte_mass_perplant <- resid(m.julian.epiphyte_mass_perplant)
+
+
+# rhi_mass_percm_m2 w/ julian_day residuals
+p18 = ggplot(df.all, aes(sedmean_site, r.julian.rhi_mass_percm, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Mean sediment class (site)\n")+ylab("\nResiduals: log(Epiphyte biomass (g per plant, DW)) x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p18)
+```
+
+```{r, include = FALSE}
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p19 = ggplot(df.all, aes(sed1_in, log(epiphyte_mass_perplant), color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Primary sediment class (inside transect)\n")+ylab("\nlog(Epiphyte biomass (g per plant, DW))") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p19)
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(log(epiphyte_mass_perplant) ~ sed1_in, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.epiphyte_mass_perplant <- lm(log(epiphyte_mass_perplant) ~ julian_day, data = df.all)
+r.julian.epiphyte_mass_perplant <- resid(m.julian.epiphyte_mass_perplant)
+
+
+# shoot_mass_m2 w/ julian_day residuals
+p20 = ggplot(df.all, aes(sed1_in, r.julian.epiphyte_mass_perplant, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Primary sediment class (inside transect)\n")+ylab("\nResiduals: log(epiphyte_mass_perplant) x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p20)
+```
+
+```{r, include = FALSE}
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p21 = ggplot(df.all, aes(sedmean_edge, log(epiphyte_mass_perplant), color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Mean sediment class (edge transect)\n")+ylab("\nlog(Epiphyte biomass (g per plant, DW))") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p21)
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(log(epiphyte_mass_perplant) ~ sedmean_edge, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+# plot the residuals against the fitted points to look at spread
+ggplot(df.all, aes(fitted(m1), resid(m1))) +
+  geom_point(size = 3) +
+  geom_hline(yintercept = 0) 
+
+
+
+
+
+# extract julian_day residuals for this independent variable
+m.julian.epiphyte_mass_perplant <- lm(log(epiphyte_mass_perplant) ~ julian_day, data = df.all)
+r.julian.epiphyte_mass_perplant <- resid(m.julian.epiphyte_mass_perplant)
+
+
+# shoot_mass_m2 w/ julian_day residuals
+p22 = ggplot(df.all, aes(sedmean_edge, r.julian.epiphyte_mass_perplant, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #theme(legend.justification=c(1,0), legend.position=c(1,0)) +
+  xlab("Mean sediment class (edge transect)\n")+ylab("\nResiduals: BG biomass per cm rhizome x julian") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p22)
+```
+<br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp9 <- ggdraw() + draw_label("Epiphyte biomass * mean sediment class, whole site", fontface='bold')
+
+cp9 <- plot_grid(p17, p18, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp9, cp9, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp10 <- ggdraw() + draw_label("Epiphyte biomass * primary sediment class, inside transect", fontface='bold')
+
+cp10 <- plot_grid(p19, p20, labels=c('C', 'D'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp10, cp10, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp11 <- ggdraw() + draw_label("Epiphyte biomass * mean sediment class, edge transect", fontface='bold')
+
+cp11 <- plot_grid(p21, p22, labels=c('E', 'F'), align = 'h', ncol=2, nrow=1, rel_widths = c(3, 3.5))
+
+plot_grid(title.cp11, cp11, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br><br><br>
 
 
