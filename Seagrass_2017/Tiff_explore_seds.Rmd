@@ -1,5 +1,5 @@
 ---
-title: "Exploration of sediment influence on seagrass"
+title: "Exploration of qualitative sediment data"
 author: "Tiff Stephens"
 #date: "1/6/2018"
 output: html_document
@@ -971,7 +971,8 @@ sed.table <- matrix(c('1','2','3','4','5','6','7','8','9','10', 'Mud', 'Sandy mu
 colnames(sed.table) <- c('Numeric Ordinal ID', 'Adjective ID')
 ```
 
-##### Here is a break down of how the numbers match with the visual classifications of sediment type. Sorry about the weird format...tables are hard. 
+##### Here is a break down of how the numbers match with the visual classifications of sediment type. Sorry about the weird format...tables are hard. __Note: the numeric ID is used as the "value" for all of the sediment analysis.__
+
 <br>
 
 | Numeric Ordinal ID | Adjective ID |
