@@ -13,6 +13,8 @@ Exploratory analysis has indicated that there is a temporal signal in pretty muc
 library(dplyr)
 library(ggplot2)
 library(nlme)
+library(mgcv)
+library(lubridate)
 
 theme_set(theme_classic())
 ```
@@ -20,7 +22,7 @@ theme_set(theme_classic())
 We will we using the eelgrass transect data to explore strategies to dealing with time. However, other data, in different files, will also need to be screened for temporal effects. After some research and consultation, there are 3 (kinda 4) ways to account for time in our models. In general "time" should be included directly in the statistical model. Yes, using the residuals is another option but there is no statistical benefit of doing that. It will actually be more time consuming because we will have to run a regression of response ~ time, then extract the residuals, and then run another test. This also increases out total number to test that we will run. So, models should take the general form of $y=\alpha + time + sea otter + other...$. Within this general model framework there are 3 ways to paramaterize time which I are explored below. They are.
 
 1. Time as a continuous variable $y=\alpha + time + sea otter + other...$. Time will essentially just be Julian day and assumed to relate linearly to y.
-2. Time as a categorical variable $y=\alpha + \delta_t +sea otter + other...$. Due to our sampling design we can group sites into 4 discrete sampling windows. If we go this direction we could consider using a mixed effects model with a random effect of time $y=\alpha + sea otter + other... + a_t$ where $a_t$ is the random intercept of time.
+2. Time as a categorical variable $y=\alpha + \delta_t +sea otter + other...$. Due to our sampling design we can group sites into 4 discrete sampling windows. If we go this direction one may think (as I did) that using a mixed effects model with a random effect of time $y=\alpha + sea otter + other... + a_t$ where $a_t$ is the random intercept of time. Well, after more consideration and consultation this is likley not appropriate. Reason 1) is that we don't have the best temporal replication for this approach and more importantly 2) we have to assume that when we sampled a site was "randomly drawn from the population" which its not really. Everything happened in the same season.
 3. Time as a smooth function $y=\alpha + s(time) + sea otter + other...$. This would be a semi-parametric GAM model where time is modeled non-parametrically but the other factors would be modeled parametrically. Now, I know what you are thinking, GAMs are kinda BS, but we can easily constrain the fitting of smooth time function to something relatively simple, biologically realistic and therefore reasonably interpretable (k <= 4 in gam() function of mgcv package).
 
 ```{r Data, echo = FALSE, results=FALSE}
@@ -95,6 +97,7 @@ eg.dat.redu$date_bin <- as.factor(month(as.POSIXlt(eg.dat.redu$date, format="%Y-
 
 ```
 
+Various models. Again, the mixed effects approach here is likley not appropriate. However, I included it here just to see. So what is intersting here is that sea otter index becomes significant when time is included as a factor (mod2.2), demonstrating that time is mopping up variability. 
 ```{r, echo = FALSE}
 ## Model with time as factor ##
 mod2.1 <- lm(abvgnd_mass ~ date_bin, data = eg.dat.redu)
@@ -107,5 +110,39 @@ anova(mod2.2)
 ## Model with time as factor in mixed effects model ##
 mod2.3 <- lme(abvgnd_mass ~ sea_otter_index, random = ~ 1 | date_bin, method = "ML", data = eg.dat.redu)
 summary(mod2.3)
+```
+
+## Option 3 - time as a smooth function
+Finally we can parameterize time as a smooth function and our other factors as linear predictors in a semi-parametric model. We will go back to using the full data set (all 21 sites)
+
+```{r, echo = FALSE}
+## Model with just a smooth function of time ##
+mod3.1 <- gam(abvgnd_mass ~ s(date_julian, k = 4), data = eg.dat)
+summary(mod3.1)
+
+ggplot(eg.dat, aes(x = date_julian, y = abvgnd_mass)) +
+  geom_errorbar(aes(x = date_julian, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1, width = 0) +
+  geom_point(size = 4) +
+  geom_smooth(method = "gam", formula = y ~ s(x, k = 4)) +
+  labs(x = "Date", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+## Model with sea otter index and smooth function of time ##
+mod3.2 <- gam(abvgnd_mass ~ sea_otter_index + s(date_julian, k = 4), data = eg.dat)
+summary(mod3.2)
+
+```
+
+Lets compare models again
+```{r}
+## Make a little summary data frame ##
+op3comp <- as.data.frame(rbind(summary(mod3.1)$r.sq, summary(mod3.2)$r.sq))
+op3comp <- cbind(op3comp, as.data.frame(rbind(summary(mod3.1)$dev.expl, summary(mod3.2)$dev.expl)))
+op3comp <- cbind(c("Mod 3.1", "Mod 3.2"), op3comp)
+colnames(op3comp) <- c("Model", "Rsq", "Dev_Expln")
+op3comp$Rsq <- round(op3comp$Rsq, 2)
+op3comp$Dev_Expln <- round(op3comp$Dev_Expln, 3)
+
+DT::datatable(op3comp)
 ```
 
