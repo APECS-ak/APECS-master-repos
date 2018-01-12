@@ -9,7 +9,7 @@ editor_options:
 # Accounting for time
 Exploratory analysis has indicated that there is a temporal signal in pretty much all of our data. Some measures appear to be more sensitive to time than other. Here I will explore options for accounting of time statistically so that we can run linear models.
 
-```{r Libraries, echo = FALSE, warning=FALSE}
+```{r Libraries, echo = FALSE, warning=FALSE, message=FALSE}
 library(dplyr)
 library(ggplot2)
 library(nlme)
@@ -22,7 +22,7 @@ theme_set(theme_classic())
 We will we using the eelgrass transect data to explore strategies to dealing with time. However, other data, in different files, will also need to be screened for temporal effects. After some research and consultation, there are 3 (kinda 4) ways to account for time in our models. In general "time" should be included directly in the statistical model. Yes, using the residuals is another option but there is no statistical benefit of doing that. It will actually be more time consuming because we will have to run a regression of response ~ time, then extract the residuals, and then run another test. This also increases out total number to test that we will run. So, models should take the general form of $y=\alpha + time + sea otter + other...$. Within this general model framework there are 3 ways to paramaterize time which I are explored below. They are.
 
 1. Time as a continuous variable $y=\alpha + time + sea otter + other...$. Time will essentially just be Julian day and assumed to relate linearly to y.
-2. Time as a categorical variable $y=\alpha + \delta_t +sea otter + other...$. Due to our sampling design we can group sites into 4 discrete sampling windows. If we go this direction one may think (as I did) that using a mixed effects model with a random effect of time $y=\alpha + sea otter + other... + a_t$ where $a_t$ is the random intercept of time. Well, after more consideration and consultation this is likley not appropriate. Reason 1) is that we don't have the best temporal replication for this approach and more importantly 2) we have to assume that when we sampled a site was "randomly drawn from the population" which its not really. Everything happened in the same season.
+2. Time as a categorical variable $y=\alpha + \delta_t +sea otter + other...$. Due to our sampling design we can group sites into 4 discrete sampling windows. If we go this direction one may think (as I did) that using a mixed effects model with a random effect of time $y=\alpha + sea otter + other... + a_t$ where $a_t$ is the random intercept of time. Well, after more consideration and consultation this is likely not appropriate. Reason 1) is that we don't have the best temporal replication for this approach and more importantly 2) we have to assume that when we sampled a site was "randomly drawn from the population" which its not really. Everything happened in the same season.
 3. Time as a smooth function $y=\alpha + s(time) + sea otter + other...$. This would be a semi-parametric GAM model where time is modeled non-parametrically but the other factors would be modeled parametrically. Now, I know what you are thinking, GAMs are kinda BS, but we can easily constrain the fitting of smooth time function to something relatively simple, biologically realistic and therefore reasonably interpretable (k <= 4 in gam() function of mgcv package).
 
 ```{r Data, echo = FALSE, results=FALSE}
@@ -85,7 +85,7 @@ DT::datatable(op1comp)
 ```
 
 ## Option 2 - time as a 4 level factor
-Exploration of parameterizing time as a 4 factor variable. At least for this example I am going to omit the two april sites and then classify each site to 4 time levels that essentially aline with month of sampling.
+Exploration of parameterizing time as a 4 factor variable. At least for this example I am going to omit the two April sites and then classify each site to 4 time levels that essentially align with month of sampling.
 
 ```{r, echo = FALSE}
 ## Reduce data and convert to date ##
@@ -97,7 +97,7 @@ eg.dat.redu$date_bin <- as.factor(month(as.POSIXlt(eg.dat.redu$date, format="%Y-
 
 ```
 
-Various models. Again, the mixed effects approach here is likley not appropriate. However, I included it here just to see. So what is intersting here is that sea otter index becomes significant when time is included as a factor (mod2.2), demonstrating that time is mopping up variability. 
+Various models. Again, the mixed effects approach here is likely not appropriate. However, I included it here just to see. So what is interesting here is that sea otter index becomes significant when time is included as a factor (mod2.2), demonstrating that time is mopping up variability. 
 ```{r, echo = FALSE}
 ## Model with time as factor ##
 mod2.1 <- lm(abvgnd_mass ~ date_bin, data = eg.dat.redu)
@@ -123,6 +123,7 @@ summary(mod3.1)
 ggplot(eg.dat, aes(x = date_julian, y = abvgnd_mass)) +
   geom_errorbar(aes(x = date_julian, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1, width = 0) +
   geom_point(size = 4) +
+  ggtitle("GAM fit of only time") +
   geom_smooth(method = "gam", formula = y ~ s(x, k = 4)) +
   labs(x = "Date", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
@@ -133,16 +134,60 @@ summary(mod3.2)
 
 ```
 
-Lets compare models again
-```{r}
+Lets compare models again. First a note, the deviance explained (Dev_Expln) parameter should be interpreted with some caution. It is the deviance explained with the intercept removed. What is important to note is that the equivalent degrees of freedom (Eq_df) for fitting time is only 1. This suggest a linear relationship for this comparison. Again, its not that surprising that the model with more parameters (Mod 3.2) has a better fit. 
+```{r, echo = FALSE}
 ## Make a little summary data frame ##
 op3comp <- as.data.frame(rbind(summary(mod3.1)$r.sq, summary(mod3.2)$r.sq))
 op3comp <- cbind(op3comp, as.data.frame(rbind(summary(mod3.1)$dev.expl, summary(mod3.2)$dev.expl)))
+op3comp <- cbind(op3comp, as.data.frame(rbind(summary(mod3.1)$edf, summary(mod3.2)$edf)))
 op3comp <- cbind(c("Mod 3.1", "Mod 3.2"), op3comp)
-colnames(op3comp) <- c("Model", "Rsq", "Dev_Expln")
+colnames(op3comp) <- c("Model", "Rsq", "Dev_Expln", "Eq_df")
 op3comp$Rsq <- round(op3comp$Rsq, 2)
 op3comp$Dev_Expln <- round(op3comp$Dev_Expln, 3)
+op3comp$Eq_df <- round(op3comp$Eq_df, 3)
 
 DT::datatable(op3comp)
+```
+
+## Thoughts
+It looks like how we proceed will really depend on how we want to frame time as a factor in this part of the project. I think that a convincing argument could be made for any of these approaches. My initial thought have me leaning towards the semi-parametric GAM framework. While there is a concern that we may over-fit the data there are tools in place to help prevent that. Also, if our goal is really to test the effect of sea otters and other possible covariates we should account for time in the most robust and flexible way possible. GAMS can do that. The GAM approach may also lead to a more simplified overall analytical approach in that we can use the same model framework for all our analyses. While we have not explored this in detail yet, it is conceivable that time will not have a linear relationship with a response even after transformation. With the GAM that's ok. If the relationship with time is a bit non-linear the GAM can deal with it and "soak up" that variability. Now, I am *not* suggesting that we brute force GAMs down everything. Graphical inspection and reviewing output of relationships will be important. If the equivalent degrees of freedom of the smooth function of time start getting >3ish we should rethink things.
+
+For an example I will try another model with belowground biomass. First it looks like the data could benefit from a log transformation. This linearizes the relationship between sea otter index and time. 
+```{r, echo = FALSE}
+ggplot(eg.dat, aes(blwgnd_mass)) +
+  geom_histogram(binwidth = 10) +
+  labs(x = bquote('Belowground mass' ~(g/m^-2)), y = "Count")
+
+ggplot(eg.dat, aes(log(blwgnd_mass))) +
+  geom_histogram(binwidth = 1) +
+  labs(x = bquote('log Belowground mass' ~(g/m^-2)), y = "Count")
+
+ggplot(eg.dat) +
+  geom_point(aes(x = sea_otter_index, y = log(blwgnd_mass)), size = 4) +
+  geom_errorbar(aes(x = sea_otter_index, ymin = log(blwgnd_mass) - log(blwgnd_mass_se), ymax = log(blwgnd_mass) + log(blwgnd_mass_se)), size = 1) +
+  labs(x = "Sea otter Index", y = bquote('log Belowground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+ggplot(eg.dat) +
+  geom_errorbar(aes(x = date_julian, ymin = log(blwgnd_mass) - log(blwgnd_mass_se), ymax = log(blwgnd_mass) + log(blwgnd_mass_se)), size = 1, width = 0) +
+  geom_point(aes(x = date_julian, y = log(blwgnd_mass)), size = 4) +
+  labs(x = "Date", y = bquote('log Belowground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
+
+## Models ##
+mod4.1 <- gam(log(blwgnd_mass) ~ sea_otter_index, data = eg.dat)
+summary(mod4.1)
+
+mod4.2 <- gam(log(blwgnd_mass) ~ sea_otter_index + s(date_julian, k = 4), data = eg.dat)
+summary(mod4.2)
+```
+
+Maybe its just by chance but again we see that the edf of the smooth time fit is 1, suggesting a linear relationship. This begs the question, why don't we just fit the model like in option 1 or 2? Lets use AIC to compare these fits. Comparison of the output indicates that these are essentially the same model. So, then why don't we just use the more straight-forward linear model? Well we could for **this** relationship but again, the GAM allows for flexibility and I think there is something to be said for using the same modeling framework for all analyses. Maybe we don't need to worry about that though ...
+
+```{r, echo = FALSE}
+mod5.1 <- lm(log(blwgnd_mass) ~ sea_otter_index + date_julian, data = eg.dat)
+summary(mod5.1)
+
+summary(mod4.2)
 ```
 
