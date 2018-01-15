@@ -10,6 +10,10 @@ editor_options:
 # Sea otter impact index
 Sea otters are hard to keep track of. Until the 2017 field season the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summaries and then combined these measures to create a sea otter impact index. 
 
+## Note for non eelgrass site users
+This script provides the details of how to calculate the sea otter index for eelgrass sites. You may want to do this differently. You my also have to clean up the resulting data in a different way than it is done here, because of how your data is formated etc. This script should be "generalizable" though and it should not be terribly difficult to creat a new version of this code that suits a slightly differnt set of needs.
+
+# Getting started
 In this script we will calculate the sea otter impact index from raw data to final index. This will be in contrast to relying on hard to track ArcGIS processing. The original index uses the following data that will be attributed to each site.
 
 1. Sea otter density from 2017 boat based sea otter surveys (otters/km2)
@@ -17,6 +21,8 @@ In this script we will calculate the sea otter impact index from raw data to fin
 3. Sea otter density derived from Tinker et al. population model estimates (otters/km2)
 4. Number of sea otter pits counted at a site (count)
 5. Proportion of sea otter cracked shells (proportion)
+
+Below, raw data is processed such that the final output is a table of sites with the corresponding values for each of these categories. Then that data can be fed into the principle components analysis that generaates the actual index.
 
 ## Packages
 Since we will be working with spatial data we need to load a bunch of packages that deal with spatial data.
@@ -61,25 +67,24 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
 ## Plot sites and sea otters
-Lets see what this all looks like.
+Lets see what this all looks like. Note that when plotting with leaflet it helps to have the data in a lat/long progection.  
 ```{r plotting everything}
 leaflet() %>% 
   addTiles() %>% 
   addPolygons(data = h2o.latlong, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "POW") %>% 
   addMarkers(data = sites.eg, ~longitude, ~latitude, label = ~site) %>% 
   addCircleMarkers(data = otts, ~longitude, ~latitude, color = "red", stroke = FALSE, radius = 5, fillOpacity = ~(n_otters/max(n_otters)))
-
 ```
 
 ## Calculating survey density
 The general steps are as follows
-1. Calculate survey area centered at each survey site and bounded by 2 nm "as the otter swims"
+1. Calculate survey area centered at each survey site and bounded by 2 nm "as the otter swims". It is essential that site points intersect the water polygon!
 2. Calculate area of above survey area
 3. Calculate density by counting number of otters in each area (and each survey instance if necessary) and dividing by the survey area
 
 The following for loop generates a 2nm (== 3704 meter) as the otter swims survey area for each sites. It then selects the otters that were where sited in that survey area and generates a data table of that data. This is done for each site iterativley and the resulting data frames are pasted together. 
 ```{r loop to extract surveyed otters to sites}
-d <-data.frame() # set up blank data frame
+d <- data.frame() # set up blank data frame to append to later
 for(i in unique(1:21)){
   s <- sites.eg[i,] # subset sites 
   b <- gBuffer(s, byid = TRUE, width = 3704, quadsegs = 10) # create 3704 meter radius buffer around site
@@ -87,18 +92,18 @@ for(i in unique(1:21)){
   bw <- gIntersection(h2o.latlong, b, byid = TRUE) # clip the buffer area by water so we only have water area left
   bw <- spTransform(bw, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")) # change projection back to UTM
   e <- extent(bw) # save the extent of the polygon for later use
-  r <- raster(xmn = e@xmin, xmx = e@xmax, ymn = e@ymin, ymx = e@ymax, ncol = (e@xmax - e@xmin) / 50, nrow = (e@ymax - e@ymin) / 50, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # create a raster with 50 X 50 meter grid cells
-  wr <- rasterize(bw, r, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # append water polygon data to raster
+  r <- raster(xmn = e@xmin, xmx = e@xmax, ymn = e@ymin, ymx = e@ymax, ncol = (e@xmax - e@xmin) / 50, nrow = (e@ymax - e@ymin) / 50, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # create a raster with 50 X 50 meter grid cells. This raster is "empty"
+  wr <- rasterize(bw, r, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # append water polygon data to raster. This raster is "full"
   wr[wr] <- 50 # convert all raster cell values to a value of 50 (because 50 meters)
-  wt <- transition(wr, transitionFunction = function(x){50}, directions = 8) # conver raster to transition layer (required for accCost())
+  wt <- transition(wr, transitionFunction = function(x){50}, directions = 8) # conver raster to transition layer (required for accCost() below)
   wt <- geoCorrection(wt, type = "r", scl = FALSE) # not really sure what this actually does but you have to do it
-  sa <- accCost(wt, s) # calculate the cumulative cost distance 
+  sa <- accCost(wt, s) # calculate the cumulative cost distance
   values(sa) <- (values(sa) * 50) # multiply cost values by 50 to reflect cost in terms of actual distance
   sa[values(sa) > 3700] <- NA # Convert cost rasters > 3700 to NA, now the raster will reflect the true survey area
   p <- rasterToPolygons(sa, dissolve = TRUE) # covert raster to polygon
   p <- spTransform(p, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")) # define projection
-  a <- (2500 * length(p) / 1000000) # caculate area of the polygon in sq km
-  o <- over(p, otts) # identifies survyed otters that intersect/overlap with the polygon
+  a <- (2500 * length(p) / 1000000) # caculate area of the polygon in sq km. 2500 becasue 50*50=2500
+  o <- over(p, otts) # identifies surveyed otters that intersect/overlap with the polygon
   o <- as.data.frame(unique(o)) # convert that subset of otters to a data frame
   o$area <- a # append the area of the polygon to that data frame
   d <- rbind(d, o) # bind this data frame to the master one. -----> now go back to the top and start again!
@@ -118,7 +123,7 @@ ott.dat <- d %>%
 # Clean up NA row and funky site names
 ott.dat <- ott.dat[c(1:8, 10:20, 22:30),]
 
-# Fill in data
+# Fill in data. These are instances where multiple sites were surveyed at the same time.
 fill <- data.frame(c("2017_H_04", "2017_H_06", "2017_M_02", "2017_M_03"), c("2017/07/21", "2017/07/21", "2017/08/05", "2017/08/05"), c(81,81,14,14))
 colnames(fill) <- c("site", "survey_dat", "n")
 
@@ -139,7 +144,7 @@ site.dat <- merge(site.dat, ott.dat.wide, by = "site", all.x = TRUE)
 colnames(site.dat)[8] <- "n_surv1"
 colnames(site.dat)[9] <- "n_surv2"
 
-# NAs ot 0
+# NAs to 0
 site.dat[is.na(site.dat)] <- 0
 
 # Calculate density
@@ -147,11 +152,10 @@ site.dat$dens_surv1 <- site.dat$n_surv1 / site.dat$area
 site.dat$dens_surv2 <- site.dat$n_surv2 / site.dat$area
 ```
 
-Lets view the final table
+Lets view the final table.
 ```{r view final table}
 DT::datatable(site.dat, caption = "Sea otter survey data")
 ```
-
 
 # 2. Duration of sea otter occupation
 Now we need to assign a duration of sea otter occupation from USFWS surveys. What we are going to do is assign each site a sea otter duration based on if that site intersected the 2003 or 2010 sea otter distribution.
@@ -180,7 +184,7 @@ leaflet() %>%
   addMarkers(data = sites.eg, ~longitude, ~latitude, label = ~site)
 ```
 
-Assign year to site
+Assign year to site.
 ```{r}
 # 2003
 sd2003.utm <- spTransform(sd2003, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
@@ -202,7 +206,7 @@ site.dat$sea_otter_duration[is.na(site.dat$sea_otter_duration)] <- 7
 
 Lets view the final table
 ```{r view final table}
-DT::datatable(site.dat, caption = "Sea otter survey data")
+DT::datatable(site.dat)
 ```
 
 # 3. Sea otter density from Tinker et. al
@@ -266,7 +270,7 @@ site.dat$pop_mod_dens <- ifelse(match(site.dat$site, dens$site), dens$dens)
 
 Lets view the final table
 ```{r view final table}
-DT::datatable(site.dat, caption = "Sea otter survey data")
+DT::datatable(site.dat)
 ```
 
 # 4. Number of sea otter pits
@@ -324,14 +328,21 @@ Congratulaiton! You can calculated and complied all the data you need to actuall
 
 ## Data
 You will need the data frame that we have been building above "site.dat"
+Lets view the final table
+```{r view final table}
+DT::datatable(site.dat)
+```
 
 ## Sea otter impact index
-We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit.
+We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit. Correlation plots indicate that most measures are reasonably correlated with eachother.
 ```{r data exploration}
 # Correlations
 corrgram(site.dat[,10:15])
 pairs(site.dat[,10:15])
+```
 
+Checking for normality is important. Histograms suggest that theses data should be log transformed. 
+```{r}
 # histograms
 hist(site.dat$dens_surv1)
 hist(site.dat$dens_surv2)
@@ -379,10 +390,23 @@ ggplot(final.dat, aes(site, sea_otter_index)) +
   geom_point(size = 4) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "Site", y = "Sea otter index (PC1)")
+
+ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 90))
 ```
+
+Final index data table
+```{r}
+DT::datatable(final.dat, caption = "Sea otter impact index")
+```
+
 
 ## Data export
 ```{r export}
 # Data Export
-write.csv(final.dat, "../ALL_DATA/sea_otter_impact_index_TEST.csv", row.names = FALSE)
+write.csv(final.dat, "../ALL_DATA/sea_otter_impact_index_new.csv", row.names = FALSE)
 ```
