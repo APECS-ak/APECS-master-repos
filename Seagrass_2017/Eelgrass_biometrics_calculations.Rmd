@@ -39,7 +39,7 @@ eg.bio <- read.csv("../ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors
 eg.tran <- read.csv("../ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # Sea Otter Impact Index
-so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # Nutrients
 nuts <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -317,7 +317,7 @@ tran.dat <- eg.tran %>%
   distinct(primary_obeserver, secondary_observer, transect_start_time, transect_end_time, depth_m)
   
 ### Master - more will be added later ###
-dat <- data.frame(cbind(eg.site[, c(1:3, 32, 4:9)], tran.dat[, 2:5], nuts.site.eg [,2:11], nuts.site.nday.1m [,2:11], nuts.site.nday.4m [,2:11], so.index[, 6:12], eg.site[, 14:26]))
+dat <- data.frame(cbind(eg.site[, c(1:3, 32, 4:9)], tran.dat[, 2:5], nuts.site.eg [,2:11], nuts.site.nday.1m [,2:11], nuts.site.nday.4m [,2:11], so.index[, 10:16], eg.site[, 14:26]))
 ```
 
 Final set of calculations at site level.
