@@ -416,13 +416,13 @@ CRBT.SOII <- ggplot(eg.dat, aes(sea_otter_index, total_crab)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
 
 ## Crab Diversity - shannon weiner ##
-CRBSW.SOII <- ggplot(eg.dat, aes(sea_otter_index, shan_diverse)) +
+CRBSW.SOII <- ggplot(eg.dat, aes(sea_otter_index, shan_diverse_crab)) +
   geom_point(size = 4) +
   labs(x = "Sea otter index", y = "S-W diversity") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
 
 ## Crab Diversity - simpson ##
-CRBSP.SOII <- ggplot(eg.dat, aes(sea_otter_index, simp_diverse)) +
+CRBSP.SOII <- ggplot(eg.dat, aes(sea_otter_index, simp_diverse_crab)) +
   geom_point(size = 4) +
   labs(x = "Sea otter index", y = "Simpson diversity") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
@@ -458,14 +458,14 @@ CRBT.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, total_crab, col = sea_otter_
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 ## Crab Diversity - shannon weiner ##
-CRBSW.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, shan_diverse, col = sea_otter_index)) +
+CRBSW.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, shan_diverse_crab, col = sea_otter_index)) +
   geom_point(size = 4) +
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Date", y = "S-W diversity") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 ## Crab Diversity - simpson ##
-CRBSP.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, simp_diverse, col = sea_otter_index)) +
+CRBSP.JDAY <- ggplot(eg.dat, aes(date_pulled_julian, simp_diverse_crab, col = sea_otter_index)) +
   geom_point(size = 4) +
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Date", y = "Simpson diversity") +
@@ -495,13 +495,13 @@ FSHT.SOII <- ggplot(eg.dat, aes(sea_otter_index, total_fish)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
 
 ## Fish Diversity - shannon weiner ##
-FSHSW.SOII <- ggplot(eg.dat, aes(sea_otter_index, shan_diverse)) +
+FSHSW.SOII <- ggplot(eg.dat, aes(sea_otter_index, shan_diverse_fish)) +
   geom_point(size = 4) +
   labs(x = "Sea otter index", y = "S-W diversity") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
 
 ## Fish Diversity - simpson ##
-FSHSP.SOII <- ggplot(eg.dat, aes(sea_otter_index, simp_diverse)) +
+FSHSP.SOII <- ggplot(eg.dat, aes(sea_otter_index, simp_diverse_fish)) +
   geom_point(size = 4) +
   labs(x = "Sea otter index", y = "Simpson diversity") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
@@ -535,15 +535,6 @@ FSHSP.JDAY <- ggplot(eg.dat, aes(date_julian, simp_diverse, col = sea_otter_inde
 
 ## Secondary Analyses
 Beyond the main hypothesis of the looking at sea otters, we are interested in other relationships between and among differnet species, functional groups, sea otter and time.
-
-For these expoloratory analyses we will need to merge all the data.
-```{r merga all data}
-# add fish
-eg.dat <- merge(eg.dat, fish.dat, by = "site")
-
-# add crabs
-eg.dat <- merge(eg.dat, crab.dat, by = "site")
-```
 
 There are a lot of potnetial combinations, but here are ones that we are particulary interested in and/or we suspect there might be an interesting relationship based off literature/exerience.
 
