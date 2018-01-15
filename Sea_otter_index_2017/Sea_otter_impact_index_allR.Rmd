@@ -153,7 +153,7 @@ site.dat$dens_surv2 <- site.dat$n_surv2 / site.dat$area
 ```
 
 Lets view the final table.
-```{r view final table}
+```{r}
 DT::datatable(site.dat, caption = "Sea otter survey data")
 ```
 
@@ -205,7 +205,7 @@ site.dat$sea_otter_duration[is.na(site.dat$sea_otter_duration)] <- 7
 ```
 
 Lets view the final table
-```{r view final table}
+```{r}
 DT::datatable(site.dat)
 ```
 
@@ -269,7 +269,7 @@ site.dat$pop_mod_dens <- ifelse(match(site.dat$site, dens$site), dens$dens)
 ```
 
 Lets view the final table
-```{r view final table}
+```{r}
 DT::datatable(site.dat)
 ```
 
@@ -329,7 +329,7 @@ Congratulaiton! You can calculated and complied all the data you need to actuall
 ## Data
 You will need the data frame that we have been building above "site.dat"
 Lets view the final table
-```{r view final table}
+```{r}
 DT::datatable(site.dat)
 ```
 
