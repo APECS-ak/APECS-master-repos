@@ -528,19 +528,19 @@ Summary from clam and pit surveys.
 **Sea otter pits**
 ```{r pits - site variation, echo = FALSE, fig.width=10,fig.height=11}
 pit.sum <- pit %>%
-  group_by(Site, Transect) %>% 
-  summarise(pits = mean(PitBin),
-            pits_se = st.er(PitBin))
+  group_by(site, trans_bin) %>% 
+  summarise(pits = mean(pit_bin),
+            pits_se = st.er(pit_bin))
 
 pit.sum <- pit.sum[2:64,] # remove NA row
 
 # quick plot
-ggplot(pit.sum, aes(Transect, pits, fill = Transect)) +
+ggplot(pit.sum, aes(trans_bin, pits, fill = trans_bin)) +
   geom_col() +
-  geom_errorbar(aes(x = Transect, ymin = pits - pits_se, ymax = pits + pits_se), width = 0) +
+  geom_errorbar(aes(x = trans_bin, ymin = pits - pits_se, ymax = pits + pits_se), width = 0) +
   labs(x = "Transect", y = "Pits +/- se") +
   theme(axis.text.x = element_text(angle = 90)) +
-  facet_wrap(~Site)
+  facet_wrap(~site)
 ```
 
 **Clams**
@@ -561,18 +561,18 @@ ggplot(clam.sum, aes(x = Transect, y = prop_death, fill = Death)) +
 **Sediments** Sediment value corresponds to size category. Smaller the number, smaller the grain size. 
 ```{r, echo = FALSE, fig.width=10,fig.height=11}
 sed.sum <- pit %>%
-  group_by(Site, Transect) %>% 
-  summarise(sed = mean(Sed_avg),
-            sed_se = st.er(Sed_avg))
+  group_by(site, trans_bin) %>% 
+  summarise(sed = mean(sedno_avg),
+            sed_se = st.er(sedno_avg))
 
 sed.sum <- sed.sum[2:64,] # remove NA row
 
 # quick plot
-ggplot(sed.sum, aes(Transect, sed, fill = Transect)) +
+ggplot(sed.sum, aes(trans_bin, sed, fill = trans_bin)) +
   geom_col() +
-  geom_errorbar(aes(x = Transect, ymin = sed - sed_se, ymax = sed + sed_se), width = 0) +
+  geom_errorbar(aes(x = trans_bin, ymin = sed - sed_se, ymax = sed + sed_se), width = 0) +
   labs(x = "Transect", y = "Sediment +/- se") +
   theme(axis.text.x = element_text(angle = 90)) +
-  facet_wrap(~Site)
+  facet_wrap(~site)
 ```
 
