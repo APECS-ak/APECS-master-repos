@@ -1,0 +1,237 @@
+---
+title: "Eelgrass_biometrics_data_analysis"
+author: "Wendel Raymond"
+date: "January 16, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Eelgrass data for analysis
+This script generates a dataframe from the eelgrass biometrics data that will be ready for analysis. In genreal nothing will be summerized, data will report values from each replicate at each site.
+
+```{r, echo=FALSE, message = FALSE, warning=FALSE}
+library(dplyr)
+```
+
+
+## Data
+Data to include here are the eelgrass biometrics data, the sea otter index values, general site level data, and sediment charteriation from the inside the bed transect.
+
+```{r}
+# Eelgrass Site
+eg.site <- read.csv("../ALL_DATA/seagrass_site_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+# Eelgrass Biometrics (lab data)
+eg.bio <- read.csv("../ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+
+# Eelgrass Transect
+eg.tran <- read.csv("../ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+# Sea Otter Impact Index
+so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
+
+# Sediment
+sed.site <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+``` 
+
+## Sediment data
+We will use the primary sediment from the inside transect in each bin at each site.
+```{r}
+seds <- sed.site %>% 
+  filter(trans_type == "Inside")
+
+seds <- seds[, c(1, 5, 8, 10)]
+```
+
+## Biometric calculations
+We need to calcualte things using transect and biometric data. The results will be values at the quadrat level.
+
+We will start with biometric calculations
+```{r}
+### Effective Leaf Area ###
+eg.bio$leaf_area1 <- (eg.bio$leaf_length1 * eg.bio$leaf_width1)
+eg.bio$leaf_area2 <- (eg.bio$leaf_length2 * eg.bio$leaf_width2)
+eg.bio$leaf_area3 <- (eg.bio$leaf_length3 * eg.bio$leaf_width3)
+eg.bio$leaf_area4 <- (eg.bio$leaf_length4 * eg.bio$leaf_width4)
+eg.bio$leaf_area5 <- (eg.bio$leaf_length5 * eg.bio$leaf_width5)
+eg.bio$leaf_area6 <- (eg.bio$leaf_length6 * eg.bio$leaf_width6)
+eg.bio$leaf_area7 <- (eg.bio$leaf_length7 * eg.bio$leaf_width7)
+eg.bio$leaf_area8 <- (eg.bio$leaf_length8 * eg.bio$leaf_width8)
+eg.bio$leaf_area9 <- (eg.bio$leaf_length9 * eg.bio$leaf_width9)
+eg.bio$leaf_area10 <- (eg.bio$leaf_length10 * eg.bio$leaf_width10)
+
+eg.bio$leaf_areaT <- rowSums(eg.bio[, 72:81], na.rm = TRUE)
+
+### Epiphytes, Rhizomes, and Shoots Mass ###
+## Epiphyte Mass ##
+eg.bio$epi_mass <- (eg.bio$pad_epiphyte_mass_g - eg.bio$pad_mass_g)
+
+## Rhizome Mass ##
+eg.bio$rhi_mass <- ((eg.bio$rhi_foil_dw_g - eg.bio$rhi_foil) * (5 / eg.bio$rhi_length))
+
+## Shoot Mass ##
+eg.bio$shoot_mass <- (eg.bio$shoot_foil_dw - eg.bio$shoot_foil)
+
+## Exess Shoot Mass ##
+eg.bio$exshoot_mass <- (eg.bio$xs_shoot_foil_dw - eg.bio$xs_shoot_foil)
+
+## Exess Epiphyte Mass ##
+eg.bio$exepi_mass <- (eg.bio$xs_epiphyte_pad_mass_g - eg.bio$xs_pad_mass_g)
+
+### Grazer Mass ###
+## Isopod (Idothea rascata) Mass - bulk ##
+eg.bio$iso_mass <- (eg.bio$iso_foil_dw - eg.bio$iso_foil)
+
+## Gammarid Amphipod Mass - bulk ##
+eg.bio$gamm_mass <- (eg.bio$gamm_amph_foil_dw - eg.bio$gamm_amph_foil)
+
+## Caprellid Amphipod Mass - bulk ##
+eg.bio$caprel_mass <- (eg.bio$caprel_foil_dw - eg.bio$caprel_foil)
+
+## Limpet Mass - bulk ##
+eg.bio$limp_mass <- (eg.bio$limpet_foil_dw - eg.bio$limpet_foil)
+
+## Other Gastropod Mass - bulk ##
+eg.bio$gast_mass <- (eg.bio$gastropod_foil_dw - eg.bio$gastropod_foil)
+
+## Crab Mass ##
+eg.bio$crab_mass <- (eg.bio$crab_foil_dw - eg.bio$crab_foil)
+
+## Fill absent grazers with 0s so that cacluations below will work ##
+eg.bio[,88:93][is.na(eg.bio[,88:93])] <- 0
+
+### Taxamonic summaries of grazers ###
+
+## Crustacean Grazers Mass ##
+eg.bio$crust_mass <- (eg.bio$iso_mass + eg.bio$gamm_mass +  eg.bio$caprel_mass + eg.bio$crab_mass)
+
+## Gastropod Grazers Mass ##
+eg.bio$gastro_mass <- (eg.bio$limp_mass + eg.bio$gast_mass)
+
+## Total Grazer Mass ##
+eg.bio$graz_massT <- rowSums(eg.bio[, 88:93], na.rm = TRUE)
+```
+
+Transect basic calculations
+```{r calculations - transect}
+## Convert Transect data to per meter ##
+eg.tran$eelgrass_shoots_msq <- (4 * eg.tran$eelgrass_shoots_0.25msq)
+eg.tran$flowering_shoots_msq <- (4 * eg.tran$flowering_shoots_0.25msq)
+eg.tran$macroalgae_cover_msq <- (1 * eg.tran$macroalgae_cover_0.25msq)
+eg.tran$diatom_cover_msq <- (1 * eg.tran$diatom_cover_0.25msq)
+```
+
+Summarizing biometrics data by site and quadrat
+```{r biometrics - site, quadrat summaries}
+## Biometrics data summarized by site and quadrat - shoots and rhizomes ##
+quad.bio <- data.frame(
+  eg.bio %>% 
+    group_by(site, quadrat) %>% 
+    summarise(s_shoot_area = mean(leaf_areaT, na.rm = TRUE),
+              s_epi_mass = mean(epi_mass, na.rm = TRUE),
+              s_shoot_mass = mean(shoot_mass, na.rm = TRUE),
+              s_rhi_mass = mean(rhi_mass, na.rm = TRUE),
+              s_node1 = mean(node1, na.rm = TRUE),
+              s_node2 = mean(node2, na.rm = TRUE),
+              s_node3 = mean(node3, na.rm = TRUE),
+              s_node4 = mean(node4, na.rm = TRUE),
+              s_node5 = mean(node5, na.rm = TRUE),
+              s_exshoot_mass = mean(exshoot_mass, na.rm = TRUE),
+              s_exepi_mass = mean(exepi_mass, na.rm = TRUE))
+)
+```
+
+Separating grazers. Since we pooled grazers at the quadrat level that data needs to be pulled out of the master biometrics data and summarized separatly.
+```{r biometrics - grazers}
+# Extract Grazer biomasses
+quad.graz <- data.frame(eg.bio[eg.bio$plant == 1,]) # extract just plant 1 which has all the grazer data
+quad.graz <- quad.graz[order(quad.graz[,1], quad.graz[,4]),] # order so that it matches everything else
+quad.graz <- data.frame(quad.graz[,c(1, 4, 88:96)]) # reduce to get grazer data only
+quad.graz[is.na(quad.graz)] <- 0 # turn NAs to 0s becasue if we sampled everything so if it was not there its a 0
+```
+
+Now we can merege transect and biometric data to summaries by site and quadrat.
+```{r merge tansect and biometrics data}
+## Combined Transect and Biometrics data to give site summaries ##
+site.quad <- merge(eg.site[,c(1, 2)], eg.tran, by = "site")
+site.quad <- merge(site.quad, quad.bio, by = c("site", "quadrat"))
+site.quad <- merge(site.quad, quad.graz, by = c("site", "quadrat"))
+```
+
+Now we can preform quadrat calculations at the quadrat level.
+```{r calculation - quadrat level}
+### Quadrat level caclulations ###
+## Aboveground Biomass ##
+site.quad$ag_mass <- (site.quad$eelgrass_shoots_msq * site.quad$s_shoot_mass)
+
+## Below Ground Biomass ##
+site.quad$bg_mass <- (site.quad$eelgrass_shoots_msq * site.quad$s_rhi_mass)
+
+## Epiphytes per eeglrass area ##
+site.quad$epimass_shootarea <- (site.quad$s_epi_mass / site.quad$s_shoot_area)
+
+## Epiphytes per eelgrass mass ##
+site.quad$epimass_shootmass <- (site.quad$s_epi_mass / site.quad$s_shoot_mass)
+
+## Grazer Mass per Quadrat ##
+# this is just equal to graz_massT
+
+## Grazer mass per eelgrass mass ##
+site.quad$grazmass_shootmass <- (site.quad$graz_massT / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
+
+## Crustacean mass per eelgrass mass ##
+site.quad$crustmass_shootmass <- (site.quad$crust_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
+
+## Gastropod mass per eelgrass mass ##
+site.quad$gastromass_shootmass <- (site.quad$gastro_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass)) 
+```
+
+## Merging
+Use caution when merging.
+
+First we need to create continuity between "bins" and "quadrats". Everything will be renamed to quadrat. Also this needs to be converted to a numeric just to make sorting easier.
+```{r}
+colnames(seds)[2] <- "quadrat"
+
+seds$quadrat <- as.numeric(seds$quadrat)
+
+site.quad$quadrat <- as.numeric(site.quad$quadrat)
+```
+
+Now create a starter dataframe with all the site data. This includes cleaning up the site level data etc. This should be 210 rows long (deep?)
+```{r}
+# Data we care about
+dat <- eg.site[, 1:27]
+
+# light attenuation
+dat$light_attenu <- dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface
+
+# Date shananagans
+dat$date <- as.Date(dat$date, format = "%m/%d/%Y")
+dat$date_julian <- format(dat$date, "%j")
+```
+
+Append sea otter index values
+```{r}
+dat <- merge(dat, so.index[, c(1, 8:16)], by = "site")
+```
+
+The actual merge
+```{r}
+dat <- merge(dat, seds, by = "site")
+dat <- merge(dat, site.quad[, c(1, 2, 8:46)], by = c("site", "quadrat"), all = TRUE)
+
+colnames(dat)[7] <- "start_time_site"
+colnames(dat)[8] <- "end_time_site"
+colnames(dat)[42] <- "start_time_transect"
+colnames(dat)[43] <- "end_time_transect"
+
+str(dat)
+```
+
+### Export
+```{r}
+write.csv(dat, "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", row.names = FALSE)
+```
+
