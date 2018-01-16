@@ -30,6 +30,8 @@ Outline
      + Belowground biomass
      + Epiphyte biomass
      + Pits * belowground biomass
+* 6: Investigate outliers
+     + 
 
 <br><br>
 
@@ -581,7 +583,8 @@ df.bio2 <- left_join(df.bio2, trim_leaf_width_mean, by = c("site", "date"))
 
 # need to standardize epiphyte mass per blade area; there is a weak, positive relationship between epiphyte mass per plant and leaf area per plant. 
 df.bio2 <- df.bio2 %>%
-  mutate(epi_mass_leafarea_mg.cm2 = (epiphyte_mass_perplant*1000) / leaf_area_plant)
+  mutate(epi_mass_leafarea_mg.cm2 = (epiphyte_mass_perplant*1000) / leaf_area_plant) %>%
+  mutate(epi_mass_shootmass_g.g = epiphyte_mass_perplant / shoot_mass_perplant)
 
 
 # remove extra DFs to keep working space clean
@@ -935,13 +938,13 @@ df.all$julian_day <- yday(df.all$date)
 ```{r, include = FALSE}
 colnames(df.all)
 
-df.all <- df.all[c('site','site_name','latitude','longitude','date','julian_day','depth_m','so_index','pits_in','pits_edge','pits_out','pits_tot_site','sed1_in','sed1_edge','sed1_out','sed2_in','sed2_edge','sed2_out','sedmean_in','sedmean_edge','sedmean_out','sed1_site','sed2_site','sedmean_site','macroalgae_percent_cover','epiphyte_percent_cover','epiphyte_mass_perplant','epi_mass_leafarea_mg.cm2','flower_density_m2','shoot_mass_perplant','shoot_density_m2','shoot_mass_m2','leaf_length_mean','leaf_length_max','leaf_width_mean','leaf_width_max','leaf_area_blade','leaf_area_plant','rhi_length','rhi_mass_tot','rhi_mass_percm','rhi_mass_percm_m2','node1_length','node2_length','node3_length','node4_length','node5_length','node1_dw','node2_dw','node3_dw','node4_dw','node5_dw','shoot_mass_m2_sd','rhi_mass_percm_m2_sd')]
+df.all <- df.all[c('site','site_name','latitude','longitude','date','julian_day','depth_m','so_index','pits_in','pits_edge','pits_out','pits_tot_site','sed1_in','sed1_edge','sed1_out','sed2_in','sed2_edge','sed2_out','sedmean_in','sedmean_edge','sedmean_out','sed1_site','sed2_site','sedmean_site','macroalgae_percent_cover','epiphyte_percent_cover','epiphyte_mass_perplant','epi_mass_shootmass_g.g','epi_mass_leafarea_mg.cm2','flower_density_m2','shoot_mass_perplant','shoot_density_m2','shoot_mass_m2','leaf_length_mean','leaf_length_max','leaf_width_mean','leaf_width_max','leaf_area_blade','leaf_area_plant','rhi_length','rhi_mass_tot','rhi_mass_percm','rhi_mass_percm_m2','node1_length','node2_length','node3_length','node4_length','node5_length','node1_dw','node2_dw','node3_dw','node4_dw','node5_dw','shoot_mass_m2_sd','rhi_mass_percm_m2_sd')]
 
 
 # we don't need these variables, but waited this long to remove them in case we want them later. Easy recovery.
 #df.all <- within(df.all, rm(shoot_mass_fw))
-df.all <- df.all[, -c(39:40,43:52)] # delete rhi_length, rhi_mass_tot, and all nodes
-colnames(df.all)
+df.all <- df.all[, -c(40:41,44:53)] # delete rhi_length, rhi_mass_tot, and all nodes
+colnames(df.all) # leaf_area_plant and shoot_mass_m2_sd should be there, still
 
 ```
 
@@ -954,6 +957,16 @@ colnames(df.all)
 
 
 ***
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2204,14 +2217,269 @@ cp13 <- plot_grid(p25, p26, labels=c('C', 'D'), align = 'h', ncol=2, nrow=1, rel
 
 plot_grid(title.cp13, cp13, ncol=1, rel_heights=c(0.1, 1))
 ```
-<br><br><br>
+<br><br><br><br><br><br><br>
+
+
+
+
+
+
 
 ***
 
+
+
+
+
+### 5. Outliers
+
+
+5A. Epiphytes per gram of seagrass
+```{r, include = FALSE}
+colnames(df.all)
+
+
+
+
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# rhi_mass_percm_m2
+p27 = ggplot(df.all, aes(sed1_site, epi_mass_shootmass_g.g, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Primary sediment class (site)\n")+ylab("\nEpiphyte biomass (g per g plant, DW)") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p27)
+
+
+#OutVals.p27 = boxplot(df.all$epi_mass_shootmass_g.g)$out
+#which(df.all$epi_mass_shootmass_g.g %in% OutVals)
+
+
+
+
+
+
+
+#### ID outliers here
+
+library(tibble)
+
+# find outliers
+is_outlier <- function(epi_mass_shootmass_g.g) {
+  return(epi_mass_shootmass_g.g < quantile(epi_mass_shootmass_g.g, 0.25) - 1.5 * IQR(epi_mass_shootmass_g.g) | epi_mass_shootmass_g.g > quantile(epi_mass_shootmass_g.g, 0.75) + 1.5 * IQR(epi_mass_shootmass_g.g))
+}
+
+# give labels to outliers (row numbers)
+dat <- df.all %>% tibble::rownames_to_column(var="outlier") %>% group_by(sed1_site) %>%  mutate(is_outlier=ifelse(is_outlier(epi_mass_shootmass_g.g), epi_mass_shootmass_g.g, as.numeric(NA)))
+dat$outlier[which(is.na(dat$is_outlier))] <- as.numeric(NA)
+
+# remove outlier IDs from oulier DF
+outlrs <- dat %>% 
+  select(site, outlier)
+
+# join outlier IDs to df.all
+df.all <- left_join(df.all, outlrs, by = c("site"))
+df.all <- within(df.all, rm(sed1_site.y)) # remove extra sed1_site column that was added during join
+colnames(df.all)[which(names(df.all) == "sed1_site.x")] <- "sed1_site" # revert column name to original
+
+
+# boxplot with labelled outliers
+out.p27 <- ggplot(df.all, aes(sed1_site, epi_mass_shootmass_g.g)) + 
+  geom_boxplot(aes(group = cut_width(df.all$sed1_site, 10))) + 
+  geom_text(aes(label=outlier),na.rm=TRUE,nudge_y=0.05)
+plot(out.p27)
+
+
+df.all[, 28][df.all[, 28] > 0.1] <- NA # remove suggested outliers for sed1_site, only
+
+
+
+
+
+
+
+
+# re-plot without outliers
+p28 = ggplot(df.all, aes(sed1_in, epi_mass_shootmass_g.g, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Primary sediment class (site)\n")+ylab("\nEpiphyte biomass (g per plant, DW)") +
+  #theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p28)
+
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(epi_mass_shootmass_g.g ~ sed1_site, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+
+```
 <br>
 
+```{r, echo = FALSE, warning = FALSE, fig.width = 12, fig.height = 5}
+title.cp14 <- ggdraw() + draw_label("Epiphyte biomass (g per g shoot, DW) * primary sediment type, whole site", fontface='bold')
+
+cp14 <- plot_grid(p27, out.p27, p28, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1, 1, 1.5))
+
+plot_grid(title.cp14, cp14, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+5A. Epiphytes per gram of seagrass
+```{r, include = FALSE}
+colnames(df.all)
+
+
+
+
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# rhi_mass_percm_m2
+p27 = ggplot(df.all, aes(sed1_site, epi_mass_shootmass_g.g, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Primary sediment class (site)\n")+ylab("\nEpiphyte biomass (g per g plant, DW)") +
+  theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p27)
+
+
+#OutVals.p27 = boxplot(df.all$epi_mass_shootmass_g.g)$out
+#which(df.all$epi_mass_shootmass_g.g %in% OutVals)
+
+
+
+
+
+
+
+#### ID outliers here
+
+library(tibble)
+
+# find outliers
+is_outlier <- function(epi_mass_shootmass_g.g) {
+  return(epi_mass_shootmass_g.g < quantile(epi_mass_shootmass_g.g, 0.25) - 1.5 * IQR(epi_mass_shootmass_g.g) | epi_mass_shootmass_g.g > quantile(epi_mass_shootmass_g.g, 0.75) + 1.5 * IQR(epi_mass_shootmass_g.g))
+}
+
+# give labels to outliers (row numbers)
+dat <- df.all %>% tibble::rownames_to_column(var="outlier") %>% group_by(sed1_site) %>%  mutate(is_outlier=ifelse(is_outlier(epi_mass_shootmass_g.g), epi_mass_shootmass_g.g, as.numeric(NA)))
+dat$outlier[which(is.na(dat$is_outlier))] <- as.numeric(NA)
+
+# remove outlier IDs from oulier DF
+outlrs <- dat %>% 
+  select(site, outlier)
+
+# join outlier IDs to df.all
+df.all <- left_join(df.all, outlrs, by = c("site"))
+df.all <- within(df.all, rm(sed1_site.y)) # remove extra sed1_site column that was added during join
+colnames(df.all)[which(names(df.all) == "sed1_site.x")] <- "sed1_site" # revert column name to original
+
+
+# boxplot with labelled outliers
+out.p27 <- ggplot(df.all, aes(sed1_site, epi_mass_shootmass_g.g)) + 
+  geom_boxplot(aes(group = cut_width(df.all$sed1_site, 10))) + 
+  geom_text(aes(label=outlier),na.rm=TRUE,nudge_y=0.05)
+plot(out.p27)
+
+
+df.all[, 28][df.all[, 28] > 0.1] <- NA # remove suggested outliers for sed1_site, only
+
+
+
+
+
+
+
+
+# re-plot without outliers
+p28 = ggplot(df.all, aes(sed1_in, epi_mass_shootmass_g.g, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  xlab("Primary sediment class (site)\n")+ylab("\nEpiphyte biomass (g per plant, DW)") +
+  #theme(legend.position="none") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p28)
+
+
+
+
+# look at fit of linear regression: density, qq-norm
+m1 <- lm(epi_mass_shootmass_g.g ~ sed1_site, data = df.all) # create a linear model
+r1 <- resid(m1) # list of model residuals
+plot(density(resid(m1))) # density plot
+qqnorm(resid(m1)) # quantile normal plot - good for checking normality
+qqline(resid(m1))
+summary(m1)
+
+
+```
+<br>
+
+```{r, echo = FALSE, warning = FALSE, fig.width = 12, fig.height = 5}
+title.cp14 <- ggdraw() + draw_label("Epiphyte biomass (g per g shoot, DW) * primary sediment type, whole site", fontface='bold')
+
+cp14 <- plot_grid(p27, out.p27, p28, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1, 1, 1.5))
+
+plot_grid(title.cp14, cp14, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
 
 
 
