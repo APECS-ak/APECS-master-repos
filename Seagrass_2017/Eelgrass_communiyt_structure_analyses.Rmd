@@ -1,0 +1,144 @@
+---
+title: "Eelgrass_community_structure_analyses"
+author: "Wendel Raymond"
+date: "January 16, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r libraries}
+library(ggplot2)
+
+theme_set(theme_classic())
+```
+
+
+# Analyses for testing hypotheses related to eelgrass community structure
+**Question** 
+What is the structure of eelgrass communities across a gradient of sea otter impacts?
+
+**Overall Hypothesis**
+If top-down (sea otter) forces are structuring eelgrass communities, then we would expect alternating relative abundance from trophic level to trophic level.
+
+## Outline
+1. Description of data
+2. Testing assumptions
+    + normality
+    + co-linearity
+3. Models
+
+## 1. Data
+**Response metrics**
+1. eelgrass shoot density (count / m^2^)
+2. eelgrass aboveground biomass density (g / m^2^)
+3. eelgrass belowground biomass density (g / m^2^)
+4. ratio of aboveground to belowground biomass density (g / m^2^)
+5. epiphyte load (g epiphyte / g eelgrass)
+6. total grazer load (g grazers/ g eelgrass)
+    + gastropod load (g grazers/ g eelgrass)
+    + crustaecean load (g grazers/ g eelgrass)
+7. crab biomass (g)
+8. fish standarized by ... candidates are length, gape size, biomass
+
+**Primary explanatory factors**
+Not all these fators will necessarily be used in all models
+1. Time
+2. Sediment type (primary sediment type from the "inside" eelgrass transect)
+3. Percent light
+
+**Secondary explanatory factors**
+Factors that are more specific to certain tests
+1. crab biomass (g)
+2. fish
+
+```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
+eg.graz <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+## 2. Testing assumptions
+
+### Normality
+Response metrics should have approximatley normal distribution.
+
+Eelgrass shoot density appears reasonably normal. 
+```{r shoot dens normality}
+## Raw data ##
+ggplot(eg.graz, aes(eelgrass_shoots_msq)) +
+  geom_histogram() +
+  labs(x = "Eelgrass shoot density", y = "Counts")
+
+qqnorm(eg.graz$eelgrass_shoots_msq)
+qqline(eg.graz$eelgrass_shoots_msq, lwd = 2)
+```
+
+Aboveground biomass shows some right skewness suggesting ln transformation. Log transformation was not super great. However square roor transformation appears more helpful.
+```{r ag normality}
+## Raw data ##
+ggplot(eg.graz, aes(ag_mass)) +
+  geom_histogram() +
+  labs(x = "Aboveground biomass", y = "Counts")
+
+qqnorm(eg.graz$ag_mass)
+qqline(eg.graz$ag_mass, lwd = 2)
+
+## ln transformed ##
+ggplot(eg.graz, aes(log(ag_mass))) +
+  geom_histogram() +
+  labs(x = "log Aboveground biomass", y = "Counts")
+
+qqnorm(log(eg.graz$ag_mass))
+qqline(log(eg.graz$ag_mass), lwd = 2)
+
+## sqrt transformation ##
+ggplot(eg.graz, aes(sqrt(ag_mass))) +
+  geom_histogram() +
+  labs(x = "sqrt Aboveground biomass", y = "Counts")
+
+qqnorm(sqrt(eg.graz$ag_mass))
+qqline(sqrt(eg.graz$ag_mass), lwd = 2)
+```
+
+Belowground biomass also shows right skewness. Both log and square root tranformations improve normality.
+```{r bg normality}
+## Raw data ##
+ggplot(eg.graz, aes(bg_mass)) +
+  geom_histogram() +
+  labs(x = "Belowground biomass", y = "Counts")
+
+qqnorm(eg.graz$bg_mass)
+qqline(eg.graz$bg_mass, lwd = 2)
+
+## ln transformed ##
+ggplot(eg.graz, aes(log(bg_mass))) +
+  geom_histogram() +
+  labs(x = "log Belowground biomass", y = "Counts")
+
+qqnorm(log(eg.graz$bg_mass))
+qqline(log(eg.graz$bg_mass), lwd = 2)
+
+## sqrt transformation ##
+ggplot(eg.graz, aes(sqrt(bg_mass))) +
+  geom_histogram() +
+  labs(x = "sqrt belowground biomass", y = "Counts")
+
+qqnorm(sqrt(eg.graz$bg_mass))
+qqline(sqrt(eg.graz$bg_mass), lwd = 2)
+```
+
+Ration of above to belowground biomass also appears right skewed.
+```{r agbg normality}
+## Raw data ##
+ggplot(eg.graz, aes(ag_mass / bg_mass)) +
+  geom_histogram() +
+  labs(x = "AG:BG biomass", y = "Counts")
+
+qqnorm(eg.graz$ag_mass / eg.graz$bg_mass)
+qqline(eg.graz$ag_mass / eg.graz$bg_mass, lwd = 2)
+
+## ln transformed ##
+ggplot(eg.graz, aes(log(ag_mass / bg_mass))) +
+  geom_histogram() +
+  labs(x = "log AG:BG biomass", y = "Counts")
+```
+
