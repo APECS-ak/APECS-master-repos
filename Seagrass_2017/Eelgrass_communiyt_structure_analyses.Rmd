@@ -9,6 +9,7 @@ editor_options:
 
 ```{r libraries}
 library(ggplot2)
+library(dplyr)
 
 theme_set(theme_classic())
 ```
@@ -59,13 +60,18 @@ tran.dat <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", heade
 ## 2. Testing assumptions
 
 ### Normality
-Response metrics should have approximatley normal distribution.
+Response metrics should have approximatley normal distribution. For this exploration we can omit the NA rows that allowed for merging with sediment data. We will also omit the April sites (L01 and H01). Resulting data frame should have 19 X 9 rows = 152
+```{r}
+tran.dat <- tran.dat %>% 
+  filter(site != "2017_L_01" & site != "2017_H_01") %>% 
+  filter(quadrat < 9)
+```
 
 Eelgrass shoot density appears reasonably normal but fails SW test. Further test indicate that sqrt transformation achives normality.
 ```{r shoot dens normality}
 ## Raw data ##
 ggplot(tran.dat, aes(eelgrass_shoots_msq)) +
-  geom_histogram(binwidth = 10) +
+  geom_histogram(bins = 10) +
   labs(x = "Eelgrass shoot density", y = "Counts")
 
 qqnorm(tran.dat$eelgrass_shoots_msq)
@@ -75,7 +81,7 @@ shapiro.test(tran.dat$eelgrass_shoots_msq)
 
 ## ln transformation ##
 ggplot(tran.dat, aes(log(eelgrass_shoots_msq))) +
-  geom_histogram(binwidth = 0.1) +
+  geom_histogram(bins = 10) +
   labs(x = "log Eelgrass shoot density", y = "Counts")
 
 qqnorm(log(tran.dat$eelgrass_shoots_msq))
@@ -160,7 +166,7 @@ qqline(sqrt(tran.dat$bg_mass), lwd = 2)
 shapiro.test(sqrt(tran.dat$bg_mass))
 ```
 
-Ration of above to belowground biomass also appears right skewed. SW test indicates that log transformation is best.
+Ratio of above to belowground biomass also appears right skewed. SW test indicates that log transformation is best.
 ```{r agbg normality}
 ## Raw data ##
 ggplot(tran.dat, aes(ag_mass / bg_mass)) +
@@ -191,7 +197,7 @@ qqline(sqrt(tran.dat$ag_mass / tran.dat$bg_mass), lwd = 2)
 shapiro.test(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
 ```
 
-Epiphyte load
+Epiphyte load. This one is a bit tricky, any sort of tranformation does not deal with the outliers well. 
 ```{r epi load normality}
 ## Raw data ##
 ggplot(tran.dat, aes(epimass_shootmass)) +
@@ -202,23 +208,88 @@ qqnorm(tran.dat$epimass_shootmass)
 qqline(tran.dat$epimass_shootmass, lwd = 2)
 
 ## ln transformed ##
-ggplot(tran.dat, aes(log(epimass_shootmass))) +
+ggplot(tran.dat, aes(log(epimass_shootmass + 0.1))) +
   geom_histogram() +
   labs(x = "log Epiphyte load", y = "Counts")
 
-qqnorm(log(tran.dat$epimass_shootmass))
-qqline(log(tran.dat$epimass_shootmass), lwd = 2)
+qqnorm(log(tran.dat$epimass_shootmass + 0.1))
+qqline(log(tran.dat$epimass_shootmass + 0.1), lwd = 2)
 
-shapiro.test(log(tran.dat$ag_mass / tran.dat$bg_mass))
+shapiro.test(log(tran.dat$epimass_shootmass + 0.1))
 
 ## sqrt transformation ##
-ggplot(tran.dat, aes(sqrt(ag_mass / bg_mass))) +
+ggplot(tran.dat, aes(sqrt(epimass_shootmass))) +
   geom_histogram() +
-  labs(x = "sqrt AG:BG biomass", y = "Counts")
+  labs(x = "sqrt Epiphyte load", y = "Counts")
 
-qqnorm(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
-qqline(sqrt(tran.dat$ag_mass / tran.dat$bg_mass), lwd = 2)
+qqnorm(sqrt(tran.dat$epimass_shootmass))
+qqline(sqrt(tran.dat$epimass_shootmass), lwd = 2)
 
-shapiro.test(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
+shapiro.test(sqrt(tran.dat$epimass_shootmass))
 ```
 
+Grazer load does not respond well to any transformation. Given the distribution of the raw data it may be best to keep it the way it is.
+```{r grazer load normality}
+## raw data ##
+ggplot(tran.dat, aes(grazmass_shootmass)) +
+  geom_histogram(bins = 20) +
+  labs(x = "Grazer load", y = "Count")
+
+## ln transformation ##
+ggplot(tran.dat, aes(log(grazmass_shootmass + 0.1))) +
+  geom_histogram(bins = 10) +
+  labs(x = " log Grazer load", y = "Count")
+
+shapiro.test(log(tran.dat$grazmass_shootmass + 0.1))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(grazmass_shootmass))) +
+  geom_histogram(bins = 10) +
+  labs(x = " sqrt Grazer load", y = "Count")
+
+shapiro.test(sqrt(tran.dat$grazmass_shootmass))
+```
+
+Gastropod load also does not respond super well to transformations.
+```{r gastropod load normality}
+## raw data ##
+ggplot(tran.dat, aes(gastromass_shootmass)) +
+  geom_histogram(bins = 20) +
+  labs(x = "Grazer load", y = "Count")
+
+## ln transformation ##
+ggplot(tran.dat, aes(log(gastromass_shootmass + 0.1))) +
+  geom_histogram(bins = 10) +
+  labs(x = " log Grazer load", y = "Count")
+
+shapiro.test(log(tran.dat$gastromass_shootmass + 0.1))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(gastromass_shootmass))) +
+  geom_histogram(bins = 10) +
+  labs(x = " sqrt Grazer load", y = "Count")
+
+shapiro.test(sqrt(tran.dat$gastromass_shootmass))
+```
+
+Crustacean load also does not respond super well to transformations.
+```{r}
+## raw data ##
+ggplot(tran.dat, aes(crustmass_shootmass)) +
+  geom_histogram(bins = 20) +
+  labs(x = "Grazer load", y = "Count")
+
+## ln transformation ##
+ggplot(tran.dat, aes(log(crustmass_shootmass + 0.1))) +
+  geom_histogram(bins = 10) +
+  labs(x = " log Grazer load", y = "Count")
+
+shapiro.test(log(tran.dat$crustmass_shootmass + 0.1))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(crustmass_shootmass))) +
+  geom_histogram(bins = 10) +
+  labs(x = " sqrt Grazer load", y = "Count")
+
+shapiro.test(sqrt(tran.dat$crustmass_shootmass))
+```
