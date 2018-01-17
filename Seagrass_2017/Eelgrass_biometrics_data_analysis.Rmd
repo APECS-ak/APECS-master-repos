@@ -128,17 +128,17 @@ Summarizing biometrics data by site and quadrat
 quad.bio <- data.frame(
   eg.bio %>% 
     group_by(site, quadrat) %>% 
-    summarise(s_shoot_area = mean(leaf_areaT, na.rm = TRUE),
-              s_epi_mass = mean(epi_mass, na.rm = TRUE),
-              s_shoot_mass = mean(shoot_mass, na.rm = TRUE),
-              s_rhi_mass = mean(rhi_mass, na.rm = TRUE),
-              s_node1 = mean(node1, na.rm = TRUE),
-              s_node2 = mean(node2, na.rm = TRUE),
-              s_node3 = mean(node3, na.rm = TRUE),
-              s_node4 = mean(node4, na.rm = TRUE),
-              s_node5 = mean(node5, na.rm = TRUE),
-              s_exshoot_mass = mean(exshoot_mass, na.rm = TRUE),
-              s_exepi_mass = mean(exepi_mass, na.rm = TRUE))
+    summarise(shoot_area = mean(leaf_areaT, na.rm = TRUE),
+              epi_mass = mean(epi_mass, na.rm = TRUE),
+              shoot_mass = mean(shoot_mass, na.rm = TRUE),
+              rhi_mass = mean(rhi_mass, na.rm = TRUE),
+              node1 = mean(node1, na.rm = TRUE),
+              node2 = mean(node2, na.rm = TRUE),
+              node3 = mean(node3, na.rm = TRUE),
+              node4 = mean(node4, na.rm = TRUE),
+              node5 = mean(node5, na.rm = TRUE),
+              exshoot_mass = mean(exshoot_mass, na.rm = TRUE),
+              exepi_mass = mean(exepi_mass, na.rm = TRUE))
 )
 ```
 
@@ -163,28 +163,31 @@ Now we can preform quadrat calculations at the quadrat level.
 ```{r calculation - quadrat level}
 ### Quadrat level caclulations ###
 ## Aboveground Biomass ##
-site.quad$ag_mass <- (site.quad$eelgrass_shoots_msq * site.quad$s_shoot_mass)
+site.quad$ag_mass <- (site.quad$eelgrass_shoots_msq * site.quad$shoot_mass)
 
 ## Below Ground Biomass ##
-site.quad$bg_mass <- (site.quad$eelgrass_shoots_msq * site.quad$s_rhi_mass)
+site.quad$bg_mass <- (site.quad$eelgrass_shoots_msq * site.quad$rhi_mass)
 
 ## Epiphytes per eeglrass area ##
-site.quad$epimass_shootarea <- (site.quad$s_epi_mass / site.quad$s_shoot_area)
+site.quad$epimass_shootarea <- ((site.quad$epi_mass + site.quad$exepi_mass) / site.quad$shoot_area)
 
 ## Epiphytes per eelgrass mass ##
-site.quad$epimass_shootmass <- (site.quad$s_epi_mass / site.quad$s_shoot_mass)
+site.quad$epimass_shootmass <- ((site.quad$epi_mass + site.quad$exepi_mass) / site.quad$shoot_mass)
+
+## Total leaf area ##
+site.quad$shoot_areaT <- (site.quad$shoot_area * site.quad$eelgrass_shoots_msq)
 
 ## Grazer Mass per Quadrat ##
 # this is just equal to graz_massT
 
 ## Grazer mass per eelgrass mass ##
-site.quad$grazmass_shootmass <- (site.quad$graz_massT / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
+site.quad$grazmass_shootmass <- (site.quad$graz_massT / (site.quad$shoot_mass + site.quad$exshoot_mass))
 
 ## Crustacean mass per eelgrass mass ##
-site.quad$crustmass_shootmass <- (site.quad$crust_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
+site.quad$crustmass_shootmass <- (site.quad$crust_mass / (site.quad$shoot_mass + site.quad$exshoot_mass))
 
 ## Gastropod mass per eelgrass mass ##
-site.quad$gastromass_shootmass <- (site.quad$gastro_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass)) 
+site.quad$gastromass_shootmass <- (site.quad$gastro_mass / (site.quad$shoot_mass + site.quad$exshoot_mass)) 
 ```
 
 ## Merging
@@ -220,7 +223,7 @@ dat <- merge(dat, so.index[, c(1, 8:16)], by = "site")
 The actual merge
 ```{r}
 dat <- merge(dat, seds, by = "site")
-dat <- merge(dat, site.quad[, c(1, 2, 8:46)], by = c("site", "quadrat"), all = TRUE)
+dat <- merge(dat, site.quad[, c(1, 2, 8:47)], by = c("site", "quadrat"), all = TRUE)
 
 colnames(dat)[7] <- "start_time_site"
 colnames(dat)[8] <- "end_time_site"
