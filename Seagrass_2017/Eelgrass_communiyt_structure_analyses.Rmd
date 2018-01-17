@@ -53,7 +53,7 @@ Factors that are more specific to certain tests
 2. fish
 
 ```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
-eg.graz <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+tran.dat <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ## 2. Testing assumptions
@@ -64,161 +64,161 @@ Response metrics should have approximatley normal distribution.
 Eelgrass shoot density appears reasonably normal but fails SW test. Further test indicate that sqrt transformation achives normality.
 ```{r shoot dens normality}
 ## Raw data ##
-ggplot(eg.graz, aes(eelgrass_shoots_msq)) +
+ggplot(tran.dat, aes(eelgrass_shoots_msq)) +
   geom_histogram(binwidth = 10) +
   labs(x = "Eelgrass shoot density", y = "Counts")
 
-qqnorm(eg.graz$eelgrass_shoots_msq)
-qqline(eg.graz$eelgrass_shoots_msq, lwd = 2)
+qqnorm(tran.dat$eelgrass_shoots_msq)
+qqline(tran.dat$eelgrass_shoots_msq, lwd = 2)
 
-shapiro.test(eg.graz$eelgrass_shoots_msq)
+shapiro.test(tran.dat$eelgrass_shoots_msq)
 
 ## ln transformation ##
-ggplot(eg.graz, aes(log(eelgrass_shoots_msq))) +
+ggplot(tran.dat, aes(log(eelgrass_shoots_msq))) +
   geom_histogram(binwidth = 0.1) +
   labs(x = "log Eelgrass shoot density", y = "Counts")
 
-qqnorm(log(eg.graz$eelgrass_shoots_msq))
-qqline(log(eg.graz$eelgrass_shoots_msq), lwd = 2)
+qqnorm(log(tran.dat$eelgrass_shoots_msq))
+qqline(log(tran.dat$eelgrass_shoots_msq), lwd = 2)
 
-shapiro.test(log(eg.graz$eelgrass_shoots_msq))
+shapiro.test(log(tran.dat$eelgrass_shoots_msq))
 
 ## sqrt transfrormation ##
-ggplot(eg.graz, aes(sqrt(eelgrass_shoots_msq))) +
+ggplot(tran.dat, aes(sqrt(eelgrass_shoots_msq))) +
   geom_histogram(binwidth = 1) +
   labs(x = "sqrt Eelgrass shoot density", y = "Counts")
 
-qqnorm(sqrt(eg.graz$eelgrass_shoots_msq))
-qqline(sqrt(eg.graz$eelgrass_shoots_msq), lwd = 2)
+qqnorm(sqrt(tran.dat$eelgrass_shoots_msq))
+qqline(sqrt(tran.dat$eelgrass_shoots_msq), lwd = 2)
 
-shapiro.test(sqrt(eg.graz$eelgrass_shoots_msq))
+shapiro.test(sqrt(tran.dat$eelgrass_shoots_msq))
 ```
 
 Aboveground biomass shows some right skewness suggesting ln transformation. Log transformation was not super great. However square roor transformation appears more helpful. SW tests all indicate at least some non-normality, but sqrt transformation is the best.
 ```{r ag normality}
 ## Raw data ##
-ggplot(eg.graz, aes(ag_mass)) +
+ggplot(tran.dat, aes(ag_mass)) +
   geom_histogram() +
   labs(x = "Aboveground biomass", y = "Counts")
 
-qqnorm(eg.graz$ag_mass)
-qqline(eg.graz$ag_mass, lwd = 2)
+qqnorm(tran.dat$ag_mass)
+qqline(tran.dat$ag_mass, lwd = 2)
 
-shapiro.test(eg.graz$ag_mass)
+shapiro.test(tran.dat$ag_mass)
 
 ## ln transformed ##
-ggplot(eg.graz, aes(log(ag_mass))) +
+ggplot(tran.dat, aes(log(ag_mass))) +
   geom_histogram() +
   labs(x = "log Aboveground biomass", y = "Counts")
 
-qqnorm(log(eg.graz$ag_mass))
-qqline(log(eg.graz$ag_mass), lwd = 2)
+qqnorm(log(tran.dat$ag_mass))
+qqline(log(tran.dat$ag_mass), lwd = 2)
 
-shapiro.test(log(eg.graz$ag_mass))
+shapiro.test(log(tran.dat$ag_mass))
 
 ## sqrt transformation ##
-ggplot(eg.graz, aes(sqrt(ag_mass))) +
+ggplot(tran.dat, aes(sqrt(ag_mass))) +
   geom_histogram() +
   labs(x = "sqrt Aboveground biomass", y = "Counts")
 
-qqnorm(sqrt(eg.graz$ag_mass))
-qqline(sqrt(eg.graz$ag_mass), lwd = 2)
+qqnorm(sqrt(tran.dat$ag_mass))
+qqline(sqrt(tran.dat$ag_mass), lwd = 2)
 
-shapiro.test(sqrt(eg.graz$ag_mass))
+shapiro.test(sqrt(tran.dat$ag_mass))
 ```
 
 Belowground biomass also shows right skewness. Both log and square root tranformations improve normality. SW test indicates that log transformation achieves normality.
 ```{r bg normality}
 ## Raw data ##
-ggplot(eg.graz, aes(bg_mass)) +
+ggplot(tran.dat, aes(bg_mass)) +
   geom_histogram() +
   labs(x = "Belowground biomass", y = "Counts")
 
-qqnorm(eg.graz$bg_mass)
-qqline(eg.graz$bg_mass, lwd = 2)
+qqnorm(tran.dat$bg_mass)
+qqline(tran.dat$bg_mass, lwd = 2)
 
-shapiro.test(eg.graz$bg_mass)
+shapiro.test(tran.dat$bg_mass)
 
 ## ln transformed ##
-ggplot(eg.graz, aes(log(bg_mass))) +
+ggplot(tran.dat, aes(log(bg_mass))) +
   geom_histogram() +
   labs(x = "log Belowground biomass", y = "Counts")
 
-qqnorm(log(eg.graz$bg_mass))
-qqline(log(eg.graz$bg_mass), lwd = 2)
+qqnorm(log(tran.dat$bg_mass))
+qqline(log(tran.dat$bg_mass), lwd = 2)
 
-shapiro.test(log(eg.graz$bg_mass))
+shapiro.test(log(tran.dat$bg_mass))
 
 ## sqrt transformation ##
-ggplot(eg.graz, aes(sqrt(bg_mass))) +
+ggplot(tran.dat, aes(sqrt(bg_mass))) +
   geom_histogram() +
   labs(x = "sqrt belowground biomass", y = "Counts")
 
-qqnorm(sqrt(eg.graz$bg_mass))
-qqline(sqrt(eg.graz$bg_mass), lwd = 2)
+qqnorm(sqrt(tran.dat$bg_mass))
+qqline(sqrt(tran.dat$bg_mass), lwd = 2)
 
-shapiro.test(sqrt(eg.graz$bg_mass))
+shapiro.test(sqrt(tran.dat$bg_mass))
 ```
 
 Ration of above to belowground biomass also appears right skewed. SW test indicates that log transformation is best.
 ```{r agbg normality}
 ## Raw data ##
-ggplot(eg.graz, aes(ag_mass / bg_mass)) +
+ggplot(tran.dat, aes(ag_mass / bg_mass)) +
   geom_histogram() +
   labs(x = "AG:BG biomass", y = "Counts")
 
-qqnorm(eg.graz$ag_mass / eg.graz$bg_mass)
-qqline(eg.graz$ag_mass / eg.graz$bg_mass, lwd = 2)
+qqnorm(tran.dat$ag_mass / tran.dat$bg_mass)
+qqline(tran.dat$ag_mass / tran.dat$bg_mass, lwd = 2)
 
 ## ln transformed ##
-ggplot(eg.graz, aes(log(ag_mass / bg_mass))) +
+ggplot(tran.dat, aes(log(ag_mass / bg_mass))) +
   geom_histogram() +
   labs(x = "log AG:BG biomass", y = "Counts")
 
-qqnorm(log(eg.graz$ag_mass / eg.graz$bg_mass))
-qqline(log(eg.graz$ag_mass / eg.graz$bg_mass), lwd = 2)
+qqnorm(log(tran.dat$ag_mass / tran.dat$bg_mass))
+qqline(log(tran.dat$ag_mass / tran.dat$bg_mass), lwd = 2)
 
-shapiro.test(log(eg.graz$ag_mass / eg.graz$bg_mass))
+shapiro.test(log(tran.dat$ag_mass / tran.dat$bg_mass))
 
 ## sqrt transformation ##
-ggplot(eg.graz, aes(sqrt(ag_mass / bg_mass))) +
+ggplot(tran.dat, aes(sqrt(ag_mass / bg_mass))) +
   geom_histogram() +
   labs(x = "sqrt AG:BG biomass", y = "Counts")
 
-qqnorm(sqrt(eg.graz$ag_mass / eg.graz$bg_mass))
-qqline(sqrt(eg.graz$ag_mass / eg.graz$bg_mass), lwd = 2)
+qqnorm(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
+qqline(sqrt(tran.dat$ag_mass / tran.dat$bg_mass), lwd = 2)
 
-shapiro.test(sqrt(eg.graz$ag_mass / eg.graz$bg_mass))
+shapiro.test(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
 ```
 
 Epiphyte load
 ```{r epi load normality}
 ## Raw data ##
-ggplot(eg.graz, aes(s_epi_mass)) +
+ggplot(tran.dat, aes(epimass_shootmass)) +
   geom_histogram() +
-  labs(x = "Epiphyte biomass", y = "Counts")
+  labs(x = "Epiphyte load", y = "Counts")
 
-qqnorm(eg.graz$ag_mass / eg.graz$bg_mass)
-qqline(eg.graz$ag_mass / eg.graz$bg_mass, lwd = 2)
+qqnorm(tran.dat$epimass_shootmass)
+qqline(tran.dat$epimass_shootmass, lwd = 2)
 
 ## ln transformed ##
-ggplot(eg.graz, aes(log(s_epi_mass))) +
+ggplot(tran.dat, aes(log(epimass_shootmass))) +
   geom_histogram() +
-  labs(x = "log Epiphyte biomass", y = "Counts")
+  labs(x = "log Epiphyte load", y = "Counts")
 
-qqnorm(log(eg.graz$ag_mass / eg.graz$bg_mass))
-qqline(log(eg.graz$ag_mass / eg.graz$bg_mass), lwd = 2)
+qqnorm(log(tran.dat$epimass_shootmass))
+qqline(log(tran.dat$epimass_shootmass), lwd = 2)
 
-shapiro.test(log(eg.graz$ag_mass / eg.graz$bg_mass))
+shapiro.test(log(tran.dat$ag_mass / tran.dat$bg_mass))
 
 ## sqrt transformation ##
-ggplot(eg.graz, aes(sqrt(ag_mass / bg_mass))) +
+ggplot(tran.dat, aes(sqrt(ag_mass / bg_mass))) +
   geom_histogram() +
   labs(x = "sqrt AG:BG biomass", y = "Counts")
 
-qqnorm(sqrt(eg.graz$ag_mass / eg.graz$bg_mass))
-qqline(sqrt(eg.graz$ag_mass / eg.graz$bg_mass), lwd = 2)
+qqnorm(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
+qqline(sqrt(tran.dat$ag_mass / tran.dat$bg_mass), lwd = 2)
 
-shapiro.test(sqrt(eg.graz$ag_mass / eg.graz$bg_mass))
+shapiro.test(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
 ```
 

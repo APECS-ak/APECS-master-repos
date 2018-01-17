@@ -169,10 +169,10 @@ site.quad$ag_mass <- (site.quad$eelgrass_shoots_msq * site.quad$shoot_mass)
 site.quad$bg_mass <- (site.quad$eelgrass_shoots_msq * site.quad$rhi_mass)
 
 ## Epiphytes per eeglrass area ##
-site.quad$epimass_shootarea <- ((site.quad$epi_mass + site.quad$exepi_mass) / site.quad$shoot_area)
+site.quad$epimass_shootarea <- ((site.quad$epi_mass + !is.na(site.quad$exepi_mass)) / site.quad$shoot_area)
 
 ## Epiphytes per eelgrass mass ##
-site.quad$epimass_shootmass <- ((site.quad$epi_mass + site.quad$exepi_mass) / site.quad$shoot_mass)
+site.quad$epimass_shootmass <- ((site.quad$epi_mass + !is.na(site.quad$exepi_mass)) / site.quad$shoot_mass)
 
 ## Total leaf area ##
 site.quad$shoot_areaT <- (site.quad$shoot_area * site.quad$eelgrass_shoots_msq)
