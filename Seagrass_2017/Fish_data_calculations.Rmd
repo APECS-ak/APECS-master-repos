@@ -51,10 +51,29 @@ sp <- fish %>%
 
 Extract length - weight relationships. **Note** that the original extracted values are in cm-g. One will either need to convert fork lengths in seine data to cm or convert the L-W conversion factors to mm-g. a’(cm, g) = a (mm, g) X 10^b a’(cm, g) = a (cm, kg) X 1000 a’(cm, g) = a (mm, mg)*10^b/1000 a’(cm,g) = a (mm, kg) X 10^b X 1000.
 
-This is not totally operational yet. There are some bugs in the package.
-```{r extracting length - weight}
-#test <- length_weight(sp[,2])
+Not all species have all the data on fishbase. This will extract what is available.
+```{r extracting fishbase data}
+## Length - weight ##
+sp.lw <- length_weight(sp[,2])
+str(sp.lw)
+
+## Diet ##
+sp.diet <- diet(sp[,2])
+str(sp.diet)
 ```
+
+Alright so fishbase dumps a lot of data in there but we only care about part of it. There are two things to accopmplish.
+1. Some species have multiple entries, thoes need to be reduced to what makes the most sense for us.
+2. There data have a lot of extra columns that we don't care about, those can be removed.
+
+```{r cleaning up fishbase data}
+## Filter out ---
+sp.diet <- sp.diet %>% 
+  filter(SampleStage != "larvae")
+
+sp.diet <- sp.diet[, c(1:6, 41:47)]
+```
+
 
 ## Separate measured and unmeasured fish
 The first step is to separate the measured fish from the unmeasured fish.
