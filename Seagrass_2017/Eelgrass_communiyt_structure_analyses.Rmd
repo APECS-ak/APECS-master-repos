@@ -55,16 +55,25 @@ Factors that are more specific to certain tests
 
 ```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
 tran.dat <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ## 2. Testing assumptions
 
 ### Normality
-Response metrics should have approximatley normal distribution. For this exploration we can omit the NA rows that allowed for merging with sediment data. We will also omit the April sites (L01 and H01). Resulting data frame should have 19 X 9 rows = 152
-```{r}
+Response metrics should have approximatley normal distribution. For this exploration we can omit the NA rows that allowed for merging with sediment data. We will also omit the April sites (L01 and H01). Resulting data frame should have 19 X 9 rows = 152. For the crab data we also want to omit the April sites. Initially we will also want to sum crab biomass within each string (pool over species). The imported data is not set up this way so the data will we summarised as such. The imported crab data is fairly bare, in that it only has the site name, date, and soak time. Data will need to be merged with sea otter index, and other things for formal analysis.
+```{r data edit}
 tran.dat <- tran.dat %>% 
   filter(site != "2017_L_01" & site != "2017_H_01") %>% 
   filter(quadrat < 9)
+
+crab <- crab.dat %>% 
+  filter(site != "2017_L_01" & site != "2017_H_01") %>% 
+  group_by(site, string) %>% 
+  summarise(mass_g = sum(mass_g))
+
+crab.dat <- merge(unique(crab.dat[, 1:8]), crab, by = "site", all.y = TRUE)
 ```
 
 Eelgrass shoot density appears reasonably normal but fails SW test. Further test indicate that sqrt transformation achives normality.
@@ -293,3 +302,42 @@ ggplot(tran.dat, aes(sqrt(crustmass_shootmass))) +
 
 shapiro.test(sqrt(tran.dat$crustmass_shootmass))
 ```
+
+Crab biomass does not respoond super well to any transformations. There are a fair amount of zeros which is messing with normality. This data may need to be modeled with a zero infalted model, or something like that. But the zeros are also really important to be zeros. 
+```{r crab biomass normality}
+## Raw data ##
+ggplot(crab.dat, aes(mass_g)) +
+  geom_histogram(bins = 20) +
+  labs(x = "crab mass", y = "Count")
+
+## ln transformation ##
+ggplot(crab.dat, aes(log(mass_g + 1))) +
+  geom_histogram(bins = 20) +
+  labs(x = "log crab mass", y = "Count")
+
+shapiro.test(log(crab.dat$mass_g + 1))
+
+## sqrt transformation ##
+ggplot(crab.dat, aes(sqrt(mass_g))) +
+  geom_histogram(bins = 20) +
+  labs(x = "sqrt crab mass", y = "Count")
+
+## Raw data > 0 ##
+crab.dat.noZ <- crab.dat %>%
+  filter(mass_g > 0)
+  
+ggplot(crab.dat.noZ, aes(mass_g)) +
+  geom_histogram(bins = 20) +
+  labs(x = "non zero crab mass", y = "Count")
+
+## ln transformation > 0 ##
+ggplot(crab.dat.noZ, aes(log(mass_g))) +
+  geom_histogram(bins = 20) +
+  labs(x = "log non zero crab mass", y = "Count")
+
+## sqrt transformation > 0 ##
+ggplot(crab.dat.noZ, aes(sqrt(mass_g))) +
+  geom_histogram(bins = 20) +
+  labs(x = "sqrt non zero crab mass", y = "Count")
+```
+

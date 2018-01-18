@@ -291,7 +291,7 @@ sites <- unique(eg.bio$site)
 sp <- unique(crab$sp_code)
 strings <- as.character(c(1:3))
 
-crab.dat <- data.frame(c(rep(sites[1], 18), rep(sites[2], 18), rep(sites[3], 18), rep(sites[4], 18), rep(sites[5], 18), rep(sites[6], 18), rep(sites[7], 18), rep(sites[8], 18), rep(sites[9], 18), rep(sites[10], 18), rep(sites[11], 18), rep(sites[12], 18), rep(sites[13], 18), rep(sites[14], 18), rep(sites[15], 18), rep(sites[16], 18), rep(sites[17], 18), rep(sites[18], 18), rep(sites[19], 18), rep(sites[10], 18), rep(sites[21], 18)))
+crab.dat <- data.frame(c(rep(sites[1], 18), rep(sites[2], 18), rep(sites[3], 18), rep(sites[4], 18), rep(sites[5], 18), rep(sites[6], 18), rep(sites[7], 18), rep(sites[8], 18), rep(sites[9], 18), rep(sites[10], 18), rep(sites[11], 18), rep(sites[12], 18), rep(sites[13], 18), rep(sites[14], 18), rep(sites[15], 18), rep(sites[16], 18), rep(sites[17], 18), rep(sites[18], 18), rep(sites[19], 18), rep(sites[20], 18), rep(sites[21], 18)))
 
 crab.dat$string <- rep(c(rep(strings[1], 6), rep(strings[2], 6), rep(strings[3], 6)), 21)
 
@@ -302,6 +302,7 @@ colnames(crab.dat)[1] <- "site"
 # Merge
 crab.dat <- merge(crab.dat, crab.string, by = c("site", "string", "sp_code"), all.x = TRUE)
 crab.dat$mass_g[is.na(crab.dat$mass_g)] <- 0
+crab.dat <- merge(unique(crab[, 2:9]), crab.dat, by = "site", all.y = TRUE)
 
 ```
 
