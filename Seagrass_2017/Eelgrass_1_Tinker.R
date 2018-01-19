@@ -2,9 +2,8 @@
 #  Models 1a - 1g: evaluate combimnations of linear and quadratic effects for time, 
 #  otter index and sediment type (and models without the latter 2 vars)
 #
-# Set current directory
-dirname = "G:/My Drive/Papers/SEAK_eelgrass" # Set this to desired directory
-setwd(dirname)
+
+
 ## -------- Load packages --------
 library(lattice)
 library(coda)
@@ -14,8 +13,9 @@ library(rjags)
 library(runjags)
 library(loo)
 library(readxl)
+
 ## -------- Read and prepare data for Bayesian modeling --------
-Dat <- read_excel("eelgrass_data.xlsx")
+Dat <-  read.csv("../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 attach(Dat)
 #
 # Dependent observed variable: this should be whatever numeric variable you 
@@ -24,7 +24,7 @@ Obs = as.numeric(ag_mass)
 # select only oberved variables that are not NA
 ii = which(!is.na(Obs))
 Obs = Obs[ii]
-# Variables to use as independent or identifiwer variables
+# Variables to use as independent or identifier variables
 Ottindx = as.numeric(sea_otter_index)[ii]
 Sedtype = as.numeric(sed1_no)[ii]
 Julianday = as.numeric(date_julian)[ii]
@@ -48,7 +48,7 @@ cores = detectCores()
 ncore = min(20,cores-1)
 
 # -- Model 1a - linear time ------------------------
-jagsfile = 'Eelgrass_1a.jags'
+jagsfile = "Eelgrass_1a_Tinker.jags"
 # savename='EelgrassM1a_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx) #, Ott = Ottindx, Sed = Sedtype Nquads = Nquads, Quad = Quad
@@ -85,7 +85,7 @@ dfWIAC$WAIC[1] = WAIC1$waic
 out1 = out
 
 # -- Model 1b - linear time + linear ott------------------------
-jagsfile = 'Eelgrass_1b.jags'
+jagsfile = 'Eelgrass_1b_Tinker.jags'
 # savename='EelgrassM1b_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
@@ -122,7 +122,7 @@ dfWIAC$WAIC[2] = WAIC2$waic
 out2 = out
 
 # -- Model 1c - linear time + linear ott + linear sed------------------------
-jagsfile = 'Eelgrass_1c.jags'
+jagsfile = 'Eelgrass_1c_Tinker.jags'
 # savename='EelgrassM1c_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx, Sed = Sedtype) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
@@ -159,7 +159,7 @@ dfWIAC$WAIC[3] = WAIC3$waic
 out3 = out
 
 # -- Model 1d - linear time + quadratic ott ------------------------
-jagsfile = 'Eelgrass_1d.jags'
+jagsfile = 'Eelgrass_1d_Tinker.jags'
 # savename='EelgrassM1d_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
@@ -196,7 +196,7 @@ dfWIAC$WAIC[4] = WAIC4$waic
 out4 = out
 
 # -- Model 1e - linear time + quadratic otter + linear sediment type ------------------------
-jagsfile = 'Eelgrass_1e.jags'
+jagsfile = 'Eelgrass_1e_Tinker.jags'
 # savename='EelgrassM1e_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx, Sed = Sedtype) # Nquads = Nquads, Quad = Quad
@@ -233,7 +233,7 @@ dfWIAC$WAIC[5] = WAIC5$waic
 out5 = out
 
 # -- Model 1f - quadratic time + linear otter ------------------------
-jagsfile = 'Eelgrass_1f.jags'
+jagsfile = 'Eelgrass_1f_Tinker.jags'
 # savename='EelgrassM1f_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx) # , Sed = Sedtype, Nquads = Nquads, Quad = Quad
@@ -270,7 +270,7 @@ dfWIAC$WAIC[6] = WAIC6$waic
 out6 = out
 
 # -- Model 1g - quadratic time + quadratic otter ------------------------
-jagsfile = 'Eelgrass_1g.jags'
+jagsfile = 'Eelgrass_1g_Tinker.jags'
 # savename='EelgrassM1g_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx) # , Sed = Sedtype, Nquads = Nquads, Quad = Quad

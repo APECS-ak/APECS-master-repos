@@ -10,6 +10,13 @@ editor_options:
 ```{r libraries, echo = FALSE, message = FALSE, warning = FALSE}
 library(ggplot2)
 library(dplyr)
+library(lattice)
+library(coda)
+library(boot)
+library(parallel)
+library(rjags)
+library(runjags)
+library(loo)
 
 theme_set(theme_classic())
 ```
@@ -341,3 +348,11 @@ ggplot(crab.dat.noZ, aes(sqrt(mass_g))) +
   labs(x = "sqrt non zero crab mass", y = "Count")
 ```
 
+## 3. Models
+ Each model will get its own individual hypothesis and set up but will follow the same general framework. Initially I will be copying and learning from example code from Tim Tinker.
+ 
+```{r}
+
+```
+ 
+ 
