@@ -2,8 +2,9 @@
 #  Models 1a - 1g: evaluate combimnations of linear and quadratic effects for time, 
 #  otter index and sediment type (and models without the latter 2 vars)
 #
-
-
+# Set current directory
+dirname = "G:/My Drive/Papers/SEAK_eelgrass" # Set this to desired directory
+setwd(dirname)
 ## -------- Load packages --------
 library(lattice)
 library(coda)
@@ -13,9 +14,8 @@ library(rjags)
 library(runjags)
 library(loo)
 library(readxl)
-
 ## -------- Read and prepare data for Bayesian modeling --------
-Dat <-  read.csv("../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+Dat <- read_excel("eelgrass_data.xlsx")
 attach(Dat)
 #
 # Dependent observed variable: this should be whatever numeric variable you 
@@ -24,7 +24,7 @@ Obs = as.numeric(ag_mass)
 # select only oberved variables that are not NA
 ii = which(!is.na(Obs))
 Obs = Obs[ii]
-# Variables to use as independent or identifier variables
+# Variables to use as independent or identifiwer variables
 Ottindx = as.numeric(sea_otter_index)[ii]
 Sedtype = as.numeric(sed1_no)[ii]
 Julianday = as.numeric(date_julian)[ii]
@@ -44,11 +44,19 @@ MeanDay = round(mean(Dayindx),0)
 # Model comparison data frame
 dfWIAC = data.frame(Model = c("Model_1a","Model_1b","Model_1c","Model_1d","Model_1e",
                               "Model_1f","Model_1g"), WAIC = numeric(length=7))
+# Set up for parralel computing
 cores = detectCores()
 ncore = min(20,cores-1)
+# Set JAGS params for running
+nsamples <- 1000
+nt <- 20
+nb <- 7000
+nc <- ncore
+# For parallel (comment out for serial)
+cl <- makeCluster(ncore)
 
 # -- Model 1a - linear time ------------------------
-jagsfile = "Eelgrass_1a_Tinker.jags"
+jagsfile = 'Eelgrass_1a.jags'
 # savename='EelgrassM1a_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx) #, Ott = Ottindx, Sed = Sedtype Nquads = Nquads, Quad = Quad
@@ -57,12 +65,6 @@ inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1))
 #
 params <- c("sigS","sigO","beta0","beta1","eps","loglik") 
 #
-nsamples <- 500
-nt <- 5
-nb <- 5000
-nc <- ncore
-# For parallel (comment out for serial)
-cl <- makeCluster(ncore)
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
                 inits = inits, 
@@ -80,12 +82,17 @@ for (i in 3:nc){
 }
 # Calculate WAIC
 mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
-WAIC1 = waic(mc_ll)
-dfWIAC$WAIC[1] = WAIC1$waic
+WAIC = waic(mc_ll)
+WAIC1a = WAIC
+dfWIAC$WAIC[1] = WAIC$waic
+T1 = data.frame(modID = c('WAIC1a'), model = c('1a'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic,
+                deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 out1 = out
 
+
 # -- Model 1b - linear time + linear ott------------------------
-jagsfile = 'Eelgrass_1b_Tinker.jags'
+jagsfile = 'Eelgrass_1b.jags'
 # savename='EelgrassM1b_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
@@ -94,12 +101,6 @@ inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1))
 #
 params <- c("sigS","sigO","beta0","beta1","beta2","eps","loglik") 
 #
-nsamples <- 500
-nt <- 5
-nb <- 5000
-nc <- ncore
-# For parallel (comment out for serial)
-# cl <- makeCluster(ncore)
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
                 inits = inits, 
@@ -117,12 +118,16 @@ for (i in 3:nc){
 }
 # Calculate WAIC
 mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
-WAIC2 = waic(mc_ll)
-dfWIAC$WAIC[2] = WAIC2$waic
+WAIC = waic(mc_ll)
+WAIC1b = WAIC
+dfWIAC$WAIC[2] = WAIC$waic
+T2 = data.frame(modID = c('WAIC1b'), model = c('1b'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic,
+                deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 out2 = out
 
 # -- Model 1c - linear time + linear ott + linear sed------------------------
-jagsfile = 'Eelgrass_1c_Tinker.jags'
+jagsfile = 'Eelgrass_1c.jags'
 # savename='EelgrassM1c_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx, Sed = Sedtype) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
@@ -131,12 +136,6 @@ inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1))
 #
 params <- c("sigS","sigO","beta0","beta1","beta2","beta3","eps","loglik") 
 #
-nsamples <- 500
-nt <- 5
-nb <- 5000
-nc <- ncore
-# For parallel (comment out for serial)
-# cl <- makeCluster(ncore)
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
                 inits = inits, 
@@ -154,12 +153,16 @@ for (i in 3:nc){
 }
 # Calculate WAIC
 mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
-WAIC3 = waic(mc_ll)
-dfWIAC$WAIC[3] = WAIC3$waic
+WAIC = waic(mc_ll)
+WAIC1c = WAIC
+dfWIAC$WAIC[3] = WAIC$waic
+T3 = data.frame(modID = c('WAIC1c'), model = c('1c'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic,
+                deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 out3 = out
 
 # -- Model 1d - linear time + quadratic ott ------------------------
-jagsfile = 'Eelgrass_1d_Tinker.jags'
+jagsfile = 'Eelgrass_1d.jags'
 # savename='EelgrassM1d_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
@@ -168,12 +171,6 @@ inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1))
 #
 params <- c("sigS","sigO","beta0","beta1","beta2","beta2b","eps","loglik") 
 #
-nsamples <- 500
-nt <- 5
-nb <- 5000
-nc <- ncore
-# For parallel (comment out for serial)
-# cl <- makeCluster(ncore)
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
                 inits = inits, 
@@ -191,12 +188,16 @@ for (i in 3:nc){
 }
 # Calculate WAIC
 mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
-WAIC4 = waic(mc_ll)
-dfWIAC$WAIC[4] = WAIC4$waic
+WAIC = waic(mc_ll)
+WAIC1d = WAIC
+dfWIAC$WAIC[4] = WAIC$waic
+T4 = data.frame(modID = c('WAIC1d'), model = c('1d'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic,
+                deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 out4 = out
 
 # -- Model 1e - linear time + quadratic otter + linear sediment type ------------------------
-jagsfile = 'Eelgrass_1e_Tinker.jags'
+jagsfile = 'Eelgrass_1e.jags'
 # savename='EelgrassM1e_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx, Sed = Sedtype) # Nquads = Nquads, Quad = Quad
@@ -205,12 +206,6 @@ inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1))
 #
 params <- c("sigS","sigO","beta0","beta1","beta2","beta2b","beta3","eps","loglik") 
 #
-nsamples <- 500
-nt <- 5
-nb <- 5000
-nc <- ncore
-# For parallel (comment out for serial)
-# cl <- makeCluster(ncore)
 # Call JAGS from R
 out <- run.jags(data = jags.data, 
                 inits = inits, 
@@ -228,12 +223,16 @@ for (i in 3:nc){
 }
 # Calculate WAIC
 mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
-WAIC5 = waic(mc_ll)
-dfWIAC$WAIC[5] = WAIC5$waic
+WAIC = waic(mc_ll)
+WAIC1e = WAIC
+dfWIAC$WAIC[5] = WAIC$waic
+T5 = data.frame(modID = c('WAIC1e'), model = c('1e'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic,
+                deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 out5 = out
 
 # -- Model 1f - quadratic time + linear otter ------------------------
-jagsfile = 'Eelgrass_1f_Tinker.jags'
+jagsfile = 'Eelgrass_1f.jags'
 # savename='EelgrassM1f_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx) # , Sed = Sedtype, Nquads = Nquads, Quad = Quad
@@ -242,12 +241,6 @@ inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1))
 #
 params <- c("sigS","sigO","beta0","beta1","beta1b","beta2","eps","loglik") 
 #
-nsamples <- 500
-nt <- 5
-nb <- 5000
-nc <- ncore
-# For parallel (comment out for serial)
-#cl <- makeCluster(ncore)
 # Call JAGS from R
 out <- run.jags(data = jags.data, 
                 inits = inits, 
@@ -265,12 +258,16 @@ for (i in 3:nc){
 }
 # Calculate WAIC
 mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
-WAIC6 = waic(mc_ll)
-dfWIAC$WAIC[6] = WAIC6$waic
+WAIC = waic(mc_ll)
+WAIC1f = WAIC
+dfWIAC$WAIC[6] = WAIC$waic
+T6 = data.frame(modID = c('WAIC1f'), model = c('1f'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic,
+                deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 out6 = out
 
 # -- Model 1g - quadratic time + quadratic otter ------------------------
-jagsfile = 'Eelgrass_1g_Tinker.jags'
+jagsfile = 'Eelgrass_1g.jags'
 # savename='EelgrassM1g_Results.Rdata'
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,
                   Day = Dayindx, Ott = Ottindx) # , Sed = Sedtype, Nquads = Nquads, Quad = Quad
@@ -279,12 +276,6 @@ inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1))
 #
 params <- c("sigS","sigO","beta0","beta1","beta1b","beta2","beta2b","eps","loglik") 
 #
-nsamples <- 500
-nt <- 5
-nb <- 5000
-nc <- ncore
-# For parallel (comment out for serial)
-#cl <- makeCluster(ncore)
 # Call JAGS from R
 out <- run.jags(data = jags.data, 
                 inits = inits, 
@@ -302,17 +293,39 @@ for (i in 3:nc){
 }
 # Calculate WAIC
 mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
-WAIC7 = waic(mc_ll)
-dfWIAC$WAIC[7] = WAIC7$waic
+WAIC = waic(mc_ll)
+WAIC1g = WAIC
+dfWIAC$WAIC[7] = WAIC$waic
+T7 = data.frame(modID = c('WAIC1g'), model = c('1g'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic,
+                deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 out7 = out
 
 ## --- Compare Models --------------------------------------------
 stopCluster(cl = cl)
 rm(out)
-
 modranks = order(dfWIAC$WAIC)
-comptab = print(compare(WAIC1, WAIC2, WAIC3, WAIC4, WAIC5, WAIC6, WAIC7), digits = 3)
-# Select best model
+T = rbind(T1,T2,T3,T4,T5,T6,T7)
+rm(T1,T2,T3,T4,T5,T6,T7)
+comptab = compare(WAIC1a, WAIC1b, WAIC1c, WAIC1d, WAIC1e, WAIC1f, WAIC1g)
+filelist = row.names(comptab)
+for (i in 2:7){
+  row = which(T$modID == filelist[i])
+  comp = compare(eval(as.name(filelist[i])) , eval(as.name(filelist[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  T$deltaWAIC[row] = comp[1]
+  T$deltaWAIC_se[row] = comp[2]
+  T$P_comp[row] = P_val
+}
+T = T[modranks,]
+T$P_comp[1] = 1
+T$Likelihood = exp(-0.5*T$deltaWAIC)
+T$Likelihood[T$P_comp<0.1]=0 
+sumlik = sum(T$Likelihood)
+T$WAICwt = T$Likelihood/sumlik
+
+# --Select best model for plots ------------------------------------------
 eval(parse(text=paste0("out = out",modranks[1]))) 
 post = rbind(out$mcmc[[1]], out$mcmc[[2]])
 for (i in 3:nc){
