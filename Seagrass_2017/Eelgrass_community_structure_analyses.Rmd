@@ -1,0 +1,867 @@
+---
+title: "Eelgrass_community_structure_analyses"
+author: "Wendel Raymond"
+date: "January 16, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r libraries, echo = FALSE, message = FALSE, warning = FALSE}
+library(ggplot2)
+library(dplyr)
+library(lattice)
+library(coda)
+library(boot)
+library(parallel)
+library(rjags)
+library(runjags)
+library(loo)
+library(DT)
+library(cowplot)
+
+theme_set(theme_classic())
+```
+
+
+# Analyses for testing hypotheses related to eelgrass community structure
+**Question** 
+What is the structure of eelgrass communities across a gradient of sea otter impacts?
+
+**Overall Hypothesis**
+If top-down (sea otter) forces are structuring eelgrass communities, then we would expect alternating relative abundance from trophic level to trophic level.
+
+## Outline
+1. Description of data
+2. Testing assumptions
+    + normality
+    + co-linearity
+3. Models
+
+## 1. Data
+**Response metrics**
+1. eelgrass aboveground biomass density (g / m^2^)
+2. eelgrass belowground biomass density (g / m^2^)
+3. eelgrass shoot density (count / m^2^)
+4. ratio of aboveground to belowground biomass density (g / m^2^)
+5. epiphyte load (g epiphyte / g eelgrass)
+6. total grazer load (g grazers/ g eelgrass)
+    + gastropod load (g grazers/ g eelgrass)
+    + crustaecean load (g grazers/ g eelgrass)
+7. crab biomass (g)
+8. fish standarized by ... candidates are length, gape size, biomass
+
+**Primary explanatory factors**
+Not all these fators will necessarily be used in all models
+1. Time
+2. Sediment type (primary sediment type from the "inside" eelgrass transect)
+3. Percent light
+
+**Secondary explanatory factors**
+Factors that are more specific to certain tests
+1. crab biomass (g)
+2. fish
+
+```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
+tran.dat <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+## 2. Testing assumptions
+
+### Normality
+Response metrics should have approximatley normal distribution. For this exploration we can omit the NA rows that allowed for merging with sediment data. We will also omit the April sites (L01 and H01). Resulting data frame should have 19 X 9 rows = 152. For the crab data we also want to omit the April sites. Initially we will also want to sum crab biomass within each string (pool over species). The imported data is not set up this way so the data will we summarised as such. The imported crab data is fairly bare, in that it only has the site name, date, and soak time. Data will need to be merged with sea otter index, and other things for formal analysis.
+```{r data edit}
+tran.dat <- tran.dat %>% 
+  filter(site != "2017_L_01" & site != "2017_H_01") %>% 
+  filter(quadrat < 9)
+
+crab <- crab.dat %>% 
+  filter(site != "2017_L_01" & site != "2017_H_01") %>% 
+  group_by(site, string) %>% 
+  summarise(mass_g = sum(mass_g))
+
+crab.dat <- merge(unique(crab.dat[, 1:8]), crab, by = "site", all.y = TRUE)
+```
+
+Eelgrass shoot density appears reasonably normal but fails SW test. Further test indicate that sqrt transformation achives normality.
+```{r shoot dens normality}
+## Raw data ##
+ggplot(tran.dat, aes(eelgrass_shoots_msq)) +
+  geom_histogram(bins = 10) +
+  labs(x = "Eelgrass shoot density", y = "Counts")
+
+qqnorm(tran.dat$eelgrass_shoots_msq)
+qqline(tran.dat$eelgrass_shoots_msq, lwd = 2)
+
+shapiro.test(tran.dat$eelgrass_shoots_msq)
+
+## ln transformation ##
+ggplot(tran.dat, aes(log(eelgrass_shoots_msq))) +
+  geom_histogram(bins = 10) +
+  labs(x = "log Eelgrass shoot density", y = "Counts")
+
+qqnorm(log(tran.dat$eelgrass_shoots_msq))
+qqline(log(tran.dat$eelgrass_shoots_msq), lwd = 2)
+
+shapiro.test(log(tran.dat$eelgrass_shoots_msq))
+
+## sqrt transfrormation ##
+ggplot(tran.dat, aes(sqrt(eelgrass_shoots_msq))) +
+  geom_histogram(bins = 10) +
+  labs(x = "sqrt Eelgrass shoot density", y = "Counts")
+
+qqnorm(sqrt(tran.dat$eelgrass_shoots_msq))
+qqline(sqrt(tran.dat$eelgrass_shoots_msq), lwd = 2)
+
+shapiro.test(sqrt(tran.dat$eelgrass_shoots_msq))
+```
+
+Aboveground biomass shows some right skewness suggesting ln transformation. Log transformation was not super great. However square roor transformation appears more helpful. SW tests all indicate at least some non-normality, but sqrt transformation is the best.
+```{r ag normality}
+## Raw data ##
+ggplot(tran.dat, aes(ag_mass)) +
+  geom_histogram(bins = 10) +
+  labs(x = "Aboveground biomass", y = "Counts")
+
+qqnorm(tran.dat$ag_mass)
+qqline(tran.dat$ag_mass, lwd = 2)
+
+shapiro.test(tran.dat$ag_mass)
+
+## ln transformed ##
+ggplot(tran.dat, aes(log(ag_mass))) +
+  geom_histogram(bins = 10) +
+  labs(x = "log Aboveground biomass", y = "Counts")
+
+qqnorm(log(tran.dat$ag_mass))
+qqline(log(tran.dat$ag_mass), lwd = 2)
+
+shapiro.test(log(tran.dat$ag_mass))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(ag_mass))) +
+  geom_histogram(bins = 10) +
+  labs(x = "sqrt Aboveground biomass", y = "Counts")
+
+qqnorm(sqrt(tran.dat$ag_mass))
+qqline(sqrt(tran.dat$ag_mass), lwd = 2)
+
+shapiro.test(sqrt(tran.dat$ag_mass))
+```
+
+Belowground biomass also shows right skewness. Both log and square root tranformations improve normality. SW test indicates that log transformation achieves normality.
+```{r bg normality}
+## Raw data ##
+ggplot(tran.dat, aes(bg_mass)) +
+  geom_histogram(bins = 10) +
+  labs(x = "Belowground biomass", y = "Counts")
+
+qqnorm(tran.dat$bg_mass)
+qqline(tran.dat$bg_mass, lwd = 2)
+
+shapiro.test(tran.dat$bg_mass)
+
+## ln transformed ##
+ggplot(tran.dat, aes(log(bg_mass))) +
+  geom_histogram(bins = 10) +
+  labs(x = "log Belowground biomass", y = "Counts")
+
+qqnorm(log(tran.dat$bg_mass))
+qqline(log(tran.dat$bg_mass), lwd = 2)
+
+shapiro.test(log(tran.dat$bg_mass))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(bg_mass))) +
+  geom_histogram(bins = 10) +
+  labs(x = "sqrt belowground biomass", y = "Counts")
+
+qqnorm(sqrt(tran.dat$bg_mass))
+qqline(sqrt(tran.dat$bg_mass), lwd = 2)
+
+shapiro.test(sqrt(tran.dat$bg_mass))
+```
+
+Ratio of above to belowground biomass also appears right skewed. SW test indicates that log transformation is best.
+```{r agbg normality}
+## Raw data ##
+ggplot(tran.dat, aes(ag_mass / bg_mass)) +
+  geom_histogram(bins = 10) +
+  labs(x = "AG:BG biomass", y = "Counts")
+
+qqnorm(tran.dat$ag_mass / tran.dat$bg_mass)
+qqline(tran.dat$ag_mass / tran.dat$bg_mass, lwd = 2)
+
+## ln transformed ##
+ggplot(tran.dat, aes(log(ag_mass / bg_mass))) +
+  geom_histogram(bins = 10) +
+  labs(x = "log AG:BG biomass", y = "Counts")
+
+qqnorm(log(tran.dat$ag_mass / tran.dat$bg_mass))
+qqline(log(tran.dat$ag_mass / tran.dat$bg_mass), lwd = 2)
+
+shapiro.test(log(tran.dat$ag_mass / tran.dat$bg_mass))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(ag_mass / bg_mass))) +
+  geom_histogram(bins = 10) +
+  labs(x = "sqrt AG:BG biomass", y = "Counts")
+
+qqnorm(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
+qqline(sqrt(tran.dat$ag_mass / tran.dat$bg_mass), lwd = 2)
+
+shapiro.test(sqrt(tran.dat$ag_mass / tran.dat$bg_mass))
+```
+
+Epiphyte load. This one is a bit tricky, any sort of tranformation does not deal with the outliers well. 
+```{r epi load normality}
+## Raw data ##
+ggplot(tran.dat, aes(epimass_shootmass)) +
+  geom_histogram(bins = 10) +
+  labs(x = "Epiphyte load", y = "Counts")
+
+qqnorm(tran.dat$epimass_shootmass)
+qqline(tran.dat$epimass_shootmass, lwd = 2)
+
+## ln transformed ##
+ggplot(tran.dat, aes(log(epimass_shootmass + 0.1))) +
+  geom_histogram(bins = 10) +
+  labs(x = "log Epiphyte load", y = "Counts")
+
+qqnorm(log(tran.dat$epimass_shootmass + 0.1))
+qqline(log(tran.dat$epimass_shootmass + 0.1), lwd = 2)
+
+shapiro.test(log(tran.dat$epimass_shootmass + 0.1))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(epimass_shootmass))) +
+  geom_histogram(bins = 10) +
+  labs(x = "sqrt Epiphyte load", y = "Counts")
+
+qqnorm(sqrt(tran.dat$epimass_shootmass))
+qqline(sqrt(tran.dat$epimass_shootmass), lwd = 2)
+
+shapiro.test(sqrt(tran.dat$epimass_shootmass))
+```
+
+Grazer load does not respond well to any transformation. Given the distribution of the raw data it may be best to keep it the way it is.
+```{r grazer load normality}
+## raw data ##
+ggplot(tran.dat, aes(grazmass_shootmass)) +
+  geom_histogram(bins = 20) +
+  labs(x = "Grazer load", y = "Count")
+
+## ln transformation ##
+ggplot(tran.dat, aes(log(grazmass_shootmass + 0.1))) +
+  geom_histogram(bins = 10) +
+  labs(x = " log Grazer load", y = "Count")
+
+shapiro.test(log(tran.dat$grazmass_shootmass + 0.1))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(grazmass_shootmass))) +
+  geom_histogram(bins = 10) +
+  labs(x = " sqrt Grazer load", y = "Count")
+
+shapiro.test(sqrt(tran.dat$grazmass_shootmass))
+```
+
+Gastropod load also does not respond super well to transformations.
+```{r gastropod load normality}
+## raw data ##
+ggplot(tran.dat, aes(gastromass_shootmass)) +
+  geom_histogram(bins = 20) +
+  labs(x = "Grazer load", y = "Count")
+
+## ln transformation ##
+ggplot(tran.dat, aes(log(gastromass_shootmass + 0.1))) +
+  geom_histogram(bins = 10) +
+  labs(x = " log Grazer load", y = "Count")
+
+shapiro.test(log(tran.dat$gastromass_shootmass + 0.1))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(gastromass_shootmass))) +
+  geom_histogram(bins = 10) +
+  labs(x = " sqrt Grazer load", y = "Count")
+
+shapiro.test(sqrt(tran.dat$gastromass_shootmass))
+```
+
+Crustacean load also does not respond super well to transformations.
+```{r}
+## raw data ##
+ggplot(tran.dat, aes(crustmass_shootmass)) +
+  geom_histogram(bins = 20) +
+  labs(x = "Grazer load", y = "Count")
+
+## ln transformation ##
+ggplot(tran.dat, aes(log(crustmass_shootmass + 0.1))) +
+  geom_histogram(bins = 10) +
+  labs(x = " log Grazer load", y = "Count")
+
+shapiro.test(log(tran.dat$crustmass_shootmass + 0.1))
+
+## sqrt transformation ##
+ggplot(tran.dat, aes(sqrt(crustmass_shootmass))) +
+  geom_histogram(bins = 10) +
+  labs(x = " sqrt Grazer load", y = "Count")
+
+shapiro.test(sqrt(tran.dat$crustmass_shootmass))
+```
+
+Crab biomass does not respoond super well to any transformations. There are a fair amount of zeros which is messing with normality. This data may need to be modeled with a zero infalted model, or something like that. But the zeros are also really important to be zeros. 
+```{r crab biomass normality}
+## Raw data ##
+ggplot(crab.dat, aes(mass_g)) +
+  geom_histogram(bins = 20) +
+  labs(x = "crab mass", y = "Count")
+
+## ln transformation ##
+ggplot(crab.dat, aes(log(mass_g + 1))) +
+  geom_histogram(bins = 20) +
+  labs(x = "log crab mass", y = "Count")
+
+shapiro.test(log(crab.dat$mass_g + 1))
+
+## sqrt transformation ##
+ggplot(crab.dat, aes(sqrt(mass_g))) +
+  geom_histogram(bins = 20) +
+  labs(x = "sqrt crab mass", y = "Count")
+
+## Raw data > 0 ##
+crab.dat.noZ <- crab.dat %>%
+  filter(mass_g > 0)
+  
+ggplot(crab.dat.noZ, aes(mass_g)) +
+  geom_histogram(bins = 20) +
+  labs(x = "non zero crab mass", y = "Count")
+
+## ln transformation > 0 ##
+ggplot(crab.dat.noZ, aes(log(mass_g))) +
+  geom_histogram(bins = 20) +
+  labs(x = "log non zero crab mass", y = "Count")
+
+## sqrt transformation > 0 ##
+ggplot(crab.dat.noZ, aes(sqrt(mass_g))) +
+  geom_histogram(bins = 20) +
+  labs(x = "sqrt non zero crab mass", y = "Count")
+```
+
+## 3. Models
+Each model will get its own individual hypothesis and set up but will follow the same general framework. Initially I will be copying and learning from example code from Tim Tinker. Models will use a mixed effects Bayesian modeling stucture. Fixed effects and the random effect of site will be modeled with normally distribution density funtions. Response variables will be paramterized in a way that best fits their distribution (see above). Count data (shoot density) will be modeled with a negative binomial distrbution. 
+
+### Model 1 - Aboveground biomass
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect aboveground biomass of eelgrass.
+
+```{r Model 1 set up}
+# Dependent observed variable: this should be whatever numeric variable you wish to analyze 
+Obs <- as.numeric(tran.dat$ag_mass)
+
+# select only oberved variables that are not NA
+ii <- which(!is.na(Obs))
+Obs <- Obs[ii]
+
+# Variables to use as independent or identifier variables
+Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
+Sedtype <- as.numeric(tran.dat$sed1_no)[ii]
+Julianday <- as.numeric(tran.dat$date_julian)[ii]
+Light <- as.numeric(tran.dat$light_attenu)[ii]
+Sitetxt <- tran.dat$site[ii]
+Quad <- as.numeric(tran.dat$quadrat)[ii]
+
+# Extracting stuff?
+Sitelist <- unique(Sitetxt)
+Sitenum <- as.numeric(as.factor(Sitetxt))
+Sites <- seq(1,max(Sitenum))
+Nsites <- max(Sitenum)
+Nquads <- max(Quad)
+Nobs <- length(Obs)
+Minday <- min(Julianday)
+Dayindx <- Julianday - Minday + 1
+MeanDay <- round(mean(Dayindx),0)
+
+# Model comparison data frame
+ModComp.1 <- data.frame(Model = c("Model_1a","Model_1b","Model_1c","Model_1d","Model_1e","Model_1f","Model_1g", "Model_1h"), 
+                        WAIC = numeric(length = 8), 
+                        LOOIC = numeric(length = 8))
+
+# Set up for parralel computing
+cores <- detectCores()
+ncore <- min(20,cores-1)
+
+# Set JAGS params for running
+nsamples <- 1000
+nt <- 20
+nb <- 7000
+nc <- ncore
+
+# For parallel (comment out for serial)
+cl <- makeCluster(ncore)
+```
+
+
+**Model 1a**
+Aboveground biomass ~ time
+```{r model 1a}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_1a.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx) #, Ott = Ottindx, Sed = Sedtype Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC1a <- WAIC
+ModComp.1$WAIC[1] <- WAIC1a$waic
+
+# Calculate LOOIC
+LOOIC1a <- loo(mc_ll)
+ModComp.1$LOOIC[1] <- LOOIC1a[3]
+
+# WAIC Detail
+WAIC.1a <- data.frame(modID = c('WAIC1a'), model = c('1a'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+#LOOIC <- LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0)
+out1a <- out
+```
+ 
+**Model 1b**
+Aboveground biomass ~ time + linear(SOI)
+```{r model 1b}
+jagsfile = 'JAGS/Eelgrass_1b.jags'
+# savename='EelgrassM1b_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC1b <- WAIC
+ModComp.1$WAIC[2] <- WAIC1b$waic
+
+# Calculate LOOIC
+LOOIC1b <- loo(mc_ll)
+ModComp.1$LOOIC[2] <- LOOIC1b[3]
+
+# WAIC detail
+WAIC.1b = data.frame(modID = c('WAIC1b'), model = c('1b'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic,deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+out1b = out
+```
+
+**Model 1c**
+Aboveground biomass ~ time + linear(SOI) + sediment
+```{r model 1c}
+jagsfile = 'JAGS/Eelgrass_1c.jags'
+# savename='EelgrassM1c_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum,Day = Dayindx, Ott = Ottindx, Sed = Sedtype) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta3","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC1c <- WAIC
+ModComp.1$WAIC[3] <- WAIC1c$waic
+
+# Calculate LOOIC
+LOOIC1c <- loo(mc_ll)
+ModComp.1$LOOIC[3] <- LOOIC1c[3]
+
+# WAIC Detail
+WAIC.1c = data.frame(modID = c('WAIC1c'), model = c('1c'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+out1c = out
+```
+
+**Model 1d**
+Aboveground biomass ~ time + linear(SOI) + sediment + light
+```{r model 1d}
+jagsfile = 'JAGS/Eelgrass_1d.jags'
+# savename='EelgrassM1d_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype, Li = Light) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta3", "beta4", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method ="rjparallel", cl=cl)
+
+post <- rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post <- rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC1d <- WAIC
+ModComp.1$WAIC[4] <- WAIC1d$waic
+
+# Calculate LOOIC
+LOOIC1d <- loo(mc_ll)
+ModComp.1$LOOIC[4] <- LOOIC1d[3]
+
+# WAIC Detail
+WAIC.1d <- data.frame(modID = c('WAIC1d'), model = c('1d'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+out1d <- out
+```
+
+**Model 1e**
+Aboveground biomass ~ time + quad(SOI)
+```{r model 1e}
+jagsfile = 'JAGS/Eelgrass_1e.jags'
+# savename='EelgrassM1d_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta2b","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method ="rjparallel", cl=cl)
+
+post <- rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post <- rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC1e <- WAIC
+ModComp.1$WAIC[5] <- WAIC1e$waic
+
+# Calculate LOOIC
+LOOIC1e <- loo(mc_ll)
+ModComp.1$LOOIC[5] <- LOOIC1e[3]
+
+# WAIC Detail
+WAIC.1e <- data.frame(modID = c('WAIC1e'), model = c('1e'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+out1e <- out
+```
+
+**Model 1f**
+Aboveground biomass ~ time + quad(SOI) + sediment
+```{r model 1f}
+jagsfile = 'JAGS/Eelgrass_1f.jags'
+# savename='EelgrassM1f_Results.Rdata'
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype) # Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta2b","beta3","eps","loglik") 
+
+# Call JAGS from R
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC = waic(mc_ll)
+WAIC1f = WAIC
+ModComp.1$WAIC[6] = WAIC1f$waic
+
+# Calculate LOOIC
+LOOIC1f <- loo(mc_ll)
+ModComp.1$LOOIC[6] <- LOOIC1f[3]
+
+# WAIC Detail
+WAIC.1f <- data.frame(modID = c('WAICf'), model = c('1f'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+out1f = out
+```
+
+**Model 1g**
+Aboveground biomass ~ quad(time) + SOI
+```{r model 1g}
+jagsfile = 'JAGS/Eelgrass_1g.jags'
+# savename='EelgrassM1f_Results.Rdata'
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) # , Sed = Sedtype, Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta1b","beta2","eps","loglik")  
+
+# Call JAGS from R
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC = waic(mc_ll)
+WAIC1g = WAIC
+ModComp.1$WAIC[7] = WAIC1g$waic
+
+# Calculate LOOIC
+LOOIC1g <- loo(mc_ll)
+ModComp.1$LOOIC[7] <- LOOIC1g[3]
+
+# WAIC Detail
+WAIC.1g <- data.frame(modID = c('WAIC1g'), model = c('1g'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+out1g = out
+```
+
+**Model 1h**
+Aboveground biomass ~ quad(time) + quad(SOI)
+```{r model 1h}
+jagsfile = 'JAGS/Eelgrass_1h.jags'
+# savename='EelgrassM1h_Results.Rdata'
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) # , Sed = Sedtype, Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta1b","beta2","beta2b", "eps","loglik")  
+
+# Call JAGS from R
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC = waic(mc_ll)
+WAIC1h = WAIC
+ModComp.1$WAIC[8] = WAIC1h$waic
+
+# Calculate LOOIC
+LOOIC1h <- loo(mc_ll)
+ModComp.1$LOOIC[8] <- LOOIC1h[3]
+
+# WAIC Detail
+WAIC.1h <- data.frame(modID = c('WAIC1h'), model = c('1h'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC = LOO$looic, LOOIC_se = LOO$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+out1h = out
+```
+
+### Model 1 Comparison
+```{r Model 1 comparison, echo = FALSE}
+# Clean up work session
+stopCluster(cl = cl)
+rm(out)
+
+# Rank and organize model comparison table
+modranks <- order(ModComp.1$WAIC)
+WAIC.1.full <- rbind(WAIC.1a, WAIC.1b, WAIC.1c, WAIC.1d, WAIC.1e, WAIC.1f, WAIC.1g, WAIC.1h)
+rm(WAIC.1a, WAIC.1b, WAIC.1c, WAIC.1d, WAIC.1e, WAIC.1f, WAIC.1g, WAIC.1h)
+comptab <- compare(WAIC1a, WAIC1b, WAIC1c, WAIC1d, WAIC1e, WAIC1f, WAIC1g, WAIC1h)
+filelist <- row.names(comptab)
+for (i in 2:8){
+  row = which(WAIC.1.full$modID == filelist[i])
+  comp = compare(eval(as.name(filelist[i])) , eval(as.name(filelist[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  WAIC.1.full$deltaWAIC[row] = comp[1]
+  WAIC.1.full$deltaWAIC_se[row] = comp[2]
+  WAIC.1.full$P_comp[row] = P_val
+}
+
+WAIC.1.full = WAIC.1.full[modranks,]
+WAIC.1.full$P_comp[1] = 1
+WAIC.1.full$Likelihood = exp(-0.5*WAIC.1.full$deltaWAIC)
+WAIC.1.full$Likelihood[WAIC.1.full$P_comp < 0.1] = 0 
+sumlik = sum(WAIC.1.full$Likelihood)
+WAIC.1.full$WAICwt = WAIC.1.full$Likelihood/sumlik
+
+# round
+WAIC.1.full <- round(WAIC.1.full[, 3:9], 3)
+
+DT::datatable(WAIC.1.full)
+```
+
+### Model 1 Plotting best model
+Best model is Aboveground biomass ~ quad(time) + quad(SOI). Otherwise know as **Model 1h**
+```{r model 1 plotting best model}
+#eval(parse(text = paste0("out = out",modranks[1]))) 
+
+post <- rbind(out1h$mcmc[[1]], out1h$mcmc[[2]])
+for (i in 3:nc){
+  post <- rbind(post, out1h$mcmc[[i]])
+}
+
+reps <- dim(post)[1]
+sumout <- add.summary(out1h, c("sig","beta"))
+sumstats <- sumout$summaries
+vn <- row.names(sumstats)
+
+# Diagnostic plots
+plot(out1h, c('trace','histogram'), vars = c("sig","beta"))
+
+# Create dataframes for plotting fixed effects: assume Model1g
+mind = min(Dayindx)
+maxd = max(Dayindx)
+Julday = numeric(length=length(seq(mind:maxd)))
+Predict = numeric(length=length(seq(mind:maxd)))
+Lwr = numeric(length=length(seq(mind:maxd)))
+Upr = numeric(length=length(seq(mind:maxd)))
+sig = post[,which(vn=='sigO')]
+bt0 = post[,which(vn=='beta0')]
+bt1 = post[,which(vn=='beta1')]
+bt1b = post[,which(vn=='beta1b')]
+bt2 = post[,which(vn=='beta2')]
+bt2b = post[,which(vn=='beta2b')]
+for (d in mind:maxd){
+  Julday[d] = d-1+Minday
+  Mu = bt0 + bt1*d + bt1b*d^2
+  Predict[d] = mean(exp(Mu + sig^2/2))
+  Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2),.025))
+  Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2),.975))
+} 
+dfDay = data.frame(Julianday=Julday,Mean=Predict,Lwr=Lwr,Upr=Upr)
+dfData = data.frame(x=Julianday,y=Obs)
+
+p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr, fill = 1), alpha = 0.2) + 
+  geom_line(aes(colour = 1), size = 1) +
+  #geom_point(data = dfData, aes(x = x, y = y))+
+  xlab('Julian Day') + 
+  ylab(bquote('Mean predicted aboveground biomass' ~(g/m^2))) +
+  theme(legend.position="none")
+
+Ottvals = seq(min(Ottindx), max(Ottindx), length.out = 100)
+Predict = numeric(length=100)
+Lwr = numeric(length=100)
+Upr = numeric(length=100)
+for (o in 1:100){
+  Mu = bt0 + bt1*MeanDay + bt1b*MeanDay^2 + bt2*Ottvals[o] + bt2b*Ottvals[o]^2
+  Predict[o] = mean(exp(Mu + sig^2/2))
+  Lwr[o] = as.numeric(quantile(exp(Mu + sig^2/2),.025))
+  Upr[o] = as.numeric(quantile(exp(Mu + sig^2/2),.975))
+} 
+dfOtt = data.frame(OtterIndex=Ottvals,Mean=Predict,Lwr=Lwr,Upr=Upr)
+
+p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr, fill = 1), alpha = 0.2) + 
+  geom_line(aes(colour = 1),size = 1) +
+  xlab('Sea Otter Index') + 
+  ylab(bquote('Mean predicted aboveground biomass' ~(g/m^2))) +
+  theme(legend.position = "none")
+
+plot_grid(p1, p2, nrow = 2, ncol = 1)
+```
+
