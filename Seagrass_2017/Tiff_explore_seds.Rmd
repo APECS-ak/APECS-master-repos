@@ -61,7 +61,11 @@ df.trans <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-re
 
 df.coords <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
 
-df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sea_otter_impact_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.nut <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_nutrients_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.grazer <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 <br><br><br><br>
 
@@ -890,6 +894,88 @@ df.soi <- df.soi %>%
   select(site, sea_otter_index)
 colnames(df.soi)[which(names(df.soi) == "sea_otter_index")] <- "so_index"
 ```
+
+* df.nut: gets nutrient data from only nutrient day, across depths
+```{r, include = FALSE}
+df.nut <- subset(df.nut, sampling_type=="nutday")
+
+df.nut <- df.nut %>% 
+  select(-site, -site_corr)
+
+colnames(df.nut)[which(names(df.nut) == "site_full")] <- "site"
+colnames(df.nut)[which(names(df.nut) == "date_corr")] <- "date"
+
+
+
+
+
+########## NOX
+nox <- df.nut %>% 
+  select(site, date, rep, depth_m, nox_umol)
+m.nox <- melt(nox, id = 1:4, na.rm = TRUE) # prepares temporary DF for breakdown using dcast
+trim_nox <- dcast(m.nox, site + date + depth_m ~ ., mean) # sums all pits per site, trimming class info to just site and date
+colnames(trim_nox)[which(names(trim_nox) == ".")] <- "nox_umol" # give data column appropriate name
+
+
+# use dcast to expand the 'trans_type' column
+c.nox <- dcast(trim_nox, site + date ~ depth_m) # dcast spread
+colnames(c.nox)[which(names(c.nox) == "1")] <- "nox_1m" # apply unique names
+colnames(c.nox)[which(names(c.nox) == "4")] <- "nox_4m"
+
+
+
+
+
+########## NH4
+nh4 <- df.nut %>% 
+  select(site, date, rep, depth_m, nh4_umol)
+m.nh4 <- melt(nh4, id = 1:4, na.rm = TRUE) # prepares temporary DF for breakdown using dcast
+trim_nh4 <- dcast(m.nh4, site + date + depth_m ~ ., mean) # sums all pits per site, trimming class info to just site and date
+colnames(trim_nh4)[which(names(trim_nh4) == ".")] <- "nh4_umol" # give data column appropriate name
+
+
+# use dcast to expand the 'trans_type' column
+c.nh4 <- dcast(trim_nh4, site + date ~ depth_m) # dcast spread
+colnames(c.nh4)[which(names(c.nh4) == "1")] <- "nh4_1m" # apply unique names
+colnames(c.nh4)[which(names(c.nh4) == "4")] <- "nh4_4m"
+
+
+
+
+
+########## PO4
+po4 <- df.nut %>% 
+  select(site, date, rep, depth_m, po4_umol)
+m.po4 <- melt(po4, id = 1:4, na.rm = TRUE) # prepares temporary DF for breakdown using dcast
+trim_po4 <- dcast(m.po4, site + date + depth_m ~ ., mean) # sums all pits per site, trimming class info to just site and date
+colnames(trim_po4)[which(names(trim_po4) == ".")] <- "po4_umol" # give data column appropriate name
+
+
+# use dcast to expand the 'trans_type' column
+c.po4 <- dcast(trim_po4, site + date ~ depth_m) # dcast spread
+colnames(c.po4)[which(names(c.po4) == "1")] <- "po4_1m" # apply unique names
+colnames(c.po4)[which(names(c.po4) == "4")] <- "po4_4m"
+
+
+
+
+
+df.nut <- left_join(c.nox, c.nh4, by = c("site"))
+df.nut <- left_join(df.nut, c.po4, by = c("site"))
+df.nut <- df.nut %>% 
+  select(-date, -date.x, -date.y)
+
+rm(nh4, nox, po4, c.nh4, c.nox, c.po4, m.nh4, m.nox, m.po4, trim_nh4, trim_nox, trim_po4)
+```
+
+*df.grazer
+```{r}
+df.grazer <- df.grazer %>% 
+  select(site, grazer_mass)
+```
+
+
+
 <br><br><br><br>
 
 
@@ -905,6 +991,8 @@ df.all <- left_join(df.all, df.sedpit_trans, by = c("site"))
 df.all <- left_join(df.all, df.bio2, by = c("site"))
 df.all <- left_join(df.all, df.mass_area, by = c("site"))
 df.all <- left_join(df.all, df.soi, by = c("site"))
+df.all <- left_join(df.all, df.nut, by = c("site"))
+df.all <- left_join(df.all, df.grazer, by = c("site"))
 ```
 
 ```{r, include = FALSE}
@@ -915,6 +1003,16 @@ df.all <- within(df.all, rm(date.y.y))
 df.all <- within(df.all, rm(date))
 colnames(df.all)[which(names(df.all) == "date.x")] <- "date"
 ```
+
+```{r}
+df.all <- df.all %>%
+  mutate(nox_mean = (nox_1m + nox_4m)/2) %>%
+  mutate(nh4_mean = (nh4_1m + nh4_4m)/2) %>%
+  mutate(po4_mean = (po4_1m + po4_4m)/2) %>%
+  mutate(nox.nh4 = nox_mean / nh4_mean) %>%
+  mutate(n_tot = nox_mean + nh4_mean)
+```
+
 <br>
 
 We want to manipulate df.all in the following ways:
@@ -938,7 +1036,7 @@ df.all$julian_day <- yday(df.all$date)
 ```{r, include = FALSE}
 colnames(df.all)
 
-df.all <- df.all[c('site','site_name','latitude','longitude','date','julian_day','depth_m','so_index','pits_in','pits_edge','pits_out','pits_tot_site','sed1_in','sed1_edge','sed1_out','sed2_in','sed2_edge','sed2_out','sedmean_in','sedmean_edge','sedmean_out','sed1_site','sed2_site','sedmean_site','macroalgae_percent_cover','epiphyte_percent_cover','epiphyte_mass_perplant','epi_mass_shootmass_g.g','epi_mass_leafarea_mg.cm2','flower_density_m2','shoot_mass_perplant','shoot_density_m2','shoot_mass_m2','leaf_length_mean','leaf_length_max','leaf_width_mean','leaf_width_max','leaf_area_blade','leaf_area_plant','rhi_length','rhi_mass_tot','rhi_mass_percm','rhi_mass_percm_m2','node1_length','node2_length','node3_length','node4_length','node5_length','node1_dw','node2_dw','node3_dw','node4_dw','node5_dw','shoot_mass_m2_sd','rhi_mass_percm_m2_sd')]
+df.all <- df.all[c('site','site_name','latitude','longitude','date','julian_day','depth_m','so_index','pits_in','pits_edge','pits_out','pits_tot_site','sed1_in','sed1_edge','sed1_out','sed2_in','sed2_edge','sed2_out','sedmean_in','sedmean_edge','sedmean_out','sed1_site','sed2_site','sedmean_site','macroalgae_percent_cover','epiphyte_percent_cover','epiphyte_mass_perplant','epi_mass_shootmass_g.g','epi_mass_leafarea_mg.cm2','flower_density_m2','shoot_mass_perplant','shoot_density_m2','shoot_mass_m2','leaf_length_mean','leaf_length_max','leaf_width_mean','leaf_width_max','leaf_area_blade','leaf_area_plant','rhi_length','rhi_mass_tot','rhi_mass_percm','rhi_mass_percm_m2','node1_length','node2_length','node3_length','node4_length','node5_length','node1_dw','node2_dw','node3_dw','node4_dw','node5_dw','shoot_mass_m2_sd','rhi_mass_percm_m2_sd','nox_1m','nox_4m','nox_mean','nh4_1m','nh4_4m','nh4_mean','nox.nh4','n_tot','po4_1m','po4_4m','po4_mean','grazer_mass')]
 
 
 # we don't need these variables, but waited this long to remove them in case we want them later. Easy recovery.
@@ -2343,7 +2441,7 @@ cp14 <- plot_grid(p27, out.p27, p28, labels=c('A', 'B', 'C'), align = 'h', ncol=
 
 plot_grid(title.cp14, cp14, ncol=1, rel_heights=c(0.1, 1))
 ```
-<br><br>
+<br><br><br><br><br><br><br><br><br><br>
 
 
 
@@ -2352,39 +2450,191 @@ plot_grid(title.cp14, cp14, ncol=1, rel_heights=c(0.1, 1))
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-5A. Epiphytes per gram of seagrass
-```{r, include = FALSE}
+#### Sediment vs nutrients
+```{r, include = FALSE, warning = FALSE}
 colnames(df.all)
-
-
 
 
 # plotting in scatter
 my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+my.formula2 <- y~x+I(x^2)
 
-# rhi_mass_percm_m2
-p27 = ggplot(df.all, aes(sed1_site, epi_mass_shootmass_g.g, color = so_index)) +
+p29 = ggplot(df.all, aes(sed2_site, nox_mean, color = so_index)) +
   geom_point(size=3) +
-  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  xlab("Primary sediment class (site)\n")+ylab("\nEpiphyte biomass (g per g plant, DW)") +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  #geom_text(aes(label=ifelse(nox_mean>1.25,as.character(site),'')),hjust=0,vjust=0)
+plot(p29)
+
+
+p29b = ggplot(df.all, aes(sedmean_site, nox_mean, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  #geom_text(aes(label=ifelse(nox_mean>1.25,as.character(site),'')),hjust=0,vjust=0)
+plot(p29b)
+
+
+
+
+
+p30 = ggplot(df.all, aes(sed2_site, nh4_mean, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula2, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula2), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) 
+  #geom_text(aes(label=ifelse(nh4_mean>1.25,as.character(site),'')),hjust=0,vjust=0)
+plot(p30)
+
+p30b = ggplot(df.all, aes(sedmean_site, nh4_mean, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula2, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula2), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) 
+  #geom_text(aes(label=ifelse(nh4_mean>1.25,as.character(site),'')),hjust=0,vjust=0)
+plot(p30b)
+
+
+
+p31 = ggplot(df.all, aes(sed2_site, nox.nh4, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula2, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula2), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  #geom_text(aes(label=ifelse(n_tot>4,as.character(site),'')),hjust=0,vjust=0)
+plot(p31)
+
+
+p31b = ggplot(df.all, aes(sedmean_site, nox.nh4, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula2, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula2), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  #geom_text(aes(label=ifelse(n_tot>4,as.character(site),'')),hjust=0,vjust=0)
+plot(p31b)
+
+
+
+
+
+p32 = ggplot(df.all, aes(sed2_site, n_tot, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula2, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula2), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  #geom_text(aes(label=ifelse(n_tot>4,as.character(site),'')),hjust=0,vjust=0)
+plot(p32)
+
+p32b = ggplot(df.all, aes(sedmean_site, n_tot, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula2, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula2), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  #geom_text(aes(label=ifelse(n_tot>4,as.character(site),'')),hjust=0,vjust=0)
+plot(p32b)
+
+
+
+
+
+p33 = ggplot(df.all, aes(sed2_site, po4_mean, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula2, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula2), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  #geom_text(aes(label=ifelse(n_tot>4,as.character(site),'')),hjust=0,vjust=0)
+plot(p33)
+
+p33b = ggplot(df.all, aes(sedmean_site, po4_mean, color = so_index)) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula='y~x', se=FALSE, fullrange=FALSE) +
+  #xlab("Total pits (site); zeros included\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
+  theme(legend.position="none") 
+  #stat_poly_eq(formula = my.formula2, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula2), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  #geom_text(aes(label=ifelse(n_tot>4,as.character(site),'')),hjust=0,vjust=0)
+plot(p33b)
+```
+
+
+```{r, echo = FALSE, warning = FALSE, fig.width = 8l;', fig.height = 18}
+title.cp15 <- ggdraw() + draw_label("Sediment type (mean across site) vs nutrients", fontface='bold')
+
+cp15 <- plot_grid(p29, p29b, p30, p30b, p31, p31b, p32, p32b, p33, p33b, labels=c('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'), align = 'h', ncol=2, nrow=5, rel_widths = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)) 
+
+plot_grid(title.cp15, cp15, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br><br><br><br><br><br><br>
+
+
+
+```{r}
+my.formula <- y ~ x
+
+p11 = ggplot(df.all, aes(sed2_edge, grazer_mass, color = so_index)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #xlab("Mean sediment class (site)\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
   theme(legend.position="none") +
   stat_poly_eq(formula = my.formula, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
@@ -2392,102 +2642,7 @@ p27 = ggplot(df.all, aes(sed1_site, epi_mass_shootmass_g.g, color = so_index)) +
   stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 4)
-plot(p27)
-
-
-#OutVals.p27 = boxplot(df.all$epi_mass_shootmass_g.g)$out
-#which(df.all$epi_mass_shootmass_g.g %in% OutVals)
-
-
-
-
-
-
-
-#### ID outliers here
-
-library(tibble)
-
-# find outliers
-is_outlier <- function(epi_mass_shootmass_g.g) {
-  return(epi_mass_shootmass_g.g < quantile(epi_mass_shootmass_g.g, 0.25) - 1.5 * IQR(epi_mass_shootmass_g.g) | epi_mass_shootmass_g.g > quantile(epi_mass_shootmass_g.g, 0.75) + 1.5 * IQR(epi_mass_shootmass_g.g))
-}
-
-# give labels to outliers (row numbers)
-dat <- df.all %>% tibble::rownames_to_column(var="outlier") %>% group_by(sed1_site) %>%  mutate(is_outlier=ifelse(is_outlier(epi_mass_shootmass_g.g), epi_mass_shootmass_g.g, as.numeric(NA)))
-dat$outlier[which(is.na(dat$is_outlier))] <- as.numeric(NA)
-
-# remove outlier IDs from oulier DF
-outlrs <- dat %>% 
-  select(site, outlier)
-
-# join outlier IDs to df.all
-df.all <- left_join(df.all, outlrs, by = c("site"))
-df.all <- within(df.all, rm(sed1_site.y)) # remove extra sed1_site column that was added during join
-colnames(df.all)[which(names(df.all) == "sed1_site.x")] <- "sed1_site" # revert column name to original
-
-
-# boxplot with labelled outliers
-out.p27 <- ggplot(df.all, aes(sed1_site, epi_mass_shootmass_g.g)) + 
-  geom_boxplot(aes(group = cut_width(df.all$sed1_site, 10))) + 
-  geom_text(aes(label=outlier),na.rm=TRUE,nudge_y=0.05)
-plot(out.p27)
-
-
-df.all[, 28][df.all[, 28] > 0.1] <- NA # remove suggested outliers for sed1_site, only
-
-
-
-
-
-
-
-
-# re-plot without outliers
-p28 = ggplot(df.all, aes(sed1_in, epi_mass_shootmass_g.g, color = so_index)) +
-  geom_point(size=3) +
-  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  xlab("Primary sediment class (site)\n")+ylab("\nEpiphyte biomass (g per plant, DW)") +
-  #theme(legend.position="none") +
-  stat_poly_eq(formula = my.formula, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
-plot(p28)
-
-
-
-
-# look at fit of linear regression: density, qq-norm
-m1 <- lm(epi_mass_shootmass_g.g ~ sed1_site, data = df.all) # create a linear model
-r1 <- resid(m1) # list of model residuals
-plot(density(resid(m1))) # density plot
-qqnorm(resid(m1)) # quantile normal plot - good for checking normality
-qqline(resid(m1))
-summary(m1)
-
+plot(p11)
 
 ```
-<br>
-
-```{r, echo = FALSE, warning = FALSE, fig.width = 12, fig.height = 5}
-title.cp14 <- ggdraw() + draw_label("Epiphyte biomass (g per g shoot, DW) * primary sediment type, whole site", fontface='bold')
-
-cp14 <- plot_grid(p27, out.p27, p28, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1, 1, 1.5))
-
-plot_grid(title.cp14, cp14, ncol=1, rel_heights=c(0.1, 1))
-```
-<br><br>
-
-
-
-
-
-
-
-
-
-
 
