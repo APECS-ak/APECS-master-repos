@@ -1,5 +1,5 @@
     model {
-    # Model 1c: Aboveground biomass as function of date, otter index and sediment type, 
+    # Model 1c: Aboveground biomass as function of date, otter index sediment type and light 
 	# 	linear day effect and linear otter effect and linear sediment effect
 	# 
 	# Set Priors: 
@@ -26,7 +26,7 @@
 	# Cycle through observations to estimate observed node
 	for (i in 1:Nobs){
 		# Expected response variable, mu (for lognormal, mu is log of median Obs)
-		Mu[i] <- beta0 + beta1*Day[i] + beta2*(Ott[i]) + beta3*Sed[i] + eps[Site[i]]
+		Mu[i] <- beta0 + beta1*Day[i] + beta2*(Ott[i]) + beta3*Sed[i] + eps[Site[i]] # beta2b*(Ott[i]^2) + beta4*Li[i]
 		# Observed node as random draw from appropriate probability distribution 
 		Obs[i] ~ dlnorm(Mu[i],tauO) # observed var drawn from log-normal distribution
 		# Compute negative log likelihood for this observation
