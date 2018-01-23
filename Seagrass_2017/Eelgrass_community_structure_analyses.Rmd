@@ -361,7 +361,7 @@ Models will exclude the two sites sampled in April. If the data have not already
 
 
 ### Model 1 - Aboveground biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect aboveground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect aboveground biomass of eelgrass. Note that the number of samples (nsamples) will need to adjusted to suit the number of cores running on your machine so that the resulting analysis results in >= 20,000 samples. For example if you have 8 cores you can run analysis on 7 cores so nsamples should = 2900.  
 
 ```{r Model 1 set up, echo=FALSE}
 # Dependent observed variable: this should be whatever numeric variable you wish to analyze 
@@ -400,7 +400,7 @@ cores <- detectCores()
 ncore <- min(20, cores-1)
 
 # Set JAGS params for running
-nsamples <- 1000
+nsamples <- 2900
 nt <- 20
 nb <- 7000
 nc <- ncore
@@ -599,7 +599,7 @@ out1d = out
 ```
 
 **Model 1e**
-Aboveground biomass ~ time + SOI + quad(SOI)
+Aboveground biomass ~ time + quad(SOI)
 ```{r model 1e, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1e.jags'
 # savename='EelgrassM1d_Results.Rdata'
@@ -646,7 +646,7 @@ out1e = out
 ```
 
 **Model 1f**
-Aboveground biomass ~ time + SOI + quad(SOI) + sediment
+Aboveground biomass ~ time + quad(SOI) + sediment
 ```{r model 1f, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1f.jags'
 # savename='EelgrassM1f_Results.Rdata'
@@ -692,7 +692,7 @@ out1f = out
 ```
 
 **Model 1g**
-Aboveground biomass ~ time + quad(time) + SOI
+Aboveground biomass ~ quad(time) + SOI
 ```{r model 1g, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1g.jags'
 # savename='EelgrassM1f_Results.Rdata'
@@ -738,7 +738,7 @@ out1g = out
 ```
 
 **Model 1h**
-Aboveground biomass ~ time + quad(time) + SOI + qaud(SOI)
+Aboveground biomass ~ quad(time) + qaud(SOI)
 ```{r model 1h, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1h.jags'
 # savename='EelgrassM1h_Results.Rdata'
@@ -789,14 +789,16 @@ out1h = out
 stopCluster(cl = cl)
 rm(out)
 
+## WAIC ##
 # Rank and organize model comparison table
-modranks <- order(ModComp.1$WAIC)
+modranks.WAIC <- order(ModComp.1$WAIC)
 WAIC.1.full <- rbind(WAIC.1a, WAIC.1b, WAIC.1c, WAIC.1d, WAIC.1e, WAIC.1f, WAIC.1g, WAIC.1h)
-comptab <- compare(WAIC1a, WAIC1b, WAIC1c, WAIC1d, WAIC1e, WAIC1f, WAIC1g, WAIC1h)
-filelist <- row.names(comptab)
+comptab.WAIC <- compare(WAIC1a, WAIC1b, WAIC1c, WAIC1d, WAIC1e, WAIC1f, WAIC1g, WAIC1h)
+filelist.WAIC <- row.names(comptab.WAIC)
+
 for (i in 2:8){
-  row = which(WAIC.1.full$modID == filelist[i])
-  comp = compare(eval(as.name(filelist[i])) , eval(as.name(filelist[1])) )
+  row = which(WAIC.1.full$modID == filelist.WAIC[i])
+  comp = compare(eval(as.name(filelist.WAIC[i])) , eval(as.name(filelist.WAIC[1])) )
   Z_score = comp[1]/comp[2]
   P_val = 1-pnorm(Z_score)
   WAIC.1.full$deltaWAIC[row] = comp[1]
@@ -804,7 +806,7 @@ for (i in 2:8){
   WAIC.1.full$P_comp[row] = P_val
 }
 
-WAIC.1.full <- WAIC.1.full[modranks,]
+WAIC.1.full <- WAIC.1.full[modranks.WAIC,]
 WAIC.1.full$P_comp[1] = 1
 WAIC.1.full$Likelihood = exp(-0.5*WAIC.1.full$deltaWAIC)
 WAIC.1.full$Likelihood[WAIC.1.full$P_comp < 0.1] = 0 
@@ -814,74 +816,116 @@ WAIC.1.full$WAICwt = WAIC.1.full$Likelihood/sumlik
 # round
 WAIC.1.full <- cbind(WAIC.1.full[,1:2], round(WAIC.1.full[, 3:9], 3))
 
+## LOOIC ##
+ModComp.1$LOOIC <- as.numeric(ModComp.1$LOOIC)
+modranks.LOOIC <- order(ModComp.1$LOOIC)
+LOOIC.1.full <- rbind(LOOIC.1a, LOOIC.1b, LOOIC.1c, LOOIC.1d, LOOIC.1e, LOOIC.1f, LOOIC.1g, LOOIC.1h)
+comptab.LOOIC <- compare(LOOIC1a, LOOIC1b, LOOIC1c, LOOIC1d, LOOIC1e, LOOIC1f, LOOIC1g, LOOIC1h)
+filelist.LOOIC <- row.names(comptab.LOOIC)
+
+for (i in 2:8){
+  row = which(LOOIC.1.full$modID == filelist.LOOIC[i])
+  comp = compare(eval(as.name(filelist.LOOIC[i])) , eval(as.name(filelist.LOOIC[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  LOOIC.1.full$deltaLOOIC[row] = comp[1]
+  LOOIC.1.full$deltaLOOIC_se[row] = comp[2]
+}
+
+LOOIC.1.full <- LOOIC.1.full[modranks.LOOIC,]
+LOOIC.1.full$Likelihood = exp(-0.5*LOOIC.1.full$deltaLOOIC)
+LOOIC.1.full$Likelihood[LOOIC.1.full$P_comp < 0.1] = 0 
+sumlik = sum(LOOIC.1.full$Likelihood)
+LOOIC.1.full$LOOICwt = LOOIC.1.full$Likelihood/sumlik
+
+# round
+LOOIC.1.full <- cbind(LOOIC.1.full[,1:2], round(LOOIC.1.full[, 3:8], 3))
+```
+
+### Model 1 Comparison tables
+WAIC Comparison
+```{r model 1 WAIC, echo = FALSE}
 DT::datatable(WAIC.1.full)
 ```
 
-### Model 1 Plotting best model
-Best model is Aboveground biomass ~ time + quad(SOI). Otherwise know as **Model 1e**
-```{r model 1 plotting best model}
-#eval(parse(text = paste0("out = out",modranks[1]))) 
+LOICC comparison
+```{r model 1 LOOIC, echo = FALSE}
+DT::datatable(LOOIC.1.full)
+```
 
-post <- rbind(out1e$mcmc[[1]], out1e$mcmc[[2]])
+### Model 1 Plotting best model
+```{r model 1 plotting best model, echo=FALSE}
+#eval(parse(text=paste0("out = out",modranks[1]))) 
+
+# Extract MCMC values
+post <- rbind(out1h$mcmc[[1]], out1h$mcmc[[2]])
+
+# Loop over number of cores
 for (i in 3:nc){
-  post <- rbind(post, out1e$mcmc[[i]])
+  post <- rbind(post, out1h$mcmc[[i]])
 }
 
+# Calculate summary stats
 reps <- dim(post)[1]
-sumout <- add.summary(out1e, c("sig","beta"))
+sumout <- add.summary(out1h, c("sig","beta"))
 sumstats <- sumout$summaries
 vn <- row.names(sumstats)
 
 # Diagnostic plots
-plot(out1e, c('trace','histogram'), vars = c("sig","beta"))
+plot(out1h, c('trace', 'histogram'), vars=c("sig","beta"))
 
-# Create dataframes for plotting fixed effects: assume Model1e
-mind = min(Dayindx)
-maxd = max(Dayindx)
-Julday = numeric(length=length(seq(mind:maxd)))
-Predict = numeric(length=length(seq(mind:maxd)))
-Lwr = numeric(length=length(seq(mind:maxd)))
-Upr = numeric(length=length(seq(mind:maxd)))
-sig = post[,which(vn=='sigO')]
-bt0 = post[,which(vn=='beta0')]
-bt1 = post[,which(vn=='beta1')]
-bt2 = post[,which(vn=='beta2')]
-bt2b = post[,which(vn=='beta2b')]
+# Create dataframes for plotting fixed effects: assume Model1h
+mind <- min(Dayindx)
+maxd <- max(Dayindx)
+Julday <- numeric(length = length(seq(mind:maxd)))
+Predict <- numeric(length = length(seq(mind:maxd)))
+Lwr <- numeric(length = length(seq(mind:maxd)))
+Upr <- numeric(length = length(seq(mind:maxd)))
+sig <- post[,which(vn == 'sigO')]
+bt0 <- post[,which(vn == 'beta0')]
+bt1 <- post[,which(vn == 'beta1')]
+bt1b <- post[,which(vn == 'beta1b')]
+bt2 <- post[,which(vn == 'beta2')]
+bt2b <- post[,which(vn == 'beta2b')]
+
 for (d in mind:maxd){
-  Julday[d] = d-1+Minday
-  Mu = bt0 + bt1*d
+  Julday[d] = d - 1 + Minday
+  Mu = bt0 + bt1*d + bt1b*d^2
   Predict[d] = mean(exp(Mu + sig^2/2))
-  Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2),.025))
-  Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2),.975))
+  Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .975))
 } 
-dfDay = data.frame(Julianday=Julday,Mean=Predict,Lwr=Lwr,Upr=Upr)
-dfData = data.frame(x=Julianday,y=Obs)
+
+dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
+dfData = data.frame(x = Julianday, y = Obs)
 
 p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) + 
-  geom_ribbon(aes(ymin = Lwr, ymax = Upr, fill = 1), alpha = 0.2) + 
-  geom_line(aes(colour = 1), size = 1) +
-  #geom_point(data = dfData, aes(x = x, y = y))+
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  # geom_point(data = dfData, aes(x=x, y=y))+
   xlab('Julian Day') + 
-  ylab(bquote('Mean predicted aboveground biomass' ~(g/m^2))) +
-  theme(legend.position="none")
+  ylab('Mean predicted aboveground biomass') +
+  theme(legend.position = "none")
 
-Ottvals = seq(min(Ottindx), max(Ottindx), length.out = 100)
-Predict = numeric(length=100)
-Lwr = numeric(length=100)
-Upr = numeric(length=100)
+Ottvals <- seq(min(Ottindx), max(Ottindx), length.out = 100)
+Predict <- numeric(length = 100)
+Lwr <- numeric(length = 100)
+Upr <- numeric(length = 100)
+
 for (o in 1:100){
-  Mu = bt0 + bt1*MeanDay + bt2*Ottvals[o] + bt2b*Ottvals[o]^2
-  Predict[o] = mean(exp(Mu + sig^2/2))
-  Lwr[o] = as.numeric(quantile(exp(Mu + sig^2/2),.025))
-  Upr[o] = as.numeric(quantile(exp(Mu + sig^2/2),.975))
-} 
-dfOtt = data.frame(OtterIndex=Ottvals,Mean=Predict,Lwr=Lwr,Upr=Upr)
+  Mu <- bt0 + bt1*MeanDay + bt1b*MeanDay^2 + bt2*Ottvals[o] + bt2b*Ottvals[o]^2
+  Predict[o] <- mean(exp(Mu + sig^2/2))
+  Lwr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .975))
+}
+
+dfOtt = data.frame(OtterIndex = Ottvals, Mean = Predict, Lwr = Lwr, Upr = Upr)
 
 p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) + 
-  geom_ribbon(aes(ymin = Lwr, ymax = Upr, fill = 1), alpha = 0.2) + 
-  geom_line(aes(colour = 1),size = 1) +
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
   xlab('Sea Otter Index') + 
-  ylab(bquote('Mean predicted aboveground biomass' ~(g/m^2))) +
+  ylab('Mean predicted aboveground biomass') +
   theme(legend.position = "none")
 
 plot_grid(p1, p2, nrow = 2, ncol = 1)
