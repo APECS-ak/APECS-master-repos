@@ -904,7 +904,7 @@ p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) +
   geom_line(size = 1) +
   # geom_point(data = dfData, aes(x=x, y=y))+
   xlab('Julian Day') + 
-  ylab('Mean predicted aboveground biomass') +
+  ylab(bquote('Mean Pred aboveground mass' ~(g/m^2))) +
   theme(legend.position = "none")
 
 Ottvals <- seq(min(Ottindx), max(Ottindx), length.out = 100)
@@ -925,7 +925,7 @@ p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) +
   geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
   geom_line(size = 1) +
   xlab('Sea Otter Index') + 
-  ylab('Mean predicted aboveground biomass') +
+  ylab(bquote('Mean Pred aboveground mass' ~(g/m^2))) +
   theme(legend.position = "none")
 
 plot_grid(p1, p2, nrow = 2, ncol = 1)
@@ -1378,6 +1378,7 @@ WAIC.2.full <- rbind(WAIC.2a, WAIC.2b, WAIC.2c, WAIC.2d, WAIC.2e, WAIC.2f, WAIC.
 comptab.WAIC <- compare(WAIC2a, WAIC2b, WAIC2c, WAIC2d, WAIC2e, WAIC2f, WAIC2g, WAIC2h)
 filelist.WAIC <- row.names(comptab.WAIC)
 
+# Calculate comaprison values
 for (i in 2:8){
   row = which(WAIC.2.full$modID == filelist.WAIC[i])
   comp = compare(eval(as.name(filelist.WAIC[i])) , eval(as.name(filelist.WAIC[1])) )
@@ -1388,6 +1389,7 @@ for (i in 2:8){
   WAIC.2.full$P_comp[row] = P_val
 }
 
+# organize final table
 WAIC.2.full <- WAIC.1.full[modranks.WAIC,]
 WAIC.2.full$P_comp[1] = 1
 WAIC.2.full$Likelihood = exp(-0.5*WAIC.1.full$deltaWAIC)
@@ -1399,12 +1401,14 @@ WAIC.2.full$WAICwt = WAIC.1.full$Likelihood/sumlik
 WAIC.2.full <- cbind(WAIC.2.full[,1:2], round(WAIC.2.full[, 3:8], 3))
 
 ## LOOIC ##
+# Rank and organize model comparison table
 ModComp.2$LOOIC <- as.numeric(ModComp.2$LOOIC)
 modranks.LOOIC <- order(ModComp.2$LOOIC)
 LOOIC.2.full <- rbind(LOOIC.2a, LOOIC.2b, LOOIC.2c, LOOIC.2d, LOOIC.2e, LOOIC.2f, LOOIC.2g, LOOIC.2h)
 comptab.LOOIC <- compare(LOOIC2a, LOOIC2b, LOOIC2c, LOOIC2d, LOOIC2e, LOOIC2f, LOOIC2g, LOOIC2h)
 filelist.LOOIC <- row.names(comptab.LOOIC)
 
+# Calculate comparison values
 for (i in 2:8){
   row = which(LOOIC.2.full$modID == filelist.LOOIC[i])
   comp = compare(eval(as.name(filelist.LOOIC[i])) , eval(as.name(filelist.LOOIC[1])) )
@@ -1414,6 +1418,7 @@ for (i in 2:8){
   LOOIC.2.full$deltaLOOIC_se[row] = comp[2]
 }
 
+# organize final table
 LOOIC.2.full <- LOOIC.2.full[modranks.LOOIC,]
 LOOIC.2.full$Likelihood = exp(-0.5*LOOIC.2.full$deltaLOOIC)
 LOOIC.2.full$Likelihood[LOOIC.2.full$P_comp < 0.1] = 0 
@@ -1433,4 +1438,307 @@ DT::datatable(WAIC.2.full)
 LOICC comparison
 ```{r model 2 LOOIC, echo = FALSE}
 DT::datatable(LOOIC.2.full)
+```
+
+### Model 2 Plotting best model
+If both best model agree then use the best WAIC model, if they dissagree use lest LOOIC model.
+```{r model 2 plotting best model, echo=FALSE}
+# Extract best model
+best2.WAIC <- paste0(c("out", paste0(WAIC.2.full[1,2])), collapse = "")
+best2.LOOIC <- paste0(c("out", paste0(LOOIC.2.full[1,2])), collapse = "")
+
+# Test for difference in best model between WAIC and LOOIC. If both best model agree then use the best WAIC model, if they dissagree use lest LOOIC model
+ifelse(all.equal(best2.WAIC, best2.LOOIC) == TRUE, best2 <- eval(best2.WAIC), best2 <- eval(best2.LOOIC))
+
+# Extract MCMC values
+post <- rbind(out2a$mcmc[[1]], out2a$mcmc[[2]])
+
+# Loop over number of cores
+for (i in 3:nc){
+  post <- rbind(post, out2a$mcmc[[i]])
+}
+
+# Calculate summary stats
+reps <- dim(post)[1]
+sumout <- add.summary(out2a, c("sig","beta"))
+sumstats <- sumout$summaries
+vn <- row.names(sumstats)
+
+# Diagnostic plots
+plot(out2a, c('trace', 'histogram'), vars=c("sig","beta"))
+
+# Create dataframes for plotting fixed effects: assume Model2a
+mind <- min(Dayindx)
+maxd <- max(Dayindx)
+Julday <- numeric(length = length(seq(mind:maxd)))
+Predict <- numeric(length = length(seq(mind:maxd)))
+Lwr <- numeric(length = length(seq(mind:maxd)))
+Upr <- numeric(length = length(seq(mind:maxd)))
+sig <- post[,which(vn == 'sigO')]
+bt0 <- post[,which(vn == 'beta0')]
+bt1 <- post[,which(vn == 'beta1')]
+
+for (d in mind:maxd){
+  Julday[d] = d - 1 + Minday
+  Mu = bt0 + bt1*d
+  Predict[d] = mean(exp(Mu + sig^2/2))
+  Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .975))
+} 
+
+dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
+dfData = data.frame(x = Julianday, y = Obs)
+
+p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  # geom_point(data = dfData, aes(x=x, y=y))+
+  xlab('Julian Day') + 
+  ylab(bquote('Mean Pred belowground mass' ~(g/m^2))) +
+  theme(legend.position = "none")
+
+print(p1)
+```
+
+### Model 3 - Shoot Density
+Responce is negative binomially distributed count data. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect belowground biomass of eelgrass.
+
+```{r model 3 set up, echo = FALSE}
+# Dependent observed variable: eeglrass shoot density per meter sq
+Obs <- as.numeric(tran.dat$eelgrass_shoots_msq)
+
+# select only oberved variables that are not NA
+ii <- which(!is.na(Obs))
+Obs <- Obs[ii]
+
+# Variables to use as independent or identifier variables
+Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
+Sedtype <- as.numeric(tran.dat$sed1_no)[ii]
+Julianday <- as.numeric(tran.dat$date_julian)[ii]
+Light <- as.numeric(tran.dat$light_attenu)[ii]
+Sitetxt <- tran.dat$site[ii]
+Quad <- as.numeric(tran.dat$quadrat)[ii]
+
+# Extracting data attributes
+Sitelist <- unique(Sitetxt)
+Sitenum <- as.numeric(as.factor(Sitetxt))
+Sites <- seq(1, max(Sitenum))
+Nsites <- max(Sitenum)
+Nquads <- max(Quad)
+Nobs <- length(Obs)
+Minday <- min(Julianday)
+Dayindx <- Julianday - Minday + 1
+MeanDay <- round(mean(Dayindx),0)
+
+# Model comparison data frame
+ModComp.3 <- data.frame(Model = c("Model_3a","Model_3b","Model_3c","Model_3d","Model_3e","Model_3f","Model_3g", "Model_3h"), WAIC = numeric(length = 8), LOOIC = numeric(length = 8))
+
+# Set up for parralel computing
+cores <- detectCores()
+ncore <- min(20, cores-1)
+
+# Set JAGS params for running
+nsamples <- 2900
+nt <- 20
+nb <- 7000
+nc <- ncore
+
+# For parallel (comment out for serial)
+cl <- makeCluster(ncore)
+```
+
+#### Model 3a
+Shoot density ~ time
+```{r model 3a, echo = FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3a.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx) # Ott = Ottindx, Sed = Sedtype Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sig0 = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3a <- WAIC
+ModComp.3$WAIC[1] <- WAIC3a$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3a <- LOOIC
+ModComp.3$LOOIC[1] <- LOOIC3a[3]
+
+# WAIC Detail
+WAIC.3a <- data.frame(modID = c('WAIC3a'), model = c('3a'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3a <- data.frame(modID = c('LOOIC3a'), model = c('3a'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3a <- out
+```
+
+#### Model 3b
+Shoot density ~ time + SOI
+```{r model 3b, echo=FLASE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3b.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) #, , Sed = Sedtype Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sig0 = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3b <- WAIC
+ModComp.3$WAIC[2] <- WAIC3b$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3b <- LOOIC
+ModComp.3$LOOIC[2] <- LOOIC3b[3]
+
+# WAIC Detail
+WAIC.3b <- data.frame(modID = c('WAIC3b'), model = c('3b'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3b <- data.frame(modID = c('LOOIC3b'), model = c('3b'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3b <- out
+```
+
+#### Model 3c
+Shoot density ~ time + SOI + Sediment
+```{r model 3c, echo=FLASE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3c.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype) #, ,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sig0 = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2", "beta3", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3c <- WAIC
+ModComp.3$WAIC[3] <- WAIC3c$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3c <- LOOIC
+ModComp.3$LOOIC[3] <- LOOIC3b[3]
+
+# WAIC Detail
+WAIC.3c <- data.frame(modID = c('WAIC3c'), model = c('3c'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3c <- data.frame(modID = c('LOOIC3c'), model = c('3c'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3c <- out
+```
+
+#### Model 3d
+Shoot density ~ time + SOI + Sediment + Light
+```{r model 3d, echo=FLASE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3d.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype, Li = Light) #, ,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sig0 = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2", "beta3", "beta4", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3d <- WAIC
+ModComp.3$WAIC[4] <- WAIC3c$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3d <- LOOIC
+ModComp.3$LOOIC[4] <- LOOIC3b[3]
+
+# WAIC Detail
+WAIC.3d <- data.frame(modID = c('WAIC3d'), model = c('3d'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3d <- data.frame(modID = c('LOOIC3d'), model = c('3d'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3d <- out
 ```
