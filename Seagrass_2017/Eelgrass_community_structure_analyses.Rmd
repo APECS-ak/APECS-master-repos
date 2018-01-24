@@ -379,7 +379,7 @@ Light <- as.numeric(tran.dat$light_attenu)[ii]
 Sitetxt <- tran.dat$site[ii]
 Quad <- as.numeric(tran.dat$quadrat)[ii]
 
-# Extracting stuff?
+# Extracting attributes of data
 Sitelist <- unique(Sitetxt)
 Sitenum <- as.numeric(as.factor(Sitetxt))
 Sites <- seq(1, max(Sitenum))
@@ -409,7 +409,7 @@ nc <- ncore
 cl <- makeCluster(ncore)
 ```
 
-**Model 1a**
+#### Model 1a
 Aboveground biomass ~ time
 ```{r model 1a, echo=FALSE}
 # Call up JAGS file
@@ -457,7 +457,7 @@ LOOIC.1a <- data.frame(modID = c('LOOIC1a'), model = c('1a'), LOOIC$looic, LOOIC
 out1a <- out
 ```
  
-**Model 1b**
+#### Model 1b
 Aboveground biomass ~ time + SOI
 ```{r model 1b, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1b.jags'
@@ -504,7 +504,7 @@ LOOIC.1b <- data.frame(modID = c('LOOIC1b'), model = c('1b'), LOOIC$looic, LOOIC
 out1b = out
 ```
 
-**Model 1c**
+#### Model 1c
 Aboveground biomass ~ time + SOI + sediment
 ```{r model 1c, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1c.jags'
@@ -551,7 +551,7 @@ LOOIC.1c <- data.frame(modID = c('LOOIC1c'), model = c('1c'), LOOIC$looic, LOOIC
 out1c = out
 ```
 
-**Model 1d**
+#### Model 1d
 Aboveground biomass ~ time + SOI + sediment + light
 ```{r model 1d, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1d.jags'
@@ -598,7 +598,7 @@ LOOIC.1d <- data.frame(modID = c('LOOIC1d'), model = c('1d'), LOOIC$looic, LOOIC
 out1d = out
 ```
 
-**Model 1e**
+#### Model 1e
 Aboveground biomass ~ time + quad(SOI)
 ```{r model 1e, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1e.jags'
@@ -645,7 +645,7 @@ LOOIC.1e <- data.frame(modID = c('LOOIC1e'), model = c('1e'), LOOIC$looic, LOOIC
 out1e = out
 ```
 
-**Model 1f**
+#### Model 1f
 Aboveground biomass ~ time + quad(SOI) + sediment
 ```{r model 1f, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1f.jags'
@@ -691,7 +691,7 @@ LOOIC.1f <- data.frame(modID = c('LOOIC1f'), model = c('1f'), LOOIC$looic, LOOIC
 out1f = out
 ```
 
-**Model 1g**
+#### Model 1g
 Aboveground biomass ~ quad(time) + SOI
 ```{r model 1g, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1g.jags'
@@ -737,7 +737,7 @@ LOOIC.1g <- data.frame(modID = c('LOOIC1g'), model = c('1g'), LOOIC$looic, LOOIC
 out1g = out
 ```
 
-**Model 1h**
+#### Model 1h
 Aboveground biomass ~ quad(time) + qaud(SOI)
 ```{r model 1h, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_1h.jags'
@@ -842,7 +842,7 @@ LOOIC.1.full$LOOICwt = LOOIC.1.full$Likelihood/sumlik
 LOOIC.1.full <- cbind(LOOIC.1.full[,1:2], round(LOOIC.1.full[, 3:8], 3))
 ```
 
-### Model 1 Comparison tables
+### Model 1 Best model comparison tables
 WAIC Comparison
 ```{r model 1 WAIC, echo = FALSE}
 DT::datatable(WAIC.1.full)
@@ -980,7 +980,7 @@ nc <- ncore
 cl <- makeCluster(ncore)
 ```
 
-**Model 2a**
+#### Model 2a
 Belowground biomass ~ time
 ```{r model 2a, echo=FALSE}
 # Call up JAGS file
@@ -1029,7 +1029,7 @@ LOOIC.2a <- data.frame(modID = c('LOOIC2a'), model = c('2a'), LOOIC$looic, LOOIC
 out2a <- out
 ```
 
-**Model 2b** 
+#### Model 2b
 Belowground biomass ~ time + SOI
 ```{r model 2b, echo=FALSE}
 # Call up JAGS file
@@ -1078,7 +1078,7 @@ LOOIC.2b <- data.frame(modID = c('LOOIC2b'), model = c('2b'), LOOIC$looic, LOOIC
 out2b <- out
 ```
 
-**Model 2c** 
+#### Model 2c 
 Belowground biomass ~ time + SOI + Sediment
 ```{r model 2c, echo=FALSE}
 # Call up JAGS file
@@ -1127,7 +1127,7 @@ LOOIC.2c <- data.frame(modID = c('LOOIC2c'), model = c('2c'), LOOIC$looic, LOOIC
 out2c <- out
 ```
 
-**Model 2d** 
+#### Model 2d 
 Belowground biomass ~ time + SOI + Sediment + Light
 ```{r model 2d, echo=FALSE}
 # Call up JAGS file
@@ -1176,7 +1176,7 @@ LOOIC.2d <- data.frame(modID = c('LOOIC2d'), model = c('2d'), LOOIC$looic, LOOIC
 out2d <- out
 ```
 
-**Model 2e** 
+#### Model 2e 
 Belowground biomass ~ time + quad(SOI)
 ```{r model 2e, echo=FALSE}
 # Call up JAGS file
@@ -1225,7 +1225,7 @@ LOOIC.2e <- data.frame(modID = c('LOOIC2e'), model = c('2e'), LOOIC$looic, LOOIC
 out2e <- out
 ```
 
-**Model 2f**
+#### Model 2f
 Belowground biomass ~ time + quad(SOI) + sediment
 ```{r model 2f, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_2f.jags'
@@ -1272,7 +1272,7 @@ LOOIC.2f <- data.frame(modID = c('LOOIC2f'), model = c('2f'), LOOIC$looic, LOOIC
 out2f = out
 ```
 
-**Model 2g**
+#### Model 2g
 Belowground biomass ~ quad(time) + SOI
 ```{r model 2g, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_2g.jags'
@@ -1318,7 +1318,7 @@ LOOIC.2g <- data.frame(modID = c('LOOIC2g'), model = c('2g'), LOOIC$looic, LOOIC
 out2g = out
 ```
 
-**Model 2h**
+#### Model 2h
 Belowground biomass ~ quad(time) + qaud(SOI)
 ```{r model 2h, echo=FALSE}
 jagsfile = 'JAGS/Eelgrass_2h.jags'
