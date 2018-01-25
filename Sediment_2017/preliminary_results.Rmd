@@ -37,6 +37,22 @@ colnames(cr.mat)
 ```
 
 
+
+```{r}
+cr.mat = cr.mat %>% 
+  mutate(om_percent = (om_weight / sed_dw_pre_450C) * 100, na.rm = TRUE) %>%
+  mutate(im_percent = (im_weight / sed_dw_pre_950C) * 100, na.rm = TRUE) %>%
+  mutate(om.im_ratio = om_weight / im_weight, na.rm = TRUE) %>%
+  mutate(om_density = om_weight * dry_bulk_density, na.rm = TRUE) %>%
+  mutate(im_density = im_weight * dry_bulk_density, na.rm = TRUE)
+```
+
+
+
+
+
+
+
 <br>
 
 ### 3. Where are the processed cores from?

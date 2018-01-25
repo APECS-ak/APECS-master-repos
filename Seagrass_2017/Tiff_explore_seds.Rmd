@@ -1044,6 +1044,8 @@ df.all <- df.all[c('site','site_name','latitude','longitude','date','julian_day'
 df.all <- df.all[, -c(40:41,44:53)] # delete rhi_length, rhi_mass_tot, and all nodes
 colnames(df.all) # leaf_area_plant and shoot_mass_m2_sd should be there, still
 
+df.all <- df.all[-c(1,8),] # delete April sites
+
 ```
 
 Here are the column names in the final df.all:
@@ -1779,7 +1781,7 @@ p11 = ggplot(df.all, aes(sedmean_site, rhi_mass_percm, color = so_index)) +
                label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
   stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4) 
 plot(p11)
 
 
@@ -2617,7 +2619,7 @@ plot(p33b)
 ```
 
 
-```{r, echo = FALSE, warning = FALSE, fig.width = 8l;', fig.height = 18}
+```{r, echo = FALSE, warning = FALSE, fig.width = 8, fig.height = 18}
 title.cp15 <- ggdraw() + draw_label("Sediment type (mean across site) vs nutrients", fontface='bold')
 
 cp15 <- plot_grid(p29, p29b, p30, p30b, p31, p31b, p32, p32b, p33, p33b, labels=c('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'), align = 'h', ncol=2, nrow=5, rel_widths = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)) 
@@ -2629,13 +2631,19 @@ plot_grid(title.cp15, cp15, ncol=1, rel_heights=c(0.1, 1))
 
 
 ```{r}
+colnames(df.all)
+
+df.all2 <- df.all %>%
+  mutate(agbg = shoot_mass_perplant / rhi_mass_percm) %>%
+  mutate(agbg2 = shoot_mass_m2 / rhi_mass_percm_m2)
+
 my.formula <- y ~ x
 
-p11 = ggplot(df.all, aes(sed2_edge, grazer_mass, color = so_index)) +
+p11 = ggplot(df.all, aes(so_index, shoot_density_m2, color = julian_day)) +
   geom_point(size=3) +
   geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
   #xlab("Mean sediment class (site)\n")+ylab("\nBG biomass (g per cm rhizome, DW)") +
-  theme(legend.position="none") +
+  #theme(legend.position="none") +
   stat_poly_eq(formula = my.formula, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
