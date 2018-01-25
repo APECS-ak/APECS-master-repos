@@ -33,6 +33,7 @@ We want to calculate dry bulk density (DBD), loss of organic matter (OM), and lo
 # for DBD
 cr.mat = cr.mat %>% 
   mutate(layer_volume_cm3 = pi*((2.5)^2)*layer_thickness, na.rm = TRUE) %>%
+  mutate(sed_ww_pre_60C = pan_sed_ww_pre_60C - pan_weight, na.rm = TRUE) %>% # not needed for DBD but a good factor to have for later ww:dw conversions
   mutate(sed_dw_post_60C = pan_sed_dw_post_60C - pan_weight, na.rm = TRUE) %>%
   mutate(dry_bulk_density = sed_dw_post_60C / layer_volume_cm3, na.rm = TRUE)
 
@@ -62,7 +63,7 @@ cr.mat = cr.mat %>%
 
 ```{r}
 # reorganize so df is easier to navigate
-cr.mat <- cr.mat[c("otter_region","site","latitude","longitude","layer_number","layer_depth","layer_thickness","layer_volume_cm3","pan_weight","pan_sed_ww_pre_60C","pan_sed_dw_post_60C","sed_dw_post_60C","pan_sed_dw_pre_450C","pan_sed_dw_post450C","sed_dw_pre_450C","sed_dw_post_450C","crucible_weight","crucible_sed_dw_pre_950C","crucible_sed_dw_post_950C","sed_dw_pre_950C","sed_dw_post_950C","dry_bulk_density","om_dw","im_dw")]
+cr.mat <- cr.mat[c("otter_region","site","latitude","longitude","layer_number","layer_depth","layer_thickness","layer_volume_cm3","pan_weight","pan_sed_ww_pre_60C","pan_sed_dw_post_60C","sed_ww_pre_60C","sed_dw_post_60C","pan_sed_dw_pre_450C","pan_sed_dw_post450C","sed_dw_pre_450C","sed_dw_post_450C","crucible_weight","crucible_sed_dw_pre_950C","crucible_sed_dw_post_950C","sed_dw_pre_950C","sed_dw_post_950C","dry_bulk_density","om_dw","im_dw")]
 ```
 
 
