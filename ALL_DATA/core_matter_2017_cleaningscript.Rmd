@@ -14,56 +14,57 @@ theme_set(theme_classic())
 
 Import data
 ```{r}
-# datachunk: TAS
-
-cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/sediment_2017/master/RAW_core_matter.csv", stringsAsFactors = FALSE, header = TRUE)
+cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/core_matter_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 
 Look at data
 ```{r}
 str(cr.mat)
-nrow(cr.mat)
 ```
 
 
 
 # Cleaning Data for Analysis
 
-Calculate dry weights, organic matter, inorganic matter
+We want to calculate dry bulk density (DBD), loss of organic matter (OM), and loss of inorganic matter (IM). To determine DBD we need the volume of the layer, and the dry weight of that layer. 
 ```{r}
-# datachunk: TAS
 
-
-# piped calculations for all
+# for DBD
 cr.mat = cr.mat %>% 
-  mutate(sed_ww_pre_60C = pan_sed_ww_pre_60C - pan_weight, na.rm = TRUE) %>%
+  mutate(layer_volume_cm3 = pi*((2.5)^2)*layer_thickness, na.rm = TRUE) %>%
   mutate(sed_dw_post_60C = pan_sed_dw_post_60C - pan_weight, na.rm = TRUE) %>%
-  mutate(dry_bulk_density = sed_dw_post_60C / sample_volume, na.rm = TRUE) %>%
+  mutate(dry_bulk_density = sed_dw_post_60C / layer_volume_cm3, na.rm = TRUE)
+
+
+# for organic matter
+cr.mat = cr.mat %>% 
   mutate(sed_dw_pre_450C = pan_sed_dw_pre_450C - pan_weight, na.rm = TRUE) %>%
   mutate(sed_dw_post_450C = pan_sed_dw_post450C - pan_weight, na.rm = TRUE) %>%
-  mutate(om_weight = sed_dw_pre_450C - sed_dw_post_450C, na.rm = TRUE) %>%
-  mutate(sed_dw_pre_950C = crucible_sed_dw_pre_950C - crucible_weight, na.rm = TRUE) %>%
-  mutate(sed_dw_post_950C = crucible_sed_dw_post_950C - crucible_weight, na.rm = TRUE) %>%
-  mutate(im_weight = sed_dw_pre_950C - sed_dw_post_950C) %>%
-  mutate(om_percent = (om_weight / sed_dw_pre_450C) * 100, na.rm = TRUE) %>%
-  mutate(im_percent = (im_weight / sed_dw_pre_950C) * 100, na.rm = TRUE) %>%
-  mutate(om.im_ratio = om_weight / im_weight, na.rm = TRUE) %>%
-  mutate(om_content = (om_weight/dry_bulk_density)*100, na.rm = TRUE) %>%
-  mutate(im_content = (im_weight/dry_bulk_density)*100, na.rm = TRUE)
+  mutate(om_dw = sed_dw_pre_450C - sed_dw_post_450C, na.rm = TRUE)
   
 
-# check new column names
-colnames(cr.mat)
+# for inorganic matter
+cr.mat = cr.mat %>%   
+  mutate(sed_dw_pre_950C = crucible_sed_dw_pre_950C - crucible_weight, na.rm = TRUE) %>%
+  mutate(sed_dw_post_950C = crucible_sed_dw_post_950C - crucible_weight, na.rm = TRUE) %>%
+  mutate(im_dw = sed_dw_pre_950C - sed_dw_post_950C)
+
+
+# calculate real depth or each layer using the layer number (each layer was cut at 2 cm but adjusted using the compaction coefficient)
+cr.mat = cr.mat %>% 
+  mutate(layer_depth = layer_number * 2, na.rm = TRUE)
+
+
+cr.mat = cr.mat %>% 
+  select(-na.rm) # uneccesary column
 ```
 
 ```{r}
-# calculate core depth using the layer number (each layer was cut at 2 cm but adjusted using the compaction coefficient)
-cr.mat = cr.mat %>% 
-  mutate(core_depth = layer_number * 2, na.rm = TRUE)
-
-colnames(cr.mat)
+# reorganize so df is easier to navigate
+cr.mat <- cr.mat[c("otter_region","site","latitude","longitude","layer_number","layer_depth","layer_thickness","layer_volume_cm3","pan_weight","pan_sed_ww_pre_60C","pan_sed_dw_post_60C","sed_dw_post_60C","pan_sed_dw_pre_450C","pan_sed_dw_post450C","sed_dw_pre_450C","sed_dw_post_450C","crucible_weight","crucible_sed_dw_pre_950C","crucible_sed_dw_post_950C","sed_dw_pre_950C","sed_dw_post_950C","dry_bulk_density","om_dw","im_dw")]
 ```
+
 
 
 

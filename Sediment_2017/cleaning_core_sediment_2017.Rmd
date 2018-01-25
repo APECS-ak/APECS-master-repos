@@ -69,7 +69,7 @@ cr.mat <- cr.mat[c("otter_region","site","latitude","longitude","layer_number","
 
 
 ```{r}
-write.csv(cr.mat,'core_matter_2017_CLEAN.csv.csv')
+write.csv(cr.mat,'core_matter_2017_CLEAN.csv')
 ```
 
 
