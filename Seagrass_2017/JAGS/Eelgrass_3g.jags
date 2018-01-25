@@ -1,25 +1,24 @@
     model {
-    # Model 3g: Shoot density as function of date, otter index, sediment type, and light
-	#   quadratic day effect and sea otter effect
+    # Model 3g for counts: shoots per m2 as function of date, otter index, sediment type and light 
+	# 	quadratic day effect and linear sea otter index effect
 	# 
 	# Set Priors: 
 	#
     # Fixed effect parameters 
 	beta0 ~ dnorm(0,.001)	# intercept of 
 	beta1 ~ dnorm(0,.001)	# beta1 = effect of julian date
-	beta1b ~ dnorm(0,.001) # quadratic effect of date
+	beta1b ~ dnorm(0,.001) #beta1b = quadratic effect of julian date
 	beta2 ~ dnorm(0,.001)	# beta2 = effect of otter index
 	# beta2b ~ dnorm(0,.001)	# beta2b = quadratic effect of otter index
-  # beta3 ~ dnorm(0,.001)	# beta3 = effect of sediment type
+	# beta3 ~ dnorm(0,.001)	# beta3 = effect of sediment type
 	# beta4 ~ dnorm(0, .001) # beta4 = effect of light
 	# 
-
     # Priors for variance params: 
     sigS ~ dunif(0.001,100) # Variance among sites
     tauS <- pow(sigS,-2)
-    sigO ~ dunif(0.001,100) # Variance among log(Obs) within a site
-    tauO <- pow(sigO,-2)
-	  #Dispers ~ dgamma(1.1,0.1)   # over-dispersion parameter (for Neg Binom count variable)
+  # sigO ~ dunif(0.001,100) # Variance among log(Obs) within a site
+  # tauO <- pow(sigO,-2)
+	  Dispers ~ dgamma(1.1,0.1)   # over-dispersion parameter (for Neg Binom count variable)
 	#
     # Compute random effects for sites 
     for (s in 1:Nsites){
@@ -27,12 +26,13 @@
 	}
 	# Cycle through observations to estimate observed node
 	for (i in 1:Nobs){
-		# Expected response variable, mu
-		Mu[i] <- beta0 + beta1*Day[i] + beta1b*(Day[i]^2) + beta2*(Ott[i]) + eps[Site[i]] # + beta2b*(Ott[i]^2) + beta3*Sed[i]+ beta4*Li[i]   
+		# Expected response variable, mu (for lognormal, mu is log of median Obs, for Neg binomial it is the mean)
+		Mu[i] <- exp(beta0 + beta1*Day[i] + beta1b*(Day[i]^2) + beta2*(Ott[i]) + eps[Site[i]]) # + beta3*Sed[i]  + beta4*Li[i]
+		p[i] <- Dispers/(Dispers+Mu[i]) 
 		# Observed node as random draw from appropriate probability distribution 
-		Obs[i] ~ dnorm(Mu[i],tauO) # observed var drawn from normal distribution
+		Obs[i] ~ dnegbin(p[i],Dispers)
 		# Compute negative log likelihood for this observation
 		# (use appropriate log-density distribution, e.g. norm, lnorm, negbin, etc.) 
-		loglik[i] <- logdensity.norm(Obs[i], Mu[i], tauO)
+		loglik[i] <- logdensity.negbin(Obs[i],p[i],Dispers)
 	}
   }

@@ -1,6 +1,6 @@
     model {
-    # Model 3b: Shoot density as function of date, otter index, sediment type, and light
-	#   day effect and sea otter effect
+    # Model 3b for counts: shoots per m2 as function of date, otter index, sediment type and light 
+	# 	linear day effect and sea otter index only 
 	# 
 	# Set Priors: 
 	#
@@ -12,13 +12,12 @@
 	# beta3 ~ dnorm(0,.001)	# beta3 = effect of sediment type
 	# beta4 ~ dnorm(0, .001) # beta4 = effect of light
 	# 
-
     # Priors for variance params: 
     sigS ~ dunif(0.001,100) # Variance among sites
     tauS <- pow(sigS,-2)
-    sigO ~ dunif(0.001,100) # Variance among log(Obs) within a site
-    tauO <- pow(sigO,-2)
-	  #Dispers ~ dgamma(1.1,0.1)   # over-dispersion parameter (for Neg Binom count variable)
+  # sigO ~ dunif(0.001,100) # Variance among log(Obs) within a site
+  # tauO <- pow(sigO,-2)
+	  Dispers ~ dgamma(1.1,0.1)   # over-dispersion parameter (for Neg Binom count variable)
 	#
     # Compute random effects for sites 
     for (s in 1:Nsites){
@@ -26,12 +25,13 @@
 	}
 	# Cycle through observations to estimate observed node
 	for (i in 1:Nobs){
-		# Expected response variable, mu
-		Mu[i] <- beta0 + beta1*Day[i] + beta2*(Ott[i]) + eps[Site[i]]  # + beta2b*(Ott[i]^2) + beta3*Sed[i] 
+		# Expected response variable, mu (for lognormal, mu is log of median Obs, for Neg binomial it is the mean)
+		Mu[i] <- exp(beta0 + beta1*Day[i] + beta2*(Ott[i]) + eps[Site[i]]) #  + beta2b*(Ott[i]^2) + beta3*Sed[i]) + beta4*Li[i]
+		p[i] <- Dispers/(Dispers+Mu[i]) 
 		# Observed node as random draw from appropriate probability distribution 
-		Obs[i] ~ dnorm(Mu[i],tauO) # observed var drawn from negative binomial distribution
+		Obs[i] ~ dnegbin(p[i],Dispers)
 		# Compute negative log likelihood for this observation
 		# (use appropriate log-density distribution, e.g. norm, lnorm, negbin, etc.) 
-		loglik[i] <- logdensity.norm(Obs[i], Mu[i], tauO)
+		loglik[i] <- logdensity.negbin(Obs[i],p[i],Dispers)
 	}
   }

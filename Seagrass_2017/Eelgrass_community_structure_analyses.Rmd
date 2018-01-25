@@ -1390,12 +1390,12 @@ for (i in 2:8){
 }
 
 # organize final table
-WAIC.2.full <- WAIC.1.full[modranks.WAIC,]
+WAIC.2.full <- WAIC.2.full[modranks.WAIC,]
 WAIC.2.full$P_comp[1] = 1
-WAIC.2.full$Likelihood = exp(-0.5*WAIC.1.full$deltaWAIC)
+WAIC.2.full$Likelihood = exp(-0.5*WAIC.2.full$deltaWAIC)
 WAIC.2.full$Likelihood[WAIC.2.full$P_comp < 0.1] = 0 
 sumlik = sum(WAIC.2.full$Likelihood)
-WAIC.2.full$WAICwt = WAIC.1.full$Likelihood/sumlik
+WAIC.2.full$WAICwt = WAIC.2.full$Likelihood/sumlik
 
 # round
 WAIC.2.full <- cbind(WAIC.2.full[,1:2], round(WAIC.2.full[, 3:8], 3))
@@ -1531,7 +1531,7 @@ Dayindx <- Julianday - Minday + 1
 MeanDay <- round(mean(Dayindx),0)
 
 # Model comparison data frame
-ModComp.3 <- data.frame(Model = c("Model_3a","Model_3b","Model_3c","Model_3d","Model_3e","Model_3f","Model_3g", "Model_3h"), WAIC = numeric(length = 8), LOOIC = numeric(length = 8))
+ModComp.3 <- data.frame(Model = c("Model_3a","Model_3b","Model_3c","Model_3d","Model_3e","Model_3f","Model_3g", "Model_3h", "Model_3i"), WAIC = numeric(length = 9), LOOIC = numeric(length = 9))
 
 # Set up for parralel computing
 cores <- detectCores()
@@ -1556,9 +1556,9 @@ jagsfile <- 'JAGS/Eelgrass_3a.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx) # Ott = Ottindx, Sed = Sedtype Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO","beta0","beta1","eps","loglik") 
+params <- c("sigS","beta0","beta1","eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1605,9 +1605,9 @@ jagsfile <- 'JAGS/Eelgrass_3b.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) #, , Sed = Sedtype Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO","beta0","beta1","beta2", "eps","loglik") 
+params <- c("sigS","Dispers","beta0","beta1","beta2", "eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1654,9 +1654,9 @@ jagsfile <- 'JAGS/Eelgrass_3c.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype) #, ,  Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO","beta0","beta1","beta2", "beta3", "eps","loglik") 
+params <- c("sigS","Dispers","beta0","beta1","beta2", "beta3", "eps","loglik")  
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1703,9 +1703,9 @@ jagsfile <- 'JAGS/Eelgrass_3d.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype, Li = Light) #, ,  Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO", "beta0", "beta1", "beta2", "beta3", "beta4", "eps","loglik") 
+params <- c("sigS","Dispers", "beta0", "beta1", "beta2", "beta3", "beta4", "eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1752,9 +1752,9 @@ jagsfile <- 'JAGS/Eelgrass_3e.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype, Li = Light ,  Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO", "beta0", "beta1", "beta2", "beta2b", "eps","loglik") 
+params <- c("sigS","Dispers", "beta0", "beta1", "beta2", "beta2b", "eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1801,9 +1801,9 @@ jagsfile <- 'JAGS/Eelgrass_3f.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype) # , Li = Light ,  Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO", "beta0", "beta1", "beta2", "beta2b", "beta3", "eps","loglik") 
+params <- c("sigS","Dispers", "beta0", "beta1", "beta2", "beta2b", "beta3", "eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1843,16 +1843,16 @@ out3f <- out
 
 #### Model 3g
 Shoot density ~ quad(time) + SOI
-```{r model 3f, echo=FLASE}
+```{r model 3g, echo=FLASE}
 # Call up JAGS file
 jagsfile <- 'JAGS/Eelgrass_3g.jags'
 # savename='EelgrassM1a_Results.Rdata'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) # Sed = Sedtype Li = Light ,  Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO", "beta0", "beta1", "beta1b", "beta2", "eps","loglik") 
+params <- c("sigS","Dispers", "beta0", "beta1", "beta1b", "beta2", "eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1899,9 +1899,9 @@ jagsfile <- 'JAGS/Eelgrass_3h.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) # Sed = Sedtype Li = Light ,  Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO", "beta0", "beta1", "beta1b", "beta2", "beta2b", "eps","loglik") 
+params <- c("sigS","Dispers", "beta0", "beta1", "beta1b", "beta2", "beta2b", "eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1937,4 +1937,128 @@ WAIC.3h <- data.frame(modID = c('WAIC3h'), model = c('3h'), WAIC = WAIC$waic, WA
 LOOIC.3h <- data.frame(modID = c('LOOIC3h'), model = c('3h'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 
 out3h <- out
+```
+
+#### Model 3i
+Shoot density ~ quad(SOI)
+```{r model 3i, echo=FLASE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3i.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Ott = Ottindx) # Sed = Sedtype Li = Light ,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
+
+params <- c("sigS","Dispers", "beta0", "beta2", "beta2b", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3i <- WAIC
+ModComp.3$WAIC[9] <- WAIC3h$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3i <- LOOIC
+ModComp.3$LOOIC[9] <- LOOIC3h[3]
+
+# WAIC Detail
+WAIC.3i <- data.frame(modID = c('WAIC3i'), model = c('3i'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3i <- data.frame(modID = c('LOOIC3i'), model = c('3i'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3i <- out
+```
+
+### Model 3 Comparison
+```{r Model 3 comparison, echo = FALSE}
+# Clean up work session
+stopCluster(cl = cl)
+rm(out)
+
+## WAIC ##
+# Rank and organize model comparison table
+modranks.WAIC <- order(ModComp.3$WAIC)
+WAIC.3.full <- rbind(WAIC.3a, WAIC.3b, WAIC.3c, WAIC.3d, WAIC.3e, WAIC.3f, WAIC.3g, WAIC.3h, WAIC.3i)
+comptab.WAIC <- compare(WAIC3a, WAIC3b, WAIC3c, WAIC3d, WAIC3e, WAIC3f, WAIC3g, WAIC3h, WAIC3i)
+filelist.WAIC <- row.names(comptab.WAIC)
+
+# Calculate comaprison values
+for (i in 2:9){
+  row = which(WAIC.3.full$modID == filelist.WAIC[i])
+  comp = compare(eval(as.name(filelist.WAIC[i])) , eval(as.name(filelist.WAIC[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  WAIC.3.full$deltaWAIC[row] = comp[1]
+  WAIC.3.full$deltaWAIC_se[row] = comp[2]
+  WAIC.3.full$P_comp[row] = P_val
+}
+
+# organize final table
+WAIC.3.full <- WAIC.3.full[modranks.WAIC,]
+WAIC.3.full$P_comp[1] = 1
+WAIC.3.full$Likelihood = exp(-0.5*WAIC.3.full$deltaWAIC)
+WAIC.3.full$Likelihood[WAIC.3.full$P_comp < 0.1] = 0 
+sumlik = sum(WAIC.3.full$Likelihood)
+WAIC.3.full$WAICwt = WAIC.3.full$Likelihood/sumlik
+
+# round
+WAIC.3.full <- cbind(WAIC.3.full[,1:2], round(WAIC.3.full[, 3:8], 3))
+
+## LOOIC ##
+# Rank and organize model comparison table
+ModComp.3$LOOIC <- as.numeric(ModComp.3$LOOIC)
+modranks.LOOIC <- order(ModComp.3$LOOIC)
+LOOIC.3.full <- rbind(LOOIC.3a, LOOIC.3b, LOOIC.3c, LOOIC.3d, LOOIC.3e, LOOIC.3f, LOOIC.3g, LOOIC.3h, LOOIC.3i)
+comptab.LOOIC <- compare(LOOIC3a, LOOIC3b, LOOIC3c, LOOIC3d, LOOIC3e, LOOIC3f, LOOIC3g, LOOIC3h, LOOIC3i)
+filelist.LOOIC <- row.names(comptab.LOOIC)
+
+# Calculate comparison values
+for (i in 2:9){
+  row = which(LOOIC.3.full$modID == filelist.LOOIC[i])
+  comp = compare(eval(as.name(filelist.LOOIC[i])) , eval(as.name(filelist.LOOIC[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  LOOIC.3.full$deltaLOOIC[row] = comp[1]
+  LOOIC.3.full$deltaLOOIC_se[row] = comp[2]
+}
+
+# organize final table
+LOOIC.3.full <- LOOIC.3.full[modranks.LOOIC,]
+LOOIC.3.full$Likelihood = exp(-0.5*LOOIC.3.full$deltaLOOIC)
+LOOIC.3.full$Likelihood[LOOIC.3.full$P_comp < 0.1] = 0 
+sumlik = sum(LOOIC.3.full$Likelihood)
+LOOIC.3.full$LOOICwt = LOOIC.3.full$Likelihood/sumlik
+
+# round
+LOOIC.3.full <- cbind(LOOIC.3.full[,1:2], round(LOOIC.3.full[, 3:8], 3))
+```
+
+### Model 3 Comparison tables
+WAIC Comparison
+```{r model 3 WAIC, echo = FALSE}
+DT::datatable(WAIC.3.full)
+```
+
+LOICC comparison
+```{r model 3 LOOIC, echo = FALSE}
+DT::datatable(LOOIC.3.full)
 ```
