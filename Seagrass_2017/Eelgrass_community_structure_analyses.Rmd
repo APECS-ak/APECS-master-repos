@@ -1556,7 +1556,7 @@ jagsfile <- 'JAGS/Eelgrass_3a.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx) # Ott = Ottindx, Sed = Sedtype Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sig0 = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
 
 params <- c("sigS","sigO","beta0","beta1","eps","loglik") 
 
@@ -1605,7 +1605,7 @@ jagsfile <- 'JAGS/Eelgrass_3b.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) #, , Sed = Sedtype Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sig0 = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
 
 params <- c("sigS","sigO","beta0","beta1","beta2", "eps","loglik") 
 
@@ -1654,7 +1654,7 @@ jagsfile <- 'JAGS/Eelgrass_3c.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype) #, ,  Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sig0 = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
 
 params <- c("sigS","sigO","beta0","beta1","beta2", "beta3", "eps","loglik") 
 
@@ -1683,7 +1683,7 @@ ModComp.3$WAIC[3] <- WAIC3c$waic
 # Calculate LOOIC
 LOOIC <- loo(mc_ll)
 LOOIC3c <- LOOIC
-ModComp.3$LOOIC[3] <- LOOIC3b[3]
+ModComp.3$LOOIC[3] <- LOOIC3c[3]
 
 # WAIC Detail
 WAIC.3c <- data.frame(modID = c('WAIC3c'), model = c('3c'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
@@ -1703,9 +1703,9 @@ jagsfile <- 'JAGS/Eelgrass_3d.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype, Li = Light) #, ,  Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sig0 = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
 
-params <- c("sigS","sigO","beta0","beta1","beta2", "beta3", "beta4", "eps","loglik") 
+params <- c("sigS","sigO", "beta0", "beta1", "beta2", "beta3", "beta4", "eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -1727,12 +1727,12 @@ for (i in 3:nc){
 mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
 WAIC <- waic(mc_ll)
 WAIC3d <- WAIC
-ModComp.3$WAIC[4] <- WAIC3c$waic
+ModComp.3$WAIC[4] <- WAIC3d$waic
 
 # Calculate LOOIC
 LOOIC <- loo(mc_ll)
 LOOIC3d <- LOOIC
-ModComp.3$LOOIC[4] <- LOOIC3b[3]
+ModComp.3$LOOIC[4] <- LOOIC3d[3]
 
 # WAIC Detail
 WAIC.3d <- data.frame(modID = c('WAIC3d'), model = c('3d'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
@@ -1741,4 +1741,200 @@ WAIC.3d <- data.frame(modID = c('WAIC3d'), model = c('3d'), WAIC = WAIC$waic, WA
 LOOIC.3d <- data.frame(modID = c('LOOIC3d'), model = c('3d'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 
 out3d <- out
+```
+
+#### Model 3e
+Shoot density ~ time + quad(SOI)
+```{r model 3e, echo=FLASE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3e.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype, Li = Light ,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO", "beta0", "beta1", "beta2", "beta2b", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3e <- WAIC
+ModComp.3$WAIC[5] <- WAIC3e$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3e <- LOOIC
+ModComp.3$LOOIC[5] <- LOOIC3e[3]
+
+# WAIC Detail
+WAIC.3e <- data.frame(modID = c('WAIC3e'), model = c('3e'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3e <- data.frame(modID = c('LOOIC3e'), model = c('3e'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3e <- out
+```
+
+#### Model 3f
+Shoot density ~ time + quad(SOI) + sediment
+```{r model 3f, echo=FLASE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3f.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype) # , Li = Light ,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO", "beta0", "beta1", "beta2", "beta2b", "beta3", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3f <- WAIC
+ModComp.3$WAIC[6] <- WAIC3f$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3f <- LOOIC
+ModComp.3$LOOIC[6] <- LOOIC3f[3]
+
+# WAIC Detail
+WAIC.3f <- data.frame(modID = c('WAIC3f'), model = c('3f'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3f <- data.frame(modID = c('LOOIC3f'), model = c('3f'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3f <- out
+```
+
+#### Model 3g
+Shoot density ~ quad(time) + SOI
+```{r model 3f, echo=FLASE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3g.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) # Sed = Sedtype Li = Light ,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO", "beta0", "beta1", "beta1b", "beta2", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3g <- WAIC
+ModComp.3$WAIC[7] <- WAIC3g$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3g <- LOOIC
+ModComp.3$LOOIC[7] <- LOOIC3g[3]
+
+# WAIC Detail
+WAIC.3g <- data.frame(modID = c('WAIC3g'), model = c('3g'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3g <- data.frame(modID = c('LOOIC3g'), model = c('3g'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3g <- out
+```
+
+#### Model 3h
+Shoot density ~ quad(time) + quad(SOI)
+```{r model 3h, echo=FLASE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_3h.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) # Sed = Sedtype Li = Light ,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+
+params <- c("sigS","sigO", "beta0", "beta1", "beta1b", "beta2", "beta2b", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC3h <- WAIC
+ModComp.3$WAIC[8] <- WAIC3h$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC3h <- LOOIC
+ModComp.3$LOOIC[8] <- LOOIC3h[3]
+
+# WAIC Detail
+WAIC.3h <- data.frame(modID = c('WAIC3h'), model = c('3h'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.3h <- data.frame(modID = c('LOOIC3h'), model = c('3h'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out3h <- out
 ```

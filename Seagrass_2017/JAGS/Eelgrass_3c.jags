@@ -14,9 +14,9 @@
 	# 
 
     # Priors for variance params: 
-    sigS ~ dunif(0.001,10) # Variance among sites
+    sigS ~ dunif(0.001,100) # Variance among sites
     tauS <- pow(sigS,-2)
-    sigO ~ dunif(0.001,10) # Variance among log(Obs) within a site
+    sigO ~ dunif(0.001,100) # Variance among log(Obs) within a site
     tauO <- pow(sigO,-2)
 	  #Dispers ~ dgamma(1.1,0.1)   # over-dispersion parameter (for Neg Binom count variable)
 	#
@@ -27,7 +27,7 @@
 	# Cycle through observations to estimate observed node
 	for (i in 1:Nobs){
 		# Expected response variable, mu
-		Mu[i] <- beta0 + beta1*Day[i] + eps[Site[i]] # + beta2*(Ott[i]) + beta2b*(Ott[i]^2) + beta3*Sed[i] 
+		Mu[i] <- beta0 + beta1*Day[i] + beta2*(Ott[i]) + beta3*Sed[i] + eps[Site[i]] # + beta2b*(Ott[i]^2)  + beta4*Li[i]
 		# Observed node as random draw from appropriate probability distribution 
 		Obs[i] ~ dnorm(Mu[i],tauO) # observed var drawn from negative binomial distribution
 		# Compute negative log likelihood for this observation
