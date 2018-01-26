@@ -721,8 +721,9 @@ plot_grid(title.cp3, cp3, ncol=1, rel_heights=c(0.1, 1))
 
 A. This section only includes the top 15 cm of each core. This was decided because our qualitative assessment of sediment type at the surface is unlikely to be accurate for deeper sediment profiles. 
 B. This section also takes the bimodal data into account. In the first set of plots, I exclude the upper clusters (Sites L01, L05, L06, M08, H06), which were identified by comparing the curves of the density plots to the sites that were plotted higher than the mean core matter. Treating each modal cluster as independent is one way to further explore patterns in the data. The second set of plots shows data from the cluster above the mean.
+
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
-df.core.top <-subset(df.core, layer_depth <= 14) # select only top 20cm of core
+df.core.top <-subset(df.core, layer_depth <= 15) # select only top 20cm of core
 
 
 
