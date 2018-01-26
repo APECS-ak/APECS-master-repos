@@ -4,7 +4,7 @@ author: "Tiff Stephens"
 date: "25 Jan 2018"
 output: html_document
 editor_options: 
-  chunk_output_type: console
+chunk_output_type: console
 ---
 
 ```{r global_options, include=FALSE}
@@ -100,7 +100,7 @@ leaflet(locations_all) %>%
 
 
 
-## 4. Plotting by site and region
+### 4. Plotting by site and region
 <br>
 
 #### Below, the depth profile for organic matter (right) and inorganic mater (left) from each site is roughly plotted to compare the overall matter content. You will notice that site L06 is way different than the rest. 
