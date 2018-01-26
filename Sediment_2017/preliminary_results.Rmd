@@ -718,26 +718,11 @@ plot_grid(title.cp3, cp3, ncol=1, rel_heights=c(0.1, 1))
 
 
 ### 5. Top 15 cm: might sediment type help explain OM and IM content?
-<<<<<<< HEAD
-
-A. This section only includes the top 15 cm of each core. This was decided because our qualitative assessment of sediment type at the surface is unlikely to be accurate for deeper sediment profiles. 
-B. This section also takes the bimodal data into account. In the first set of plots, I exclude the upper clusters (Sites L01, L05, L06, M08, H06), which were identified by comparing the curves of the density plots to the sites that were plotted higher than the mean core matter. Treating each modal cluster as independent is one way to further explore patterns in the data. The second set of plots shows data from the cluster above the mean.
+##### A. This section only includes the top 15 cm of each core. This was decided because our qualitative assessment of sediment type at the surface is unlikely to be accurate for deeper sediment profiles. 
+##### B. This section also takes the bimodal data into account. In the first set of plots, I exclude the upper clusters (Sites L01, L05, L06, M08, H06), which were identified by comparing the curves of the density plots to the sites that were plotted higher than the mean core matter. Treating each modal cluster as independent is one way to further explore patterns in the data. The second set of plots shows data from the cluster above the mean.
 
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
-df.core.top <-subset(df.core, layer_depth <= 15) # select only top 20cm of core
-=======
-<<<<<<< HEAD
-
-A. This section only includes the top 15 cm of each core. This was decided because our qualitative assessment of sediment type at the surface is unlikely to be accurate for deeper sediment profiles. 
-B. This section also takes the bimodal data into account. In the first set of plots, I exclude the upper clusters (Sites L01, L05, L06, M08, H06), which were identified by comparing the curves of the density plots to the sites that were plotted higher than the mean core matter. Treating each modal cluster as independent is one way to further explore patterns in the data. The second set of plots shows data from the cluster above the mean.
-=======
-<br>
-
-A. This section only includes the top 15 cm of each core. This was decided because our qualitative assessment of sediment type at the surface is unlikely to be accurate for deeper sediment profiles. 
-B. This section also takes the bimodal data into account; I exclude the upper clusters (Sites L01, L05, L06, M08, H06), which were identified by comparing the curves of the density plots to the sites that were plotted higher than the mean core matter. Treating each modal cluster as independent is one way to further explore patterns in the data. 
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
-```{r, echo = FALSE, include = FALSE, warning = FALSE}
-df.core.top <-subset(df.core, layer_depth <= 14) # select only top 20cm of core
+df.core.top <- subset(df.core, layer_depth <= 15) # select only top 20cm of core
 
 
 
@@ -747,8 +732,6 @@ om.top <- df.core.top %>%
   select(otter_region, site, om_density)
 
 m.om.top <- melt(om.top, id = 1:2, na.rm = TRUE)
-<<<<<<< HEAD
-=======
 
 trim.top_om.top <- dcast(m.om.top, otter_region + site ~ ., mean)
 colnames(trim.top_om.top)[which(names(trim.top_om.top) == ".")] <- "om.top_density"
@@ -819,176 +802,6 @@ df.core.trimtop <- df.core.trimtop %>%
 
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
 # remove L06
-df.core.trimtop <- df.core.trimtop[-c(1,5,6,14,15,20),]
-```
-<br>
-
-
-
-```{r, echo = FALSE, include = FALSE, warning = FALSE}
-# plotting in scatter
-my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
-
-
-pt1 = ggplot(df.core.trimtop, aes(sed1_in, om_density)) +
-  geom_point(size=3) +
-  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
-  theme(legend.position="none") +
-  stat_poly_eq(formula = my.formula, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
-plot(pt1)
-
-
-
-pt2 = ggplot(df.core.trimtop, aes(sed1_in, im_density)) +
-  geom_point(size=3) +
-  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
-  theme(legend.position="none") +
-  stat_poly_eq(formula = my.formula, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
-plot(pt2)
-
-
-pt3 = ggplot(df.core.trimtop, aes(sed1_in, om.im_ratio)) +
-  geom_point(size=3) +
-  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
-  theme(legend.position="none") +
-  stat_poly_eq(formula = my.formula, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
-plot(pt3)
-```
-
-```{r, echo = FALSE, fig.width = 12, fig.height = 5}
-title.pt1 <- ggdraw() + draw_label(".", fontface='bold')
-
-cppt1 <- plot_grid(pt1, pt2, pt3, labels=c('OM', 'IM', 'OM:IM'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
-
-plot_grid(title.pt1, cppt1, ncol=1, rel_heights=c(0.1, 1))
-```
-<br><br><br><br><br><br><br><br>
-<br><br>
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
-
-trim.top_om.top <- dcast(m.om.top, otter_region + site ~ ., mean)
-colnames(trim.top_om.top)[which(names(trim.top_om.top) == ".")] <- "om.top_density"
-
-
-
-
-
-
-<<<<<<< HEAD
-=======
-
-
-
-
-
-```{r, echo = FALSE, include = FALSE, warning = FALSE}
-df.core.top <-subset(df.core, layer_depth <= 14) # select only top 20cm of core
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
-
-
-
-colnames(df.core.top)
-
-om.top <- df.core.top %>% 
-  select(otter_region, site, om_density)
-
-m.om.top <- melt(om.top, id = 1:2, na.rm = TRUE)
-
-trim.top_om.top <- dcast(m.om.top, otter_region + site ~ ., mean)
-colnames(trim.top_om.top)[which(names(trim.top_om.top) == ".")] <- "om.top_density"
-
-
-
-
-
-
-<<<<<<< HEAD
-=======
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
-im.top <- df.core.top %>% 
-  select(otter_region, site, im_density)
-
-m.im.top <- melt(im.top, id = 1:2, na.rm = TRUE)
-
-trim.top_im.top <- dcast(m.im.top, otter_region + site ~ ., mean)
-colnames(trim.top_im.top)[which(names(trim.top_im.top) == ".")] <- "im.top_density"
-
-
-
-
-
-
-om.im.top <- df.core.top %>% 
-  select(otter_region, site, om.im_ratio)
-
-m.om.im.top <- melt(om.im.top, id = 1:2, na.rm = TRUE)
-
-trim.top_om.im.top <- dcast(m.om.im.top, otter_region + site ~ ., mean)
-colnames(trim.top_om.im.top)[which(names(trim.top_om.im.top) == ".")] <- "om.im.top_ratio"
-
-
-
-
-
-# join trim.topmed data of interest into one df
-df.trim.top <- left_join(trim.top_om.top, trim.top_im.top, by = c("otter_region","site"))
-df.trim.top <- left_join(df.trim.top, trim.top_om.im.top, by = c("otter_region","site"))
-
-
-
-
-
-```
-
-```{r, echo = FALSE, include = FALSE, warning = FALSE}
-df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
-
-df.all <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/Seagrass_2017/Tiff_explore_sed_DERIVED_DF.csv", stringsAsFactors = FALSE, header = TRUE)
-```
-
-```{r, echo = FALSE, include = FALSE, warning = FALSE}
-# join core data with soi data
-
-df.core.trimtop <- left_join(df.trim.top, df.soi, by = c("site"))
-df.core.trimtop <- left_join(df.core.trimtop, df.all, by = c("site"))
-
-colnames(df.core.trimtop)
-
-colnames(df.core.trimtop)[which(names(df.core.trimtop) == "latitude.x")] <- "latitude"
-colnames(df.core.trimtop)[which(names(df.core.trimtop) == "longitude.x")] <- "longitude"
-colnames(df.core.trimtop)[which(names(df.core.trimtop) == "om.top_density")] <- "om_density"
-colnames(df.core.trimtop)[which(names(df.core.trimtop) == "im.top_density")] <- "im_density"
-colnames(df.core.trimtop)[which(names(df.core.trimtop) == "om.im.top_ratio")] <- "om.im_ratio"
-
-df.core.trimtop <- df.core.trimtop %>% 
-  select(otter_region, site, place_name, latitude, longitude, sea_otter_index, sea_otter_duration, pop_mod_dens, depth_m, sed1_in, sed2_in, sedmean_in, sed1_site, sed2_site, sedmean_site, om_density, im_density, om.im_ratio, shoot_mass_perplant, shoot_mass_m2, shoot_density_m2, rhi_mass_percm, rhi_mass_percm_m2)
-```
-
-```{r, echo = FALSE, include = FALSE, warning = FALSE}
-# remove L06
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 df.core.trimtop <- df.core.trimtop[-c(1,5,6,14,15,20),]
 ```
 <br><br><br>
@@ -998,32 +811,12 @@ df.core.trimtop <- df.core.trimtop[-c(1,5,6,14,15,20),]
 
 
 #### Data clustered below the mean
-<<<<<<< HEAD
-=======
-=======
-df.core.trimtop <- df.core.trimtop[-c(2,3,4,7,8,9,10,11,12,13,16,17,18,19,21),]
-
-```
-<br>
-
-
-
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
 # plotting in scatter
 my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
 
 
-<<<<<<< HEAD
 pt1 = ggplot(df.core.trimtop, aes(sed1_in, om_density)) +
-=======
-<<<<<<< HEAD
-pt1 = ggplot(df.core.trimtop, aes(sed1_in, om_density)) +
-=======
-pt4 = ggplot(df.core.trimtop, aes(sed1_site, om_density)) +
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
   geom_point(size=3) +
   geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
   #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
@@ -1034,27 +827,11 @@ pt4 = ggplot(df.core.trimtop, aes(sed1_site, om_density)) +
   stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 4)
-<<<<<<< HEAD
 plot(pt1)
 
 
 
 pt2 = ggplot(df.core.trimtop, aes(sed1_in, im_density)) +
-=======
-<<<<<<< HEAD
-plot(pt1)
-
-
-
-pt2 = ggplot(df.core.trimtop, aes(sed1_in, im_density)) +
-=======
-plot(pt4)
-
-
-
-pt5 = ggplot(df.core.trimtop, aes(sed1_site, im_density)) +
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
   geom_point(size=3) +
   geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
   #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
@@ -1065,23 +842,10 @@ pt5 = ggplot(df.core.trimtop, aes(sed1_site, im_density)) +
   stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 4)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 plot(pt2)
 
 
 pt3 = ggplot(df.core.trimtop, aes(sed1_in, om.im_ratio)) +
-<<<<<<< HEAD
-=======
-=======
-plot(pt5)
-
-
-pt6 = ggplot(df.core.trimtop, aes(sed1_site, om.im_ratio)) +
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
   geom_point(size=3) +
   geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
   #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
@@ -1092,23 +856,10 @@ pt6 = ggplot(df.core.trimtop, aes(sed1_site, om.im_ratio)) +
   stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 4)
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 plot(pt3)
 ```
 
 ```{r, echo = FALSE, fig.width = 12, fig.height = 5}
-<<<<<<< HEAD
-=======
-=======
-plot(pt6)
-```
-
-```{r, include = FALSE, echo = FALSE, fig.width = 12, fig.height = 5}
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 title.pt1 <- ggdraw() + draw_label(".", fontface='bold')
 
 cppt1 <- plot_grid(pt1, pt2, pt3, labels=c('OM', 'IM', 'OM:IM'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
@@ -1127,10 +878,6 @@ plot_grid(title.pt1, cppt1, ncol=1, rel_heights=c(0.1, 1))
 
 
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 #### Data clustered above the mean
 Note: there will eventually be 5 datapoints. There is a bug in this section of code that I need to iron out...other data are not effected. 
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
@@ -1162,20 +909,10 @@ trim.top_im.top <- dcast(m.im.top, otter_region + site ~ ., mean)
 colnames(trim.top_im.top)[which(names(trim.top_im.top) == ".")] <- "im.top_density"
 
 
-<<<<<<< HEAD
 
 
 
 
-=======
-=======
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
-
-
-
-
-<<<<<<< HEAD
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 om.im.top <- df.core.top %>% 
   select(otter_region, site, om.im_ratio)
 
@@ -1183,24 +920,11 @@ m.om.im.top <- melt(om.im.top, id = 1:2, na.rm = TRUE)
 
 trim.top_om.im.top <- dcast(m.om.im.top, otter_region + site ~ ., mean)
 colnames(trim.top_om.im.top)[which(names(trim.top_om.im.top) == ".")] <- "om.im.top_ratio"
-<<<<<<< HEAD
 
 
 
 
 
-=======
-=======
-
-
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
-
-
-
-
-
-<<<<<<< HEAD
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 # join trim.topmed data of interest into one df
 df.trim.top <- left_join(trim.top_om.top, trim.top_im.top, by = c("otter_region","site"))
 df.trim.top <- left_join(df.trim.top, trim.top_om.im.top, by = c("otter_region","site"))
@@ -1248,23 +972,6 @@ my.formula <- y ~ x # defined formula (linear regression) for stats labels on pl
 
 
 pt4 = ggplot(df.core.trimtop, aes(sed1_site, om_density)) +
-<<<<<<< HEAD
-=======
-=======
-
-
-```{r, include = FALSE}
-test <- aggregate(om_density ~ site, df.core, function(x) c(Var = var(x)))
-test2 <- aggregate(layer_thickness ~ site, df.core, function(x) c(Meandepth = mean(x)))
-
-df.var <- left_join(test, test2, by = c("site"))
-
-df.var <- df.var[-6,]
-
-
-varplot = ggplot(df.var, aes(layer_thickness, om_density)) +
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
   geom_point(size=3) +
   #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
   #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
@@ -1274,10 +981,6 @@ varplot = ggplot(df.var, aes(layer_thickness, om_density)) +
               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
   #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
                   #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
                  # label.x.npc = 'left', label.y.npc = 'top', size = 4)
 plot(pt4)
 
@@ -1319,21 +1022,6 @@ cppt2 <- plot_grid(pt4, pt5, pt6, labels=c('OM', 'IM', 'OM:IM'), align = 'h', nc
 plot_grid(title.pt2, cppt2, ncol=1, rel_heights=c(0.1, 1))
 ```
 <br><br><br><br><br><br><br><br>
-<<<<<<< HEAD
-=======
-=======
-                  #label.x.npc = 'left', label.y.npc = 'top', size = 4)
-plot(varplot)
-```
-
-
-
-
-
-
-
->>>>>>> 5190decfe74e29772a0e476713fa6e85c6b65e25
->>>>>>> e0c293cf278fd3d2038dcf8b128e9919846397af
 
 
 
