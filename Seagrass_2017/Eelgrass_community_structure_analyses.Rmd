@@ -2062,3 +2062,115 @@ LOICC comparison
 ```{r model 3 LOOIC, echo = FALSE}
 DT::datatable(LOOIC.3.full)
 ```
+
+### Model 3 Plotting best model
+THIS IS NOT OPERATIONAL If both best model agree then use the best WAIC model, if they dissagree use lest LOOIC model.
+```{r model 3 plotting best model, echo=FALSE}
+# Extract best model
+best3.WAIC <- paste0(c("out", paste0(WAIC.3.full[1,2])), collapse = "")
+best3.LOOIC <- paste0(c("out", paste0(LOOIC.3.full[1,2])), collapse = "")
+
+# Test for difference in best model between WAIC and LOOIC. If both best model agree then use the best WAIC model, if they dissagree use lest LOOIC model
+ifelse(all.equal(best3.WAIC, best3.LOOIC) == TRUE, best2 <- eval(best3.WAIC), best2 <- eval(best3.LOOIC))
+
+# Extract MCMC values
+post <- rbind(out3e$mcmc[[1]], out3e$mcmc[[2]])
+
+# Loop over number of cores
+for (i in 3:nc){
+  post <- rbind(post, out3e$mcmc[[i]])
+}
+
+# Calculate summary stats
+reps <- dim(post)[1]
+sumout <- add.summary(out3e, c("sig", "Dispers","beta"))
+sumstats <- sumout$summaries
+vn <- row.names(sumstats)
+
+# Diagnostic plots
+plot(out3e, c('trace', 'histogram'), vars=c("sig", "Dispers","beta"))
+
+# Create dataframes for plotting fixed effects
+mind <- min(Dayindx)
+maxd <- max(Dayindx)
+Julday <- numeric(length = length(seq(mind:maxd)))
+Predict <- numeric(length = length(seq(mind:maxd)))
+Lwr <- numeric(length = length(seq(mind:maxd)))
+Upr <- numeric(length = length(seq(mind:maxd)))
+sig <- post[,which(vn == 'sigS')]
+dis <- post[,which(vn == 'Dispers')]
+bt0 <- post[,which(vn == 'beta0')]
+bt1 <- post[,which(vn == 'beta1')]
+bt2 <- post[,which(vn == 'beta2')]
+bt2b <- post[,which(vn == 'beta2b')]
+
+for (d in mind:maxd){
+  Julday[d] = d - 1 + Minday
+  ldayMu = bt0 + bt1*d + bt2*d +bt2b*d^2
+  Predict[d] = mean(exp(Mu + sig^2/2))
+  Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .975))
+} 
+
+dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
+dfData = data.frame(x = Julianday, y = Obs)
+
+p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  # geom_point(data = dfData, aes(x=x, y=y))+
+  xlab('Julian Day') + 
+  ylab(bquote('Mean Pred belowground mass' ~(g/m^2))) +
+  theme(legend.position = "none")
+
+print(p1)
+```
+
+### Model 4 - Aboveground to belowground biomass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect belowground biomass of eelgrass. Note that the number of samples (nsamples) will need to adjusted to suit the number of cores running on your machine so that the resulting analysis results in >= 20,000 samples. For example if you have 8 cores you can run analysis on 7 cores so nsamples should = 2900.
+
+```{r Model 4 set up, echo=FALSE}
+# Dependent observed variable: this should be whatever numeric variable you wish to analyze 
+Obs <- as.numeric()
+
+# select only oberved variables that are not NA
+ii <- which(!is.na(Obs))
+Obs <- Obs[ii]
+
+# Variables to use as independent or identifier variables
+Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
+Sedtype <- as.numeric(tran.dat$sed1_no)[ii]
+Julianday <- as.numeric(tran.dat$date_julian)[ii]
+Light <- as.numeric(tran.dat$light_attenu)[ii]
+Sitetxt <- tran.dat$site[ii]
+Quad <- as.numeric(tran.dat$quadrat)[ii]
+
+# Extracting attributes of data
+Sitelist <- unique(Sitetxt)
+Sitenum <- as.numeric(as.factor(Sitetxt))
+Sites <- seq(1, max(Sitenum))
+Nsites <- max(Sitenum)
+Nquads <- max(Quad)
+Nobs <- length(Obs)
+Minday <- min(Julianday)
+Dayindx <- Julianday - Minday + 1
+MeanDay <- round(mean(Dayindx),0)
+
+# Model comparison data frame
+ModComp.1 <- data.frame(Model = c("Model_1a","Model_1b","Model_1c","Model_1d","Model_1e","Model_1f","Model_1g", "Model_1h"), 
+                        WAIC = numeric(length = 8), 
+                        LOOIC = numeric(length = 8))
+
+# Set up for parralel computing
+cores <- detectCores()
+ncore <- min(20, cores-1)
+
+# Set JAGS params for running
+nsamples <- 2900
+nt <- 20
+nb <- 7000
+nc <- ncore
+
+# For parallel (comment out for serial)
+cl <- makeCluster(ncore)
+```

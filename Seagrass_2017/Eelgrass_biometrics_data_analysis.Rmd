@@ -171,6 +171,9 @@ site.quad$ag_mass <- (site.quad$eelgrass_shoots_msq * site.quad$shoot_mass)
 ## Below Ground Biomass ##
 site.quad$bg_mass <- (site.quad$eelgrass_shoots_msq * site.quad$rhi_mass)
 
+## Ratio of Aboveground to Belowground Biomass
+site.quad$agbg_mass <- (site.quad$ag_mass / site.quad$bg_mass)
+
 ## Epiphytes per eeglrass area ##
 site.quad$epimass_shootarea <- ((site.quad$epi_mass + !is.na(site.quad$exepi_mass)) / site.quad$shoot_area)
 
