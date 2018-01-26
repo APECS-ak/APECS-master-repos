@@ -254,45 +254,6 @@ plot_imb = ggplot(df.core_noL06, aes(layer_depth, im_density)) +
 # organize om and im side-by-side
 plot_grid(plot_ima, plot_imb, align = "hv", ncol = 2)
 ```
-<br><br><br>
-
-### OM:IM ratio
-```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
-
-hlinedat_om <- ddply(df.core_noL06, "otter_region", summarize, regionmean_om = mean(om.im_ratio, na.rm = TRUE))
-
-# plot organic matter with sites
-plot_omima = ggplot(df.core_noL06, aes(layer_depth, om.im_ratio, color = site_n)) +
-  stat_summary(fun.y=mean, geom="point") +
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
-  coord_flip() +
-  scale_x_reverse() +
-  xlab("Core Depth (cm)") +
-  ylab("OM:IM") +
-  #scale_x_continuous(position = "top") +
-  #scale_y_continuous(position = "left") +
-  facet_wrap(~otter_region, ncol = 1) +
-  geom_hline(aes(yintercept = regionmean_om), hlinedat_om, color = "red") +
-  theme(legend.position = c(0.9, 0.13), legend.background = element_rect(color = "black", fill = "grey90", size = 1, linetype = "solid"))
-
-
-# plot organic matter averaged across sites
-plot_omimb = ggplot(df.core_noL06, aes(layer_depth, om.im_ratio)) +
-  stat_summary(fun.y=mean, geom="point")+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
-  coord_flip() +
-  scale_x_reverse() +
-  xlab("Core Depth (cm)") +
-  ylab("OM:IM") +
-  #scale_x_continuous(position = "top") +
-  #scale_y_continuous(position = "left") +
-  facet_wrap(~otter_region, ncol = 1) +
-  geom_hline(aes(yintercept = regionmean_om), hlinedat_om, color = "red")
-
-
-# organize om and im side-by-side
-plot_grid(plot_omima, plot_omimb, align = "hv", ncol = 2)
-```
 <br><br><br><br><br><br><br><br><br>
 
 
@@ -391,39 +352,6 @@ plot_grid(title.cpbiomim, cpbiomim, ncol=1, rel_heights=c(0.1, 1))
 
 
 
-
-
-```{r, include = FALSE}
-df.core_noL06$otter_region <- as.factor(df.core_noL06$otter_region)
-df.core_noL06$site_n <- as.factor(df.core_noL06$site_n)
-
-
-p01 <- ggplot(df.core_noL06, aes(otter_region, om_density)) +
-  geom_boxplot(outlier.shape = NA) +
-  geom_jitter(alpha = 0.3, width = 0.15)
-plot(p01)
-
-p02 <- ggplot(df.core_noL06, aes(otter_region, im_density)) +
-  geom_boxplot(outlier.shape = NA) +
-  geom_jitter(alpha = 0.3, width = 0.15)
-plot(p02)
-
-p03 <- ggplot(df.core_noL06, aes(otter_region, om.im_ratio)) +
-  geom_boxplot(outlier.shape = NA) +
-  geom_jitter(alpha = 0.3, width = 0.15)
-plot(p03)
-```
-
-```{r, include = FALSE, echo = FALSE, fig.width = 12, fig.height = 5}
-title.cp01 <- ggdraw() + draw_label(".", fontface='bold')
-
-cp01 <- plot_grid(p01, p02, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths = c(1,1))
-
-plot_grid(title.cp01, cp01, ncol=1, rel_heights=c(0.1, 1))
-```
-<br><br><br><br>
-
-
 ```{r, include = FALSE}
 df.core_noL06$otter_region <- as.factor(df.core_noL06$otter_region)
 df.core_noL06$site_n <- as.factor(df.core_noL06$site_n)
@@ -454,7 +382,7 @@ cp02 <- plot_grid(p04, p05, p06, labels=c('A', 'B', 'C'), align = 'h', ncol=3, n
 
 plot_grid(title.cp02, cp02, ncol=1, rel_heights=c(0.1, 1))
 ```
-<br><br>
+<br>
 
 ## For proper analysis, we need to decide how to deal with the bimodal distributions. 
 
@@ -519,11 +447,6 @@ colnames(trim_om.im)[which(names(trim_om.im) == ".")] <- "om.im_ratio"
 # join trimmed data of interest into one df
 df.trim <- left_join(trim_om, trim_im, by = c("otter_region","site"))
 df.trim <- left_join(df.trim, trim_om.im, by = c("otter_region","site"))
-
-
-
-
-
 ```
 
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
@@ -552,43 +475,7 @@ df.core.trim <- df.core.trim %>%
 # remove L06
 df.core.trim <- df.core.trim[-6,]
 ```
-<br>
-
-
-
-```{r, echo = FALSE, include = FALSE, warning = FALSE}
-str(df.core.trim)
-df.core.trim$otter_region <- as.factor(df.core.trim$otter_region)
-
-
-p1 <- ggplot(df.core.trim, aes(otter_region, om_density, color = sed1_site)) +
-  geom_boxplot() +
-  geom_jitter(size = 3, width = 0.2)
-plot(p1)
-
-
-
-p2 <- ggplot(df.core.trim, aes(otter_region, im_density)) +
-  geom_boxplot() +
-  geom_point(size = 3, alpha = 0.6)
-plot(p2)
-
-
-
-p3 <- ggplot(df.core.trim, aes(otter_region, om.im_ratio)) +
-  geom_boxplot() +
-  geom_point(size = 3, alpha = 0.6)
-plot(p3)
-```
-
-```{r, include=FALSE, echo = FALSE, fig.width = 12, fig.height = 5}
-title.cp1 <- ggdraw() + draw_label("Trends with SO zone?", fontface='bold')
-
-cp1 <- plot_grid(p1, p2, p3, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
-
-plot_grid(title.cp1, cp1, ncol=1, rel_heights=c(0.1, 1))
-```
-<br>
+<br><br>
 
 
 
@@ -646,15 +533,7 @@ my.formula <- y ~ x # defined formula (linear regression) for stats labels on pl
 # shoot_mass_m2
 p10 = ggplot(df.core.trim, aes(sea_otter_index, log(om_density))) +
   geom_point(size=3) +
-  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
   theme(legend.position="none")
-  #stat_poly_eq(formula = my.formula, 
-               #aes(label = paste(..rr.label.., sep = "~~~")), 
-               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
-  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
-                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  #label.x.npc = 'left', label.y.npc = 'top', size = 4)
 plot(p10)
 
 
@@ -662,15 +541,7 @@ plot(p10)
 
 p11 = ggplot(df.core.trim, aes(sea_otter_index, log(im_density))) +
   geom_point(size=3) +
-  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
   theme(legend.position="none")
-  #stat_poly_eq(formula = my.formula, 
-               #aes(label = paste(..rr.label.., sep = "~~~")), 
-               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
-  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
-                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  #label.x.npc = 'left', label.y.npc = 'top', size = 4)
 plot(p11)
 
 
@@ -679,7 +550,6 @@ plot(p11)
 p12 = ggplot(df.core.trim, aes(sea_otter_index, log(om.im_ratio))) +
   geom_point(size=3) +
   geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
   theme(legend.position="none") +
   stat_poly_eq(formula = my.formula, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
