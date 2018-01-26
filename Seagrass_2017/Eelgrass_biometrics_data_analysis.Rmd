@@ -160,6 +160,9 @@ Now we can merege transect and biometric data to summaries by site and quadrat.
 site.quad <- merge(eg.site[,c(1, 2)], eg.tran, by = "site")
 site.quad <- merge(site.quad, quad.bio, by = c("site", "quadrat"))
 site.quad <- merge(site.quad, quad.graz, by = c("site", "quadrat"))
+
+# Convert NaN to NA
+site.quad$epi_mass[is.nan(site.quad$epi_mass)] <- NA
 ```
 
 Now we can preform quadrat calculations at the quadrat level.
