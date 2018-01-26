@@ -2758,7 +2758,7 @@ Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
 Sedtype <- as.numeric(tran.dat$sed1_no)[ii]
 Julianday <- as.numeric(tran.dat$date_julian)[ii]
 Light <- as.numeric(tran.dat$light_attenu)[ii]
-Graz <- as.numeric(log(tran.dat$grazmass_shootmass))
+Graz <- as.numeric(log(tran.dat$grazmass_shootmass)) [ii]
 Sitetxt <- tran.dat$site[ii]
 Quad <- as.numeric(tran.dat$quadrat)[ii]
 
