@@ -1558,7 +1558,7 @@ jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day =
 
 inits <- function() list(sigS = runif(1, .1, 1), Dispers = runif(1, .1, 1)) 
 
-params <- c("sigS","beta0","beta1","eps","loglik") 
+params <- c("sigS","Dispers", "beta0","beta1","eps","loglik") 
 
 # Call JAGS from R 
 out <- run.jags(data = jags.data, 
@@ -2074,21 +2074,21 @@ best3.LOOIC <- paste0(c("out", paste0(LOOIC.3.full[1,2])), collapse = "")
 ifelse(all.equal(best3.WAIC, best3.LOOIC) == TRUE, best2 <- eval(best3.WAIC), best2 <- eval(best3.LOOIC))
 
 # Extract MCMC values
-post <- rbind(out3e$mcmc[[1]], out3e$mcmc[[2]])
+post <- rbind(out3a$mcmc[[1]], out3a$mcmc[[2]])
 
 # Loop over number of cores
 for (i in 3:nc){
-  post <- rbind(post, out3e$mcmc[[i]])
+  post <- rbind(post, out3a$mcmc[[i]])
 }
 
 # Calculate summary stats
 reps <- dim(post)[1]
-sumout <- add.summary(out3e, c("sig", "Dispers","beta"))
+sumout <- add.summary(out3a, c("sig","beta", "Dispers"))
 sumstats <- sumout$summaries
 vn <- row.names(sumstats)
 
 # Diagnostic plots
-plot(out3e, c('trace', 'histogram'), vars=c("sig", "Dispers","beta"))
+plot(out3a, c('trace', 'histogram'), vars=c("sig","Dispers","beta"))
 
 # Create dataframes for plotting fixed effects
 mind <- min(Dayindx)
@@ -2101,12 +2101,10 @@ sig <- post[,which(vn == 'sigS')]
 dis <- post[,which(vn == 'Dispers')]
 bt0 <- post[,which(vn == 'beta0')]
 bt1 <- post[,which(vn == 'beta1')]
-bt2 <- post[,which(vn == 'beta2')]
-bt2b <- post[,which(vn == 'beta2b')]
 
 for (d in mind:maxd){
   Julday[d] = d - 1 + Minday
-  ldayMu = bt0 + bt1*d + bt2*d +bt2b*d^2
+  ldayMu = bt0 + bt1*d
   Predict[d] = mean(exp(Mu + sig^2/2))
   Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .025))
   Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .975))
@@ -2124,6 +2122,29 @@ p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) +
   theme(legend.position = "none")
 
 print(p1)
+
+Ottvals <- seq(min(Ottindx), max(Ottindx), length.out = 100)
+Predict <- numeric(length = 100)
+Lwr <- numeric(length = 100)
+Upr <- numeric(length = 100)
+
+for (o in 1:100){
+  Mu <- bt0 + bt1*MeanDay + bt2*Ottvals[o] + bt2b*Ottvals[o]^2
+  Predict[o] <- mean(exp(Mu + sig^2/2))
+  Lwr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .975))
+}
+
+dfOtt = data.frame(OtterIndex = Ottvals, Mean = Predict, Lwr = Lwr, Upr = Upr)
+
+p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  xlab('Sea Otter Index') + 
+  ylab(bquote('Mean Pred aboveground mass' ~(g/m^2))) +
+  theme(legend.position = "none")
+
+plot_grid(p1, p2, nrow = 2, ncol = 1)
 ```
 
 ### Model 4 - Aboveground to belowground biomass.
@@ -2563,4 +2584,160 @@ WAIC.4h <- data.frame(modID = c('WAIC4h'), model = c('4h'), WAIC = WAIC$waic, WA
 LOOIC.4h <- data.frame(modID = c('LOOIC4h'), model = c('4h'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 
 out4h <- out
+```
+
+### Model 4 Comparison
+```{r Model 4 comparison, echo = FALSE}
+# Clean up work session
+stopCluster(cl = cl)
+rm(out)
+
+## WAIC ##
+# Rank and organize model comparison table
+modranks.WAIC <- order(ModComp.4$WAIC)
+WAIC.4.full <- rbind(WAIC.4a, WAIC.4b, WAIC.4c, WAIC.4d, WAIC.4e, WAIC.4f, WAIC.4g, WAIC.4h)
+comptab.WAIC <- compare(WAIC4a, WAIC4b, WAIC4c, WAIC4d, WAIC4e, WAIC4f, WAIC4g, WAIC4h)
+filelist.WAIC <- row.names(comptab.WAIC)
+
+# Calculate comaprison values
+for (i in 2:8){
+  row = which(WAIC.4.full$modID == filelist.WAIC[i])
+  comp = compare(eval(as.name(filelist.WAIC[i])) , eval(as.name(filelist.WAIC[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  WAIC.4.full$deltaWAIC[row] = comp[1]
+  WAIC.4.full$deltaWAIC_se[row] = comp[2]
+  WAIC.4.full$P_comp[row] = P_val
+}
+
+# organize final table
+WAIC.4.full <- WAIC.4.full[modranks.WAIC,]
+WAIC.4.full$P_comp[1] = 1
+WAIC.4.full$Likelihood = exp(-0.5*WAIC.4.full$deltaWAIC)
+WAIC.4.full$Likelihood[WAIC.4.full$P_comp < 0.1] = 0 
+sumlik = sum(WAIC.4.full$Likelihood)
+WAIC.4.full$WAICwt = WAIC.4.full$Likelihood/sumlik
+
+# round
+WAIC.4.full <- cbind(WAIC.4.full[,1:2], round(WAIC.4.full[, 3:9], 3))
+
+## LOOIC ##
+# Rank and organize model comparison table
+ModComp.4$LOOIC <- as.numeric(ModComp.4$LOOIC)
+modranks.LOOIC <- order(ModComp.4$LOOIC)
+LOOIC.4.full <- rbind(LOOIC.4a, LOOIC.4b, LOOIC.4c, LOOIC.4d, LOOIC.4e, LOOIC.4f, LOOIC.4g, LOOIC.4h)
+comptab.LOOIC <- compare(LOOIC4a, LOOIC4b, LOOIC4c, LOOIC4d, LOOIC4e, LOOIC4f, LOOIC4g, LOOIC4h)
+filelist.LOOIC <- row.names(comptab.LOOIC)
+
+# Calculate comparison values
+for (i in 2:8){
+  row = which(LOOIC.4.full$modID == filelist.LOOIC[i])
+  comp = compare(eval(as.name(filelist.LOOIC[i])) , eval(as.name(filelist.LOOIC[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  LOOIC.4.full$deltaLOOIC[row] = comp[1]
+  LOOIC.4.full$deltaLOOIC_se[row] = comp[2]
+}
+
+# organize final table
+LOOIC.4.full <- LOOIC.4.full[modranks.LOOIC,]
+LOOIC.4.full$Likelihood = exp(-0.5*LOOIC.4.full$deltaLOOIC)
+LOOIC.4.full$Likelihood[LOOIC.4.full$P_comp < 0.1] = 0 
+sumlik = sum(LOOIC.4.full$Likelihood)
+LOOIC.4.full$LOOICwt = LOOIC.4.full$Likelihood/sumlik
+
+# round
+LOOIC.4.full <- cbind(LOOIC.4.full[,1:2], round(LOOIC.4.full[, 3:8], 3))
+```
+
+### Model 4 Comparison tables
+WAIC Comparison
+```{r model 4 WAIC, echo = FALSE}
+DT::datatable(WAIC.4.full)
+```
+
+LOICC comparison
+```{r model 4 LOOIC, echo = FALSE}
+DT::datatable(LOOIC.4.full)
+```
+
+### Model 4 Plotting best model
+```{r model 4 plotting best model, echo=FALSE}
+# Extract best model
+best4.WAIC <- paste0(c("out", paste0(WAIC.4.full[1,2])), collapse = "")
+best4.LOOIC <- paste0(c("out", paste0(LOOIC.4.full[1,2])), collapse = "")
+
+# Test for difference in best model between WAIC and LOOIC. If both best model agree then use the best WAIC model, if they dissagree use lest LOOIC model
+ifelse(all.equal(best4.WAIC, best4.LOOIC) == TRUE, best2 <- eval(best4.WAIC), best2 <- eval(best4.LOOIC))
+
+# Extract MCMC values
+post <- rbind(out4b$mcmc[[1]], out4b$mcmc[[2]])
+
+# Loop over number of cores
+for (i in 3:nc){
+  post <- rbind(post, out4b$mcmc[[i]])
+}
+
+# Calculate summary stats
+reps <- dim(post)[1]
+sumout <- add.summary(out4b, c("sig","beta"))
+sumstats <- sumout$summaries
+vn <- row.names(sumstats)
+
+# Diagnostic plots
+plot(out4b, c('trace', 'histogram'), vars=c("sig","beta"))
+
+# Create dataframes for plotting fixed effects: assume Model4b
+mind <- min(Dayindx)
+maxd <- max(Dayindx)
+Julday <- numeric(length = length(seq(mind:maxd)))
+Predict <- numeric(length = length(seq(mind:maxd)))
+Lwr <- numeric(length = length(seq(mind:maxd)))
+Upr <- numeric(length = length(seq(mind:maxd)))
+sig <- post[,which(vn == 'sigO')]
+bt0 <- post[,which(vn == 'beta0')]
+bt1 <- post[,which(vn == 'beta1')]
+bt2 <- post[,which(vn == 'beta2')]
+
+for (d in mind:maxd){
+  Julday[d] = d - 1 + Minday
+  Mu = bt0 + bt1*d
+  Predict[d] = mean(exp(Mu + sig^2/2))
+  Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .975))
+} 
+
+dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
+dfData = data.frame(x = Julianday, y = Obs)
+
+p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  # geom_point(data = dfData, aes(x=x, y=y))+
+  xlab('Julian Day') + 
+  ylab(bquote('Mean Pred AG/BG mass' ~(g/m^2))) +
+  theme(legend.position = "none")
+
+Ottvals <- seq(min(Ottindx), max(Ottindx), length.out = 100)
+Predict <- numeric(length = 100)
+Lwr <- numeric(length = 100)
+Upr <- numeric(length = 100)
+
+for (o in 1:100){
+  Mu <- bt0 + bt1*MeanDay  + bt2*Ottvals[o]
+  Predict[o] <- mean(exp(Mu + sig^2/2))
+  Lwr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .975))
+}
+
+dfOtt = data.frame(OtterIndex = Ottvals, Mean = Predict, Lwr = Lwr, Upr = Upr)
+
+p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  xlab('Sea Otter Index') + 
+  ylab(bquote('Mean Pred AG/BG mass' ~(g/m^2))) +
+  theme(legend.position = "none")
+
+plot_grid(p1, p2, nrow = 2, ncol = 1)
 ```
