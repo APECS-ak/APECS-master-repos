@@ -7,57 +7,69 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
+```
+
 ```{r, include=FALSE}
-library(knitr); library(dplyr); library(tidyr); library(ggplot2); library(DT); library(cowplot); library(leaflet)
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubridate); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf); library(knitr); library(cowplot); library(ggpmisc); library(DT); library(plyr)
+
 theme_set(theme_classic())
 ```
+
+
+
 
 
 ### 1. Import cleaned .csv file and look at dataframe.
 ```{r, echo = FALSE, include = FALSE}
 # read clean file from github
-cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/core_matter_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+df.core <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/core_matter_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # check 
-str(cr.mat)
+str(df.core)
 ```
+
+
+
 
 
 ### 2. Remove excess columns and calcuate other factors of interest. <br>
-
-#### (e.g. pan + crucible data recorded prior to final calcualted weights)
-```{r}
+```{r, echo = FALSE, include = FALSE}
 # remove pan, crucible, and sediment combo weights not necessary here
-cr.mat = cr.mat %>% 
+df.core = df.core %>% 
   select(-pan_weight, -pan_sed_ww_pre_60C, -pan_sed_dw_post_60C, -pan_sed_dw_pre_450C, -pan_sed_dw_post450C, -crucible_weight, -crucible_sed_dw_pre_950C, -crucible_sed_dw_post_950C)
 ```
 
-```{r}
-cr.mat = cr.mat %>% 
+```{r, echo = FALSE, include = FALSE}
+df.core = df.core %>% 
   mutate(om_percent_dw = (om_dw / sed_dw_pre_450C) * 100, na.rm = TRUE) %>%
   mutate(im_percent_dw = (im_dw / sed_dw_pre_950C) * 100, na.rm = TRUE) %>%
   mutate(om.im_ratio = om_dw / im_dw, na.rm = TRUE) %>%
   mutate(om_density = om_dw * dry_bulk_density, na.rm = TRUE) %>%
-  mutate(im_density = im_dw * dry_bulk_density, na.rm = TRUE)
+  mutate(im_density = im_dw * dry_bulk_density, na.rm = TRUE) %>%
+  mutate(porewater_volume_cm3 = sed_ww_pre_60C - sed_dw_post_60C, na.rm = TRUE)
+```
+
+```{r, echo = FALSE, include = FALSE}
+df.core = df.core %>% 
+  select(-sed_ww_pre_60C, -sed_dw_post_60C, -sed_dw_pre_450C, -sed_dw_post_450C, -sed_dw_pre_950C, -sed_dw_post_950C, -na.rm)
+```
+
+```{r, echo = FALSE, include = FALSE}
+# TEMPORARILY remove these rows...clear mistake in data collection or data entry.
+df.core <- df.core[-c(52,195,206,276,365,403,470,481,482,484,513,515,516),]
 ```
 
 
-```{r}
-cr.mat = cr.mat %>% 
-  select(-sed_ww_pre_60C, -sed_dw_post_60C, -sed_dw_pre_450C, -sed_dw_post_450C, -sed_dw_pre_950C, -sed_dw_post_950C)
-```
 
 
-
-
-
-<br>
 
 ### 3. Where are the processed cores from?
-```{r}
+```{r, echo = FALSE}
 # new data frame for all cores
-locations_all = cr.mat %>%
-  distinct(cr.mat, latitude, longitude, site) %>%
+locations_all = df.core %>%
+  distinct(df.core, latitude, longitude, site) %>%
   drop_na()
 
 # map "locations_all"
@@ -65,16 +77,22 @@ leaflet(locations_all) %>%
   addTiles() %>%
   addMarkers(~longitude, ~latitude, popup = ~site, label = ~site)
 ```
-
 <br>
 
-### 4. Plotting
-#### All sites
-```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
-levels=c("Low","Mid","High") # order zones
+
+
+
+
+### 4. Plotting by site and region
+#### Total OM (right column) and IM content (left column)
+```{r, fig.height = 35, fig.width = 8, echo = FALSE, warning = FALSE}
+df.core$site=factor(df.core$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order sites
+
+df.core$otter_region=factor(df.core$otter_region, levels=c("Low","Mid","High")) # order zones
+
 
 # plot organic matter
-plot_om_all = ggplot(cr.mat, aes(core_depth, om_content)) +
+plot_om_all = ggplot(df.core, aes(layer_depth, om_density)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -86,7 +104,7 @@ plot_om_all = ggplot(cr.mat, aes(core_depth, om_content)) +
   facet_wrap(~site, ncol = 1)
 
 # plot inorganic matter
-plot_im_all = ggplot(cr.mat, aes(core_depth, im_content)) +
+plot_im_all = ggplot(df.core, aes(layer_depth, im_density)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -100,11 +118,9 @@ plot_im_all = ggplot(cr.mat, aes(core_depth, im_content)) +
 # organize om and im side-by-side
 plot_grid(plot_om_all, plot_im_all, align = "hv", ncol = 2)
 ```
-
 <br>
 
-#### You will notice that site L06 is way different than the rest, so far. This core was loaded with chunky woody debris; it's real data but an outlier compared to the other sites. Here are two images of the sliced core from site L06:
-
+#### You will notice that site L06 is way different than the rest. This core was loaded with chunky woody debris and this site had a lot of woody debris at the surface; it's real data but an outlier compared to the other sites. Here are two images of the sliced core from site L06:
 ```{r, include = FALSE}
 img1_path = "images/woodchunk1.JPG"
 img2_path = "images/woodchunk2.JPG"
@@ -114,51 +130,18 @@ img2_path = "images/woodchunk2.JPG"
 include_graphics(img1_path)
 include_graphics(img2_path)
 ```
-
-
 <br>
 
-#### For the sake of looking at regional patterns, let's remove site L06 until we have more sites processed:
 
+#### For the sake of looking at regional patterns, let's remove site L06.
 ```{r}
-cr.mat_noL06 = cr.mat[-c(1:30),] # remove L06 (for now) because organic matter is off the scale
+df.core_noL06 = df.core[-c(1:30),] # remove L06 (for now) because organic matter is off the scale
 ```
 
 <br>
 <br>
 
 
-#### Here are the data, by site, without L06:
-```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
-levels=c("Low","Mid","High") # order zones
-
-# plot organic matter
-plot_om_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, om_content)) +
-  stat_summary(fun.y=mean, geom="point")+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
-  coord_flip() +
-  scale_x_reverse() +
-  xlab("Core Depth (cm)") +
-  ylab("Organic Matter (g cm^3)") +
-  #scale_x_continuous(position = "top") +
-  #scale_y_continuous(position = "left") +
-  facet_wrap(~site, ncol = 1)
-
-# plot inorganic matter
-plot_im_sites_exL06 = ggplot(cr.mat_noL06, aes(core_depth, im_content)) +
-  stat_summary(fun.y=mean, geom="point")+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
-  coord_flip() +
-  scale_x_reverse() +
-  xlab("Core Depth (cm)") +
-  ylab("Organic Matter (g cm^3)") +
-  #scale_x_continuous(position = "top") +
-  #scale_y_continuous(position = "left") +
-  facet_wrap(~site, ncol = 1)
-
-# organize om and im side-by-side
-plot_grid(plot_om_sites_exL06, plot_im_sites_exL06, align = "hv", ncol = 2)
-```
 
 
 
@@ -167,17 +150,22 @@ plot_grid(plot_om_sites_exL06, plot_im_sites_exL06, align = "hv", ncol = 2)
 
 
 
-<br>
-<br>
+<br><br><br><br>
 
-#### Here are the data grouped by sea otter zone (witout L06)
+### Here are the data grouped by sea otter zone (without L06)
+#### The red lines represent the mean values for the length of the entire core.
+
 ```{r fig2, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
+df.core_noL06$site=factor(df.core_noL06$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order zones
 
-cr.mat_noL06$otter_region=factor(cr.mat_noL06$otter_region, levels=c("Low","Mid","High")) # order zones
+df.core_noL06$otter_region=factor(df.core_noL06$otter_region, levels=c("Low","Mid","High")) # order zones
 
+
+
+hlinedat_om <- ddply(df.core_noL06, "otter_region", summarize, regionmean_om = mean(om_density, na.rm = TRUE))
 
 # plot organic matter
-plot_om = ggplot(cr.mat_noL06, aes(core_depth, om_content)) +
+plot_om = ggplot(df.core_noL06, aes(layer_depth, om_density)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -186,10 +174,15 @@ plot_om = ggplot(cr.mat_noL06, aes(core_depth, om_content)) +
   ylab("Organic Matter (g cm^3)") +
   #scale_x_continuous(position = "top") +
   #scale_y_continuous(position = "left") +
-  facet_wrap(~otter_region, ncol = 1)
+  facet_wrap(~otter_region, ncol = 1) +
+  geom_hline(aes(yintercept = regionmean_om), hlinedat_om, color = "red")
+
+
+
+hlinedat_im <- ddply(df.core_noL06, "otter_region", summarize, regionmean_im = mean(im_density, na.rm = TRUE))
 
 #plopt inorganic matter
-plot_im = ggplot(cr.mat_noL06, aes(core_depth, im_content)) +
+plot_im = ggplot(df.core_noL06, aes(layer_depth, im_density)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -198,7 +191,10 @@ plot_im = ggplot(cr.mat_noL06, aes(core_depth, im_content)) +
   ylab("Inorganic Matter (g cm^3)") +
   #scale_x_continuous(position = "top") +
   #scale_y_continuous(position = "left") +
-  facet_wrap(~otter_region, ncol = 1)
+  facet_wrap(~otter_region, ncol = 1) +
+  geom_hline(aes(yintercept = regionmean_im), hlinedat_im, color = "red")
+
+
 
 # organize om and im side-by-side
 plot_grid(plot_om, plot_im, align = "hv", ncol = 2)
@@ -206,8 +202,8 @@ plot_grid(plot_om, plot_im, align = "hv", ncol = 2)
 
 ```{r, echo = FALSE, message = FALSE}
 # make new dataframe for mapping
-#locations = cr.mat_noL06 %>%
-  #distinct(cr.mat_noL06, latitude, longitude, site) %>%
+#locations = df.core_noL06 %>%
+  #distinct(df.core_noL06, latitude, longitude, site) %>%
   #drop_na()
 
 # turn into leaflet map
@@ -218,68 +214,266 @@ plot_grid(plot_om, plot_im, align = "hv", ncol = 2)
 
 <br>
 
-#### It looks like the low sea otter zone has more organic matter in the sediments, and the mid sites have a nice range that tracks through depth. I'm looking forward to more replicates! It will also be great to have grain size analysis...hopefully some day.  
+#### It looks like the low sea otter zone has more organic and inorganic matter in the sediments, and the mid sites have a nice range that tracks through depth.  
 
 <br>
+<br>
 
-#### OM and IM ratios: I just noticed that the depths for IM at one site are misaligned, meaning that the data were probably entered into the wrong lines. This will be looked into. In the mean time, it appears that the OM:IM ratio, across all sites, decreases with depth. Makes sense! Here, data are summarized across sites because the pattern looked similar across sites. 
-```{r, echo = FALSE, warning = FALSE}
-# plot organic matter
-plot_omim_ratio = ggplot(cr.mat_noL06, aes(core_depth, om.im_ratio)) +
-  stat_summary(fun.y=mean, geom="point")+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
-  coord_flip() +
-  scale_x_reverse() +
-  xlab("Core Depth (cm)") +
-  ylab("OM:IM Ratio (g cm^3)")
-  #scale_x_continuous(position = "top") +
-  #scale_y_continuous(position = "left") +
 
-# organize om and im side-by-side
-plot_grid(plot_omim_ratio, align = "hv", ncol = 1)
+
+
+
+
+
+
+
+
+
+
+
+
+### 4. Plotting across the SOI
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
+colnames(df.core)
+
+om <- df.core %>% 
+  select(otter_region, site, om_density)
+
+m.om <- melt(om, id = 1:2, na.rm = TRUE)
+
+trim_om <- dcast(m.om, otter_region + site ~ ., mean)
+colnames(trim_om)[which(names(trim_om) == ".")] <- "om_density"
+
+
+
+
+
+
+im <- df.core %>% 
+  select(otter_region, site, im_density)
+
+m.im <- melt(im, id = 1:2, na.rm = TRUE)
+
+trim_im <- dcast(m.im, otter_region + site ~ ., mean)
+colnames(trim_im)[which(names(trim_im) == ".")] <- "im_density"
+
+
+
+
+
+
+om.im <- df.core %>% 
+  select(otter_region, site, om.im_ratio)
+
+m.om.im <- melt(om.im, id = 1:2, na.rm = TRUE)
+
+trim_om.im <- dcast(m.om.im, otter_region + site ~ ., mean)
+colnames(trim_om.im)[which(names(trim_om.im) == ".")] <- "om.im_ratio"
+
+
+
+
+
+# join trimmed data of interest into one df
+df.trim <- left_join(trim_om, trim_im, by = c("otter_region","site"))
+df.trim <- left_join(df.trim, trim_om.im, by = c("otter_region","site"))
+
+
+
+
+
+```
+
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
+df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
+# join core data with soi data
+
+df.core.trim <- left_join(df.trim, df.soi, by = c("site"))
+
+colnames(df.core.trim)
+
+df.core.trim <- df.core.trim %>% 
+  select(otter_region, site, place_name, latitude, longitude, sea_otter_index, sea_otter_duration, om_density, im_density, om.im_ratio)
+```
+
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
+# remove L06
+
+df.core.trim <- df.core.trim[-6,]
 ```
 
 
 
-<br>
-<br>
-<br>
-<br>
-
-### Plots of dry bulk density (DBD) of the sediment. 
-
-<br>
-
-#### These are important to look at because it is used to calculate the OM and IM per volume. In the mean time, it also gives hints about the sediment type/quality; a higher DBD implies lower porosity and compaction. 
-```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
-levels=c("Low","Mid","High") # order zones
-
-# plot organic matter
-plot_DBD_site = ggplot(cr.mat, aes(core_depth, dry_bulk_density)) +
-  stat_summary(fun.y=mean, geom="point")+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
-  coord_flip() +
-  scale_x_reverse() +
-  xlab("Core Depth (cm)") +
-  ylab("Sediment Dry Bulk Density (g cm^3)") +
-  #scale_x_continuous(position = "top") +
-  #scale_y_continuous(position = "left") +
-  facet_wrap(~site, ncol = 1)
-
-plot_DBD_region = ggplot(cr.mat, aes(core_depth, dry_bulk_density)) +
-  stat_summary(fun.y=mean, geom="point")+
-  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
-  coord_flip() +
-  scale_x_reverse() +
-  xlab("Core Depth (cm)") +
-  ylab("Sediment Dry Bulk Density (g cm^3") +
-  #scale_x_continuous(position = "top") +
-  #scale_y_continuous(position = "left") +
-  facet_wrap(~otter_region, ncol = 1)
 
 
-# organize om and im side-by-side
-plot_grid(plot_DBD_site, plot_DBD_region, align = "hv", ncol = 2)
+
+
+
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
+str(df.core.trim)
+df.core.trim$otter_region <- as.factor(df.core.trim$otter_region)
+
+
+p1 <- ggplot(df.core.trim, aes(otter_region, om_density)) +
+  geom_boxplot() +
+  geom_point(size = 3, alpha = 0.6)
+plot(p1)
+
+
+
+p2 <- ggplot(df.core.trim, aes(otter_region, im_density)) +
+  geom_boxplot() +
+  geom_point(size = 3, alpha = 0.6)
+plot(p2)
+
+
+
+p3 <- ggplot(df.core.trim, aes(otter_region, om.im_ratio)) +
+  geom_boxplot() +
+  geom_point(size = 3, alpha = 0.6)
+plot(p3)
+
+
+
 ```
 
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp1 <- ggdraw() + draw_label("Trends with SO zone?", fontface='bold')
 
+cp1 <- plot_grid(p1, p2, p3, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
+
+plot_grid(title.cp1, cp1, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
+str(df.core.trim)
+df.core.trim$sea_otter_duration <- as.factor(df.core.trim$sea_otter_duration)
+
+
+p7 <- ggplot(df.core.trim, aes(sea_otter_duration, om_density)) +
+  geom_boxplot() +
+  geom_point(size = 3, alpha = 0.6)
+plot(p7)
+
+
+
+p8 <- ggplot(df.core.trim, aes(sea_otter_duration, im_density)) +
+  geom_boxplot() +
+  geom_point(size = 3, alpha = 0.6)
+plot(p8)
+
+
+
+p9 <- ggplot(df.core.trim, aes(sea_otter_duration, om.im_ratio)) +
+  geom_boxplot() +
+  geom_point(size = 3, alpha = 0.6)
+plot(p9)
+
+
+
+```
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp2 <- ggdraw() + draw_label("Trends with SO duration?", fontface='bold')
+
+cp2 <- plot_grid(p7, p8, p9, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
+
+plot_grid(title.cp2, cp2, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
+
+
+
+
+
+
+
+
+```{r, echo = FALSE, include = FALSE, warning = FALSE}
+# plotting in scatter
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+# shoot_mass_m2
+p10 = ggplot(df.core.trim, aes(sea_otter_index, log(om_density))) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
+  theme(legend.position="none")
+  #stat_poly_eq(formula = my.formula, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p10)
+
+
+
+
+p11 = ggplot(df.core.trim, aes(sea_otter_index, log(im_density))) +
+  geom_point(size=3) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
+  theme(legend.position="none")
+  #stat_poly_eq(formula = my.formula, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p11)
+
+
+
+
+p12 = ggplot(df.core.trim, aes(sea_otter_index, log(om.im_ratio))) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #xlab("Secondary sediment class (inside transect)\n")+ylab("\nBG biomass per cm rhizome (g per msq, DW)") +
+  theme(legend.position="none")
+  #stat_poly_eq(formula = my.formula, 
+               #aes(label = paste(..rr.label.., sep = "~~~")), 
+               #label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  #stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  #label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p12)
+
+```
+<br>
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp3 <- ggdraw() + draw_label("Trends with SO index?", fontface='bold')
+
+cp3 <- plot_grid(p10, p11, p12, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
+
+plot_grid(title.cp3, cp3, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br>
