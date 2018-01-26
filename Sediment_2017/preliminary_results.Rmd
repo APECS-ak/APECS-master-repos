@@ -21,7 +21,7 @@ theme_set(theme_classic())
 
 
 
-## 1. Import cleaned .csv file and look at dataframe.
+### 1. Import cleaned .csv file and look at dataframe.
 ```{r, echo = FALSE, include = FALSE}
 # read clean file from github
 df.core <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/core_matter_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -34,7 +34,7 @@ str(df.core)
 
 
 
-## 2. Remove excess columns and calcuate other factors of interest.
+### 2. Remove excess columns and calcuate other factors of interest.
 ```{r, echo = FALSE, include = FALSE}
 # remove pan, crucible, and sediment combo weights not necessary here
 df.core = df.core %>% 
@@ -76,7 +76,7 @@ df.core <- df.core[-c(52,195,206,276,365,403,470,481,482,484,513,515,516),]
 
 
 
-## 3. Where are the processed cores from?
+### 3. Where are the processed cores from?
 ```{r, echo = FALSE}
 # new data frame for all cores
 locations_all = df.core %>%
