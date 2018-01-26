@@ -1,7 +1,7 @@
 ---
-title: "Preliminary OM and IM results"
+title: "Preliminary sedimentary OM and IM results"
 author: "Tiff Stephens"
-date: "12/1/2017"
+date: "25 Jan 2017"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo=FALSE, warning=FALSE, message=FALSE)
 ```
 
 ```{r, include=FALSE}
-library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubridate); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf); library(knitr); library(cowplot); library(ggpmisc); library(DT); library(plyr)
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubridate); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf); library(knitr); library(cowplot); library(ggpmisc); library(DT); library(plyr); library(magick)
 
 theme_set(theme_classic())
 ```
@@ -21,7 +21,7 @@ theme_set(theme_classic())
 
 
 
-### 1. Import cleaned .csv file and look at dataframe.
+## 1. Import cleaned .csv file and look at dataframe.
 ```{r, echo = FALSE, include = FALSE}
 # read clean file from github
 df.core <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/core_matter_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -34,7 +34,7 @@ str(df.core)
 
 
 
-### 2. Remove excess columns and calcuate other factors of interest. <br>
+## 2. Remove excess columns and calcuate other factors of interest.
 ```{r, echo = FALSE, include = FALSE}
 # remove pan, crucible, and sediment combo weights not necessary here
 df.core = df.core %>% 
@@ -64,9 +64,8 @@ df.newsitenames <- data.frame(newsitenames)
 df.newsitenames <- tibble::rowid_to_column(df.newsitenames, "X") # add order column for joining
 df.core <- left_join(df.core, df.newsitenames, by = "X") 
 
-names(df.core)[names(df.core) == 'newsitenames'] <- 'site_number' # rename site columns
+names(df.core)[names(df.core) == 'newsitenames'] <- 'site_n' # rename site columns
 ```
-
 
 ```{r, echo = FALSE, include = FALSE}
 # TEMPORARILY remove these rows...clear mistake in data collection or data entry.
@@ -77,22 +76,7 @@ df.core <- df.core[-c(52,195,206,276,365,403,470,481,482,484,513,515,516),]
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-### 3. Where are the processed cores from?
+## 3. Where are the processed cores from?
 ```{r, echo = FALSE}
 # new data frame for all cores
 locations_all = df.core %>%
@@ -104,15 +88,23 @@ leaflet(locations_all) %>%
   addTiles() %>%
   addMarkers(~longitude, ~latitude, popup = ~site, label = ~site)
 ```
+<br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+
+
+## 4. Plotting by site and region
 <br>
 
-
-
-
-
-### 4. Plotting by site and region
-#### Total OM (right column) and IM content (left column)
-```{r, fig.height = 35, fig.width = 8, echo = FALSE, warning = FALSE}
+#### Below, the depth profile for organic matter (right) and inorganic mater (left) from each site is roughly plotted to compare the overall matter content. You will notice that site L06 is way different than the rest. 
+```{r, fig.height = 30, fig.width = 8, echo = FALSE, warning = FALSE}
 df.core$site=factor(df.core$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order sites
 
 df.core$otter_region=factor(df.core$otter_region, levels=c("Low","Mid","High")) # order zones
@@ -145,9 +137,9 @@ plot_im_all = ggplot(df.core, aes(layer_depth, im_density)) +
 # organize om and im side-by-side
 plot_grid(plot_om_all, plot_im_all, align = "hv", ncol = 2)
 ```
-<br>
+<br><br><br>
 
-#### You will notice that site L06 is way different than the rest. This core was loaded with chunky woody debris and this site had a lot of woody debris at the surface; it's real data but an outlier compared to the other sites. Here are two images of the sliced core from site L06:
+#### The core from L06 was loaded with chunky woody debris; in general, this site had a lot of woody debris at the surface of the sediment (see notes). The data are real but an outlier compared to the other sites. Here are two images of the sliced core from site L06:
 ```{r, include = FALSE}
 img1_path = "images/woodchunk1.JPG"
 img2_path = "images/woodchunk2.JPG"
@@ -160,28 +152,29 @@ include_graphics(img2_path)
 <br>
 
 
-#### For the sake of looking at regional patterns, let's remove site L06.
+#### For the sake of looking at regional patterns, I've removed Site L06 for further analysis. 
 ```{r}
 df.core_noL06 = df.core[-c(1:30),] # remove L06 (for now) because organic matter is off the scale
 ```
+<br><br><br><br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### Here the data are plotted again but grouped by sea otter region. In plots on the right, the sites are color coded to demonstrate the variance across sites (and in which sites); the mean values + standard error are shown on the left. <span style="color:red">The red lines represent the mean values for the entire length of the respective core.</span>
 
 <br>
-<br>
 
-
-
-
-
-
-
-
-
-
-<br><br><br><br>
-
-### Here are the data grouped by sea otter zone (without L06)
-#### The red lines represent the mean values for the length of the entire core.
-
+### Organic matter
 ```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
 df.core_noL06$site=factor(df.core_noL06$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order zones
 
@@ -192,8 +185,8 @@ df.core_noL06$otter_region=factor(df.core_noL06$otter_region, levels=c("Low","Mi
 hlinedat_om <- ddply(df.core_noL06, "otter_region", summarize, regionmean_om = mean(om_density, na.rm = TRUE))
 
 # plot organic matter with sites
-plot_oma = ggplot(df.core_noL06, aes(layer_depth, om_density, color = site_number)) +
-  stat_summary(fun.y=mean, geom="point")+
+plot_oma = ggplot(df.core_noL06, aes(layer_depth, om_density, color = site_n)) +
+  stat_summary(fun.y=mean, geom="point") +
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
   scale_x_reverse() +
@@ -202,7 +195,8 @@ plot_oma = ggplot(df.core_noL06, aes(layer_depth, om_density, color = site_numbe
   #scale_x_continuous(position = "top") +
   #scale_y_continuous(position = "left") +
   facet_wrap(~otter_region, ncol = 1) +
-  geom_hline(aes(yintercept = regionmean_om), hlinedat_om, color = "red")
+  geom_hline(aes(yintercept = regionmean_om), hlinedat_om, color = "red") +
+  theme(legend.position = c(0.9, 0.13), legend.background = element_rect(color = "black", fill = "grey90", size = 1, linetype = "solid"))
 
 # plot organic matter averaged across sites
 plot_omb = ggplot(df.core_noL06, aes(layer_depth, om_density)) +
@@ -221,12 +215,14 @@ plot_omb = ggplot(df.core_noL06, aes(layer_depth, om_density)) +
 # organize om and im side-by-side
 plot_grid(plot_oma, plot_omb, align = "hv", ncol = 2)
 ```
+<br><br><br>
 
+### Inorganic matter
 ```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
 hlinedat_im <- ddply(df.core_noL06, "otter_region", summarize, regionmean_im = mean(im_density, na.rm = TRUE))
 
 #plopt inorganic matter with sites
-plot_ima = ggplot(df.core_noL06, aes(layer_depth, im_density, color = site_number)) +
+plot_ima = ggplot(df.core_noL06, aes(layer_depth, im_density, color = site_n)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
@@ -237,8 +233,9 @@ plot_ima = ggplot(df.core_noL06, aes(layer_depth, im_density, color = site_numbe
   #scale_y_continuous(position = "left") +
   facet_wrap(~otter_region, ncol = 1) +
   geom_hline(aes(yintercept = regionmean_im), hlinedat_im, color = "red") +
-  theme(legend.position = c(0.93, 0.2), legend.background = element_rect(color = "black", 
-    fill = "grey90", size = 1, linetype = "solid"))
+  theme(legend.position = c(0.9, 0.13), legend.background = element_rect(color = "black", fill = "grey90", size = 1, linetype = "solid"))
+
+
 
 
 #plopt inorganic matter averaged across sites
@@ -257,16 +254,148 @@ plot_imb = ggplot(df.core_noL06, aes(layer_depth, im_density)) +
 # organize om and im side-by-side
 plot_grid(plot_ima, plot_imb, align = "hv", ncol = 2)
 ```
+<br><br><br>
 
-<br>
+### OM:IM ratio
+```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
 
-#### It looks like the low sea otter zone has more organic and inorganic matter in the sediments, and the mid sites have a nice range that tracks through depth.  
+hlinedat_om <- ddply(df.core_noL06, "otter_region", summarize, regionmean_om = mean(om.im_ratio, na.rm = TRUE))
+
+# plot organic matter with sites
+plot_omima = ggplot(df.core_noL06, aes(layer_depth, om.im_ratio, color = site_n)) +
+  stat_summary(fun.y=mean, geom="point") +
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Organic Matter (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~otter_region, ncol = 1) +
+  geom_hline(aes(yintercept = regionmean_om), hlinedat_om, color = "red") +
+  theme(legend.position = c(0.9, 0.13), legend.background = element_rect(color = "black", fill = "grey90", size = 1, linetype = "solid"))
+
+
+# plot organic matter averaged across sites
+plot_omimb = ggplot(df.core_noL06, aes(layer_depth, om.im_ratio)) +
+  stat_summary(fun.y=mean, geom="point")+
+  stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
+  coord_flip() +
+  scale_x_reverse() +
+  xlab("Core Depth (cm)") +
+  ylab("Organic Matter (g cm^3)") +
+  #scale_x_continuous(position = "top") +
+  #scale_y_continuous(position = "left") +
+  facet_wrap(~otter_region, ncol = 1) +
+  geom_hline(aes(yintercept = regionmean_om), hlinedat_om, color = "red")
+
+
+# organize om and im side-by-side
+plot_grid(plot_omima, plot_omimb, align = "hv", ncol = 2)
+```
+<br><br><br><br><br><br><br><br><br>
+
+
+
+
+#### Looking at the means, it appears that OM and IM decrease as sea otters become more abundant in a region. The distribution across sites, however, may also be bimodal for the "Low" and "High" regions. The "Mid" region has questionable biomodality, instead the variance for few sites may be high. Let's look at their distributions using density plots:  
+
+<br><br><br><br>
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 5}
+# split region factors for bimodal looksies
+Low <- df.core_noL06[df.core_noL06$otter_region=="Low",]
+Mid <- df.core_noL06[df.core_noL06$otter_region=="Mid",]
+High <- df.core_noL06[df.core_noL06$otter_region=="High",]
+
+
+
+# plot distributions
+biom1 <- ggplot(Low) +
+  geom_density(aes(x = om_density)) +
+  geom_rug(aes(x = om_density, y = 0), position = position_jitter(height = 0))
+
+biom2 <- ggplot(Mid) +
+  geom_density(aes(x = om_density)) +
+  geom_rug(aes(x = om_density, y = 0), position = position_jitter(height = 0))
+
+biom3 <- ggplot(High) +
+  geom_density(aes(x = om_density)) +
+  geom_rug(aes(x = om_density, y = 0), position = position_jitter(height = 0))
+```
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cpbom <- ggdraw() + draw_label("Organic Matter Distributions", fontface='bold')
+
+cpbiom <- plot_grid(biom1, biom2, biom3, labels=c('Low', 'Mid', 'High'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
+
+plot_grid(title.cpbom, cpbiom, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br>
+
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 5}
+# plot distributions
+biim1 <- ggplot(Low) +
+  geom_density(aes(x = im_density)) +
+  geom_rug(aes(x = im_density, y = 0), position = position_jitter(height = 0))
+
+biim2 <- ggplot(Mid) +
+  geom_density(aes(x = im_density)) +
+  geom_rug(aes(x = im_density, y = 0), position = position_jitter(height = 0))
+
+biim3 <- ggplot(High) +
+  geom_density(aes(x = im_density)) +
+  geom_rug(aes(x = im_density, y = 0), position = position_jitter(height = 0))
+```
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cpbiim <- ggdraw() + draw_label("Inorganic Matter Distributions", fontface='bold')
+
+cpbiim <- plot_grid(biim1, biim2, biim3, labels=c('Low', 'Mid', 'High'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
+
+plot_grid(title.cpbiim, cpbiim, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br>
+
+
+```{r, echo = FALSE, fig.width = 5, fig.height = 5}
+# plot distributions
+biomim1 <- ggplot(Low) +
+  geom_density(aes(x = om.im_ratio)) +
+  geom_rug(aes(x = im_density, y = 0), position = position_jitter(height = 0))
+
+biomim2 <- ggplot(Mid) +
+  geom_density(aes(x = om.im_ratio)) +
+  geom_rug(aes(x = im_density, y = 0), position = position_jitter(height = 0))
+
+biomim3 <- ggplot(High) +
+  geom_density(aes(x = om.im_ratio)) +
+  geom_rug(aes(x = im_density, y = 0), position = position_jitter(height = 0))
+```
+
+```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cpbiomim <- ggdraw() + draw_label("OM:IM Matter Ratio", fontface='bold')
+
+cpbiomim <- plot_grid(biomim1, biomim2, biomim3, labels=c('Low', 'Mid', 'High'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
+
+plot_grid(title.cpbiomim, cpbiomim, ncol=1, rel_heights=c(0.1, 1))
+```
+<br><br><br><br>
+
+
+
+
+
+
+
+
 
 
 
 ```{r, include = FALSE}
 df.core_noL06$otter_region <- as.factor(df.core_noL06$otter_region)
-df.core_noL06$site_number <- as.factor(df.core_noL06$site_number)
+df.core_noL06$site_n <- as.factor(df.core_noL06$site_n)
 
 
 p01 <- ggplot(df.core_noL06, aes(otter_region, om_density)) +
@@ -283,64 +412,54 @@ p03 <- ggplot(df.core_noL06, aes(otter_region, om.im_ratio)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(alpha = 0.3, width = 0.15)
 plot(p03)
-
-
 ```
 
-```{r, echo = FALSE, fig.width = 12, fig.height = 5}
-title.cp01 <- ggdraw() + draw_label("Trends with SO zone?", fontface='bold')
+```{r, include = FALSE, echo = FALSE, fig.width = 12, fig.height = 5}
+title.cp01 <- ggdraw() + draw_label(".", fontface='bold')
 
-cp01 <- plot_grid(p01, p02, p03, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
+cp01 <- plot_grid(p01, p02, labels=c('A', 'B'), align = 'h', ncol=2, nrow=1, rel_widths = c(1,1))
 
 plot_grid(title.cp01, cp01, ncol=1, rel_heights=c(0.1, 1))
 ```
 <br><br><br><br>
 
 
-
 ```{r, include = FALSE}
 df.core_noL06$otter_region <- as.factor(df.core_noL06$otter_region)
-df.core_noL06$site_number <- as.factor(df.core_noL06$site_number)
+df.core_noL06$site_n <- as.factor(df.core_noL06$site_n)
 
 
-p04 <- ggplot(df.core_noL06, aes(otter_region, om_density, color = site_number)) +
+p04 <- ggplot(df.core_noL06, aes(otter_region, om_density, color = site_n)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(alpha = 0.3, width = 0.15) +
   theme(legend.position="none")
 plot(p04)
 
-p05 <- ggplot(df.core_noL06, aes(otter_region, im_density, color = site_number)) +
+p05 <- ggplot(df.core_noL06, aes(otter_region, im_density, color = site_n)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(alpha = 0.3, width = 0.15) +
   theme(legend.position="none")
 plot(p05)
 
-p06 <- ggplot(df.core_noL06, aes(otter_region, om.im_ratio, color = site_number)) +
+p06 <- ggplot(df.core_noL06, aes(otter_region, om.im_ratio, color = site_n)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(alpha = 0.3, width = 0.15)
 plot(p06)
-
-
 ```
 
-```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+```{r, include = FALSE, echo = FALSE, fig.width = 12, fig.height = 5}
 title.cp02 <- ggdraw() + draw_label("Trends with SO zone?", fontface='bold')
 
 cp02 <- plot_grid(p04, p05, p06, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1.2))
 
 plot_grid(title.cp02, cp02, ncol=1, rel_heights=c(0.1, 1))
 ```
-<br><br><br><br>
+<br><br>
 
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+## For proper analysis, we need to decide how to deal with the bimodal distributions. 
+
+
+<br><br><br><br><br><br><br><br>
 
 
 
@@ -355,7 +474,7 @@ plot_grid(title.cp02, cp02, ncol=1, rel_heights=c(0.1, 1))
 
 
 
-## 4. Plotting general patterns of mean core matter versus factors
+### 4. Other things? Plotting general patterns of mean core matter versus factors
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
 colnames(df.core)
 
@@ -431,16 +550,9 @@ df.core.trim <- df.core.trim %>%
 
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
 # remove L06
-
 df.core.trim <- df.core.trim[-6,]
 ```
-<br><br><br><br>
-
-
-
-
-
-
+<br>
 
 
 
@@ -467,9 +579,6 @@ p3 <- ggplot(df.core.trim, aes(otter_region, om.im_ratio)) +
   geom_boxplot() +
   geom_point(size = 3, alpha = 0.6)
 plot(p3)
-
-
-
 ```
 
 ```{r, include=FALSE, echo = FALSE, fig.width = 12, fig.height = 5}
@@ -479,42 +588,7 @@ cp1 <- plot_grid(p1, p2, p3, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=
 
 plot_grid(title.cp1, cp1, ncol=1, rel_heights=c(0.1, 1))
 ```
-<br><br><br><br>
-
-
-
-
-#### No patterns with matter content * sea otter population model density
-```{r, echo = FALSE, include = FALSE, warning = FALSE}
-str(df.core.trim)
-df.core.trim$pop_mod_dens <- as.factor(df.core.trim$pop_mod_dens)
-
-
-p4 <- ggplot(df.core.trim, aes(pop_mod_dens, om_density)) +
-  geom_boxplot() +
-  geom_point(size = 3, alpha = 0.6)
-plot(p4)
-
-
-
-p5 <- ggplot(df.core.trim, aes(pop_mod_dens, im_density)) +
-  geom_boxplot() +
-  geom_point(size = 3, alpha = 0.6)
-plot(p5)
-
-
-
-p6 <- ggplot(df.core.trim, aes(pop_mod_dens, om.im_ratio)) +
-  geom_boxplot() +
-  geom_point(size = 3, alpha = 0.6)
-plot(p6)
-```
-<br><br><br><br>
-
-
-
-
-
+<br>
 
 
 
@@ -522,6 +596,7 @@ plot(p6)
 
 
 #### Matter content * sea otter duration
+I do have a question about the duration factor...there are only two year groups, 7 and 14. I don't understand why the low sites are grouped in the 7-yr bin because some/most of those sites haven't had sea otters at all; I would have expected a third "0-yr" category. I know that these spatial data are derived from elsewhere, but... 
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
 str(df.core.trim)
 df.core.trim$sea_otter_duration <- as.factor(df.core.trim$sea_otter_duration)
@@ -554,7 +629,7 @@ cp2 <- plot_grid(p7, p8, p9, labels=c('A', 'B', 'C'), align = 'h', ncol=3, nrow=
 
 plot_grid(title.cp2, cp2, ncol=1, rel_heights=c(0.1, 1))
 ```
-<br><br>
+<br><br><br><br><br><br>
 
 
 
@@ -563,6 +638,7 @@ plot_grid(title.cp2, cp2, ncol=1, rel_heights=c(0.1, 1))
 
 
 #### Matter content * sea otter index
+I wouldn't expect the buried OM and IM would interact with the sea otter index; burial relects a long/big temporal scale, where the sea otter index incorporates short-term data (e.g. cracked shells, pits).
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
 # plotting in scatter
 my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
@@ -630,7 +706,6 @@ plot_grid(title.cp3, cp3, ncol=1, rel_heights=c(0.1, 1))
 
 
 
-#### Matter content * surface qualitative sediment type
 ```{r, echo = FALSE, include = FALSE, warning = FALSE}
 # plotting in scatter
 my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
