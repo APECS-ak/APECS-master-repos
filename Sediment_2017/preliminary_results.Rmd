@@ -16,25 +16,39 @@ theme_set(theme_classic())
 ### 1. Import cleaned .csv file and look at dataframe.
 ```{r, echo = FALSE, include = FALSE}
 # read clean file from github
-cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/CLEAN_core_matter.csv", stringsAsFactors = FALSE, header = TRUE)
+cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/core_matter_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # check 
 str(cr.mat)
 ```
 
 
-### 2. Remove excess columns. <br>
+### 2. Remove excess columns and calcuate other factors of interest. <br>
 
 #### (e.g. pan + crucible data recorded prior to final calcualted weights)
 ```{r}
-
-# remove pan, crucible, and sediment combo weights not necessary for analysis
+# remove pan, crucible, and sediment combo weights not necessary here
 cr.mat = cr.mat %>% 
-  select(-na.rm, -pan_number, -pan_weight, -pan_sed_ww_pre_60C, -pan_sed_dw_post_60C, -pan_sed_dw_pre_450C, -pan_sed_dw_post450C, -crucible_weight, -crucible_sed_dw_pre_950C, -crucible_sed_dw_post_950C, -sed_ww_pre_60C, -sed_dw_post_60C, -sed_dw_pre_450C, -sed_dw_post_450C, -sed_dw_pre_950C, -sed_dw_post_950C)
-
-
-colnames(cr.mat)
+  select(-pan_weight, -pan_sed_ww_pre_60C, -pan_sed_dw_post_60C, -pan_sed_dw_pre_450C, -pan_sed_dw_post450C, -crucible_weight, -crucible_sed_dw_pre_950C, -crucible_sed_dw_post_950C)
 ```
+
+```{r}
+cr.mat = cr.mat %>% 
+  mutate(om_percent_dw = (om_dw / sed_dw_pre_450C) * 100, na.rm = TRUE) %>%
+  mutate(im_percent_dw = (im_dw / sed_dw_pre_950C) * 100, na.rm = TRUE) %>%
+  mutate(om.im_ratio = om_dw / im_dw, na.rm = TRUE) %>%
+  mutate(om_density = om_dw * dry_bulk_density, na.rm = TRUE) %>%
+  mutate(im_density = im_dw * dry_bulk_density, na.rm = TRUE)
+```
+
+
+```{r}
+cr.mat = cr.mat %>% 
+  select(-sed_ww_pre_60C, -sed_dw_post_60C, -sed_dw_pre_450C, -sed_dw_post_450C, -sed_dw_pre_950C, -sed_dw_post_950C)
+```
+
+
+
 
 
 <br>
