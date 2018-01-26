@@ -8,7 +8,7 @@ editor_options:
 ---
 
 ```{r Libraries, echo = FALSE, include=FALSE}
-library(dplyr); library(tidyr); library(ggplot2)
+library(dplyr); library(tidyr); library(ggplot2); library(plyr)
 theme_set(theme_classic())
 ```
 
@@ -16,6 +16,20 @@ Import data
 ```{r}
 cr.mat <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/core_matter_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
+
+```{r}
+# change the site names so that they match the format in the rest of the APECS data files
+newsitenames <- mapvalues(cr.mat$site, from = c("L01","L02","L03","L04","L05","L06","L07","M02","M03","M04","M05","M06","M07","M08","H01","H02","H03","H04","H05","H06","H07"), to = c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07"))
+
+df.newsitenames <- data.frame(newsitenames)
+df.newsitenames <- tibble::rowid_to_column(df.newsitenames, "X") # add order column for joining
+cr.mat <- tibble::rowid_to_column(cr.mat, "X") # add order column for joining
+cr.mat <- left_join(cr.mat, df.newsitenames, by = "X") 
+
+names(cr.mat)[names(cr.mat) == 'site'] <- 'oldsite' # rename site columns
+names(cr.mat)[names(cr.mat) == 'newsitenames'] <- 'site' # rename site columns
+```
+
 
 
 Look at data

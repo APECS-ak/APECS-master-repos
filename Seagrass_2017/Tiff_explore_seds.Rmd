@@ -1052,11 +1052,29 @@ Here are the column names in the final df.all:
 ```{r, echo = FALSE, tidy = TRUE}
 colnames(df.all)
 ```
+
+
+```{r}
+write.csv(df.all,'Tiff_explore_sed_DERIVED_DF.csv')
+```
+
+
 <br><br><br><br><br><br>
 
 
 
 ***
+
+
+
+
+
+
+
+
+
+
+
 
 
 
