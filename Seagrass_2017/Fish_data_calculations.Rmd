@@ -41,7 +41,7 @@ fish$date_julian <- format(fish$date, "%j")
 ```
 
 ## Extracting a species list
-We want a full list of species for many purposes. One of which is that such a list interfaces with rfishbase commands.
+We want a full list of species for many purposes. One of which is that such a list interfaces with rfishbase commands. After extracting data from fish base we will export csv for further filling out manually. So, the fishbase dump will need to be merged with the master species list so we know what we need to fill in.
 
 ```{r species list}
 sp <- fish %>% 
@@ -62,16 +62,13 @@ sp.diet <- diet(sp[,2])
 str(sp.diet)
 ```
 
-Alright so fishbase dumps a lot of data in there but we only care about part of it. There are two things to accopmplish.
-1. Some species have multiple entries, thoes need to be reduced to what makes the most sense for us.
-2. There data have a lot of extra columns that we don't care about, those can be removed.
-
+Mergeing with master list
 ```{r cleaning up fishbase data}
-## Filter out ---
-sp.diet <- sp.diet %>% 
-  filter(SampleStage != "larvae")
+## Merging ##
+lw.master <- merge(sp, sp.lw, by.x = "species_scientific", by.y = "sciname")
 
-sp.diet <- sp.diet[, c(1:6, 41:47)]
+## Joining ##
+lw.master <- anti_join(sp, lw.master, by = "sp_code")
 ```
 
 

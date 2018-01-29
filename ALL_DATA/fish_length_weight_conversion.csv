@@ -1,0 +1,134 @@
+"","species_common","species_scientific","sp_code","LengthMin","LengthMax","Type","LmaxCompare","EsQ","Number","Sex","a","aTL","b","CoeffDetermination","SEa","SEb","SDa","SDb","Method","Locality","DataRef","C_Code","Comment","Entered"
+"1","Crescent gunnel","Pholis laeta","GUNNCRE",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"2","Threespine stickleback","Gasterosteus aculeatus","STICK3",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"3","Juvenile sculpin","Cottidae","UNSCUL",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"4","Chum salmon","Oncorhynchus keta","SALCHUM",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"5","Pink salmon","Oncorhynchus gorbuscha","SALPINK",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"6","Juvenile flatfish","Pleuronectidae","UNFLAT",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"7","Bay Pipefish","Syngnathus leptorhynchus","PIPEFISH",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"8","Buffalo sculpin","Enophrys bison","SCULBUF",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"9","Pacific staghorn sculpin","Leptocottus armatus","SCULPSTG",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"10","Starry flounder","Platichthys stellatus","FLOUNST",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"11","Rock sole","Lepidopsetta spp.","SOLEROC",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"12","Whitespotted greenling","Hexagrammos stelleri","GREENWHI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"13","Pacific sand lance","Ammodytes personatus","SANDLNCP",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"14","Juvenile Sculpin","Cottidae","UNSCUL",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"15","Walleye pollock","Gadus chalcogrammus","POLLOCK",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"16","Tubesnout ","Aulorhynchus flavidus","TUBESNT",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"17","Juvenile greenling","Hexagrammidae sp.","UNGREEN",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"18","Juvenile Myoxocephalus","Myoxocephalus sp.","UNMYOXO",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"19","Larval fish","Teleostei","UNFISH",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"20","Coho salmon","Oncorhynchus kisutch","SALCOHO",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"21","Chinook salmon","Oncorhynchus tshawytscha","SALCHIN",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"22","Tubenose poacher ","Pallasina barbata","POATUBE",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"23","Silverspotted sculpin","Blepsias cirrhosus","SCULSILV",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"24","Juvenile gunnel","Pholidae","UNGUNN",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"25","Juvenile Artedius","Artedius spp.","UNARTE",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"26","Sturgeon poacher","Podothecus accipenserinus","POASTUR",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"27","Snake prickleback","Lumpenus sagitta","PRICKSN",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"28","Pacific Herring","Clupea pallasii","HERRING",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"29","Masked greenling","Hexagrammos octogrammus","GREENMAS",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"30","English sole","Parophrys vetulus","SOLEENG",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"31","Tubesnout","Aulorhynchus flavidus","TUBESNT",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"32","Pacific cod ","Gadus macrocephalus","CODPAC",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"33","Shiner perch","Cymatogaster aggregata","PERCHSH",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"34","Grunt sculpin","Rhamphocottus richardsonii","SCULGRU",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"35","Slender cockscomb","Anoplarchus insignis","COCKSSL",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"36","Butter sole","Isopsetta isolepis","SOLEBUT",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"37","Penpoint gunnel","Apodichthys flavidus","GUNNPEN",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"38","Juvenile irish lord","Hemilepidotus sp. ","UNLORD",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"39","Great sculpin","Myoxocephalus polyacanthocephalus","SCULGRT",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"40","Tubenose poacher","Pallasina barbata","POATUBE",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"41","Sailfin sculpin","Nautichthys oculofasciatus","SCULSAIL",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"42","Padded sculpin","Artedius fenestralis","SCULPAD",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"43","Great sculpin ","Myoxocephalus polyacanthocephalus","SCULGRT",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"44","Grunt sculpin ","Rhamphocottus richardsonii","SCULGRU",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"45","Giant wrymouth","Cryptacanthodes giganteus","WRYGI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"46","Quillback rockfish","Sebastes maliger","ROCKQUI",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"47","Penpoint gunnel ","Apodichthys flavidus","GUNNPEN",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"48","Copper rockfish","Sebastes caurinus","ROCKCOP",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"49","Brown rockfish","Sebastes auriculatus","ROCKBRO",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"50","Juvenile irish lord","Hemilepidotus sp.","UNLORD",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"51","Silvergray rockfish","Sebastes brevispinis","ROCKSLG",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"52","Black rockfish","Sebastes melanops","ROCKBLA",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"53","Kelp greenling","Hexagrammos decagrammus","GREENKEL",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"54","Lingcod","Ophiodon elongatus","LINGCOD",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"55","Pacific sanddab","Citharichthys sordidus","SDABPAC",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"56","Manacled sculpin","Synchirus gilli","SCULMAN",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"57","Pygmy poacher","Odontopyxis trispinosa","POAPYGMY",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"58","Pacific sanddab","Lepidopsetta spp.","SDABPAC",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"59","Pacific cod","Gadus macrocephalus","CODPAC",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"60","Tidepool sculpin","Oligocottus maculosus","SCULTIDE",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"61","Cabezon","Scorpaenichthys marmoratus","CABEZON",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"62","Smoothhead sculpin","Artedius lateralis","SCULSMO",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"63","C-O Sole","Pleuronichthys coenosus","SOLECO",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"64","Juvenile irish lord","Cottidae","UNLORD",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"65","Speckled sanddab","Citharichthys stigmaeus","SDABSPKL",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"66","Dolly varden","Salvelinus malma","DOLLY",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"67","Brown Irish lord","Hemilepidotus spinosus","UNLORD",NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA
+"68","Pacific sand lance","Ammodytes personatus","SANDLNCP",NA,NA,"FL",NA,NA,NA,"unsexed",0.0404,NA,3.006,0.9801,NA,NA,NA,NA,"type I linear regression","East coast, 1993-94",26572,"410",NA,3
+"69","Tubesnout","Aulorhynchus flavidus","TUBESNT",5.5,18.8,"TL",NA,NA,31,"mixed",0.00044,0.00044,3.43,0.9409,NA,NA,NA,NA,"type I linear regression","Yaquina Estuary, Oregon",51446,"840","Specimens over 16 cm underrepresented in the equation.",3
+"70","Tubesnout ","Aulorhynchus flavidus","TUBESNT",5.5,18.8,"TL",NA,NA,31,"mixed",0.00044,0.00044,3.43,0.9409,NA,NA,NA,NA,"type I linear regression","Yaquina Estuary, Oregon",51446,"840","Specimens over 16 cm underrepresented in the equation.",3
+"71","Silverspotted sculpin","Blepsias cirrhosus","SCULSILV",10,19,"TL",NA,NA,33,"mixed",0.0088,NA,3.0278,0.95063,NA,NA,NA,NA,"type I linear regression","Northern Primorye",NA,"643",NA,1287
+"72","Pacific cod","Gadus macrocephalus","CODPAC",NA,NA,NA,NA,NA,216,"unsexed",0.0224,NA,2.89,0.9006,NA,NA,NA,NA,"type I linear regression","North Puget Sound, Washington",4511,"840",NA,3
+"73","Pacific cod","Gadus macrocephalus","CODPAC",44,81,"TL",NA,NA,33,"Mixed",0.0032,0.0032,3.331,NA,NA,NA,NA,NA,"type I linear regression","Northeastern Sea of Okhotsk",NA,"643",NA,1287
+"74","Pacific cod","Gadus macrocephalus","CODPAC",12,52,"TL",NA,"Yes",32,"Mixed",0.661,0.661,1.739,0.68393,NA,NA,NA,NA,"type I linear regression","Iona Is. (Northwestern Sea of Okhotsk)/1989",NA,"643",NA,1287
+"75","Pacific cod","Gadus macrocephalus","CODPAC",10,100,"FL",NA,NA,NA,"Mixed",0.00548,0.00548,3.1883,NA,NA,NA,NA,NA,"type I linear regression","Sea of Okhotsk",NA,"643",NA,1287
+"76","Pacific cod","Gadus macrocephalus","CODPAC",10,100,"FL",NA,NA,NA,"Mixed",0.00749,0.00749,3.0885,NA,NA,NA,NA,NA,"type I linear regression","North Kurils",NA,"643",NA,1287
+"77","Pacific cod","Gadus macrocephalus","CODPAC",10,100,"FL",NA,NA,NA,"Mixed",0.00793,0.00793,3.0968,NA,NA,NA,NA,NA,"type I linear regression","South Kurils",NA,"643",NA,1287
+"78","Pacific cod","Gadus macrocephalus","CODPAC",18,50,"TL",NA,NA,NA,"Mixed",0.0063,0.0063,3.138,0.97023,NA,NA,NA,NA,"type I linear regression","Shantar Isl. (Northwestern Sea of Okhotsk)/1995",NA,"643",NA,1287
+"79","Pacific cod","Gadus macrocephalus","CODPAC",31,106,"FL",NA,NA,699,"Female",0.00376,NA,3.28,0.971,NA,NA,NA,NA,"type I linear regression","western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,"643",NA,3
+"80","Pacific cod","Gadus macrocephalus","CODPAC",34,91,"FL",NA,NA,726,"Male",0.00431,NA,3.25,0.962,NA,NA,NA,NA,"type I linear regression","western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,"643",NA,3
+"81","Pacific cod","Gadus macrocephalus","CODPAC",NA,NA,NA,NA,NA,NA,"unsexed",0.0117,NA,3,NA,NA,NA,NA,NA,"type I linear regression","West coast, 1987-89",7275,"304","b not significantly different from 3.  Under <i>Gadus ogac</i>.",3
+"82","Pacific cod ","Gadus macrocephalus","CODPAC",NA,NA,NA,NA,NA,216,"unsexed",0.0224,NA,2.89,0.9006,NA,NA,NA,NA,"type I linear regression","North Puget Sound, Washington",4511,"840",NA,3
+"83","Pacific cod ","Gadus macrocephalus","CODPAC",44,81,"TL",NA,NA,33,"Mixed",0.0032,0.0032,3.331,NA,NA,NA,NA,NA,"type I linear regression","Northeastern Sea of Okhotsk",NA,"643",NA,1287
+"84","Pacific cod ","Gadus macrocephalus","CODPAC",12,52,"TL",NA,"Yes",32,"Mixed",0.661,0.661,1.739,0.68393,NA,NA,NA,NA,"type I linear regression","Iona Is. (Northwestern Sea of Okhotsk)/1989",NA,"643",NA,1287
+"85","Pacific cod ","Gadus macrocephalus","CODPAC",10,100,"FL",NA,NA,NA,"Mixed",0.00548,0.00548,3.1883,NA,NA,NA,NA,NA,"type I linear regression","Sea of Okhotsk",NA,"643",NA,1287
+"86","Pacific cod ","Gadus macrocephalus","CODPAC",10,100,"FL",NA,NA,NA,"Mixed",0.00749,0.00749,3.0885,NA,NA,NA,NA,NA,"type I linear regression","North Kurils",NA,"643",NA,1287
+"87","Pacific cod ","Gadus macrocephalus","CODPAC",10,100,"FL",NA,NA,NA,"Mixed",0.00793,0.00793,3.0968,NA,NA,NA,NA,NA,"type I linear regression","South Kurils",NA,"643",NA,1287
+"88","Pacific cod ","Gadus macrocephalus","CODPAC",18,50,"TL",NA,NA,NA,"Mixed",0.0063,0.0063,3.138,0.97023,NA,NA,NA,NA,"type I linear regression","Shantar Isl. (Northwestern Sea of Okhotsk)/1995",NA,"643",NA,1287
+"89","Pacific cod ","Gadus macrocephalus","CODPAC",31,106,"FL",NA,NA,699,"Female",0.00376,NA,3.28,0.971,NA,NA,NA,NA,"type I linear regression","western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,"643",NA,3
+"90","Pacific cod ","Gadus macrocephalus","CODPAC",34,91,"FL",NA,NA,726,"Male",0.00431,NA,3.25,0.962,NA,NA,NA,NA,"type I linear regression","western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,"643",NA,3
+"91","Pacific cod ","Gadus macrocephalus","CODPAC",NA,NA,NA,NA,NA,NA,"unsexed",0.0117,NA,3,NA,NA,NA,NA,NA,"type I linear regression","West coast, 1987-89",7275,"304","b not significantly different from 3.  Under <i>Gadus ogac</i>.",3
+"92","Threespine stickleback","Gasterosteus aculeatus","STICK3",4.3,8.2,"TL",NA,NA,500,"mixed",0.0044,NA,3.544,0.8836,NA,NA,NA,NA,"type I linear regression",NA,59087,"364",NA,3
+"93","Threespine stickleback","Gasterosteus aculeatus","STICK3",1.3,4.7,"SL",NA,"Yes",568,"mixed",0.01,NA,3.61,NA,NA,NA,NA,NA,"type I linear regression","coastal streams' mouths, northwestern Baja California (32°23'01"" N--30°02'32.5"" N), 1983-97",59092,"484",NA,3
+"94","Threespine stickleback","Gasterosteus aculeatus","STICK3",2.1,8.2,"TL",NA,NA,262,"unsexed",0.0068,NA,3.26,0.958,NA,0.025,NA,NA,"type I linear regression","Lake Iznik, Marmara, Oct. 2003-Aug. 2004 (Oct.-Aug.)",59105,"792",NA,3
+"95","Threespine stickleback","Gasterosteus aculeatus","STICK3",1.5,10,"TL",NA,NA,29213,"unsexed",0.0105,NA,3.049,0.9,NA,NA,NA,NA,"type I linear regression","Flanders (Yser, Scheldt and Meuse drainage basin), 1992-2009",88166,"056",NA,3
+"96","Threespine stickleback","Gasterosteus aculeatus","STICK3",3.75,8.5,"TL",NA,NA,122,"unsexed",0.0239,NA,2.6111,0.7617,NA,NA,NA,NA,"type I linear regression","North Sea / 1994-2008",NA,NA,NA,65
+"97","Kelp greenling","Hexagrammos decagrammus","GREENKEL",45,45,"TL",NA,NA,1,"unsexed",0.01558,0.01558,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"98","Whitespotted greenling","Hexagrammos stelleri","GREENWHI",13.6,35.2,"FL",NA,NA,444,"mixed",0.00305,NA,3.4278,0.98605,NA,NA,NA,NA,"type I linear regression","Northern Sea of Okhotsk/2005",NA,"643",NA,1287
+"99","Pacific staghorn sculpin","Leptocottus armatus","SCULPSTG",4.5,13.5,"SL",NA,NA,18,"mixed",0.04,NA,2.82,NA,NA,NA,NA,NA,"type I linear regression","coastal streams' mouths, northwestern Baja California (32°23'01"" N--30°02'32.5"" N), 1983-97",59092,"484",NA,3
+"100","Pacific staghorn sculpin","Leptocottus armatus","SCULPSTG",4.5,13.5,"TL",NA,"Yes",18,"unsexed",0.04,NA,2.82,0.98,NA,NA,NA,NA,"Type I linear regression","northwestern Baja California / 1983-1997",NA,"484",NA,65
+"101","Great sculpin","Myoxocephalus polyacanthocephalus","SCULGRT",49.5,49.5,"TL",NA,NA,1,"unsexed",0.02798,0.02798,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"L-W relationship calculated from data in Ref. 40637.",3
+"102","Great sculpin","Myoxocephalus polyacanthocephalus","SCULGRT",29,75,"TL",NA,NA,837,"Female",0.0062,0.0062,3.2535,0.998,NA,NA,NA,NA,"type I linear regression","Kamchatka/19479-1980",NA,"643",NA,1287
+"103","Great sculpin","Myoxocephalus polyacanthocephalus","SCULGRT",29,50,"TL",NA,NA,324,"Male",0.0092,0.0092,3.1297,0.998,NA,NA,NA,NA,"type I linear regression","Kamchatka/1979-1980",NA,"643",NA,1287
+"104","Great sculpin","Myoxocephalus polyacanthocephalus","SCULGRT",NA,NA,"TL",NA,NA,NA,"Mixed",0.007,0.007,3.215,NA,NA,NA,NA,NA,"type I linear regression","Sea of Okhotsk",NA,"643",NA,1287
+"105","Great sculpin","Myoxocephalus polyacanthocephalus","SCULGRT",39,79,"TL",NA,NA,347,"mixed",0.0123,NA,3.08,0.926,NA,NA,NA,NA,"type I linear regression","western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,"643",NA,3
+"106","Great sculpin ","Myoxocephalus polyacanthocephalus","SCULGRT",49.5,49.5,"TL",NA,NA,1,"unsexed",0.02798,0.02798,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"L-W relationship calculated from data in Ref. 40637.",3
+"107","Great sculpin ","Myoxocephalus polyacanthocephalus","SCULGRT",29,75,"TL",NA,NA,837,"Female",0.0062,0.0062,3.2535,0.998,NA,NA,NA,NA,"type I linear regression","Kamchatka/19479-1980",NA,"643",NA,1287
+"108","Great sculpin ","Myoxocephalus polyacanthocephalus","SCULGRT",29,50,"TL",NA,NA,324,"Male",0.0092,0.0092,3.1297,0.998,NA,NA,NA,NA,"type I linear regression","Kamchatka/1979-1980",NA,"643",NA,1287
+"109","Great sculpin ","Myoxocephalus polyacanthocephalus","SCULGRT",NA,NA,"TL",NA,NA,NA,"Mixed",0.007,0.007,3.215,NA,NA,NA,NA,NA,"type I linear regression","Sea of Okhotsk",NA,"643",NA,1287
+"110","Great sculpin ","Myoxocephalus polyacanthocephalus","SCULGRT",39,79,"TL",NA,NA,347,"mixed",0.0123,NA,3.08,0.926,NA,NA,NA,NA,"type I linear regression","western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,"643",NA,3
+"111","Pink salmon","Oncorhynchus gorbuscha","SALPINK",NA,NA,NA,NA,NA,NA,"unsexed",0.00336,NA,3.3,NA,NA,NA,NA,NA,"type I linear regression","Sea of Okhotsk",7231,"643",NA,3
+"112","Pink salmon","Oncorhynchus gorbuscha","SALPINK",NA,NA,"FL",NA,NA,NA,"Mixed",0.024,0.02198,3.2,NA,NA,NA,NA,NA,"type I linear regression","1955-1957",NA,"124C","Given as log w = -3.747 + 3.2 log l; apparently natural logarithm was used. Estimate was done by plot on double-logarithmic paper.",1
+"113","Chum salmon","Oncorhynchus keta","SALCHUM",101,101,"TL",NA,NA,1,"unsexed",0.01408,0.01408,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"114","Chum salmon","Oncorhynchus keta","SALCHUM",NA,NA,"FL",NA,NA,NA,"Mixed",0.023,0.02179,3.2,NA,NA,NA,NA,NA,"type I linear regression","1955-1957",NA,"124C","Given as log w = -3.780 + 3.2 log l; apparently natural logarithm was used. Estimate was done by plot on double-logarithmic paper.",1
+"115","Coho salmon","Oncorhynchus kisutch","SALCOHO",98,98,"TL","no",NA,1,"unsexed",0.0112,0.0112,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated using data in Ref.",1
+"116","Chinook salmon","Oncorhynchus tshawytscha","SALCHIN",149,149,"TL",NA,NA,1,"unsexed",0.01333,0.01333,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"117","Lingcod","Ophiodon elongatus","LINGCOD",133,133,"TL",NA,NA,1,"unsexed",0.0133,0.0133,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"118","English sole","Parophrys vetulus","SOLEENG",NA,NA,NA,NA,NA,159,"unsexed",0.00383,NA,3.127,0.9409,NA,NA,NA,NA,"type I linear regression","North Puget Sound, Washington",4511,"840",NA,3
+"119","English sole","Parophrys vetulus","SOLEENG",22,55,"TL","no",NA,1643,"Mixed",0.01429,0.01429,2.9036,NA,NA,NA,NA,NA,"type I linear regression","Strait of Georgia",NA,"124C",NA,1287
+"120","Starry flounder","Platichthys stellatus","FLOUNST",54.1,51.4,"TL",NA,NA,1,"unsexed",0.0125,0.0125,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"L-W relationship calculated from data in Ref. 40637.",3
+"121","Starry flounder","Platichthys stellatus","FLOUNST",27,64,"TL",NA,NA,263,"Mixed",0.00359,0.00359,3.3433,NA,NA,NA,NA,NA,"type I linear regression","Br. Columbia",NA,"124C",NA,1287
+"122","Starry flounder","Platichthys stellatus","FLOUNST",22,51,"TL",NA,NA,297,"Mixed",0.01531,0.01531,2.9993,NA,NA,NA,NA,NA,"type I linear regression","Sea of Japan",NA,"643",NA,1287
+"123","Starry flounder","Platichthys stellatus","FLOUNST",17.6,48.5,"TL",NA,NA,250,"unsexed",0.0121,NA,3.081,0.96,NA,NA,NA,NA,"Type I linear regression","Gyeongsangbuk-do coast / 2011-2012",NA,"410",NA,65
+"124","Dolly varden","Salvelinus malma","DOLLY",91,91,"TL",NA,NA,1,"unsexed",0.0101,0.0101,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"125","Dolly varden","Salvelinus malma","DOLLY",12.5,61.5,"FL",NA,NA,221,"unsexed",0.00302,0.00302,3.18,0.99002,NA,NA,NA,NA,"type I linear regression","Simpson Cove, Arctic Nat'l Wildlife Refuge, 1988-91",34025,"840A",NA,3
+"126","Dolly varden","Salvelinus malma","DOLLY",12.5,61.5,"FL",NA,NA,191,"unsexed",0.00334,0.00334,3.16,0.99002,NA,NA,NA,NA,"type I linear regression","Beaufort lagoon, Arctic Nat'l Wildlife Refuge, 1988-91",34025,"840A",NA,3
+"127","Dolly varden","Salvelinus malma","DOLLY",12.5,61.5,"FL",NA,NA,398,"unsexed",0.00437,0.00437,3.12,0.99002,NA,NA,NA,NA,"type I linear regression","Barter I., Arctic Nat'l Wildlife Refuge, 1988-91",34025,"840A",NA,3
+"128","Cabezon","Scorpaenichthys marmoratus","CABEZON",71,71,"TL",NA,NA,1,"unsexed",0.02914,0.02914,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"129","Silvergray rockfish","Sebastes brevispinis","ROCKSLG",40.6,61,"TL",NA,NA,3,"unsexed",0.0143,0.0143,3,NA,NA,NA,NA,NA,"several L-W pairs with b=3",NA,NA,NA,"L-W relationship calculated from data in Ref. 40637.",3
+"130","Copper rockfish","Sebastes caurinus","ROCKCOP",53,53,"TL",NA,NA,1,"unsexed",0.01746,0.01746,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"131","Quillback rockfish","Sebastes maliger","ROCKQUI",48,48,"TL",NA,NA,1,"unsexed",0.02966,0.02966,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"132","Black rockfish","Sebastes melanops","ROCKBLA",60,60,"TL",NA,NA,1,"unsexed",0.02111,0.02111,3,NA,NA,NA,NA,NA,"single L-W pair with b=3",NA,NA,NA,"Estimated from data given in Reference.",1
+"133","Bay Pipefish","Syngnathus leptorhynchus","PIPEFISH",6.8,38.5,"TL",NA,NA,57,"mixed",2e-04,NA,3.12,NA,NA,NA,NA,NA,"Type I linear regression","Yaquina estuary, Oregon (44°38'N, 124°13'W), 1975-76",93899,"840","Only 2 pipefish were over 34. cm; the regression equation underestimates weight of the largest fish.",3
