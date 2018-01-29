@@ -219,7 +219,7 @@ Epiphyte load. This one is a bit tricky, any sort of tranformation does not deal
 ```{r epi load normality, echo=FALSE}
 ## Raw data ##
 ggplot(tran.dat, aes(epimass_shootmass)) +
-  geom_histogram(bins = 10) +
+  geom_histogram(bins = 50) +
   labs(x = "Epiphyte load", y = "Counts")
 
 qqnorm(tran.dat$epimass_shootmass)
@@ -2748,6 +2748,7 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 ```{r Model 5 set up, echo=FALSE}
 # Dependent observed variable: this should be whatever numeric variable you wish to analyze 
 Obs <- as.numeric(tran.dat$epimass_shootmass)
+Obs[Obs == 0] <- 0.0001 # Can't have 0s so convert 0 to very small value
 
 # select only oberved variables that are not NA
 ii <- which(!is.na(Obs))
@@ -2758,7 +2759,7 @@ Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
 Sedtype <- as.numeric(tran.dat$sed1_no)[ii]
 Julianday <- as.numeric(tran.dat$date_julian)[ii]
 Light <- as.numeric(tran.dat$light_attenu)[ii]
-Graz <- as.numeric(log(tran.dat$grazmass_shootmass)) [ii]
+Graz <- as.numeric(log(tran.dat$grazmass_shootmass + 0.0001)) [ii] # add 0.0001 to have non Inf values.
 Sitetxt <- tran.dat$site[ii]
 Quad <- as.numeric(tran.dat$quadrat)[ii]
 
@@ -2774,7 +2775,7 @@ Dayindx <- Julianday - Minday + 1
 MeanDay <- round(mean(Dayindx),0)
 
 # Model comparison data frame
-ModComp.5 <- data.frame(Model = c("Model_5a","Model_5b","Model_5c","Model_5d","Model_5e","Model_5f","Model_5g", "Model_5h"), WAIC = numeric(length = 8), LOOIC = numeric(length = 8))
+ModComp.5 <- data.frame(Model = c("Model_5a","Model_5b","Model_5c","Model_5d","Model_5e","Model_5f","Model_5g", "Model_5h", "Model5i", "Model5j", "Model5k", "Model5l"), WAIC = numeric(length = 12), LOOIC = numeric(length = 12))
 
 # Set up for parralel computing
 cores <- detectCores()
@@ -2799,7 +2800,7 @@ jagsfile <- 'JAGS/Eelgrass_5a.jags'
 
 jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx) # Ott = Ottindx, Sed = Sedtype, Li = Light, Grz = Graz, Nquads = Nquads, Quad = Quad
 
-inits <- function() list(sigS = runif(1, .1, 1), sigO = runif(1, .1, 1)) 
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
 
 params <- c("sigS","sigO","beta0","beta1","eps","loglik") 
 
@@ -2837,4 +2838,745 @@ WAIC.5a <- data.frame(modID = c('WAIC5a'), model = c('5a'), WAIC = WAIC$waic, WA
 LOOIC.5a <- data.frame(modID = c('LOOIC5a'), model = c('5a'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
 
 out5a <- out
+```
+
+#### Model 5b
+epi ~ time + SOI
+```{r model 5b, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5b.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) # , Sed = Sedtype, Li = Light, Grz = Graz, Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5b <- WAIC
+ModComp.5$WAIC[2] <- WAIC5b$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5b <- LOOIC
+ModComp.5$LOOIC[2] <- LOOIC5b[3]
+
+# WAIC Detail
+WAIC.5b <- data.frame(modID = c('WAIC5b'), model = c('5b'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5b <- data.frame(modID = c('LOOIC5b'), model = c('5b'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5b <- out
+```
+
+#### Model 5c
+epi ~ Graz
+```{r model 5c, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5c.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Grz = Graz) #Day = Dayindx, Ott = Ottindx , Sed = Sedtype, Li = Light, , Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta5","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5c <- WAIC
+ModComp.5$WAIC[3] <- WAIC5c$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5c <- LOOIC
+ModComp.5$LOOIC[3] <- LOOIC5c[3]
+
+# WAIC Detail
+WAIC.5c <- data.frame(modID = c('WAIC5c'), model = c('5c'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5c <- data.frame(modID = c('LOOIC5c'), model = c('5c'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5c <- out
+```
+
+#### Model 5d
+epi ~ time + Graz
+```{r model 5d, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5d.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Grz = Graz) #, Ott = Ottindx , Sed = Sedtype, Li = Light, , Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta5","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5d <- WAIC
+ModComp.5$WAIC[4] <- WAIC5d$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5d <- LOOIC
+ModComp.5$LOOIC[4] <- LOOIC5d[3]
+
+# WAIC Detail
+WAIC.5d <- data.frame(modID = c('WAIC5d'), model = c('5d'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5d <- data.frame(modID = c('LOOIC5d'), model = c('5d'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5d <- out
+```
+
+#### Model 5e
+epi ~ SOI + Graz
+```{r model 5e, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5e.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Ott = Ottindx, Grz = Graz) #,Day = Dayindx , Sed = Sedtype, Li = Light, , Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta2","beta5","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5e <- WAIC
+ModComp.5$WAIC[5] <- WAIC5e$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5e <- LOOIC
+ModComp.5$LOOIC[5] <- LOOIC5e[3]
+
+# WAIC Detail
+WAIC.5e <- data.frame(modID = c('WAIC5e'), model = c('5e'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5e <- data.frame(modID = c('LOOIC5e'), model = c('5e'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5e <- out
+```
+
+#### Model 5f
+epi ~ time + SOI + Graz
+```{r model 5f, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5f.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Grz = Graz) #, , Sed = Sedtype, Li = Light, , Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1", "beta2","beta5","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5f <- WAIC
+ModComp.5$WAIC[6] <- WAIC5f$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5f <- LOOIC
+ModComp.5$LOOIC[6] <- LOOIC5f[3]
+
+# WAIC Detail
+WAIC.5f <- data.frame(modID = c('WAIC5f'), model = c('5f'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5f <- data.frame(modID = c('LOOIC5f'), model = c('5f'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5f <- out
+```
+
+#### Model 5g
+epi ~ time + SOI + Sed + Graz
+```{r model 5g, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5g.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype, Grz = Graz) #, , , Li = Light, , Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta3","beta5","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5g <- WAIC
+ModComp.5$WAIC[7] <- WAIC5g$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5g <- LOOIC
+ModComp.5$LOOIC[7] <- LOOIC5g[3]
+
+# WAIC Detail
+WAIC.5g <- data.frame(modID = c('WAIC5g'), model = c('5g'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5g <- data.frame(modID = c('LOOIC5g'), model = c('5g'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5g <- out
+```
+
+#### Model 5h
+epi ~ time + SOI + Sed + Light + Graz
+```{r model 5h, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5h.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Sed = Sedtype, Li = Light, Grz = Graz) #, , , , , Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta3","beta4","beta5","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5h <- WAIC
+ModComp.5$WAIC[8] <- WAIC5h$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5h <- LOOIC
+ModComp.5$LOOIC[8] <- LOOIC5h[3]
+
+# WAIC Detail
+WAIC.5h <- data.frame(modID = c('WAIC5h'), model = c('5h'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5h <- data.frame(modID = c('LOOIC5h'), model = c('5h'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5h <- out
+```
+
+#### Model 5i
+epi ~ time + quad(SOI)
+```{r model 5i, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5i.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx) #, Sed = Sedtype, Li = Light, Grz = Graz) Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta2b","eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5i <- WAIC
+ModComp.5$WAIC[9] <- WAIC5i$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5i <- LOOIC
+ModComp.5$LOOIC[9] <- LOOIC5i[3]
+
+# WAIC Detail
+WAIC.5i <- data.frame(modID = c('WAIC5i'), model = c('5i'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5i <- data.frame(modID = c('LOOIC5i'), model = c('5i'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5i <- out
+```
+
+#### Model 5j
+epi ~ time + quad(SOI) + Graz
+```{r model 5j, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5j.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Grz = Graz) #, Sed = Sedtype, Li = Light,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta2b","beta5", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5j <- WAIC
+ModComp.5$WAIC[10] <- WAIC5j$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5j <- LOOIC
+ModComp.5$LOOIC[10] <- LOOIC5j[3]
+
+# WAIC Detail
+WAIC.5j <- data.frame(modID = c('WAIC5j'), model = c('5j'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5j <- data.frame(modID = c('LOOIC5j'), model = c('5j'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5j <- out
+```
+
+#### Model 5k
+epi ~ time + quad(SOI) + quad(Graz)
+```{r model 5l, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5k.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Day = Dayindx, Ott = Ottindx, Grz = Graz) #, Sed = Sedtype, Li = Light,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta1","beta2","beta2b","beta5","beta5b", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5k <- WAIC
+ModComp.5$WAIC[11] <- WAIC5k$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5k <- LOOIC
+ModComp.5$LOOIC[11] <- LOOIC5k[3]
+
+# WAIC Detail
+WAIC.5k <- data.frame(modID = c('WAIC5k'), model = c('5k'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5k <- data.frame(modID = c('LOOIC5k'), model = c('5k'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5k <- out
+```
+
+#### Model 5l
+epi ~ quad(SOI) + Graz
+```{r model 5l, echo=FALSE}
+# Call up JAGS file
+jagsfile <- 'JAGS/Eelgrass_5l.jags'
+# savename='EelgrassM1a_Results.Rdata'
+
+jags.data <- list(Nsites = Nsites, Nobs = Nobs, Obs = Obs, Site = Sitenum, Ott = Ottindx, Grz = Graz) #, Sed = Sedtype, Li = Light,  Nquads = Nquads, Quad = Quad
+
+inits <- function() list(sigS = runif(1, 0, 1), sigO = runif(1, 0, 1)) 
+
+params <- c("sigS","sigO","beta0","beta2","beta2b","beta5", "eps","loglik") 
+
+# Call JAGS from R 
+out <- run.jags(data = jags.data, 
+                inits = inits, 
+                monitor = params, 
+                model = jagsfile, 
+                n.chains = nc, 
+                thin = nt, 
+                sample = nsamples, 
+                burnin = nb,
+                method="rjparallel", cl=cl)
+
+post = rbind(out$mcmc[[1]], out$mcmc[[2]])
+for (i in 3:nc){
+  post = rbind(post, out$mcmc[[i]])
+}
+
+# Calculate WAIC
+mc_ll <- post[,paste0("loglik[",1:Nobs,"]")]
+WAIC <- waic(mc_ll)
+WAIC5l <- WAIC
+ModComp.5$WAIC[12] <- WAIC5l$waic
+
+# Calculate LOOIC
+LOOIC <- loo(mc_ll)
+LOOIC5l <- LOOIC
+ModComp.5$LOOIC[12] <- LOOIC5l[3]
+
+# WAIC Detail
+WAIC.5l <- data.frame(modID = c('WAIC5l'), model = c('5l'), WAIC = WAIC$waic, WAIC_se = WAIC$se_waic, deltaWAIC = c(0), deltaWAIC_se = c(0), P_comp = c(0))
+
+# LOOIC Detail
+LOOIC.5l <- data.frame(modID = c('LOOIC5l'), model = c('5l'), LOOIC$looic, LOOIC_se = LOOIC$se_looic, deltaLOOIC = c(0), deltaLOOIC_se = c(0))
+
+out5l <- out
+```
+
+### Model 5 Comparison
+```{r Model 5 comparison, echo = FALSE}
+# Clean up work session
+stopCluster(cl = cl)
+rm(out)
+
+## WAIC ##
+# Rank and organize model comparison table
+modranks.WAIC <- order(ModComp.5$WAIC)
+WAIC.5.full <- rbind(WAIC.5a, WAIC.5b, WAIC.5c, WAIC.5d, WAIC.5e, WAIC.5f, WAIC.5g, WAIC.5h, WAIC.5i, WAIC.5j, WAIC.5k, WAIC.5l)
+comptab.WAIC <- compare(WAIC5a, WAIC5b, WAIC5c, WAIC5d, WAIC5e, WAIC5f, WAIC5g, WAIC5h, WAIC5i, WAIC5j, WAIC5k, WAIC5l)
+filelist.WAIC <- row.names(comptab.WAIC)
+
+for (i in 2:12){
+  row = which(WAIC.5.full$modID == filelist.WAIC[i])
+  comp = compare(eval(as.name(filelist.WAIC[i])) , eval(as.name(filelist.WAIC[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  WAIC.5.full$deltaWAIC[row] = comp[1]
+  WAIC.5.full$deltaWAIC_se[row] = comp[2]
+  WAIC.5.full$P_comp[row] = P_val
+}
+
+WAIC.5.full <- WAIC.5.full[modranks.WAIC,]
+WAIC.5.full$P_comp[1] = 1
+WAIC.5.full$Likelihood = exp(-0.5*WAIC.5.full$deltaWAIC)
+WAIC.5.full$Likelihood[WAIC.5.full$P_comp < 0.1] = 0 
+sumlik = sum(WAIC.5.full$Likelihood)
+WAIC.5.full$WAICwt = WAIC.5.full$Likelihood/sumlik
+
+# round
+WAIC.5.full <- cbind(WAIC.5.full[,1:2], round(WAIC.5.full[, 3:9], 3))
+
+## LOOIC ##
+ModComp.5$LOOIC <- as.numeric(ModComp.5$LOOIC)
+modranks.LOOIC <- order(ModComp.5$LOOIC)
+LOOIC.5.full <- rbind(LOOIC.5a, LOOIC.5b, LOOIC.5c, LOOIC.5d, LOOIC.5e, LOOIC.5f, LOOIC.5g, LOOIC.5h, LOOIC.5i, LOOIC.5k, LOOIC.5k, LOOIC.5l)
+comptab.LOOIC <- compare(LOOIC5a, LOOIC5b, LOOIC5c, LOOIC5d, LOOIC5e, LOOIC5f, LOOIC5g, LOOIC5h, LOOIC5i, LOOIC5k, LOOIC5k, LOOIC5l)
+filelist.LOOIC <- row.names(comptab.LOOIC)
+
+for (i in 2:12){
+  row = which(LOOIC.5.full$modID == filelist.LOOIC[i])
+  comp = compare(eval(as.name(filelist.LOOIC[i])) , eval(as.name(filelist.LOOIC[1])) )
+  Z_score = comp[1]/comp[2]
+  P_val = 1-pnorm(Z_score)
+  LOOIC.5.full$deltaLOOIC[row] = comp[1]
+  LOOIC.5.full$deltaLOOIC_se[row] = comp[2]
+}
+
+LOOIC.5.full <- LOOIC.5.full[modranks.LOOIC,]
+LOOIC.5.full$Likelihood = exp(-0.5*LOOIC.5.full$deltaLOOIC)
+LOOIC.5.full$Likelihood[LOOIC.5.full$P_comp < 0.1] = 0 
+sumlik = sum(LOOIC.5.full$Likelihood)
+LOOIC.5.full$LOOICwt = LOOIC.5.full$Likelihood/sumlik
+
+# round
+LOOIC.5.full <- cbind(LOOIC.5.full[,1:2], round(LOOIC.5.full[, 3:8], 3))
+```
+
+### Model 5 Best model comparison tables
+WAIC Comparison
+```{r model 5 WAIC, echo = FALSE}
+DT::datatable(WAIC.5.full)
+```
+
+LOICC comparison
+```{r model 5 LOOIC, echo = FALSE}
+DT::datatable(LOOIC.5.full)
+```
+
+### Model 5 Plotting best model
+THIS IS NOT OPERATIONAL AT THE MOMENT, MODEL MAY NEED TO BE EXAMINED MORE CAREFULLY
+```{r model 4 plotting best model, echo=FALSE}
+# Extract best model
+best5.WAIC <- paste0(c("out", paste0(WAIC.5.full[1,2])), collapse = "")
+best5.LOOIC <- paste0(c("out", paste0(LOOIC.5.full[1,2])), collapse = "")
+
+# Test for difference in best model between WAIC and LOOIC. If both best model agree then use the best WAIC model, if they dissagree use lest LOOIC model
+ifelse(all.equal(best5.WAIC, best5.LOOIC) == TRUE, best2 <- eval(best5.WAIC), best2 <- eval(best5.LOOIC))
+
+# Extract MCMC values
+post <- rbind(out5f$mcmc[[1]], out5f$mcmc[[2]])
+
+# Loop over number of cores
+for (i in 3:nc){
+  post <- rbind(post, out5f$mcmc[[i]])
+}
+
+# Calculate summary stats
+reps <- dim(post)[1]
+sumout <- add.summary(out5f, c("sig","beta"))
+sumstats <- sumout$summaries
+vn <- row.names(sumstats)
+
+# Diagnostic plots
+plot(out5f, c('trace', 'histogram'), vars=c("sig","beta"))
+
+# Create dataframes for plotting fixed effects: assume Model5f
+mind <- min(Dayindx)
+maxd <- max(Dayindx)
+Julday <- numeric(length = length(seq(mind:maxd)))
+Predict <- numeric(length = length(seq(mind:maxd)))
+Lwr <- numeric(length = length(seq(mind:maxd)))
+Upr <- numeric(length = length(seq(mind:maxd)))
+sig <- post[,which(vn == 'sigO')]
+bt0 <- post[,which(vn == 'beta0')]
+bt1 <- post[,which(vn == 'beta1')]
+bt2 <- post[,which(vn == 'beta2')]
+bt5 <- post[,which(vn == 'beta5')]
+
+for (d in mind:maxd){
+  Julday[d] = d - 1 + Minday
+  Mu = bt0 + bt1*d + bt5*d
+  Predict[d] = mean(exp(Mu + sig^2/2))
+  Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .975))
+} 
+
+dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
+dfData = data.frame(x = Julianday, y = Obs)
+
+p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  # geom_point(data = dfData, aes(x=x, y=y))+
+  xlab('Julian Day') + 
+  ylab(bquote('Mean Pred epiphyte load' ~(g/g))) +
+  theme(legend.position = "none")
+
+Ottvals <- seq(min(Ottindx), max(Ottindx), length.out = 100)
+Predict <- numeric(length = 100)
+Lwr <- numeric(length = 100)
+Upr <- numeric(length = 100)
+
+for (o in 1:100){
+  Mu <- bt0 + bt1*MeanDay  + bt2*Ottvals[o]
+  Predict[o] <- mean(exp(Mu + sig^2/2))
+  Lwr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .975))
+}
+
+dfOtt = data.frame(OtterIndex = Ottvals, Mean = Predict, Lwr = Lwr, Upr = Upr)
+
+p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  xlab('Sea Otter Index') + 
+  ylab(bquote('Mean Pred AG/BG mass' ~(g/m^2))) +
+  theme(legend.position = "none")
+
+plot_grid(p1, p2, nrow = 2, ncol = 1)
+```
+
+### Model 6 - Grazer load (grams epiphytes to grams eelgrass)
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, crab biomass, and fish biomass may affect grazer load on eelgrass. Note that the number of samples (nsamples) will need to adjusted to suit the number of cores running on your machine so that the resulting analysis results in >= 20,000 samples. For example if you have 8 cores you can run analysis on 7 cores so nsamples should = 2900.
+
+```{r Model 5 set up, echo=FALSE}
+# Dependent observed variable: this should be whatever numeric variable you wish to analyze 
+Obs <- as.numeric(tran.dat$grazmass_shootmass)
+Obs[Obs == 0] <- 0.0001 # Can't have 0s so convert 0 to very small value
+
+# select only oberved variables that are not NA
+ii <- which(!is.na(Obs))
+Obs <- Obs[ii]
+
+# Variables to use as independent or identifier variables
+Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
+Julianday <- as.numeric(tran.dat$date_julian)[ii]
+Epi <- as.numeric(log(tran.dat$epimass_shootmass + 0.0001)) [ii] # add 0.0001 to have non Inf values.
+Crab <- 
+Fish <-
+Sitetxt <- tran.dat$site[ii]
+Quad <- as.numeric(tran.dat$quadrat)[ii]
+
+# Extracting attributes of data
+Sitelist <- unique(Sitetxt)
+Sitenum <- as.numeric(as.factor(Sitetxt))
+Sites <- seq(1, max(Sitenum))
+Nsites <- max(Sitenum)
+Nquads <- max(Quad)
+Nobs <- length(Obs)
+Minday <- min(Julianday)
+Dayindx <- Julianday - Minday + 1
+MeanDay <- round(mean(Dayindx),0)
+
+# Model comparison data frame
+ModComp.5 <- data.frame(Model = c("Model_5a","Model_5b","Model_5c","Model_5d","Model_5e","Model_5f","Model_5g", "Model_5h", "Model5i", "Model5j", "Model5k", "Model5l"), WAIC = numeric(length = 12), LOOIC = numeric(length = 12))
+
+# Set up for parralel computing
+cores <- detectCores()
+ncore <- min(20, cores-1)
+
+# Set JAGS params for running
+nsamples <- 2900
+nt <- 20
+nb <- 7000
+nc <- ncore
+
+# For parallel (comment out for serial)
+cl <- makeCluster(ncore)
 ```

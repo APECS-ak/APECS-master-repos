@@ -1,16 +1,17 @@
     model {
-    # Model 5a: Epiphyte load as function of date, otter index, sediment type, light, and grazer load 
-	# 	linear day effect  
+    # Model 5g: Epiphyte load as function of date, otter index, sediment type, light, and grazer load 
+	# 	linear date, sea otter, index sediment type and  grazer effect
 	# 
 	# Set Priors: 
 	#
    # Fixed effect parameters 
 	beta0 ~ dnorm(0,.001)	# intercept of linear model
-	beta1 ~ dnorm(0,.001)	# beta1 = effect of julian date
-	# beta2 ~ dnorm(0,.001)	# beta2 = effect of otter index
+	  beta1 ~ dnorm(0,.001)	# beta1 = effect of julian date
+	  beta2 ~ dnorm(0,.001)	# beta2 = effect of otter index
 	# beta2b ~ dnorm(0,.001)	# beta2b = quadratic effect of otter index
-	# beta3 ~ dnorm(0,.001)	# beta3 = effect of sediment type
-	# beta4~ dnorm(0, .001) # beta4 = effect of light
+	  beta3 ~ dnorm(0,.001)	# beta3 = effect of sediment type
+	# beta4 ~ dnorm(0, .001) # beta4 = effect of light
+	  beta5 ~ dnorm(0, .001) # beta4 = effect of grazer load
 	# 
     # Priors for variance params: 
     sigS ~ dunif(0.001,10) # Variance among sites
@@ -26,7 +27,7 @@
 	# Cycle through observations to estimate observed node
 	for (i in 1:Nobs){
 		# Expected response variable, mu (for lognormal, mu is log of median Obs)
-		Mu[i] <- beta0 + beta1*Day[i] + eps[Site[i]] # + beta2*(Ott[i]) + beta2b*(Ott[i]^2) + beta3*Sed[i] + beta4*Li[i] 
+		Mu[i] <- beta0 + beta1*Day[i] + beta2*(Ott[i]) + beta3*Sed[i] + beta5*(Grz[i]) + eps[Site[i]] #+ beta2b*(Ott[i]^2)  + beta4*Li[i] 
 		# Observed node as random draw from appropriate probability distribution 
 		Obs[i] ~ dlnorm(Mu[i],tauO) # observed var drawn from log-normal distribution
 		# Compute negative log likelihood for this observation
