@@ -68,7 +68,15 @@ Mergeing with master list
 lw.master <- merge(sp, sp.lw, by.x = "species_scientific", by.y = "sciname")
 
 ## Joining ##
-lw.master <- anti_join(sp, lw.master, by = "sp_code")
+lw.master <- bind_rows(sp, lw.master)
+
+## Cleaning ##
+lw.master <- cbind(lw.master[,c(1:3, 8:22, 27:32)])
+```
+
+Export
+```{r export}
+write.csv(lw.master, "../ALL_DATA/fish_length_weight_conversion.csv")
 ```
 
 
