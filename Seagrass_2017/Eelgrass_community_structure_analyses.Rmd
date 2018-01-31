@@ -868,7 +868,15 @@ Posteriors only
 plot(out1h, "histogram", vars = c("sig", "beta"), layout = c(1, 7))
 plot(out1g, "histogram", vars = c("sig", "beta"), layout = c(1, 7))
 plot(out1b, "histogram", vars = c("sig", "beta"), layout = c(1, 7))
+
 ```
+
+```{r top model table}
+t <- add.summary(out1h, c("sig","beta"))
+t%add.summary(out1g, c("sig","beta"))
+add.summary(out1b, c("sig","beta"))
+```
+
 
 ### Model 1 Plotting best model
 ```{r model 1 plotting best model, echo=FALSE}
