@@ -291,7 +291,8 @@ Pool all pots but keep strings. Final dataframe should include instances where n
 ## Prepping data ##
 crab.string <- crab %>% 
   group_by(site, string, sp_code) %>% 
-  summarise(mass_g = sum(mass_g))
+  summarise(count = n(), 
+            mass_g = sum(mass_g))
 
 sites <- unique(eg.bio$site)
 sp <- unique(crab$sp_code)
@@ -308,6 +309,7 @@ colnames(crab.dat)[1] <- "site"
 # Merge
 crab.dat <- merge(crab.dat, crab.string, by = c("site", "string", "sp_code"), all.x = TRUE)
 crab.dat$mass_g[is.na(crab.dat$mass_g)] <- 0
+crab.dat$count[is.na(crab.dat$count)] <- 0
 crab.dat <- merge(unique(crab[, 2:9]), crab.dat, by = "site", all.y = TRUE)
 
 ```

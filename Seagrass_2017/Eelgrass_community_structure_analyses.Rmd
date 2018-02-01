@@ -70,6 +70,12 @@ tran.dat <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", heade
 crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
+Prepping crab data
+```{r}
+
+```
+
+
 ## 2. Testing assumptions
 
 ### Normality
