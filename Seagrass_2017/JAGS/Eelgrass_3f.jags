@@ -16,7 +16,7 @@
     sigS ~ dunif(0.001,100) # Variance among sites
     tauS <- pow(sigS,-2)
   # sigO ~ dunif(0.001,100) # Variance among log(Obs) within a site
-  # tauO <- pow(sigO,-2)
+    tauO <- pow(Dispers,-2)
 	  Dispers ~ dgamma(1.1,0.1)   # over-dispersion parameter (for Neg Binom count variable)
 	#
     # Compute random effects for sites 

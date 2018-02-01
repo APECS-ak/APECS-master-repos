@@ -12,11 +12,12 @@
 	# beta3 ~ dnorm(0,.001)	# beta3 = effect of sediment type
 	# beta4 ~ dnorm(0, .001) # beta4 = effect of light
 	# 
+	
     # Priors for variance params: 
     sigS ~ dunif(0.001,10) # Variance among sites
     tauS <- pow(sigS,-2)
     # sigO ~ dunif(0.001,10) # Variance among log(Obs) within a site
-    # tauO <- pow(sigO,-2)
+    tauO <- pow(Dispers,-2)
 	  Dispers ~ dgamma(1.1, 0.1)   # over-dispersion parameter (for Neg Binom count variable)
 	#
     # Compute random effects for sites 

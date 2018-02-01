@@ -20,6 +20,7 @@ library(loo)
 library(HDInterval)
 library(DT)
 library(cowplot)
+library(arm)
 
 theme_set(theme_classic())
 ```
@@ -846,11 +847,17 @@ LOOIC.1.full <- cbind(LOOIC.1.full[,1:2], round(LOOIC.1.full[, 3:8], 3))
 WAIC Comparison
 ```{r model 1 WAIC, echo = FALSE}
 DT::datatable(WAIC.1.full)
+
+# Write
+write.csv(WAIC.1.full, "EG_Mod1_WAIC.csv", row.names = FALSE)
 ```
 
 LOICC comparison
 ```{r model 1 LOOIC, echo = FALSE}
 DT::datatable(LOOIC.1.full)
+
+# Write
+write.csv(LOOIC.1.full, "EG_Mod1_LOOIC.csv", row.names = FALSE)
 ```
 
 #### Model 1 Best model comparison plots
@@ -868,15 +875,50 @@ Posteriors only
 plot(out1h, "histogram", vars = c("sig", "beta"), layout = c(1, 7))
 plot(out1g, "histogram", vars = c("sig", "beta"), layout = c(1, 7))
 plot(out1b, "histogram", vars = c("sig", "beta"), layout = c(1, 7))
-
 ```
 
-```{r top model table}
-t <- add.summary(out1h, c("sig","beta"))
-t%add.summary(out1g, c("sig","beta"))
-add.summary(out1b, c("sig","beta"))
+```{r top models table}
+## Model 1h summary stats ##
+sum.1h <- add.summary(out1h, c("sig","beta"))
+sumstats.1h <- as.data.frame(sum.1h$summaries)
+sumstats.1h$Coef <- rownames(sumstats.1h)
+sumstats.1h$Model <- "1h"
+
+## Model 1g summary stats ##
+sum.1g <- add.summary(out1g, c("sig","beta"))
+sumstats.1g <- as.data.frame(sum.1g$summaries)
+sumstats.1g$Coef <- rownames(sumstats.1g)
+sumstats.1g$Model <- "1g"
+
+## Model 1b summary stats ##
+sum.1b <- add.summary(out1b, c("sig","beta"))
+sumstats.1b <- as.data.frame(sum.1b$summaries)
+sumstats.1b$Coef <- rownames(sumstats.1b)
+sumstats.1b$Model <- "1b"
+
+## All Together Now ##
+sumstats.1 <- rbind(sumstats.1h, sumstats.1g, sumstats.1b)
+rownames(sumstats.1) <- c()
+sumstats.1 <- cbind(sumstats.1[, c(13, 12)], round(sumstats.1[, 1:11], 4))
+
+# Change names #
+sumstats.1$Coef <- recode(sumstats.1$Coef, sigS = "among site", sigO = "within site", beta1 = "time", beta1b = "time^2", beta2 = "SOI", beta2b = "SOI^2", beta0 = "intercept")
+
+DT::datatable(sumstats.1)
+
+# Save ##
+write.csv(sumstats.1, "EG_Mod1_sumstats.csv", row.names = FALSE)
 ```
 
+```{r plots?}
+ggplot(sumstats.1, aes(color = Model)) +
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_linerange(aes(Coef, ymin = Lower95, ymax = Upper95), lwd = 1.5, position = position_dodge(width = 1/2)) +
+  geom_point(aes(Coef, Median), size = 3, position = position_dodge(width = 1/2)) +
+  coord_flip() + 
+  scale_y_continuous(breaks = seq(-1.5, 4, by = 0.5)) +
+  labs(x = "Coefficient Name", y = " Coefficient Value +/- CI")
+```
 
 ### Model 1 Plotting best model
 ```{r model 1 plotting best model, echo=FALSE}
@@ -934,6 +976,9 @@ p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) +
   scale_y_continuous(breaks = seq(0, 250, by = 50)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
+# save plot
+ggsave("Mod1h_time.png", p1, dpi = 400)
+
 Ottvals <- seq(min(Ottindx), max(Ottindx), length.out = 100)
 Predict <- numeric(length = 100)
 Lwr <- numeric(length = 100)
@@ -956,6 +1001,9 @@ p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) +
   #scale_x_continuous(breaks = seq(-1, 1, by = 0.25)) +
   #scale_y_continuous(breaks = seq(0, 250, by = 50)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+# save plot
+ggsave("Mod1h_SOI.png", p2, dpi = 400)
 
 plot_grid(p1, p2, nrow = 2, ncol = 1)
 ```
@@ -1462,11 +1510,77 @@ LOOIC.2.full <- cbind(LOOIC.2.full[,1:2], round(LOOIC.2.full[, 3:8], 3))
 WAIC Comparison
 ```{r model 2 WAIC, echo = FALSE}
 DT::datatable(WAIC.2.full)
+
+# Write
+write.csv(WAIC.2.full, "EG_Mod2_WAIC.csv", row.names = FALSE)
 ```
 
 LOICC comparison
 ```{r model 2 LOOIC, echo = FALSE}
 DT::datatable(LOOIC.2.full)
+
+# Write
+write.csv(LOOIC.2.full, "EG_Mod2_LOOIC.csv", row.names = FALSE)
+```
+
+#### Model 2 Best model comparison plots
+Top three models
+```{r Model 1 full model plots }
+plot(out1b, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 4))
+
+plot(out1a, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 4))
+
+plot(out1e, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 4))
+```
+
+Posteriors only
+```{r posteriors only}
+plot(out1b, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out1a, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out1e, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+```
+
+```{r top models table}
+## Model 2b summary stats ##
+sum.2b <- add.summary(out2b, c("sig","beta"))
+sumstats.2b <- as.data.frame(sum.2b$summaries)
+sumstats.2b$Coef <- rownames(sumstats.2b)
+sumstats.2b$Model <- "2b"
+
+## Model 2a summary stats ##
+sum.2a <- add.summary(out2a, c("sig","beta"))
+sumstats.2a <- as.data.frame(sum.2a$summaries)
+sumstats.2a$Coef <- rownames(sumstats.2a)
+sumstats.2a$Model <- "2a"
+
+## Model 2e summary stats ##
+sum.2e <- add.summary(out2e, c("sig","beta"))
+sumstats.2e <- as.data.frame(sum.2e$summaries)
+sumstats.2e$Coef <- rownames(sumstats.2e)
+sumstats.2e$Model <- "2e"
+
+## All Together Now ##
+sumstats.2 <- rbind(sumstats.2b, sumstats.2a, sumstats.2e)
+rownames(sumstats.2) <- c()
+sumstats.2 <- cbind(sumstats.2[, c(13, 12)], round(sumstats.2[, 1:11], 4))
+
+# Change names #
+sumstats.2$Coef <- recode(sumstats.2$Coef, sigS = "among site", sigO = "within site", beta1 = "time", beta1b = "time^2", beta2 = "SOI", beta2b = "SOI^2", beta0 = "intercept")
+
+DT::datatable(sumstats.2)
+
+# Save ##
+write.csv(sumstats.2, "EG_Mod2_sumstats.csv", row.names = FALSE)
+```
+
+```{r plots?}
+ggplot(sumstats.2, aes(color = Model)) +
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_linerange(aes(Coef, ymin = Lower95, ymax = Upper95), lwd = 1.5, position = position_dodge(width = 1/2)) +
+  geom_point(aes(Coef, Median), size = 3, position = position_dodge(width = 1/2)) +
+  coord_flip() + 
+  scale_y_continuous(breaks = seq(-1.5, 4, by = 0.5)) +
+  labs(x = "Coefficient Name", y = " Coefficient Value +/- CI")
 ```
 
 ### Model 2 Plotting best model
@@ -1480,21 +1594,21 @@ best2.LOOIC <- paste0(c("out", paste0(LOOIC.2.full[1,2])), collapse = "")
 ifelse(all.equal(best2.WAIC, best2.LOOIC) == TRUE, best2 <- eval(best2.WAIC), best2 <- eval(best2.LOOIC))
 
 # Extract MCMC values
-post <- rbind(out2a$mcmc[[1]], out2a$mcmc[[2]])
+post <- rbind(out2b$mcmc[[1]], out2b$mcmc[[2]])
 
 # Loop over number of cores
 for (i in 3:nc){
-  post <- rbind(post, out2a$mcmc[[i]])
+  post <- rbind(post, out2b$mcmc[[i]])
 }
 
 # Calculate summary stats
 reps <- dim(post)[1]
-sumout <- add.summary(out2a, c("sig","beta"))
+sumout <- add.summary(out2b, c("sig","beta"))
 sumstats <- sumout$summaries
 vn <- row.names(sumstats)
 
 # Diagnostic plots
-plot(out2a, c('trace', 'histogram'), vars=c("sig","beta"))
+plot(out2b, c('trace', 'histogram'), vars=c("sig","beta"))
 
 # Create dataframes for plotting fixed effects: assume Model2a
 mind <- min(Dayindx)
@@ -1506,6 +1620,7 @@ Upr <- numeric(length = length(seq(mind:maxd)))
 sig <- post[,which(vn == 'sigO')]
 bt0 <- post[,which(vn == 'beta0')]
 bt1 <- post[,which(vn == 'beta1')]
+bt2 <- post[,which(vn == "beta2")]
 
 for (d in mind:maxd){
   Julday[d] = d - 1 + Minday
@@ -1523,10 +1638,35 @@ p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) +
   geom_line(size = 1) +
   # geom_point(data = dfData, aes(x=x, y=y))+
   xlab('Julian Day') + 
-  ylab(bquote('Mean Pred belowground mass' ~(g/m^2))) +
-  theme(legend.position = "none")
+  ylab(bquote('Predicted belowground mass +/- 95% CI ' ~(g/m^2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
-print(p1)
+# save plot
+ggsave("Mod2b_time.png", p1, dpi = 400)
+
+Ottvals <- seq(min(Ottindx), max(Ottindx), length.out = 100)
+Predict <- numeric(length = 100)
+Lwr <- numeric(length = 100)
+Upr <- numeric(length = 100)
+
+for (o in 1:100){
+  Mu <- bt0 + bt1*MeanDay + bt2*Ottvals[o] 
+  Predict[o] <- mean(exp(Mu + sig^2/2))
+  Lwr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[o] <- as.numeric(quantile(exp(Mu + sig^2/2), .975))
+}
+
+dfOtt = data.frame(OtterIndex = Ottvals, Mean = Predict, Lwr = Lwr, Upr = Upr)
+
+p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  xlab('Sea Otter Index') + 
+  ylab(bquote('Predicted belowground mass +/- 95% CI ' ~(g/m^2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+# save plot
+ggsave("Mod2b_SOI.png", p2, dpi = 400)
 ```
 
 ### Model 3 - Shoot Density
@@ -2085,12 +2225,77 @@ LOOIC.3.full <- cbind(LOOIC.3.full[,1:2], round(LOOIC.3.full[, 3:8], 3))
 WAIC Comparison
 ```{r model 3 WAIC, echo = FALSE}
 DT::datatable(WAIC.3.full)
+
+write.csv(WAIC.3.full, "EG_Mod3_WAIC.csv", row.names = FALSE)
 ```
 
 LOICC comparison
 ```{r model 3 LOOIC, echo = FALSE}
 DT::datatable(LOOIC.3.full)
+
+write.csv(LOOIC.3.full, "EG_Mod3_LOOIC.csv", row.names = FALSE)
 ```
+
+#### Model 3 Best model comparison plots
+Top three models
+```{r Model 1 full model plots }
+plot(out3a, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(3, 2))
+
+plot(out3e, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(5, 2))
+
+plot(out3b, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(3, 4))
+```
+
+Posteriors only
+```{r posteriors only}
+plot(out3a, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out3e, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out3b, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+```
+
+```{r top models table}
+## Model 3b summary stats ##
+sum.3a <- add.summary(out3a, c("sig","beta"))
+sumstats.3a <- as.data.frame(sum.3a$summaries)
+sumstats.3a$Coef <- rownames(sumstats.3a)
+sumstats.3a$Model <- "3a"
+
+## Model 3a summary stats ##
+sum.3e <- add.summary(out3e, c("sig","beta"))
+sumstats.3e <- as.data.frame(sum.3e$summaries)
+sumstats.3e$Coef <- rownames(sumstats.3e)
+sumstats.3e$Model <- "3e"
+
+## Model 3b summary stats ##
+sum.3b <- add.summary(out3b, c("sig","beta"))
+sumstats.3b <- as.data.frame(sum.3b$summaries)
+sumstats.3b$Coef <- rownames(sumstats.3b)
+sumstats.3b$Model <- "3b"
+
+## All Together Now ##
+sumstats.3 <- rbind(sumstats.3a, sumstats.3e, sumstats.3b)
+rownames(sumstats.3) <- c()
+sumstats.3 <- cbind(sumstats.3[, c(13, 12)], round(sumstats.3[, 1:11], 4))
+
+# Change names #
+sumstats.3$Coef <- recode(sumstats.3$Coef, sigS = "among site", sigO = "within site", beta1 = "time", beta1b = "time^2", beta2 = "SOI", beta2b = "SOI^2", beta3 = "sediment", beta0 = "intercept")
+
+DT::datatable(sumstats.3)
+
+# Save ##
+write.csv(sumstats.3, "EG_Mod3_sumstats.csv", row.names = FALSE)
+```
+
+```{r plots?}
+ggplot(sumstats.3, aes(color = Model)) +
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_linerange(aes(Coef, ymin = Lower95, ymax = Upper95), lwd = 1.5, position = position_dodge(width = 1/2)) +
+  geom_point(aes(Coef, Median), size = 3, position = position_dodge(width = 1/2)) +
+  coord_flip() + 
+  scale_y_continuous(breaks = seq(-5, 6, by = 1)) +
+  labs(x = "Coefficient Name", y = " Coefficient Value +/- CI")
+```
+
 
 ### Model 3 Plotting best model
 THIS IS NOT OPERATIONAL If both best model agree then use the best WAIC model, if they dissagree use lest LOOIC model.
@@ -2103,21 +2308,21 @@ best3.LOOIC <- paste0(c("out", paste0(LOOIC.3.full[1,2])), collapse = "")
 ifelse(all.equal(best3.WAIC, best3.LOOIC) == TRUE, best2 <- eval(best3.WAIC), best2 <- eval(best3.LOOIC))
 
 # Extract MCMC values
-post <- rbind(out3a$mcmc[[1]], out3a$mcmc[[2]])
+post <- rbind(out3e$mcmc[[1]], out3e$mcmc[[2]])
 
 # Loop over number of cores
 for (i in 3:nc){
-  post <- rbind(post, out3a$mcmc[[i]])
+  post <- rbind(post, out3e$mcmc[[i]])
 }
 
 # Calculate summary stats
 reps <- dim(post)[1]
-sumout <- add.summary(out3a, c("sig","beta", "Dispers"))
+sumout <- add.summary(out3e, c("sig","beta", "Dispers"))
 sumstats <- sumout$summaries
 vn <- row.names(sumstats)
 
 # Diagnostic plots
-plot(out3a, c('trace', 'histogram'), vars=c("sig","Dispers","beta"))
+plot(out3e, c('trace', 'histogram'), vars=c("sig","Dispers","beta"), layout = c(6, 2))
 
 # Create dataframes for plotting fixed effects
 mind <- min(Dayindx)
@@ -2130,6 +2335,8 @@ sig <- post[,which(vn == 'sigS')]
 dis <- post[,which(vn == 'Dispers')]
 bt0 <- post[,which(vn == 'beta0')]
 bt1 <- post[,which(vn == 'beta1')]
+bt2 <- post[,which(vn == 'beta2')]
+bt2b <- post[,which(vn == 'beta2b')]
 
 for (d in mind:maxd){
   Julday[d] = d - 1 + Minday
@@ -2147,7 +2354,7 @@ p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) +
   geom_line(size = 1) +
   # geom_point(data = dfData, aes(x=x, y=y))+
   xlab('Julian Day') + 
-  ylab(bquote('Mean Pred belowground mass' ~(g/m^2))) +
+  ylab(bquote('Predicted shoot density' ~(m^2))) +
   theme(legend.position = "none")
 
 print(p1)
@@ -2683,11 +2890,77 @@ LOOIC.4.full <- cbind(LOOIC.4.full[,1:2], round(LOOIC.4.full[, 3:8], 3))
 WAIC Comparison
 ```{r model 4 WAIC, echo = FALSE}
 DT::datatable(WAIC.4.full)
+
+# write
+write.csv(WAIC.4.full, "EG_Mod4_WAIC.csv", row.names = FALSE)
 ```
 
 LOICC comparison
 ```{r model 4 LOOIC, echo = FALSE}
 DT::datatable(LOOIC.4.full)
+
+# write
+write.csv(LOOIC.4.full, "EG_Mod4_LOOIC.csv", row.names = FALSE)
+```
+
+#### Model 3 Best model comparison plots
+Top three models
+```{r Model 1 full model plots }
+plot(out4b, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 2))
+
+plot(out4g, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 3))
+
+plot(out4a, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 2))
+```
+
+Posteriors only
+```{r posteriors only}
+plot(out4b, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out4g, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out4a, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+```
+
+```{r top models table}
+## Model 4b summary stats ##
+sum.4b <- add.summary(out4b, c("sig","beta"))
+sumstats.4b <- as.data.frame(sum.4b$summaries)
+sumstats.4b$Coef <- rownames(sumstats.4b)
+sumstats.4b$Model <- "4b"
+
+## Model 4g summary stats ##
+sum.4g <- add.summary(out4g, c("sig","beta"))
+sumstats.4g <- as.data.frame(sum.4g$summaries)
+sumstats.4g$Coef <- rownames(sumstats.4g)
+sumstats.4g$Model <- "4g"
+
+## Model 4a summary stats ##
+sum.4a <- add.summary(out4a, c("sig","beta"))
+sumstats.4a <- as.data.frame(sum.4a$summaries)
+sumstats.4a$Coef <- rownames(sumstats.4a)
+sumstats.4a$Model <- "4a"
+
+## All Together Now ##
+sumstats.4 <- rbind(sumstats.4b, sumstats.4g, sumstats.4a)
+rownames(sumstats.4) <- c()
+sumstats.4 <- cbind(sumstats.4[, c(13, 12)], round(sumstats.4[, 1:11], 4))
+
+# Change names #
+sumstats.4$Coef <- recode(sumstats.4$Coef, sigS = "among site", sigO = "within site", beta1 = "time", beta1b = "time^2", beta2 = "SOI", beta2b = "SOI^2", beta3 = "sediment", beta0 = "intercept")
+
+DT::datatable(sumstats.4)
+
+# Save ##
+write.csv(sumstats.4, "EG_Mod4_sumstats.csv", row.names = FALSE)
+```
+
+```{r plots?}
+ggplot(sumstats.4, aes(color = Model)) +
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_linerange(aes(Coef, ymin = Lower95, ymax = Upper95), lwd = 1.5, position = position_dodge(width = 1/2)) +
+  geom_point(aes(Coef, Median), size = 3, position = position_dodge(width = 1/2)) +
+  coord_flip() + 
+  scale_y_continuous(breaks = seq(-1, 1, by = 0.25)) +
+  labs(x = "Coefficient Name", y = " Coefficient Value +/- CI")
 ```
 
 ### Model 4 Plotting best model
@@ -2744,8 +3017,11 @@ p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) +
   geom_line(size = 1) +
   # geom_point(data = dfData, aes(x=x, y=y))+
   xlab('Julian Day') + 
-  ylab(bquote('Mean Pred AG/BG mass' ~(g/m^2))) +
-  theme(legend.position = "none")
+  ylab(bquote('Predicted AG/BG mass +/- 95% CI ' ~(g/m^2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+# save plot
+ggsave("Mod4b_time.png", p1, dpi = 400)
 
 Ottvals <- seq(min(Ottindx), max(Ottindx), length.out = 100)
 Predict <- numeric(length = 100)
@@ -2765,8 +3041,11 @@ p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) +
   geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
   geom_line(size = 1) +
   xlab('Sea Otter Index') + 
-  ylab(bquote('Mean Pred AG/BG mass' ~(g/m^2))) +
-  theme(legend.position = "none")
+  ylab(bquote('Mean Pred AG/BG mass +/- 95% CI ' ~(g/m^2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+# save plot
+ggsave("Mod4b_SOI.png", p2, dpi = 400)
 
 plot_grid(p1, p2, nrow = 2, ncol = 1)
 ```
