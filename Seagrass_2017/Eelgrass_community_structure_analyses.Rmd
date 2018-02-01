@@ -2341,9 +2341,9 @@ bt2b <- post[,which(vn == 'beta2b')]
 for (d in mind:maxd){
   Julday[d] = d - 1 + Minday
   ldayMu = bt0 + bt1*d
-  Predict[d] = mean(exp(Mu + dis))
-  Lwr[d] = as.numeric(quantile(exp(Mu + dis), .025))
-  Upr[d] = as.numeric(quantile(exp(Mu + dis), .975))
+  Predict[d] = mean(exp(ldayMu + sig))
+  Lwr[d] = as.numeric(quantile(exp(ldayMu + sig), .025))
+  Upr[d] = as.numeric(quantile(exp(ldayMu + sig), .975))
 } 
 
 dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
@@ -3909,7 +3909,7 @@ plot_grid(p1, p2, nrow = 2, ncol = 1)
 ### Model 6 - Grazer load (grams epiphytes to grams eelgrass)
 Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, crab biomass, and fish biomass may affect grazer load on eelgrass. Note that the number of samples (nsamples) will need to adjusted to suit the number of cores running on your machine so that the resulting analysis results in >= 20,000 samples. For example if you have 8 cores you can run analysis on 7 cores so nsamples should = 2900.
 
-```{r Model 5 set up, echo=FALSE}
+```{r Model 6 set up, echo=FALSE}
 # Dependent observed variable: this should be whatever numeric variable you wish to analyze 
 Obs <- as.numeric(tran.dat$grazmass_shootmass)
 Obs[Obs == 0] <- 0.0001 # Can't have 0s so convert 0 to very small value
@@ -3922,8 +3922,8 @@ Obs <- Obs[ii]
 Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
 Julianday <- as.numeric(tran.dat$date_julian)[ii]
 Epi <- as.numeric(log(tran.dat$epimass_shootmass + 0.0001)) [ii] # add 0.0001 to have non Inf values.
-Crab <- 
-Fish <-
+Crab <- ## INSERT CRAB SAMPLES HERE ##
+Fish <- ## INSERT FISH SAMPLES HERE ##
 Sitetxt <- tran.dat$site[ii]
 Quad <- as.numeric(tran.dat$quadrat)[ii]
 
@@ -3939,7 +3939,7 @@ Dayindx <- Julianday - Minday + 1
 MeanDay <- round(mean(Dayindx),0)
 
 # Model comparison data frame
-ModComp.5 <- data.frame(Model = c("Model_5a","Model_5b","Model_5c","Model_5d","Model_5e","Model_5f","Model_5g", "Model_5h", "Model5i", "Model5j", "Model5k", "Model5l"), WAIC = numeric(length = 12), LOOIC = numeric(length = 12))
+ModComp.5 <- data.frame(Model = c("Model_6a","Model_6b","Model_6c","Model_6d","Model_6e","Model_6f","Model_6g", "Model_6h", "Model6i"), WAIC = numeric(length = 12), LOOIC = numeric(length = 12))
 
 # Set up for parralel computing
 cores <- detectCores()

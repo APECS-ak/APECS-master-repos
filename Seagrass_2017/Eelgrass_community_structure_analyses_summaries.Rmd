@@ -90,7 +90,7 @@ DT::datatable(mod2.LOOIC, options = list(pageLength = nrow(mod2.LOOIC)))
 ```
 
 Best models comparisons
-```{rbest mod2s, echo=FALSE}
+```{r best mod2s, echo=FALSE}
 DT::datatable(mod2.sumstats, options = list(pageLength = nrow(mod2.sumstats)))
 
 ggplot(mod2.sumstats, aes(color = Model)) +
