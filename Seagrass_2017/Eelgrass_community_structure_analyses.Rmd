@@ -2341,9 +2341,9 @@ bt2b <- post[,which(vn == 'beta2b')]
 for (d in mind:maxd){
   Julday[d] = d - 1 + Minday
   ldayMu = bt0 + bt1*d
-  Predict[d] = mean(exp(Mu + sig^2/2))
-  Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .025))
-  Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .975))
+  Predict[d] = mean(exp(Mu + dis))
+  Lwr[d] = as.numeric(quantile(exp(Mu + dis), .025))
+  Upr[d] = as.numeric(quantile(exp(Mu + dis), .975))
 } 
 
 dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
@@ -2903,9 +2903,9 @@ DT::datatable(LOOIC.4.full)
 write.csv(LOOIC.4.full, "EG_Mod4_LOOIC.csv", row.names = FALSE)
 ```
 
-#### Model 3 Best model comparison plots
+#### Model 4 Best model comparison plots
 Top three models
-```{r Model 1 full model plots }
+```{r Model 4 full model plots }
 plot(out4b, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 2))
 
 plot(out4g, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 3))
@@ -3750,16 +3750,82 @@ LOOIC.5.full <- cbind(LOOIC.5.full[,1:2], round(LOOIC.5.full[, 3:8], 3))
 WAIC Comparison
 ```{r model 5 WAIC, echo = FALSE}
 DT::datatable(WAIC.5.full)
+
+# write
+write.csv(WAIC.5.full, "EG_Mod5_WAIC.csv", row.names = FALSE)
 ```
 
 LOICC comparison
 ```{r model 5 LOOIC, echo = FALSE}
 DT::datatable(LOOIC.5.full)
+
+# write
+write.csv(LOOIC.5.full, "EG_Mod5_LOOIC.csv", row.names = FALSE)
+```
+
+#### Model 5 Best model comparison plots
+Top three models
+```{r Model 5 full model plots }
+plot(out5f, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 3))
+
+plot(out5e, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 3))
+
+plot(out5d, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 3))
+```
+
+Posteriors only
+```{r posteriors only}
+plot(out5f, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out5e, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out5d, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+```
+
+```{r top models table}
+## Model 5f summary stats ##
+sum.5f <- add.summary(out5f, c("sig","beta"))
+sumstats.5f <- as.data.frame(sum.5f$summaries)
+sumstats.5f$Coef <- rownames(sumstats.5f)
+sumstats.5f$Model <- "5f"
+
+## Model 5e summary stats ##
+sum.5e <- add.summary(out5e, c("sig","beta"))
+sumstats.5e <- as.data.frame(sum.5e$summaries)
+sumstats.5e$Coef <- rownames(sumstats.5e)
+sumstats.5e$Model <- "5e"
+
+## Model 5d summary stats ##
+sum.5d <- add.summary(out5d, c("sig","beta"))
+sumstats.5d <- as.data.frame(sum.5d$summaries)
+sumstats.5d$Coef <- rownames(sumstats.5d)
+sumstats.5d$Model <- "5d"
+
+## All Together Now ##
+sumstats.5 <- rbind(sumstats.5f, sumstats.5e, sumstats.5d)
+rownames(sumstats.5) <- c()
+sumstats.5 <- cbind(sumstats.5[, c(13, 12)], round(sumstats.5[, 1:11], 4))
+
+# Change names #
+sumstats.5$Coef <- recode(sumstats.5$Coef, sigS = "among site", sigO = "within site", beta1 = "time", beta1b = "time^2", beta2 = "SOI", beta2b = "SOI^2", beta3 = "sediment", beta5 = "grazer", beta0 = "intercept")
+
+DT::datatable(sumstats.5)
+
+# Save ##
+write.csv(sumstats.5, "EG_Mod5_sumstats.csv", row.names = FALSE)
+```
+
+```{r plots?}
+ggplot(sumstats.5, aes(color = Model)) +
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_linerange(aes(Coef, ymin = Lower95, ymax = Upper95), lwd = 1.5, position = position_dodge(width = 1/2)) +
+  geom_point(aes(Coef, Median), size = 3, position = position_dodge(width = 1/2)) +
+  coord_flip() + 
+  scale_y_continuous(breaks = seq(-6.5, 2, by = 0.5)) +
+  labs(x = "Coefficient Name", y = " Coefficient Value +/- CI")
 ```
 
 ### Model 5 Plotting best model
 THIS IS NOT OPERATIONAL AT THE MOMENT, MODEL MAY NEED TO BE EXAMINED MORE CAREFULLY
-```{r model 4 plotting best model, echo=FALSE}
+```{r model 5 plotting best model, echo=FALSE}
 # Extract best model
 best5.WAIC <- paste0(c("out", paste0(WAIC.5.full[1,2])), collapse = "")
 best5.LOOIC <- paste0(c("out", paste0(LOOIC.5.full[1,2])), collapse = "")
