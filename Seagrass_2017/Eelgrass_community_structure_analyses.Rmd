@@ -68,11 +68,25 @@ Factors that are more specific to certain tests
 tran.dat <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crab.dat$string <- as.character(crab.dat$string)
 ```
 
-Prepping crab data
-```{r}
+### Data Prep
+Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information).
+```{r crab sites string, echo=FALSE}
+crab.string <- crab.dat %>% 
+  group_by(site, string) %>% 
+  summarise(count = sum(count),
+            mass = sum(mass_g))
+```
 
+Crab data preparation. Summarize counts and mass of cancer/rock crabs.
+```{r rock crabs string, echo=FALSE}
+crab.rock <- crab.dat %>% 
+  filter(sp_code == "CRABDUN" | sp_code == "CRABRR" | sp_code == "CRAGRA"| sp_code == "UNRKCB") %>% 
+  group_by(site, string) %>% 
+  summarise(count = sum(count),
+            mass = sum(mass_g))
 ```
 
 
@@ -3871,7 +3885,7 @@ bt5 <- post[,which(vn == 'beta5')]
 
 for (d in mind:maxd){
   Julday[d] = d - 1 + Minday
-  Mu = bt0 + bt1*d + bt5*d
+  Mu = bt0 + bt1*d 
   Predict[d] = mean(exp(Mu + sig^2/2))
   Lwr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .025))
   Upr[d] = as.numeric(quantile(exp(Mu + sig^2/2), .975))
@@ -3906,7 +3920,30 @@ p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) +
   geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
   geom_line(size = 1) +
   xlab('Sea Otter Index') + 
-  ylab(bquote('Mean Pred AG/BG mass' ~(g/m^2))) +
+  ylab(bquote('Predicted Epiphyte load' ~(g/g))) +
+  theme(legend.position = "none")
+
+Grzvals <- seq(min(exp(Graz)), max(exp(Graz)), length.out = 100)
+Predict <- numeric(length = 100)
+Lwr <- numeric(length = 100)
+Upr <- numeric(length = 100)
+
+for (g in 1:100){
+  Mu <- bt0 + bt1*MeanDay  + bt2*mean(Ottindx) + exp(bt5)*Grzvals[g]
+  Predict[g] <- mean(exp(Mu + sig^2/2))
+  Lwr[g] <- as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[g] <- as.numeric(quantile(exp(Mu + sig^2/2), .975))
+}
+
+
+dfGrz = data.frame(GrazLoad = Grzvals, Mean = Predict, Lwr = Lwr, Upr = Upr)
+
+## this does not seem right, grazer effect should be negative i think seem univariate plot log(epi) v log(grazer)
+p3 <- ggplot(dfGrz, aes(x = GrazLoad, y = Mean)) + 
+  geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
+  geom_line(size = 1) +
+  xlab(bquote('Grazer load' ~(g/g))) + 
+  ylab(bquote('Predicted Epiphyte load' ~(g/g))) +
   theme(legend.position = "none")
 
 plot_grid(p1, p2, nrow = 2, ncol = 1)
@@ -3928,8 +3965,11 @@ Obs <- Obs[ii]
 Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
 Julianday <- as.numeric(tran.dat$date_julian)[ii]
 Epi <- as.numeric(log(tran.dat$epimass_shootmass + 0.0001)) [ii] # add 0.0001 to have non Inf values.
-Crab <- ## INSERT CRAB SAMPLES HERE ##
-Fish <- ## INSERT FISH SAMPLES HERE ##
+CrabMass <- as.numeric(crab.string$mass) ##### many 0s and/or log normalness to head with
+CrabCnt <- as.numeric(crab.string$count) ##### many 0s and/or log normalness to head with
+RockMass <- as.numeric(crab.rock$mass) ##### many 0s and/or log normalness to head with
+RockCnt <- as.numeric(crab.rock$count) ##### many 0s and/or log normalness to head with
+Fish <- ## INSERT FISH DATA HERE - BUT  ##
 Sitetxt <- tran.dat$site[ii]
 Quad <- as.numeric(tran.dat$quadrat)[ii]
 
