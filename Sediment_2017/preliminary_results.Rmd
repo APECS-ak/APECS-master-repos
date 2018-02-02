@@ -335,7 +335,7 @@ biomim3 <- ggplot(High) +
   geom_rug(aes(x = im_density, y = 0), position = position_jitter(height = 0))
 ```
 
-```{r, echo = FALSE, fig.width = 12, fig.height = 5}
+```{r, include = FALSE, echo = FALSE, fig.width = 12, fig.height = 5}
 title.cpbiomim <- ggdraw() + draw_label("OM:IM Matter Ratio", fontface='bold')
 
 cpbiomim <- plot_grid(biomim1, biomim2, biomim3, labels=c('Low', 'Mid', 'High'), align = 'h', ncol=3, nrow=1, rel_widths = c(1,1,1))
