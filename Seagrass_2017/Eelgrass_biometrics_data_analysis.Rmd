@@ -13,6 +13,7 @@ This script generates a dataframe from the eelgrass biometrics data that will be
 ```{r, echo=FALSE, message = FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
+library(FSA)
 
 theme_set(theme_classic())
 ```
@@ -317,5 +318,43 @@ crab.dat <- merge(unique(crab[, 2:9]), crab.dat, by = "site", all.y = TRUE)
 Export data for analysis
 ```{r}
 write.csv(crab.dat, "../ALL_DATA/eelgrass_crab_pot_derived.csv", row.names = FALSE)
+```
+
+# Fish data for analysis
+This scrip will generate a dataframe from the beach seine data that will be ready for analysis. In genreal nothing will be summerized, data will report values from each replicate at each site. One task is to assign lengths to unmeasured fish and then convert lengths to biomass.
+
+## Data
+We need fish data and length weight conversion data.
+```{r}
+fish <- read.csv("../ALL_DATA/seagrass_beach_seine_data_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+
+#fishLW <- read.csv("../ALL_DATA/INSERT HERE")
+```
+
+## Separate measured and unmeasured fish
+The first step is to separate the measured fish from the unmeasured fish.
+```{r measured - unmeasured split}
+fish.m <- fish %>%
+  filter(taxon == "Vertebrata") %>%
+  filter(fork_length > 0)
+
+fish.um <- fish %>%
+  filter(taxon == "Vertebrata") %>% 
+  filter(unmeasured != "estimate") %>% # assume that infield estimates are accurate
+  filter(unmeasured > 0)
+
+fish.um$unmeasured <- as.numeric(fish.um$unmeasured)
+```
+
+## Assign lengths to unmeasured fish
+When beach seining we only measured the first 30 individuals of a species, and counted the rest. We can use the measured fishes to create a distribution from which we can assign lengths to the unmeasured fishes.
+
+Assign lengths to unmeasured fish based on sampled distribution. This assignment should happen at the site level. i.e. use the distribution of fishes at a site to assign unmeasured fishes at that site. There was only one seine per site and only one sine per day so site and date are essentially unique identifiers for how we want to restrict our analysis. 
+```{r}
+hist(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"], breaks = 10)
+
+summary(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"])
+
+hist(rnorm(2000, mean(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"], sd(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"]))))
 ```
 
