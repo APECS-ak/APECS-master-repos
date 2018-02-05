@@ -13,6 +13,7 @@ These data represent fish community data collected in Southeast Alaska. This scr
 ```{r libraries, echo = FALSE}
 library(dplyr)
 library(tidyr)
+library(rfishbase)
 ```
 
 ## Load data
@@ -42,6 +43,38 @@ fish$Unmeasured[is.na(fish$Unmeasured)] <- 0
 
 str(fish)
 ```
+
+## Extract Species list
+```{r sp list}
+noaa.sp <- data.frame(species_scientific = unique(fish$Sp_ScientificName))
+```
+
+## Extract fisbase data
+Extact fishbase dat and then compasre to what we have already extracted and export "new" species.
+```{r fishbase}
+## Extract ##
+sp.lw <- length_weight(noaa.sp)
+
+## Merging ##
+noaa.sp <- merge(noaa.sp, sp.lw, by.x = "species_scientific", by.y = "sciname")
+
+## Joining ##
+lw.master <- bind_rows(noaa.sp, lw.master)
+
+## import 2017 eelgrass data ##
+eg.fish <- read.csv("../ALL_DATA/fish_length_weight_conversion.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## Edit NOAA list so that it only includes fish NOT in eeglrass list ##
+non.eg <- anti_join(lw.master, eg.fish)
+
+## Add Common names and SP codes ##
+non.eg <- merge(unique(fish[,19:21]), non.eg, by.x = "Sp_ScientificName", by.y = "species_scientific")
+non.eg <- non.eg[57:248,] # remove inverts
+
+## Export ##
+write.csv(non.eg, "../ALL_DATA/fish_length_weight_conversion_noneelgrass.csv", row.names = FALSE)
+```
+
 
 ## Export clean csv
 ```{r export}
