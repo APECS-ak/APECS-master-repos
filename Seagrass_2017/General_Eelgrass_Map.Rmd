@@ -1,0 +1,64 @@
+---
+title: "General_Eelgrass_Map"
+author: "Wendel Raymond"
+date: "February 5, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Map of eelgrass on Prince of Wales Island
+This map includes layers from the [ShoreZone](https://alaskafisheries.noaa.gov/habitat/shorezone) shoreline mapping project
+
+```{r libraries, echo=FALSE, message=FALSE, warning=FALSE, results=FALSE}
+library(sp)
+library(rgdal)
+library(rgeos)
+library(maptools)
+library(leaflet)
+library(dplyr)
+library(raster)
+library(ggplot2)
+library(htmlwidgets)
+```
+
+
+```{r data, echo=FALSE, message=FALSE, warning=FALSE}
+base <- readOGR(dsn = "../ALL_DATA/spatial_data", layer="POW")
+base <- spTransform(base, CRS("+proj=longlat +datum=WGS84"))
+
+shoreline <- readOGR(dsn = "E:/wraymond2/My Documents/Graduate School/GIS General", layer="POW Shoreline")
+shoreline <- spTransform(shoreline, CRS("+proj=longlat +datum=WGS84"))
+
+eelgrass_c <- as.SpatialLines.SLDF(subset(shoreline, ZOS == "C"))
+eelgrass_p <- as.SpatialLines.SLDF(subset(shoreline, ZOS == "P"))
+
+rm(shoreline)
+
+sites <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "Otter_Survey_Sites_2017_All_UTM")
+sites.eg <- subset(sites, site_type %in% "Eelgrass")
+rm(sites)
+```
+
+Map
+```{r icon, echo=FALSE, message=FALSE, warning=FALSE}
+# Eelgrass Icon
+egIcon <- makeIcon(
+  iconUrl = "http://moziru.com/images/sea-grass-clipart-1.png",
+  iconWidth = 25, iconHeight = 15,
+  iconAnchorX = 12.5, iconAnchorY = 0
+)
+```
+
+
+```{r map, echo = FALSE, message=FALSE, warning=FALSE}
+leaflet() %>% 
+  addTiles() %>% 
+  addPolylines(data = eelgrass_p, color = "lightgreen", fill = NA, opacity = 1, group = "Patchy eelgrass") %>% # patchy eelgrass shoreline
+  addPolylines(data = eelgrass_c, color ="darkgreen", fill = NA, opacity = 1, group = "Continuous eelgrass") %>% # continuous eelgrass shoreline
+  addMarkers(data = sites.eg, ~longitude, ~latitude, icon = egIcon, label = ~place_name, group = "2017 eelgrass community sampling") %>% 
+  addLayersControl(overlayGroups = c("Patchy eelgrass", "Continuous eelgrass", "2017 eelgrass community sampling"), options = layersControlOptions(collapsed = FALSE)) %>% 
+  addLegend("bottomleft", colors = c("lightgreen", "darkgreen", "green"), labels = c("Patchy eelgrass", "Continuous eelgrass", "2017 eelgrass community sampling"), title = "Legend", opacity = 1)
+  
+```
+
