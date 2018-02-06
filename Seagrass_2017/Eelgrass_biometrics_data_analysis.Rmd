@@ -362,9 +362,9 @@ dat <- fish.m %>%
   filter(sp_code == "STICK3")
 
 hist(dat$fork_length, breaks = 20)
-dens <- density(dat$fork_length, n = 30)
+dens <- density(dat$fork_length, n = 1000)
 hist(dens$x)
-str(dens)
+plot(dens)
 range(dat$fork_length)
 dens$x
 
