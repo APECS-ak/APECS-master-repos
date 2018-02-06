@@ -328,7 +328,7 @@ We need fish data and length weight conversion data.
 ```{r}
 fish <- read.csv("../ALL_DATA/seagrass_beach_seine_data_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 
-#fishLW <- read.csv("../ALL_DATA/INSERT HERE")
+fishLW <- read.csv("../ALL_DATA/fish_length_weight_conversions_05Feb2018.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ## Separate measured and unmeasured fish
@@ -351,10 +351,24 @@ When beach seining we only measured the first 30 individuals of a species, and c
 
 Assign lengths to unmeasured fish based on sampled distribution. This assignment should happen at the site level. i.e. use the distribution of fishes at a site to assign unmeasured fishes at that site. There was only one seine per site and only one sine per day so site and date are essentially unique identifiers for how we want to restrict our analysis. 
 ```{r}
-hist(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"], breaks = 10)
+hist(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"], probability  = TRUE, breaks = 10)
+sd(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"])
+lines(density(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"], bw = 11.33))
 
-summary(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"])
+density(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"] )
 
-hist(rnorm(2000, mean(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"], sd(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"]))))
+dat <- fish.m %>% 
+  filter(site == "2017_H_03") %>% 
+  filter(sp_code == "STICK3")
+
+hist(dat$fork_length, breaks = 20)
+dens <- density(dat$fork_length, n = 30)
+hist(dens$x)
+str(dens)
+range(dat$fork_length)
+dens$x
+
+
+test <- expandLenFreq(dens$x, 1, 3069)
 ```
 

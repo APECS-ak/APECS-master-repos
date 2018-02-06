@@ -1,0 +1,127 @@
+species_common,species_scientific,sp_code,LengthMin_cm,LengthMax_cm,Type,LmaxCompare,EsQ,Number,Sex,a_cm-g,aTL_cm-g,b_cm-g,CoeffDetermination,SEa,SEb,SDa,SDb,a CI lwr,a CI upr,b CI lwr,b CI upr,Method,Locality,DataRef,C_Code,Comment,Entered
+Pacific Herring,Clupea pallasii,HERRING,,,,,,236,unsexed,0.0238,,2.862,,,,,,,,,,Bayesian,"North Puget Sound, Washington, USA",Fishbase - Bayesian,,,
+Pacific Herring,Clupea pallasii,HERRING,19,31,FL,,,,mixed,0.0093,,3.022,,,,,,,,,,Bayesian,"Sea of Okhotsk, Russia",Fishbase - Bayesian,,,
+Pacific Herring,Clupea pallasii,HERRING,16.9,32.7,FL,,,82,unsexed,0.00448,,3.127,,,,,,,,,,Bayesian,"Liverpool Bay (69°50'N, 130°20'W), Canada",Fishbase - Bayesian,,,
+Pacific Herring,Clupea pallasii,HERRING,,,,,,,unsexed,0.00428,,3.232,,,,,,,,,,Bayesian,"San Francisco Bay, California, USA",Fishbase - Bayesian,,,
+Pacific Herring,Clupea pallasii,HERRING,6.7,28.7,,,,3947,,0.0026,,3.283,,,,,,,,,,"""simple linear least squares of log-transformed weight""",South-eastern coast of Korea,"Park and Huh, 2015",,,
+Pacific Herring,Clupea pallasii,HERRING,13.8,28.7,,,,112,,0.0031,,3.235,,,,,,,,,,"""simple linear least squares of log-transformed weight""",South-eastern coast of Korea,"Park and Huh, 2015",,,
+Pacific Herring,Clupea pallasii,HERRING,6.7,28,,,,3710,,0.0025,,3.305,,,,,,,,,,"""simple linear least squares of log-transformed weight""",South-eastern coast of Korea,"Park and Huh, 2015",,,
+Pacific Herring,Clupea pallasii,HERRING,12.8,25.9,,,,104,,0.0038,,3.141,,,,,,,,,,"""simple linear least squares of log-transformed weight""",South-eastern coast of Korea,"Park and Huh, 2015",,,
+Shiner perch,Cymatogaster aggregata,PERCHSH,,,TL,,,,,,0.0195,3.02,,,,,,,,,,Bayesian,,Fishbase - Bayesian Ref. 93245,,,
+Buffalo sculpin,Enophrys bison,SCULBUF,,,TL,,,,,,0.00912,3.09,,,,,,,,,,Bayesian,,Fishbase - Bayesian; Ref 93245,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,28,68,FL,,,1445,Mixed,0.0876,,2.308,,,,,,,,,,Bayesian,"SE Sakhalin, Russia 1975-1978",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,24,64,FL,,,1948,Mixed,0.0599,,2.39,,,,,,,,,,Bayesian,"Peter the Great Bay, Sea of Japan, Russia 1979/1980",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,16,70,FL,,,2397,Mixed,0.0613,,2.482,,,,,,,,,,Bayesian,"SE Bering Sea, USA / 1979-1980",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,8,74,FL,,,1105,Mixed,0.0338,,2.599,,,,,,,,,,Bayesian,"Havarin canyon, Russia / 1978-1979",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,16,76,FL,,,2955,Mixed,0.0206,,2.718,,,,,,,,,,Bayesian,"Western Bering Sea, Russia / 1978-1979",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,,,,,,,Unsexed,0.0178,,2.768,,,,,,,,,,Bayesian,"Bering Sea and Aleutian Islands, AK / 1983",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,12,74,FL,,,1134,Mixed,0.0154,,2.783,,,,,,,,,,Bayesian,"South Kurils, Russia / 1978",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,24,80,FL,,,4978,Female,0.0118,,2.85,,,,,0.03,,,,,Bayesian,"Western Bering Sea (Russian EEZ and within (54°-60°N, 164°E-177°W) 1990; 1995-98",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,,,,,,,unsexed,0.0132,,2.858,,,,,,,,,,Bayesian,"Bering Sea and Aleutian Islands, AK/1980",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,28,82,FL,,,2258,Male,0.0104,,2.88,,,,,0.03,,,,,Bayesian,"Western Bering Sea, Russia (Russian EEZ and within (54°-60°N, 164°E-177°W) 1990; 1995-98",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,,,,,,,unsexed,0.0104,,2.912,,,,,,,,,,Bayesian,"Bering Sea and Aleutian Islands, AK/1991",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,,,,,,,unsexed,0.0081,,2.983,,,,,,,,,,Bayesian,Bering Sea and Aleutian Islands / 1997,Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,20,68,FL,,,823,mixed,0.0066,,2.984,,,,,,,,,,Bayesian,"SE Kamchatka, Russia / 1979-1980",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,,,,,,,unsexed,0.0066,,3.018,,,,,,,,,,Bayesian,"Bering Sea and Aleutian Islands, AK 2002",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,,,,,,,unsexed,0.0064,,3.019,,,,,,,,,,Bayesian,Bering Sea and Aleutian Islands /2000,Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,,,,,,,unsexed,0.0069,,3.022,,,,,,,,,,Bayesian,"Bering Sea and Aleutian Islands, AK /1994",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,,,,,,,unsexed,0.0059,,3.03,,,,,,,,,,Bayesian,"Gulf of Alaska, USA",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,9,79,FL,,,7345,mixed,0.00397,,3.148,,,,,,,,,,Bayesian,"West Kamchatka,Russia / 1985-1995",Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,10,72,FL,,,5350,mixed,0.0037,,3.157,,,,,,,,,,Bayesian,Northern Sea of Okhotsk/1987-1995,Fishbase - Bayesian,,,
+Walleye pollock,Gadus chalcogrammus,POLLOCK,16,70,FL,,,1448,mixed,0.0006,,3.596,,,,,,,,,,Bayesian,"Gulf of Alaska, USA / 1980",Fishbase - Bayesian,,,
+Brown Irish lord,Hemilepidotus spinosus,UNLORD,,,,,,,,0.00708,,3.13,,,0.21,,,0.00296,0.01962,2.92,3.34,Bayesian,,Fishbase - Bayesian,,,
+Masked greenling,Hexagrammos octogrammus,GREENMAS,,,,,,,,0.00457,,3.13,,,,,,0.0018,0.01158,2.9,3.36,Bayesian,,Fishbase - Bayesian,,,
+Rock sole,Lepidopsetta spp.,SOLEROC,20,45,TL,,,1018,,0.02062,,2.858,,,,,,,,,,type I linear regression,,Tarta Strait sea of Japan,,,
+Snake prickleback,Lumpenus sagitta,PRICKSN,,,,,,,,0.001929,,2.99,,,,,,0.0005,0.00331,2.77,3.21,Bayesian,,Fishbase - Bayesian,,,
+Shorthorn sculpin,Myoxocephalus scorpius,,,,,,,780,male,0.0343,,2.73,,,,,,,,,,Bayesian,"Limfjord, Denmark",Fishbase - Bayesian,,,
+Shorthorn sculpin,Myoxocephalus scorpius,,,,,,,1028,male,0.0279,,2.89,,,,,,,,,,Bayesian,"sonderborg Bugt, Denmark",Fishbase - Bayesian,,,
+Shorthorn sculpin,Myoxocephalus scorpius,,,,,,,204,male,0.0158,,2.96,,,,,,,,,,Bayesian,"Koge Bugt, Denmark",Fishbase - Bayesian,,,
+Shorthorn sculpin,Myoxocephalus scorpius,,2.5,33.5,TL,,,938,unsexed,0.0114,,3.104,,,,,,,,,,bayesian,North Sea/ 1995-2008,Fishbase - Bayesian,,,
+Shorthorn sculpin,Myoxocephalus scorpius,,12,35,TL,,,311,unsexed,,0.0126,3.124,,,,,,,,,,bayesian,"Moray Firth, Buchan & Danish Coast, UK",Fishbase - Bayesian,,,
+Shorthorn sculpin,Myoxocephalus scorpius,,,,,,,1054,female,0.0093,,3.18,,,,,,,,,,bayesian,"Limfjord, Denmark",Fishbase - Bayesian,,,
+Shorthorn sculpin,Myoxocephalus scorpius,,,,,,,1139,female,0.0094,,3.18,,,,,,,,,,bayesian,"sonderborg Bugt, Denmark",Fishbase - Bayesian,,,
+Shorthorn sculpin,Myoxocephalus scorpius,,,,,,,100,female,0.0074,,3.28,,,,,,,,,,bayesian,"Koge Bugt, Denmark",Fishbase - Bayesian,,,
+Longhorn sculpin,Myoxcephalus octodecemspinosus,,,,,,,,,,0.00708,3.13,,,,,,,,,,bayesian,,Fishbase - Bayesian,,,
+Crescent gunnel,Pholis laeta,GUNNCRE,,,,,,,,0.00182,,3.15,,,,,,0.00071,0.00463,2.93,3.37,Bayesian,,Fishbase - Bayesian,,,
+Brown rockfish,Sebastes auriculatus,ROCKBRO,,,,,,,,0.01023,,3.07,,,,,,0.00488,0.02145,2.9,3.24,Bayesian,,fishbase - Bayesian,,,
+Quillback rockfish,Sebastes maliger,ROCKQUI,48,48,TL,,,1,unsexed,,0.02966,3,,,,,,,,,,Bayesian,,fishbase - Bayesian,,,
+Rockfish,Sebastes serriceps,,,,,40.6,,,both,0.01404,,3.081,,,,,,,,,,unsure,,"Colton and Larson, 2007",,,
+Rockfish,S. carnatus,,,,,42.5,,,n/a,0.0186,,2.957,,,,,,,,,,unsure,,"Colton and Larson, 2007",,,
+Rockfish,S. caurinus,,,,,26.4,,,both,0.0172,,3.018,,,,,,,,,,unsure,,"Colton and Larson, 2007",,,
+Rockfish,S. chrysomelas,,,,,39.6,,,female,0.0081,,3.257,,,,,,,,,,unsure,,"Colton and Larson, 2007",,,
+Rockfish,S. nigrocinctus,,,,,63.5,,,n/a,0.009,,3.205,,,,,,,,,,unsure,,"Colton and Larson, 2007",,,
+Rockfish,S. rastrelliger,,,,,55.9,,,both,0.045,,2.77,,,,,,,,,,unsure,,"Colton and Larson, 2007",,,
+Rockfish,S. rosenblatti,,,,,48.3,,,both,0.01103,,3.10572,,,,,,,,,,unsure,,"Colton and Larson, 2007",,,
+Rockfish,S. rubrivinctus,,,,,44,,,n/a,0.0146,,3,,,,,,,,,,unsure,,"Colton and Larson, 2007",,,
+Slender cockscomb,Anoplarchus insignis,COCKSSL,,,,,,,,0.00389,,3.12,,,,,,0.0018,0.00842,2.94,3.3,Bayesian,,fishbase - Bayesian,,,
+Penpoint gunnel,Apodichthys flavidus,GUNNPEN,,,,,,,,0.00182,,3.15,,,,,,0.00071,0.00463,2.93,3.37,Bayesian,,fishbase - Bayesian,,,
+Pacific sanddab,Citharichthys sordidus,SDABPAC,,,,,,,,0.00933,,3.08,,,,,,0.00443,0.01965,2.89,3.27,Bayesian,,fishbase - Bayesian,,,
+Speckled sanddab,Citharichthys stigmaeus,SDABSPKL,,,,,,,,0.00708,,3.15,,,,,,0.00306,0.01693,2.97,3.33,Bayesian,,fishbase - Bayesian,,,
+Butter sole,Isopsetta isolepis,SOLEBUT,,,,,,,,0.00912,,3.09,,,,,,0.00453,0.01836,2.93,3.25,Bayesian,,fishbase - Bayesian,,,
+Sailfin sculpin,Nautichthys oculofasciatus,SCULSAIL,,,,,,,,0.00447,,3.11,,,,,,0.00172,0.01163,2.89,3.33,Bayesian,,fishbase - Bayesian,,,
+Tidepool sculpin,Oligocottus maculosus,SCULTIDE,,,,,,,,0.00708,,3.13,,,,,,0.00269,0.01692,2.92,3.34,Bayesian,,fishbase - Bayesian,,,
+Tubenose poacher,Pallasina barbata,POATUBE,,,,,,,,0.00389,,3.12,,,,,,0.0018,0.00842,2.94,3.3,Bayesian,,fishbase - Bayesian,,,
+Manacled sculpin,Synchirus gilli,SCULMAN,,,,,,,,0.00708,,3.13,,,,,,0.00296,0.01692,2.92,3.34,Bayesian,,fishbase - Bayesian,,,
+Padded sculpin,Artedius fenestralis,SCULPAD,,,,,,,,0.00708,,3.13,,,,,,0.00296,0.01692,2.92,3.34,Bayesian,,fishbase - Bayesian,,,
+Smoothhead sculpin,Artedius lateralis,SCULSMO,,,,,,,,0.00708,,3.13,,,,,,0.00296,0.01692,2.92,3.34,Bayesian,,fishbase - Bayesian,,,
+Giant wrymouth,Cryptacanthodes giganteus,WRYGI,,,,,,,,0.00389,,3.12,,,,,,0.0018,0.00842,2.94,3.3,Bayesian,,fishbase - Bayesian,,,
+Pygmy poacher,Odontopyxis trispinosa,POAPYGMY,,,,,,,,0.00389,,3.12,,,,,,0.0018,0.00842,2.94,3.3,Bayesian,,fishbase - Bayesian,,,
+C-O Sole,Pleuronichthys coenosus,SOLECO,,,,,,,,0.00912,,3.09,,,,,,0.00453,0.01836,2.93,3.25,Bayesian,,fishbase - Bayesian,,,
+Sturgeon poacher,Podothecus accipenserinus,POASTUR,,,,,,,,0.00389,,3.12,,,,,,,,,,Bayesian,,,,,
+Grunt sculpin,Rhamphocottus richardsonii,SCULGRU,,,,,,,,0.01,,3.04,,,,,,,,,,Bayesian,,,,,
+Pacific sand lance,Ammodytes personatus,SANDLNCP,,,FL,,,,unsexed,0.0404,,3.006,0.9801,,,,,,,,,type I linear regression,"East coast, 1993-94",26572,410,,3
+Tubesnout,Aulorhynchus flavidus,TUBESNT,5.5,18.8,TL,,,31,mixed,0.00044,0.00044,3.43,0.9409,,,,,,,,,type I linear regression,"Yaquina Estuary, Oregon",51446,840,Specimens over 16 cm underrepresented in the equation.,3
+Tubesnout,Aulorhynchus flavidus,TUBESNT,5.5,18.8,TL,,,31,mixed,0.00044,0.00044,3.43,0.9409,,,,,,,,,type I linear regression,"Yaquina Estuary, Oregon",51446,840,Specimens over 16 cm underrepresented in the equation.,3
+Silverspotted sculpin,Blepsias cirrhosus,SCULSILV,10,19,TL,,,33,mixed,0.0088,,3.0278,0.95063,,,,,,,,,type I linear regression,Northern Primorye,,643,,1287
+Pacific cod,Gadus macrocephalus,CODPAC,,,,,,216,unsexed,0.0224,,2.89,0.9006,,,,,,,,,type I linear regression,"North Puget Sound, Washington",4511,840,,3
+Pacific cod,Gadus macrocephalus,CODPAC,44,81,TL,,,33,Mixed,0.0032,0.0032,3.331,,,,,,,,,,type I linear regression,Northeastern Sea of Okhotsk,,643,,1287
+Pacific cod,Gadus macrocephalus,CODPAC,10,100,FL,,,,Mixed,0.00548,0.00548,3.1883,,,,,,,,,,type I linear regression,Sea of Okhotsk,,643,,1287
+Pacific cod,Gadus macrocephalus,CODPAC,10,100,FL,,,,Mixed,0.00749,0.00749,3.0885,,,,,,,,,,type I linear regression,North Kurils,,643,,1287
+Pacific cod,Gadus macrocephalus,CODPAC,10,100,FL,,,,Mixed,0.00793,0.00793,3.0968,,,,,,,,,,type I linear regression,South Kurils,,643,,1287
+Pacific cod,Gadus macrocephalus,CODPAC,18,50,TL,,,,Mixed,0.0063,0.0063,3.138,0.97023,,,,,,,,,type I linear regression,Shantar Isl. (Northwestern Sea of Okhotsk)/1995,,643,,1287
+Pacific cod,Gadus macrocephalus,CODPAC,31,106,FL,,,699,Female,0.00376,,3.28,0.971,,,,,,,,,type I linear regression,"western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,643,,3
+Pacific cod,Gadus macrocephalus,CODPAC,34,91,FL,,,726,Male,0.00431,,3.25,0.962,,,,,,,,,type I linear regression,"western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,643,,3
+Pacific cod,Gadus macrocephalus,CODPAC,,,,,,,unsexed,0.0117,,3,,,,,,,,,,type I linear regression,"West coast, 1987-89",7275,304,b not significantly different from 3. Under <i>Gadus ogac</i>.,3
+Pacific cod,Gadus macrocephalus,CODPAC,,,,,,216,unsexed,0.0224,,2.89,0.9006,,,,,,,,,type I linear regression,"North Puget Sound, Washington",4511,840,,3
+Threespine stickleback,Gasterosteus aculeatus,STICK3,4.3,8.2,TL,,,500,mixed,0.0044,,3.544,0.8836,,,,,,,,,type I linear regression,,59087,364,,3
+Threespine stickleback,Gasterosteus aculeatus,STICK3,1.3,4.7,SL,,Yes,568,mixed,0.01,,3.61,,,,,,,,,,type I linear regression,"coastal streams' mouths, northwestern Baja California (32°23'01"" N--30°02'32.5"" N), 1983-97",59092,484,,3
+Threespine stickleback,Gasterosteus aculeatus,STICK3,2.1,8.2,TL,,,262,unsexed,0.0068,,3.26,0.958,,0.025,,,,,,,type I linear regression,"Lake Iznik, Marmara, Oct. 2003-Aug. 2004 (Oct.-Aug.)",59105,792,,3
+Threespine stickleback,Gasterosteus aculeatus,STICK3,1.5,10,TL,,,29213,unsexed,0.0105,,3.049,0.9,,,,,,,,,type I linear regression,"Flanders (Yser, Scheldt and Meuse drainage basin), 1992-2009",88166,56,,3
+Threespine stickleback,Gasterosteus aculeatus,STICK3,3.75,8.5,TL,,,122,unsexed,0.0239,,2.6111,0.7617,,,,,,,,,type I linear regression,North Sea / 1994-2008,,,,65
+Kelp greenling,Hexagrammos decagrammus,GREENKEL,45,45,TL,,,1,unsexed,0.01558,0.01558,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+Whitespotted greenling,Hexagrammos stelleri,GREENWHI,13.6,35.2,FL,,,444,mixed,0.00305,,3.4278,0.98605,,,,,,,,,type I linear regression,Northern Sea of Okhotsk/2005,,643,,1287
+Pacific staghorn sculpin,Leptocottus armatus,SCULPSTG,4.5,13.5,SL,,,18,mixed,0.04,,2.82,,,,,,,,,,type I linear regression,"coastal streams' mouths, northwestern Baja California (32°23'01"" N--30°02'32.5"" N), 1983-97",59092,484,,3
+Pacific staghorn sculpin,Leptocottus armatus,SCULPSTG,4.5,13.5,TL,,Yes,18,unsexed,0.04,,2.82,0.98,,,,,,,,,Type I linear regression,northwestern Baja California / 1983-1997,,484,,65
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,49.5,49.5,TL,,,1,unsexed,0.02798,0.02798,3,,,,,,,,,,single L-W pair with b=3,,,,L-W relationship calculated from data in Ref. 40637.,3
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,29,75,TL,,,837,Female,0.0062,0.0062,3.2535,0.998,,,,,,,,,type I linear regression,Kamchatka/19479-1980,,643,,1287
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,29,50,TL,,,324,Male,0.0092,0.0092,3.1297,0.998,,,,,,,,,type I linear regression,Kamchatka/1979-1980,,643,,1287
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,,,TL,,,,Mixed,0.007,0.007,3.215,,,,,,,,,,type I linear regression,Sea of Okhotsk,,643,,1287
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,39,79,TL,,,347,mixed,0.0123,,3.08,0.926,,,,,,,,,type I linear regression,"western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,643,,3
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,49.5,49.5,TL,,,1,unsexed,0.02798,0.02798,3,,,,,,,,,,single L-W pair with b=3,,,,L-W relationship calculated from data in Ref. 40637.,3
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,29,75,TL,,,837,Female,0.0062,0.0062,3.2535,0.998,,,,,,,,,type I linear regression,Kamchatka/19479-1980,,643,,1287
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,29,50,TL,,,324,Male,0.0092,0.0092,3.1297,0.998,,,,,,,,,type I linear regression,Kamchatka/1979-1980,,643,,1287
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,,,TL,,,,Mixed,0.007,0.007,3.215,,,,,,,,,,type I linear regression,Sea of Okhotsk,,643,,1287
+Great sculpin,Myoxocephalus polyacanthocephalus,SCULGRT,39,79,TL,,,347,mixed,0.0123,,3.08,0.926,,,,,,,,,type I linear regression,"western Bering Sea (Russian EEZ and within 54°-60°N, 164°E-177°W), 1990; 1995-98",80637,643,,3
+Pink salmon,Oncorhynchus gorbuscha,SALPINK,,,,,,,unsexed,0.00336,,3.3,,,,,,,,,,type I linear regression,Sea of Okhotsk,7231,643,,3
+Pink salmon,Oncorhynchus gorbuscha,SALPINK,,,FL,,,,Mixed,0.024,0.02198,3.2,,,,,,,,,,type I linear regression,1955-1957,,124C,Given as log w = -3.747 + 3.2 log l; apparently natural logarithm was used. Estimate was done by plot on double-logarithmic paper.,1
+Chum salmon,Oncorhynchus keta,SALCHUM,101,101,TL,,,1,unsexed,0.01408,0.01408,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+Chum salmon,Oncorhynchus keta,SALCHUM,,,FL,,,,Mixed,0.023,0.02179,3.2,,,,,,,,,,type I linear regression,1955-1957,,124C,Given as log w = -3.780 + 3.2 log l; apparently natural logarithm was used. Estimate was done by plot on double-logarithmic paper.,1
+Coho salmon,Oncorhynchus kisutch,SALCOHO,98,98,TL,no,,1,unsexed,0.0112,0.0112,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated using data in Ref.,1
+Chinook salmon,Oncorhynchus tshawytscha,SALCHIN,149,149,TL,,,1,unsexed,0.01333,0.01333,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+Lingcod,Ophiodon elongatus,LINGCOD,133,133,TL,,,1,unsexed,0.0133,0.0133,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+English sole,Parophrys vetulus,SOLEENG,,,,,,159,unsexed,0.00383,,3.127,0.9409,,,,,,,,,type I linear regression,"North Puget Sound, Washington",4511,840,,3
+English sole,Parophrys vetulus,SOLEENG,22,55,TL,no,,1643,Mixed,0.01429,0.01429,2.9036,,,,,,,,,,type I linear regression,Strait of Georgia,,124C,,1287
+Starry flounder,Platichthys stellatus,FLOUNST,54.1,51.4,TL,,,1,unsexed,0.0125,0.0125,3,,,,,,,,,,single L-W pair with b=3,,,NA,L-W relationship calculated from data in Ref. 40637.,3
+Starry flounder,Platichthys stellatus,FLOUNST,27,64,TL,,,263,Mixed,0.00359,0.00359,3.3433,,,,,,,,,,type I linear regression,Br. Columbia,,124C,,1287
+Starry flounder,Platichthys stellatus,FLOUNST,22,51,TL,,,297,Mixed,0.01531,0.01531,2.9993,,,,,,,,,,type I linear regression,Sea of Japan,,643,,1287
+Starry flounder,Platichthys stellatus,FLOUNST,17.6,48.5,TL,,,250,unsexed,0.0121,,3.081,0.96,,,,,,,,,Type I linear regression,Gyeongsangbuk-do coast / 2011-2012,,410,,65
+Dolly varden,Salvelinus malma,DOLLY,91,91,TL,,,1,unsexed,0.0101,0.0101,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+Dolly varden,Salvelinus malma,DOLLY,12.5,61.5,FL,,,221,unsexed,0.00302,0.00302,3.18,0.99002,,,,,,,,,type I linear regression,"Simpson Cove, Arctic Nat'l Wildlife Refuge, 1988-91",34025,840A,,3
+Dolly varden,Salvelinus malma,DOLLY,12.5,61.5,FL,,,191,unsexed,0.00334,0.00334,3.16,0.99002,,,,,,,,,type I linear regression,"Beaufort lagoon, Arctic Nat'l Wildlife Refuge, 1988-91",34025,840A,,3
+Dolly varden,Salvelinus malma,DOLLY,12.5,61.5,FL,,,398,unsexed,0.00437,0.00437,3.12,0.99002,,,,,,,,,type I linear regression,"Barter I., Arctic Nat'l Wildlife Refuge, 1988-91",34025,840A,,3
+Cabezon,Scorpaenichthys marmoratus,CABEZON,71,71,TL,,,1,unsexed,0.02914,0.02914,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+Silvergray rockfish,Sebastes brevispinis,ROCKSLG,40.6,61,TL,,,3,unsexed,0.0143,0.0143,3,,,,,,,,,,several L-W pairs with b=3,,,,L-W relationship calculated from data in Ref. 40637.,3
+Copper rockfish,Sebastes caurinus,ROCKCOP,53,53,TL,,,1,unsexed,0.01746,0.01746,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+Quillback rockfish,Sebastes maliger,ROCKQUI,48,48,TL,,,1,unsexed,0.02966,0.02966,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+Black rockfish,Sebastes melanops,ROCKBLA,60,60,TL,,,1,unsexed,0.02111,0.02111,3,,,,,,,,,,single L-W pair with b=3,,,,Estimated from data given in Reference.,1
+Bay Pipefish,Syngnathus leptorhynchus,PIPEFISH,6.8,38.5,TL,,,57,mixed,0.0002,,3.12,,,,,,,,,,Type I linear regression,"Yaquina estuary, Oregon (44°38'N, 124°13'W), 1975-76",93899,840,Only 2 pipefish were over 34. cm; the regression equation underestimates weight of the largest fish.,3
