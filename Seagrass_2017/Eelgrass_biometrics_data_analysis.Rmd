@@ -13,7 +13,6 @@ This script generates a dataframe from the eelgrass biometrics data that will be
 ```{r, echo=FALSE, message = FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
-library(FSA)
 
 theme_set(theme_classic())
 ```
@@ -356,7 +355,15 @@ Assign lengths to unmeasured fish based on sampled distribution. This assignment
 dat <- fish.m %>% 
   filter(site == "2017_H_03") %>% 
   filter(sp_code == "STICK3")
+
 dens <- density(dat$fork_length, n = 1000)
+plot(dens)
+raw <- data.frame(x = round(dens$x, 0), y = dens$y)
+
+
+test <- data.frame(bins = round(min(dens$x):max(dens$x), 0),
+                   val = )
+
 df <- data.frame(x = as.character(round(dens$x, 0)), y = dens$y)
 df2 <- df %>% 
   group_by(x) %>% 
