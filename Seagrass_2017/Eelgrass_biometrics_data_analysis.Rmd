@@ -349,7 +349,47 @@ fish.um$unmeasured <- as.numeric(fish.um$unmeasured)
 When beach seining we only measured the first 30 individuals of a species, and counted the rest. We can use the measured fishes to create a distribution from which we can assign lengths to the unmeasured fishes.
 
 Assign lengths to unmeasured fish based on sampled distribution. This assignment should happen at the site level. i.e. use the distribution of fishes at a site to assign unmeasured fishes at that site. There was only one seine per site and only one sine per day so site and date are essentially unique identifiers for how we want to restrict our analysis. 
-```{r assignment}
+
+Option 1 will be to assume the least and jsut use the sampled proportions to assign lenghts to unmeasured fish
+```{r assignment direct}
+# Exclued fishes that do not have a measured counterpart. These were insantces when we tossed a fish without knowing what it was other than it was a sculpin thing  
+fish.um.redu <- fish.um[c(1:29, 31, 32, 34, 35, 36, 38:53, 55:60, 63:89, 91:95),]
+
+d <- data.frame()
+for(s in unique(fish.um.redu$site)){ # cycle through sites
+  dat.m <- fish.m %>% # subset measured data
+    filter(site == s)
+  dat.um <- fish.um.redu %>% #subset unmeasured data
+      filter(site == s)
+  for(i in unique(dat.um$sp_code)){ #cycle through species that are in UNMEASURED data
+    samp <- dat.m %>% # create sample from which to make distrubution
+      filter(sp_code == i)
+    unmeas <- dat.um %>% # isolate unmeasured fish
+      filter(sp_code == i)
+    unmeas <- as.numeric(unmeas$unmeasured) # save unmeasured value
+    dat <- data.frame(size = as.character(samp$fork_length))
+    dat2 <- dat %>% 
+      group_by(size) %>% 
+      summarise(count = n())
+    dat2$porb <- (dat2$count/sum(dat2$count))
+    dat2$x <- as.numeric(paste(dat2$size))
+    fx <- function(n){ # function derived from limits and probabilities of above
+    sample(x = min(dat2$x):max(dat2$x), n, replace = TRUE, prob = dat2$prob)
+    }
+    dat3 <- data.frame(site = s, sp_code = i, fork_length = fx(unmeas))
+    d <- rbind(d, dat3)
+  }
+} # this is returning an error in regards to prob, but i am not sure what its talking about
+```
+
+Append assigned lengths to master data
+```{r}
+fish.all <- bind_rows(fish.m, d)
+```
+
+
+Option 2 will generate a smooth distribution around the sampled fish and then create a function to assing lengths - this is NOT preferes as on Feb 7 2018
+```{r assignment distribution}
 # Exclued fishes that do not have a measured counterpart. These were insantces when we tossed a fish without knowing what it was other than it was a sculpin thing  
 fish.um <- fish.um[c(1:29, 31, 32, 34, 35, 36, 38:53, 55:60, 63:89, 91:95),]
 
@@ -379,6 +419,5 @@ for(s in unique(fish.um$site)){ # cycle through sites
     d <- rbind(d, lfq.df) # bind results to dummy data frame
   }
 }
-
 ```
 
