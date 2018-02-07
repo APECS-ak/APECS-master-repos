@@ -341,8 +341,6 @@ fish.um <- fish %>%
   filter(taxon == "Vertebrata") %>% 
   filter(unmeasured != "estimate") %>% # assume that infield estimates are accurate
   filter(unmeasured > 0)
-  
-fish.um <- fish.um[c(1:26, 31, 32, 34, 35, 36, 38:53, 55:89, 91:98),]
 
 fish.um$unmeasured <- as.numeric(fish.um$unmeasured)
 ```
@@ -351,60 +349,36 @@ fish.um$unmeasured <- as.numeric(fish.um$unmeasured)
 When beach seining we only measured the first 30 individuals of a species, and counted the rest. We can use the measured fishes to create a distribution from which we can assign lengths to the unmeasured fishes.
 
 Assign lengths to unmeasured fish based on sampled distribution. This assignment should happen at the site level. i.e. use the distribution of fishes at a site to assign unmeasured fishes at that site. There was only one seine per site and only one sine per day so site and date are essentially unique identifiers for how we want to restrict our analysis. 
-```{r}
-dat <- fish.m %>% 
-  filter(site == "2017_H_03") %>% 
-  filter(sp_code == "STICK3")
+```{r assignment}
+# Exclued fishes that do not have a measured counterpart. These were insantces when we tossed a fish without knowing what it was other than it was a sculpin thing  
+fish.um <- fish.um[c(1:29, 31, 32, 34, 35, 36, 38:53, 55:60, 63:89, 91:95),]
 
-dens <- density(dat$fork_length, n = 1000)
-plot(dens)
-raw <- data.frame(x = round(dens$x, 0), y = dens$y)
-
-
-test <- data.frame(bins = round(min(dens$x):max(dens$x), 0),
-                   val = )
-
-df <- data.frame(x = as.character(round(dens$x, 0)), y = dens$y)
-df2 <- df %>% 
-  group_by(x) %>% 
-  summarise(pred = sum(y))
-df2$x <- as.numeric(levels(df2$x))
-df2$prop <- df2$pred/sum(df2$pred)
-df2$count <- round(df2$prop * (1/min(df2$prop)), 0)
-df3 <- rep(x = df2$x, df2$count)
-test <- expandLenFreq(df3, 1, 3069)
-
-
-
-
-d <- data.frame()
-for(s in unique(fish.um$site)){
-  dat.m <- fish.m %>% 
+d <- data.frame() # dummy data frame
+for(s in unique(fish.um$site)){ # cycle through sites
+  dat.m <- fish.m %>% # subset measured data
     filter(site == s)
-  dat.um <- fish.um %>% 
+  dat.um <- fish.um %>% #subset unmeasured data
       filter(site == s)
-  for(i in unique(dat.um$sp_code)){
-    samp <- dat.m %>%
+  for(i in unique(dat.um$sp_code)){ #cycle through species that are in UNMEASURED data
+    samp <- dat.m %>% # create sample from which to make distrubution
       filter(sp_code == i)
-    unmeas <- dat.um %>%
+    unmeas <- dat.um %>% # isolate unmeasured fish
       filter(sp_code == i)
-    unmeas <- as.numeric(unmeas$unmeasured)
-    dens <- density(samp$fork_length, n = 1000)
-    df <- data.frame(x = as.character(round(dens$x, 0)), y = dens$y)
-    df2 <- df %>% 
+    unmeas <- as.numeric(unmeas$unmeasured)# save number of unmeasured fish
+    dens <- density(samp$fork_length, n = 1000, from = min(samp$fork_length), to = max(samp$fork_length)) # create kernel density around sampled fish distribution but restrict upper and lower bounds to observed upper and lower
+    df <- data.frame(x = as.character(round(dens$x, 0)), y = dens$y) # convert dens to dataframe
+    df2 <- df %>% # sum predicted values by size classes
       group_by(x) %>% 
       summarise(pred = sum(y))
-    df2$x <- as.numeric(levels(df2$x))
-    df2$prop <- df2$pred/sum(df2$pred)
-    df2$count <- round(df2$prop * 1/min(df2$prop), 6)
-    df3 <- rep(x = df2$x, df2$count)
-    lfq <- expandLenFreq(df3, 1, numeas, startcat = abs(min(df3)), FALSE)
-    lfq.df <- data.frame(site = s, sp_code = i, fl = lfq)
-    d <- rbind(d, lfq.df)
+    df2$x <- as.numeric(levels(df2$x))[df2$x] # convert size bins to numeric
+    df2$prop <- df2$pred/sum(df2$pred) # calcualte probability of each bin
+    fx <- function(n){ # function derived from limits and probabilities of above
+    sample(x = min(df2$x):max(df2$x), n, replace = TRUE, prob = df2$prop)
+    }
+    lfq.df <- data.frame(site = s, sp_code = i, val = fx(unmeas)) # sample from that disctribution using the function
+    d <- rbind(d, lfq.df) # bind results to dummy data frame
   }
 }
-
-
 
 ```
 
