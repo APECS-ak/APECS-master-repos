@@ -342,6 +342,8 @@ fish.um <- fish %>%
   filter(taxon == "Vertebrata") %>% 
   filter(unmeasured != "estimate") %>% # assume that infield estimates are accurate
   filter(unmeasured > 0)
+  
+fish.um <- fish.um[c(1:26, 31, 32, 34, 35, 36, 38:53, 55:89, 91:98),]
 
 fish.um$unmeasured <- as.numeric(fish.um$unmeasured)
 ```
@@ -351,24 +353,51 @@ When beach seining we only measured the first 30 individuals of a species, and c
 
 Assign lengths to unmeasured fish based on sampled distribution. This assignment should happen at the site level. i.e. use the distribution of fishes at a site to assign unmeasured fishes at that site. There was only one seine per site and only one sine per day so site and date are essentially unique identifiers for how we want to restrict our analysis. 
 ```{r}
-hist(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"], probability  = TRUE, breaks = 10)
-sd(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"])
-lines(density(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"], bw = 11.33))
-
-density(fish.m$fork_length[fish.m$sp_code == "SANDLNCP"] )
-
 dat <- fish.m %>% 
   filter(site == "2017_H_03") %>% 
   filter(sp_code == "STICK3")
-
-hist(dat$fork_length, breaks = 20)
 dens <- density(dat$fork_length, n = 1000)
-hist(dens$x)
-plot(dens)
-range(dat$fork_length)
-dens$x
+df <- data.frame(x = as.character(round(dens$x, 0)), y = dens$y)
+df2 <- df %>% 
+  group_by(x) %>% 
+  summarise(pred = sum(y))
+df2$x <- as.numeric(levels(df2$x))
+df2$prop <- df2$pred/sum(df2$pred)
+df2$count <- round(df2$prop * (1/min(df2$prop)), 0)
+df3 <- rep(x = df2$x, df2$count)
+test <- expandLenFreq(df3, 1, 3069)
 
 
-test <- expandLenFreq(dens$x, 1, 3069)
+
+
+d <- data.frame()
+for(s in unique(fish.um$site)){
+  dat.m <- fish.m %>% 
+    filter(site == s)
+  dat.um <- fish.um %>% 
+      filter(site == s)
+  for(i in unique(dat.um$sp_code)){
+    samp <- dat.m %>%
+      filter(sp_code == i)
+    unmeas <- dat.um %>%
+      filter(sp_code == i)
+    unmeas <- as.numeric(unmeas$unmeasured)
+    dens <- density(samp$fork_length, n = 1000)
+    df <- data.frame(x = as.character(round(dens$x, 0)), y = dens$y)
+    df2 <- df %>% 
+      group_by(x) %>% 
+      summarise(pred = sum(y))
+    df2$x <- as.numeric(levels(df2$x))
+    df2$prop <- df2$pred/sum(df2$pred)
+    df2$count <- round(df2$prop * 1/min(df2$prop), 6)
+    df3 <- rep(x = df2$x, df2$count)
+    lfq <- expandLenFreq(df3, 1, numeas, startcat = abs(min(df3)), FALSE)
+    lfq.df <- data.frame(site = s, sp_code = i, fl = lfq)
+    d <- rbind(d, lfq.df)
+  }
+}
+
+
+
 ```
 
