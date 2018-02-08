@@ -50,8 +50,8 @@ If top-down (sea otter) forces are structuring eelgrass communities, then we wou
 6. total grazer load (g grazers/ g eelgrass)
     + gastropod load (g grazers/ g eelgrass)
     + crustaecean load (g grazers/ g eelgrass)
-7. crab biomass (g)
-8. fish standarized by ... candidates are length, gape size, biomass
+7. crab biomass (g) - can also be counts
+8. fish biomass (g) - can also be counts
 
 **Primary explanatory factors**
 Not all these fators will necessarily be used in all models
@@ -62,13 +62,16 @@ Not all these fators will necessarily be used in all models
 **Secondary explanatory factors**
 Factors that are more specific to certain tests
 1. crab biomass (g)
-2. fish
+2. fish biomass (g)
+3. grazer biomass (g)
 
 ```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
 tran.dat <- read.csv( "../ALL_DATA/eelgrass_bio_sed_transect_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 crab.dat$string <- as.character(crab.dat$string)
+
+fish.dat <- read.csv("../ALL_DATA/eelgrass_beach_seine_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ### Data Prep
@@ -88,7 +91,6 @@ crab.rock <- crab.dat %>%
   summarise(count = sum(count),
             mass = sum(mass_g))
 ```
-
 
 ## 2. Testing assumptions
 
@@ -3985,7 +3987,7 @@ Dayindx <- Julianday - Minday + 1
 MeanDay <- round(mean(Dayindx),0)
 
 # Model comparison data frame
-ModComp.5 <- data.frame(Model = c("Model_6a","Model_6b","Model_6c","Model_6d","Model_6e","Model_6f","Model_6g", "Model_6h", "Model6i"), WAIC = numeric(length = 12), LOOIC = numeric(length = 12))
+ModComp.6 <- data.frame(Model = c("Model_6a","Model_6b","Model_6c","Model_6d","Model_6e","Model_6f","Model_6g", "Model_6h", "Model6i"), WAIC = numeric(length = 12), LOOIC = numeric(length = 12))
 
 # Set up for parralel computing
 cores <- detectCores()
@@ -4000,3 +4002,89 @@ nc <- ncore
 # For parallel (comment out for serial)
 cl <- makeCluster(ncore)
 ```
+
+#### Model 6a
+INSERT MODELS HERE
+
+### Model 6 Comparison
+INSERT COMPARISONS HERE
+
+### Model 6 Best model comparison table
+INSERT COMPARISON TABLES HERE
+
+#### Model 6 Best model comparison plots
+INSERT BEST MODEL PLOTS
+
+### Model 6 Plotting best model
+INSERT BEST MODEL PLOT
+
+### Model 7 - Crab biomass
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, grazer load, and fish biomass may affect crab biomass at our sites. Note that the number of samples (nsamples) will need to adjusted to suit the number of cores running on your machine so that the resulting analysis results in >= 20,000 samples. For example if you have 8 cores you can run analysis on 7 cores so nsamples should = 2900.
+
+There are 9 instances of no crabs nad therefore no mass out of 63 stings. Should we consider a two stage model to deal with zeros??
+
+We may also want to model the responce of just cancer/rock crabs, see ObsRK
+```{r Model 7 set up, echo=FALSE}
+# Dependent observed variable: this should be whatever numeric variable you wish to analyze 
+Obs <- as.numeric(crab.string$mass)
+ObsRK <- as.numeric(crab.rock$mass)
+
+# select only oberved variables that are not NA
+ii <- which(!is.na(Obs))
+Obs <- Obs[ii]
+
+# Variables to use as independent or identifier variables
+Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
+Julianday <- as.numeric(tran.dat$date_julian)[ii]
+Graz <- as.numeric(log(tran.dat$grazmass_shootmass + 0.0001)) [ii] # add 0.0001 to have non Inf values.
+Fish <- ## INSERT FISH DATA HERE - BUT THAT MIGHT BE A WHILE ##
+Sitetxt <- tran.dat$site[ii]
+Quad <- as.numeric(tran.dat$quadrat)[ii]
+
+# Extracting attributes of data
+Sitelist <- unique(Sitetxt)
+Sitenum <- as.numeric(as.factor(Sitetxt))
+Sites <- seq(1, max(Sitenum))
+Nsites <- max(Sitenum)
+Nquads <- max(Quad)
+Nobs <- length(Obs)
+Minday <- min(Julianday)
+Dayindx <- Julianday - Minday + 1
+MeanDay <- round(mean(Dayindx),0)
+
+# Model comparison data frame
+ModComp.7 <- data.frame(Model = c("Model_7a","Model_7b","Model_7c","Model_7d","Model_7e","Model_7f","Model_7g", "Model_7h", "Model7i"), WAIC = numeric(length = 12), LOOIC = numeric(length = 12))
+
+# Set up for parralel computing
+cores <- detectCores()
+ncore <- min(20, cores-1)
+
+# Set JAGS params for running
+nsamples <- 2900
+nt <- 20
+nb <- 7000
+nc <- ncore
+
+# For parallel (comment out for serial)
+cl <- makeCluster(ncore)
+```
+
+#### Model 7a
+INSERT MODELS HERE
+
+### Model 7 Comparison
+INSERT COMPARISONS HERE
+
+### Model 7 Best model comparison table
+INSERT COMPARISON TABLES HERE
+
+#### Model 7 Best model comparison plots
+INSERT BEST MODEL PLOTS
+
+### Model 7 Plotting best model
+INSERT BEST MODEL PLOT
+
+### Model 8 - Fish biomass
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, shoot dnesity, aboveground biomass, grazer load, and crab biomass may affect fish biomass at our sites. Note that the number of samples (nsamples) will need to adjusted to suit the number of cores running on your machine so that the resulting analysis results in >= 20,000 samples. For example if you have 8 cores you can run analysis on 7 cores so nsamples should = 2900
+
+Given the structure of this data we may need to modle this differnetly
