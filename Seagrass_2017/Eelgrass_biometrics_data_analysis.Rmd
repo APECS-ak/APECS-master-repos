@@ -382,9 +382,14 @@ for(s in unique(fish.um.redu$site)){ # cycle through sites
 } # this is returning an error in regards to prob, but i am not sure what its talking about
 ```
 
-Append assigned lengths to master data
+Append assigned lengths to master data with all site level data
 ```{r}
+fish.site <- unique(fish[,1:8])
+fish.sp <- unique(fish.m[,9:11])
+d.info <- merge(d, fish.site, by = "site") 
+d.info <- merge(d.info, fish.sp, by = "sp_code")
 fish.all <- bind_rows(fish.m, d)
+
 ```
 
 
@@ -419,5 +424,105 @@ for(s in unique(fish.um$site)){ # cycle through sites
     d <- rbind(d, lfq.df) # bind results to dummy data frame
   }
 }
+```
+
+## Calculate Biomass
+Using the length-weight conversion values individual lengths will be converted to biomass. Coefficients are in cm*g so fork lengths will need to be converted to cm from mm.
+
+First the L-W conversion data will need to be prepped for use. This will include defineing one a value (collapse the a TL column), define sp_code for new species, and filter out estimates that were made from SL (standard length) and fish calssified as UNFISH or unidentified fish, and then summarise by taking the average a and b value for each species.
+```{r prep L-W}
+## put all a values in one column ##
+fishLW$a_cm.g <- ifelse(is.na(fishLW$a_cm.g), fishLW$aTL_cm.g, fishLW$a_cm.g)
+
+## define sp_code for new species ##
+# Shorthorn sculpin #
+fishLW$sp_code <- ifelse(fishLW$species_common == "Shorthorn sculpin", paste("SCULSHRN"), fishLW$sp_code)
+
+# Longhorn sculpin #
+fishLW$sp_code <- ifelse(fishLW$species_common == "Longhorn sculpin", paste("SCULLHRN"), fishLW$sp_code)
+
+# Rockfish general #
+fishLW$sp_code <- ifelse(fishLW$species_common == "Rockfish", paste("ROCKSEB"), fishLW$sp_code)
+
+## Filter and summarise ##
+LW <- fishLW %>%
+  filter(Type != "SL") %>% 
+  filter(sp_code != "UNFISH") %>% 
+  group_by(sp_code) %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g))
+```
+
+We know that we do not have estimates for a and b estiamtes for all the species so we need to apply other values to other species. First identify what species we need to have stand ins for
+1. "UNSCUL" - Unidentified sculpins will use the average a and b values for all sculpins species.
+2. "UNFLAT" - Unidentified flatfish will use the average a and b values for all flatfish species.
+3. "UNGREEN" - Unidentified greenling will use the average a and b values for all greenling speices.
+4. "UNMYOXO" - Unidentified Myoxocephalus sp. will use the the average of a and b values of sampled members of the Myoxocephalus genus.
+5. "UNGUNN" - Unidentified gunnel will use average a and b values from the sampled gunnel species
+6. "UNARTE" - Unidentified Aretedius sp. will use the average a nad b values of sampled members of the Artedeius genus.
+
+```{r setting stand ins}
+## Unique species in master data ##
+sp <- data.frame(sp_code = unique(fish.all$sp_code))
+
+## Species that need stand ins ##
+nomatch <- anti_join(sp, LW, by = "sp_code")
+
+## Summarising stand ins ##
+# Sculpins
+scul <- data.frame(sp_code = "UNSCUL", fishLW %>% 
+  filter(sp_code == "SCULBUF" | sp_code == "SCULGRT" | sp_code == "SCULGRU" |sp_code == "SCULLHRN" | sp_code == "SCULMAN" |sp_code == "SCULPAD" | sp_code == "SCULPSTG" | sp_code == "SCULSAIL" | sp_code == "SCULSHRN" | sp_code =="SCULSILV" | sp_code == "SCULSMO" | sp_code == "SCULTIDE") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+# Flats
+flat <- data.frame(sp_code = "UNFLAT", fishLW %>% 
+  filter(sp_code == "SDABPAC" | sp_code == "SDABSPKL" | sp_code == "SOLEBUT" |sp_code == "SOLECO" | sp_code == "SOLEENG" |sp_code == "SOLEROC" | sp_code == "FLOUNST") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+# Greenlings
+grns <- data.frame(sp_code = "UNGREEN", fishLW %>% 
+  filter(sp_code == "GREENKEL" | sp_code == "GREENMAS" | sp_code == "GREENWHI") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+# Myoxocephalus
+myoxo <- data.frame(sp_code = "UNMYOXO", fishLW %>% 
+  filter(sp_code == "SCULGRT" | sp_code == "SCULLHRN" | sp_code == "SCULSHRN") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+# Gunnels
+gunn <- data.frame(sp_code = "UNGUNN", fishLW %>% 
+  filter(sp_code == "GUNNCRE" | sp_code == "GUNNPEN") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+arte <- data.frame(sp_code = "UNARTE", fishLW %>% 
+  filter(sp_code == "SCULPAD" | sp_code == "SCULSMO") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+## Master a b lsit ##
+LW.master <- rbind.data.frame(LW, scul, flat, grns, myoxo, gunn, arte)
+
+## Filter out UNFISH from fish.all ##
+fish.all <- fish.all %>% 
+  filter(sp_code != "UNFISH")
+
+## Check that everything is cool ##
+anti_join(fish.all, LW.master, by = "sp_code")
+```
+
+Finally join the a and b values from above with the master data and calcualte biomass.
+```{r final join and calculate}
+fish.all.m <- merge(fish.all, LW.master, by = "sp_code")
+
+fish.all.m$fork_length_cm <- fish.all.m$fork_length / 10
+
+fish.all.m$mass_g <- (fish.all.m$a * fish.all.m$fork_length_cm^fish.all.m$b)
+hist(fish.all.m$mass_g)
+hist(log(fish.all.m$mass_g))
 ```
 
