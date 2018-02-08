@@ -314,7 +314,7 @@ crab.dat <- merge(unique(crab[, 2:9]), crab.dat, by = "site", all.y = TRUE)
 
 ```
 
-Export data for analysis
+### Export data for analysis
 ```{r}
 write.csv(crab.dat, "../ALL_DATA/eelgrass_crab_pot_derived.csv", row.names = FALSE)
 ```
@@ -384,16 +384,24 @@ for(s in unique(fish.um.redu$site)){ # cycle through sites
 
 Append assigned lengths to master data with all site level data
 ```{r}
+## Extract site and sp data ##
 fish.site <- unique(fish[,1:8])
 fish.sp <- unique(fish.m[,9:11])
-d.info <- merge(d, fish.site, by = "site") 
-d.info <- merge(d.info, fish.sp, by = "sp_code")
-fish.all <- bind_rows(fish.m, d)
 
+## Merge with loop output, the lengths of unmeasured fishes ##
+d.info <- merge(d, fish.site, by = "site")
+
+## Add species detail ##
+d.info <- merge(d.info, fish.sp, by = "sp_code")
+
+test <- anti_join(d.info, d, by = "sp_code")
+
+## Merge with original measured fishes ##
+fish.all <- bind_rows(fish.m, d.info)
 ```
 
 
-Option 2 will generate a smooth distribution around the sampled fish and then create a function to assing lengths - this is NOT preferes as on Feb 7 2018
+**NOPE DONT USE** Option 2 will generate a smooth distribution around the sampled fish and then create a function to assing lengths - this is NOT preferes as on Feb 7 2018
 ```{r assignment distribution}
 # Exclued fishes that do not have a measured counterpart. These were insantces when we tossed a fish without knowing what it was other than it was a sculpin thing  
 fish.um <- fish.um[c(1:29, 31, 32, 34, 35, 36, 38:53, 55:60, 63:89, 91:95),]
@@ -517,12 +525,27 @@ anti_join(fish.all, LW.master, by = "sp_code")
 
 Finally join the a and b values from above with the master data and calcualte biomass.
 ```{r final join and calculate}
+## Merge a and b values ##
 fish.all.m <- merge(fish.all, LW.master, by = "sp_code")
 
+## Convert mm to cm ##
 fish.all.m$fork_length_cm <- fish.all.m$fork_length / 10
 
+## Calculate mass in g ##
 fish.all.m$mass_g <- (fish.all.m$a * fish.all.m$fork_length_cm^fish.all.m$b)
+
+## some plots, cuz ya know ##
 hist(fish.all.m$mass_g)
 hist(log(fish.all.m$mass_g))
+range(fish.all.m$mass_g)
+
+## Clean up ##
+fish.all.m$taxon[is.na(fish.all.m$taxon)] <- "Vertebrata"
+```
+
+### Export
+Save to master file for use elsewhere
+```{r export}
+write.csv(fish.all.m, "../ALL_DATA/eelgrass_beach_seine_derived.csv", row.names = FALSE)
 ```
 
