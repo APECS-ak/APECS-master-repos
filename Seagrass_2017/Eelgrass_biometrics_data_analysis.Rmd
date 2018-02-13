@@ -541,13 +541,17 @@ range(fish.all.m$mass_g)
 
 ## Clean up ##
 fish.all.m$taxon[is.na(fish.all.m$taxon)] <- "Vertebrata"
+```
 
+```{r checking}
 ## Checking ##
 fish.site <- fish.all.m %>% 
   group_by(site) %>% 
   summarise(mass_g = sum(mass_g))
 
 fish.site$mass_kg <- fish.site$mass_g / 1000
+
+boxplot(fish.site$mass_g)
 
 m02 <- fish.all.m[fish.all.m$site == "2017_M_02",]
 ```
