@@ -25,6 +25,9 @@ library(arm)
 library(vegan)
 
 theme_set(theme_classic())
+
+# load other plotting features from Kruschke 2015
+source("../../DBDA2Eprograms/DBDA2Eprograms/DBDA2E-utilities.R")
 ```
 
 
