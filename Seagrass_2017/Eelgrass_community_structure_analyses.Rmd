@@ -10,6 +10,7 @@ editor_options:
 ```{r libraries, echo = FALSE, message = FALSE, warning = FALSE}
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(lattice)
 library(coda)
 library(boot)
@@ -21,6 +22,7 @@ library(HDInterval)
 library(DT)
 library(cowplot)
 library(arm)
+library(vegan)
 
 theme_set(theme_classic())
 ```
@@ -92,15 +94,36 @@ crab.rock <- crab.dat %>%
             mass = sum(mass_g))
 ```
 
-Fish data preparation. This needs to be done to summarise by site
-```{r fish sitem, echo = FALSE}
+Fish data preparation. This needs to be done to summarise by site across all species.
+```{r fish site, echo = FALSE}
 fish.site <- fish.dat %>% 
   group_by(site) %>% 
-  summarise(mass_g = sum(mass_g))
+  summarise(count = n(),
+            mass_g = sum(mass_g))
 
 fish.site$mass_kg <- fish.site$mass_g / 1000
+fish.site$gperfish <- fish.site$mass_g / fish.site$count
 ```
 
+Fish data preparation. Calculate diversity measures by site.
+```{r fish diversity}
+fish.site.sp <- fish.dat %>% 
+  group_by(site, sp_code) %>% 
+  summarise(count = n()) %>% 
+  spread(key = sp_code, value = count)
+
+fish.site.sp[is.na(fish.site.sp)] <- 0
+
+fish.site.sp$SW.diverse <- diversity(fish.site.sp[,2:56], index = "shannon")
+fish.site.sp$rarefy.rich <- rarefy(fish.site.sp[,2:56], sample = min(rowSums(fish.site.sp[,2:56])))
+
+# merge back to fish.site ##
+fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:58)], by = "site")
+```
+
+Fish data preparation. Summarise by functional groups by site. What are these funcitonal groups?
+1. Benthic predators = sculpins, gunnels, flatfish
+2. Water column predators = greenlings, shiner perch, three spines
 
 ## 2. Testing assumptions
 
@@ -3977,11 +4000,13 @@ Obs <- Obs[ii]
 Ottindx <- as.numeric(tran.dat$sea_otter_index)[ii]
 Julianday <- as.numeric(tran.dat$date_julian)[ii]
 Epi <- as.numeric(log(tran.dat$epimass_shootmass + 0.0001)) [ii] # add 0.0001 to have non Inf values.
-CrabMass <- as.numeric(crab.string$mass) ##### many 0s and/or log normalness to head with
+CrabMass <- as.numeric(log(crab.string$mass + 0.0001)) [ii] ##### many 0s and/or log normalness to head with
 CrabCnt <- as.numeric(crab.string$count) ##### many 0s and/or log normalness to head with
 RockMass <- as.numeric(crab.rock$mass) ##### many 0s and/or log normalness to head with
 RockCnt <- as.numeric(crab.rock$count) ##### many 0s and/or log normalness to head with
-Fish <- ## INSERT FISH DATA HERE - BUT THAT MIGHT BE A WHILE ##
+FishCnt <- as.numeric(fish.site$count)
+FishMass <- as.numeric(fish.site$mass_g)
+FishDiv <- as.numeric(fish.site$SW.diverse)
 Sitetxt <- tran.dat$site[ii]
 Quad <- as.numeric(tran.dat$quadrat)[ii]
 
