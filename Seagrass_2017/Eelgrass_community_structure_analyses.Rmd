@@ -92,6 +92,16 @@ crab.rock <- crab.dat %>%
             mass = sum(mass_g))
 ```
 
+Fish data preparation. This needs to be done to summarise by site
+```{r fish sitem, echo = FALSE}
+fish.site <- fish.dat %>% 
+  group_by(site) %>% 
+  summarise(mass_g = sum(mass_g))
+
+fish.site$mass_kg <- fish.site$mass_g / 1000
+```
+
+
 ## 2. Testing assumptions
 
 ### Normality
