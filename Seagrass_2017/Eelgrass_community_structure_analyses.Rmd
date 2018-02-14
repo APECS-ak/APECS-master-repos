@@ -27,7 +27,7 @@ library(vegan)
 theme_set(theme_classic())
 
 # load other plotting features from Kruschke 2015
-source("../../DBDA2Eprograms/DBDA2Eprograms/DBDA2E-utilities.R")
+#source("../../DBDA2Eprograms/DBDA2Eprograms/DBDA2E-utilities.R")
 ```
 
 
@@ -2344,7 +2344,7 @@ DT::datatable(sumstats.3)
 write.csv(sumstats.3, "EG_Mod3_sumstats.csv", row.names = FALSE)
 ```
 
-```{r plots?}
+```{r plots}
 ggplot(sumstats.3, aes(color = Model)) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_linerange(aes(Coef, ymin = Lower95, ymax = Upper95), lwd = 1.5, position = position_dodge(width = 1/2)) +
