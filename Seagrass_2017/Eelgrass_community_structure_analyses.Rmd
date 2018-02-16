@@ -2968,14 +2968,14 @@ plot(out4b, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 2))
 
 plot(out4g, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 3))
 
-plot(out4a, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 2))
+plot(out4e, c('trace', 'histogram'), vars = c("sig", "beta"), layout = c(4, 2))
 ```
 
 Posteriors only
 ```{r posteriors only}
 plot(out4b, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
 plot(out4g, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
-plot(out4a, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
+plot(out4e, "histogram", vars = c("sig", "beta"), layout = c(1, 6))
 ```
 
 ```{r top models table}
@@ -3075,7 +3075,7 @@ p1 <- ggplot(dfDay, aes(x = Julianday, y = Mean)) +
   geom_line(size = 1) +
   # geom_point(data = dfData, aes(x=x, y=y))+
   xlab('Julian Day') + 
-  ylab(bquote('Predicted AG/BG mass +/- 95% CI ' ~(g/m^2))) +
+  ylab('Predicted AG/BG mass +/- 95% CI ') +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 # save plot
@@ -3099,7 +3099,7 @@ p2 <- ggplot(dfOtt, aes(x = OtterIndex, y = Mean)) +
   geom_ribbon(aes(ymin = Lwr, ymax = Upr), alpha = 0.2) + 
   geom_line(size = 1) +
   xlab('Sea Otter Index') + 
-  ylab(bquote('Mean Pred AG/BG mass +/- 95% CI ' ~(g/m^2))) +
+  ylab('Mean Pred AG/BG mass +/- 95% CI ') +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 # save plot
@@ -4007,8 +4007,8 @@ CrabMass <- as.numeric(log(crab.string$mass + 0.0001)) [ii] ##### many 0s and/or
 CrabCnt <- as.numeric(crab.string$count) ##### many 0s and/or log normalness to head with
 RockMass <- as.numeric(crab.rock$mass) ##### many 0s and/or log normalness to head with
 RockCnt <- as.numeric(crab.rock$count) ##### many 0s and/or log normalness to head with
-FishCnt <- as.numeric(fish.site$count)
-FishMass <- as.numeric(fish.site$mass_g)
+FishCnt <- as.numeric(fish.site$count) ##### count obviously
+FishMass <- as.numeric(fish.site$mass_g) 
 FishDiv <- as.numeric(fish.site$SW.diverse)
 Sitetxt <- tran.dat$site[ii]
 Quad <- as.numeric(tran.dat$quadrat)[ii]
