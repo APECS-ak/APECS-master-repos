@@ -17,6 +17,9 @@ library(MASS)
 library(lmerTest)
 library(DT)
 library(AER)
+library(ggplot2)
+
+theme_set(theme_classic())
 ```
 
 ## Data
@@ -87,6 +90,9 @@ crab.site <- crab.dat %>%
             crab_mass = mean(mass_g, na.rm = TRUE))
 
 dat <- merge(dat, crab.site, by = "site")
+
+crab.site.fuk <- crab.dat %>% 
+  filter()
 ```
 
 Crab data preparation. Summarize counts and mass of cancer/rock crabs. Average by site.
@@ -115,7 +121,7 @@ fish.site.sp <- fish.dat %>%
 fish.site.sp[is.na(fish.site.sp)] <- 0
 
 fish.site.sp$fish_SW_diverse <- diversity(fish.site.sp[,2:56], index = "shannon")
-fish.site.sp$fish_rarefy_rich <- rarefy(fish.site.sp[,2:56], sample = min(rowSums(fish.site.sp[,2:56])))
+fish.site.sp$fish_rich <- rowSums(fish.site.sp[, 2:56] != 0)
 
 fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:58)], by = "site")
 
@@ -518,7 +524,7 @@ mod6f
 ```
 
 ### Model 7 - Grazer load
-Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, crab biomass, and fish biomass may affect grazer load on eelgrass. NEED TO HAVE GRUP THINK HERE
+Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, crab biomass may affect grazer load on eelgrass.
 
 ```{r model 7}
 ## Model 7a - grz ~ Julian day ##
@@ -533,23 +539,89 @@ mod7c <- summary(glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index +
 ## Model 7d - grz ~ Julian day + SOI + epi + crab ##
 mod7d <- summary(glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(crab_mass), data = dat))
 
-## Model 7e - grz ~ Julian day + SOI + epi + crab + fish ##
-mod7e <- summary(glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(crab_mass) + log(fish_mass), data = dat))
+## Model 7e - grz ~ epi  ##
+mod7e <- summary(glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat))
 
-## Model 7f - grz ~ crab + fish ##
-mod7f <- summary(glm(log(grazermass_shootmass) ~log(crab_mass) + log(fish_mass), data = dat))
+## Model 7 Comparison ##
+Model.7.Comp <- data.frame(model = c("mod7a", "mod7b", "mod7c", "mod7d", "mod7e"), AIC = numeric(length = 5),
+          dispersion = numeric(length = 5),
+          deviance = numeric(length = 5),
+          df.resid = numeric(length = 5))
+
+Model.7.Comp[1, 2:5] <- c(mod7a$aic, mod7a$dispersion, mod7a$deviance, mod7a$df.residual)
+Model.7.Comp[2, 2:5] <- c(mod7b$aic, mod7b$dispersion, mod7b$deviance, mod7b$df.residual)
+Model.7.Comp[3, 2:5] <- c(mod7c$aic, mod7c$dispersion, mod7c$deviance, mod7c$df.residual)
+Model.7.Comp[4, 2:5] <- c(mod7d$aic, mod7d$dispersion, mod7d$deviance, mod7d$df.residual)
+Model.7.Comp[5, 2:5] <- c(mod7e$aic, mod7e$dispersion, mod7e$deviance, mod7e$df.residual)
+
+
+## Order by lowest AIC and clean up ##
+Model.7.Comp <- Model.7.Comp[order(Model.7.Comp$AIC, decreasing = FALSE),]
+
+Model.7.Comp$del_AIC <- abs(Model.7.Comp[1,2] - Model.7.Comp$AIC)
 ```
 
 ### Model 7 Comparison
 ```{r model 7 comp}
-Model..Comp <- data.frame(Model = Model..Comp$model, resid_df = Model..Comp$df.resid, round(Model.6.Comp[, c(2, 3, 4, 6)], 2))
+Model.7.Comp <- data.frame(Model = Model.7.Comp$model, resid_df = Model.7.Comp$df.resid, round(Model.7.Comp[, c(2, 3, 4, 6)], 2))
 
-datatable(Model..Comp)
+datatable(Model.7.Comp)
 ```
 
 ### Best Model 7
 ```{r model 7 best}
-
+mod7e
+mod7c
 ```
 
-### Model 8 - Crab
+### Model 8 - Crabs
+Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer biomass, may affect grazer load on eelgrass.
+
+```{r model 8}
+## Model 8a - crab ~ Julian day ##
+mod8a <- summary(glm(log(crab_mass) ~ date_julian, data = dat))
+
+## Model 8b - crab ~ Julian day + SOI ##
+mod8b <- summary(glm(log(crab_mass) ~ date_julian + sea_otter_index, data = dat))
+
+## Model 8c - grz ~ Julian day + SOI + epi ##
+mod8c <- summary(glm(log(crab_mass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass), data = dat))
+
+## Model 8d - grz ~ Julian day + SOI + epi + crab ##
+mod8d <- summary(glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(crab_mass), data = dat))
+
+## Model 8e - grz ~ epi  ##
+mod8e <- summary(glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat))
+
+## Model 8 Comparison ##
+Model.7.Comp <- data.frame(model = c("mod7a", "mod7b", "mod7c", "mod7d", "mod7e"), AIC = numeric(length = 5),
+          dispersion = numeric(length = 5),
+          deviance = numeric(length = 5),
+          df.resid = numeric(length = 5))
+
+Model.7.Comp[1, 2:5] <- c(mod7a$aic, mod7a$dispersion, mod7a$deviance, mod7a$df.residual)
+Model.7.Comp[2, 2:5] <- c(mod7b$aic, mod7b$dispersion, mod7b$deviance, mod7b$df.residual)
+Model.7.Comp[3, 2:5] <- c(mod7c$aic, mod7c$dispersion, mod7c$deviance, mod7c$df.residual)
+Model.7.Comp[4, 2:5] <- c(mod7d$aic, mod7d$dispersion, mod7d$deviance, mod7d$df.residual)
+Model.7.Comp[5, 2:5] <- c(mod7e$aic, mod7e$dispersion, mod7e$deviance, mod7e$df.residual)
+
+
+## Order by lowest AIC and clean up ##
+Model.7.Comp <- Model.7.Comp[order(Model.7.Comp$AIC, decreasing = FALSE),]
+
+Model.7.Comp$del_AIC <- abs(Model.7.Comp[1,2] - Model.7.Comp$AIC)
+```
+
+### Model 7 Comparison
+```{r model 7 comp}
+Model.7.Comp <- data.frame(Model = Model.7.Comp$model, resid_df = Model.7.Comp$df.resid, round(Model.7.Comp[, c(2, 3, 4, 6)], 2))
+
+datatable(Model.7.Comp)
+```
+
+#### Plots
+```{r}
+ggplot(dat) +
+  geom_point(aes(x = date_julian, y = n_pits), size = 3)
+```
+
