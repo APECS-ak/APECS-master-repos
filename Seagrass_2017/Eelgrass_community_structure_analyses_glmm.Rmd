@@ -81,7 +81,6 @@ Light attenuation calculation
 dat$light_atten <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
 ```
 
-
 Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
 ```{r crab sites string, echo=FALSE}
 crab.site <- crab.dat %>% 
@@ -707,6 +706,16 @@ summary(mod8.best)
 par(mfrow = c(2, 2))
 plot(mod7.best)
 par(mfrow = c(1, 1))
+```
+
+### Fishes
+Since we only sampled fishes with one beach seine at each site we have a limited ability to draw meaningful inference about ifsh dynamics. However, we can at least repost our findings and demonstrate the biomass and diversity of fishes in eelgrass beds, to point out that they are likley a strong driver in the ecosystem and may be the cause of our "decoupled" trophic cascade.
+
+PCA on fish counts. First values should be standardized. 
+```{r PCA fish}
+# Standardize to column (sea otter measure) maximum
+fish.std <- scale(fish.site.sp[,2:56], center = FALSE, scale = apply(fish.site.sp[,2:56], 2, max))
+
 ```
 
 #### Plots
