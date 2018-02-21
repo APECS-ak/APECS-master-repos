@@ -503,7 +503,7 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 ```{r model 6}
 ## Global Model ##
 mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + log(dat$grazermass_shootmass), lower = ~ 1), direction = "both")
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + log(dat$grazermass_shootmass) + dat$Ntotal_site), direction = "both")
 
 mod6$anova
 
@@ -751,7 +751,7 @@ mod9.mds
 Table to look at result from best models
 ```{r full results best model, echo = FALSE, }
 all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE,
-        depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second node distance", "Epiphyte Load", "Grazer Load", "Crab biomass"))
+        depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second node distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE)
 
 all.results.simp
 ```
@@ -760,6 +760,6 @@ all.results.simp
 #### Plots
 ```{r}
 ggplot(dat) +
-  geom_point(aes(x = log(epiphmass_shootmass), y = log(grazermass_shootmass)), size = 3)
+  geom_point(aes(x = dat$Ntotal_site, y = log(epiphmass_shootmass)), size = 3)
 ```
 
