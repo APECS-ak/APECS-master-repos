@@ -704,19 +704,58 @@ datatable(Model.8.Comp)
 mod8.best <- glm(log(crab_mass) ~ sea_otter_index, data = dat)
 summary(mod8.best)
 par(mfrow = c(2, 2))
-plot(mod7.best)
+plot(mod8.best)
 par(mfrow = c(1, 1))
 ```
 
 ### Fishes
 Since we only sampled fishes with one beach seine at each site we have a limited ability to draw meaningful inference about ifsh dynamics. However, we can at least repost our findings and demonstrate the biomass and diversity of fishes in eelgrass beds, to point out that they are likley a strong driver in the ecosystem and may be the cause of our "decoupled" trophic cascade.
 
-PCA on fish counts. First values should be standardized. 
-```{r PCA fish}
-# Standardize to column (sea otter measure) maximum
-fish.std <- scale(fish.site.sp[,2:56], center = FALSE, scale = apply(fish.site.sp[,2:56], 2, max))
+First values should be standardized and transformed. We will use a 4th root tranformation which is often used with hihgly abundant variable species data. 
+```{r multivariate prep fish}
+## Fish by species ##
+str(fish.site.sp)
+
+## Tranformation ##
+fish.sp.trsfrm <- (fish.site.sp[, 2:56]^0.25)
+
+## Standardize to column maximum i.e. species maximum ##
+fish.std <- as.data.frame(scale(fish.sp.trsfrm, center = FALSE, scale = apply(fish.sp.trsfrm, 2, max)))
+```
+
+PERMANOVAs
+```{r permanova}
+## Dissimilarity matirx ##
+fish.diss <- vegdist(fish.std, method = "bray")
+round(fish.diss, 2)
+
+## PERMDISP ##
+fish.disp <- betadisper(fish.diss, fish.site.sp$site)
+fish.disp
+anova(fish.disp)
+plot(fish.disp)
+
+## PERMANOVA ##
+mod9 <- adonis2(fish.diss ~ site, data = fish.site.sp, permutations = 9999)
+mod9
+
+## MDS ##
+mod9.mds <- metaMDS(fish.diss, k = 2)
+plot(mod9.mds$points, asp = 1)
+mod9.mds
 
 ```
+
+
+## Collating results
+Table to look at result from best models
+```{r full results best model, echo = FALSE, }
+all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE,
+        depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second node distance", "Epiphyte Load", "Grazer Load", "Crab biomass"))
+
+all.results.simp
+```
+
 
 #### Plots
 ```{r}
