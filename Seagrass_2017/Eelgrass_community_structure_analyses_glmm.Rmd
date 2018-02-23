@@ -711,6 +711,7 @@ par(mfrow = c(1, 1))
 ### Fishes
 Since we only sampled fishes with one beach seine at each site we have a limited ability to draw meaningful inference about ifsh dynamics. However, we can at least repost our findings and demonstrate the biomass and diversity of fishes in eelgrass beds, to point out that they are likley a strong driver in the ecosystem and may be the cause of our "decoupled" trophic cascade.
 
+#### Multivariate
 First values should be standardized and transformed. We will use a 4th root tranformation which is often used with hihgly abundant variable species data. 
 ```{r multivariate prep fish}
 ## Fish by species ##
@@ -746,8 +747,50 @@ mod9.mds
 
 ```
 
+#### Simple models and summaries
+Simple models
+```{r}
+mod10 <- stepAIC(glm(log(dat$fish_mass) ~ 1), 
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
+
+mod10$anova
+
+
+mod11 <- stepAIC(glm(log(dat$fish_count) ~ 1), 
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
+
+mod11$anova
+
+mod12 <- stepAIC(glm(dat$fish_SW_diverse ~ 1), 
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
+
+mod12$anova
+
+mod13 <- stepAIC(glm(dat$fish_rich ~ 1), 
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
+
+mod13$anova
+
+```
+
+Given that fish are not well explained by any of our data, lets take a look at all the dat together
+```{r}
+fish.sum <- dat %>% 
+  summarise(abundance = mean(fish_count),
+            abundance_se = (sd(fish_count) / sqrt(21)),
+            biomass = mean(fish_mass / 1000),
+            biomass_se = (sd(fish_mass / 1000) / sqrt(21)),
+            richness = mean(fish_rich),
+            richness_se = (sd(fish_rich) / sqrt(21)),
+            SW = mean(fish_SW_diverse),
+            SW_se = (sd(fish_SW_diverse) / sqrt(21)))
+
+fish.site.sp$
+```
+
 
 ## Collating results
+### Modling results table
 Table to look at result from best models
 ```{r full results best model, echo = FALSE, }
 all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE,
@@ -760,6 +803,6 @@ all.results.simp
 #### Plots
 ```{r}
 ggplot(dat) +
-  geom_point(aes(x = dat$Ntotal_site, y = log(epiphmass_shootmass)), size = 3)
+  geom_point(aes(x = dat$sea_otter_index, y = dat$fish_SW_diverse), size = 3)
 ```
 
