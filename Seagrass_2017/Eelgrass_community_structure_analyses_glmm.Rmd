@@ -18,6 +18,7 @@ library(lmerTest)
 library(DT)
 library(AER)
 library(ggplot2)
+library(sjPlot)
 
 theme_set(theme_classic())
 ```
@@ -773,8 +774,9 @@ mod13$anova
 
 ```
 
-Given that fish are not well explained by any of our data, lets take a look at all the dat together
+Given that fish are not well explained by any of our data, lets take a look at all the data together. First we will look at basic summary statistics, and the average relative fq by species.
 ```{r}
+## Bassic summar yastats of all seines ##
 fish.sum <- dat %>% 
   summarise(abundance = mean(fish_count),
             abundance_se = (sd(fish_count) / sqrt(21)),
@@ -785,7 +787,21 @@ fish.sum <- dat %>%
             SW = mean(fish_SW_diverse),
             SW_se = (sd(fish_SW_diverse) / sqrt(21)))
 
-fish.site.sp$
+write.csv(fish.sum, "Eelgrass_structure_MS_results/fish_summary_stats.csv", row.names =  FALSE)
+
+## Average relative fq of species ##
+fish.site.sp$total <- rowSums(fish.site.sp[, 2:56])
+
+fish.sp.relfq <- (fish.site.sp[,2:56] / fish.site.sp$total)
+
+fish.relfq.mean <- as.data.frame(lapply(fish.sp.relfq, FUN = mean))
+fish.relfq.mean <- data.frame(sp_code = colnames(fish.relfq.mean),
+                              mean_rel_freq = t(fish.relfq.mean[1,]))
+colnames(fish.relfq.mean) <- c("sp_code", "mean_rel_freq")
+
+fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
+
+
 ```
 
 
