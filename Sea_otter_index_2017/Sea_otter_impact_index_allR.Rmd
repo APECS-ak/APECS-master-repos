@@ -404,9 +404,21 @@ Final index data table
 DT::datatable(final.dat, caption = "Sea otter impact index")
 ```
 
-
 ## Data export
 ```{r export}
 # Data Export
 write.csv(final.dat, "../ALL_DATA/sea_otter_impact_index_new.csv", row.names = FALSE)
 ```
+
+## Collated Results
+Reduce full data and organise for publication
+```{r}
+## Reduce full data and organise / clean up
+final.dat.redu <- final.dat[, c(2, 7, 10:16)]
+final.dat.redu <- cbind.data.frame(final.dat.redu$place_name, round(final.dat.redu[, 2:9], 2))
+final.dat.redu <- final.dat.redu[order(final.dat.redu$sea_otter_index, decreasing = TRUE),]
+
+## Export ##
+write.csv(final.dat.redu, "../Seagrass_2017/Eelgrass_structure_MS_results/Sea_otter_index_results.csv", row.names = FALSE)
+```
+
