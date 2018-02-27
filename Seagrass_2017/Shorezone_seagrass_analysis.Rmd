@@ -1,0 +1,68 @@
+---
+title: "Shorzone_seagrass_analysis"
+author: "Wendel Raymond"
+date: "February 26, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Analysis of Shorezone data
+We will compare the extent of seagrass in areas with and without sea otters.
+
+```{r libraries}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(rgdal)
+library(rgeos)
+library(raster)
+library(gdistance)
+library(spatstat)
+library(leaflet)
+library(spatialEco)
+```
+
+## Data
+Spatial data for seagrass extent and sea otter accupation will be needed.
+```{r load data}
+## Shorezone data ##
+shore <- readOGR(dsn = "../ALL_DATA/spatial_data", layer="SEAK_shoreline")
+shore <- spTransform(shore, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+
+## Sea Otter occupation ##
+sd2003 <- readOGR(dsn = "../ALL_DATA/spatial_data", layer="Sea_Otter_disp_2003") 
+sd2003 <- spTransform(sd2003, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+
+# 2010 Sea Otters
+sd2010 <- readOGR(dsn = "../ALL_DATA/spatial_data", layer="Sea_Otter_disp_2010") 
+sd2010 <- spTransform(sd2010, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+```
+
+### Defining shore types
+Seagrass shorelines defined as continuous (C) or patch (P) and suitable shoreline as semi-protected, protected, or very protected with partailly mobile, mobile or esturanie sediment classifications.
+```{r shore types}
+## Seagrass shorelines ##
+sg_c <- subset(shore, ZOS == "C")
+sg_c <- spTransform(sg_c, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+
+sg_p <- subset(shore, ZOS == "P")
+sg_p <- spTransform(sg_p, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+
+## Suitable for seagrass ##
+sg_suit <- shore[which(shore$HabClass == 41 | shore$HabClass == 42 | shore$HabClass == 43 | shore$HabClass == 51 | shore$HabClass == 52 | shore$HabClass == 53 | shore$HabClass == 61 | shore$HabClass == 62 | shore$HabClass == 63), ]
+sg_suit <- spTransform(sg_suit, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
+```
+
+## Shoreline lengths
+```{r lengths}
+## Raw totals ##
+dat <- data.frame(type = c("continuous", "patchy", "totalSG", "suitable"), length_km = c(sum(sg_c$Shape_Leng / 1000), sum(sg_p$Shape_Leng / 1000), 0, sum(sg_suit$Shape_Leng / 1000)))
+
+dat[3,2] <- (dat[1,2] + dat[2,2])
+
+## With Sea otters ##
+so_sg_c <- intersect(sg_c, sd2010)
+
+```
+
