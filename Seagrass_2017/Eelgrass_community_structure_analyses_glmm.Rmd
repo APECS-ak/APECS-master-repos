@@ -800,12 +800,10 @@ fish.relfq.mean <- data.frame(sp_code = colnames(fish.relfq.mean),
 colnames(fish.relfq.mean) <- c("sp_code", "mean_rel_freq")
 
 fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
-
-
 ```
 
 
-## Collating results
+## Collating Model results
 ### Modling results table
 Table to look at result from best models
 ```{r full results best model, echo = FALSE, }
@@ -813,6 +811,17 @@ all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.bes
         depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second node distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE)
 
 all.results.simp
+```
+
+## Environmental Data
+Summary stats from environmental data from all sites.
+```{r}
+## Collate environmental data ##
+site.envi <- cbind.data.frame(dat[,2:3], round(dat[,15:44],2), round(dat[,57:61], 2), round(dat[, 116], 2))
+
+## Export ##
+write.csv(site.envi, "Eelgrass_structure_MS_results/envi_summary_stats.csv", row.names =  FALSE)
+
 ```
 
 
