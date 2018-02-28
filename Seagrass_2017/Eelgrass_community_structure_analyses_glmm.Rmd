@@ -817,7 +817,9 @@ all.results.simp
 Summary stats from environmental data from all sites.
 ```{r}
 ## Collate environmental data ##
-site.envi <- cbind.data.frame(dat[,2:3], round(dat[,15:44],2), round(dat[,57:61], 2), round(dat[, 116], 2))
+site.envi <- cbind.data.frame(dat[,2:3], round(dat[,15:24],2), round(dat[,57:61], 2), round(dat[, 115], 1), round(dat[, 116], 2))
+colnames(site.envi)[18] <- "sediment"
+colnames(site.envi)[19] <- "light_attenuation"
 
 ## Export ##
 write.csv(site.envi, "Eelgrass_structure_MS_results/envi_summary_stats.csv", row.names =  FALSE)
