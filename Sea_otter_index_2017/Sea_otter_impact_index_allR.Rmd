@@ -374,7 +374,7 @@ Now we can calculate the PCA
 ```{r PCA}
 # PCA on transformed AND standarized data
 pca <- princomp(dat.std.l)
-summary(pca)
+pca.summary <- summary(pca)
 loadings(pca)
 biplot(pca, cex = 1)
 screeplot(pca, ylim = c(0, 0.8))
@@ -408,6 +408,8 @@ DT::datatable(final.dat, caption = "Sea otter impact index")
 ```{r export}
 # Data Export
 write.csv(final.dat, "../ALL_DATA/sea_otter_impact_index_new.csv", row.names = FALSE)
+
+
 ```
 
 ## Collated Results
