@@ -138,7 +138,7 @@ We generated a global model that includes linear and quadratic effects of julian
 ```{r model 1}
 ## Global Model ##
 mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten, lower = ~ 1), direction = "both")
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 ## Model 1a - aboveground biomass ~ Julian day ##
 mod1a <- summary(glm(log(abvgnd_mass) ~  date_julian, data = dat))
@@ -212,7 +212,7 @@ We generated a global model that includes linear and quadratic effects of julian
 ```{r model 2}
 ## Global Model ##
 mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten, lower = ~ 1), direction = "both")
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 mod2$anova
 
@@ -288,7 +288,7 @@ dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
 mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten, lower = ~ 1), direction = "both")
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 mod3$anova
 
@@ -360,7 +360,7 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 ```{r model 4}
 ## Global Model ##
 mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten, lower = ~ 1), direction = "both")
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 mod4$anova
 
@@ -432,7 +432,7 @@ Responce - log normal. We hypothesise that time (as julian day), sea otter index
 ```{r model 5}
 ## Global Model ##
 mod5 <- stepAIC(glm(log(dat$node2) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten, lower = ~ 1), direction = "both")
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 mod5$anova
 
@@ -491,7 +491,7 @@ datatable(Model.5.Comp)
 
 ### Best Model 5
 ```{r model 5 best}
-mod5.best <- glm(log(node2) ~  poly(date_julian, 2) + sea_otter_index + light_atten, data = dat)
+mod5.best <- glm(log(node2) ~  poly(date_julian, 2) + sea_otter_index + light_atten + Ntotal_site, data = dat)
 summary(mod5.best)
 par(mfrow = c(2, 2))
 plot(mod5.best)
