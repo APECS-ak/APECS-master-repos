@@ -126,6 +126,14 @@ fish.site.sp$fish_rich <- rowSums(fish.site.sp[, 2:56] != 0)
 fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:58)], by = "site")
 
 dat <- merge(dat, fish.site, by = "site")
+
+## biomass community matirx ##
+fishmass.site.sp <- fish.dat %>% 
+  group_by(site, sp_code) %>% 
+  summarise(mass = sum(mass_g)) %>% 
+  spread(key = sp_code, value = mass)
+
+fishmass.site.sp[is.na(fishmass.site.sp)] <- 0
 ```
 
 ## Models
@@ -139,59 +147,6 @@ We generated a global model that includes linear and quadratic effects of julian
 ## Global Model ##
 mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), 
                 scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
-
-## Model 1a - aboveground biomass ~ Julian day ##
-mod1a <- summary(glm(log(abvgnd_mass) ~  date_julian, data = dat))
-
-## Model 1b - aboveground biomass ~ Julian day + SOI ##
-mod1b <- summary(glm(log(abvgnd_mass) ~  date_julian + sea_otter_index, data = dat))
-
-## Model 1c - aboveground biomass ~ Julian day + SOI + sediment ##
-mod1c <- summary(glm(log(abvgnd_mass) ~  date_julian + sea_otter_index + sed_inside_prim, data = dat))
-
-## Model 1d - aboveground biomass ~ Julian day + SOI + sediment + light ##
-mod1d <- summary(glm(log(abvgnd_mass) ~  date_julian + sea_otter_index + sed_inside_prim + light_atten, data = dat))
-
-## Model 1e - aboveground biomass ~ Julian day + quad(SOI) ##
-mod1e <- summary(glm(log(abvgnd_mass) ~  date_julian + poly(sea_otter_index, 2), data = dat))
-
-## Model 1f - aboveground biomass ~ Julian day + quad(SOI) + sediment ##
-mod1f <- summary(glm(log(abvgnd_mass) ~  date_julian + poly(sea_otter_index, 2) + sed_inside_prim, data = dat))
-
-## Model 1g - aboveground biomass ~ quad(Julian day) + SOI ##
-mod1g <- summary(glm(log(abvgnd_mass) ~  poly(date_julian, 2) + sea_otter_index, data = dat))
-
-## Model 1h - aboveground biomass ~ quad(Julian day) + quad(SOI) ##
-mod1h <- summary(glm(log(abvgnd_mass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2), data = dat))
-
-## Model 1 Comparison ##
-Model.1.Comp <- data.frame(model = c("mod1a", "mod1b", "mod1c", "mod1d", "mod1e", "mod1f", "mod1g", "mod1h"),
-                           AIC = numeric(length = 8),
-                           dispersion = numeric(length = 8),
-                           deviance = numeric(length = 8),
-                           df.resid = numeric(length = 8))
-
-Model.1.Comp[1, 2:5] <- c(mod1a$aic, mod1a$dispersion, mod1a$deviance, mod1a$df.residual)
-Model.1.Comp[2, 2:5] <- c(mod1b$aic, mod1b$dispersion, mod1b$deviance, mod1b$df.residual)
-Model.1.Comp[3, 2:5] <- c(mod1c$aic, mod1c$dispersion, mod1c$deviance, mod1c$df.residual)
-Model.1.Comp[4, 2:5] <- c(mod1d$aic, mod1d$dispersion, mod1d$deviance, mod1d$df.residual)
-Model.1.Comp[5, 2:5] <- c(mod1e$aic, mod1e$dispersion, mod1e$deviance, mod1e$df.residual)
-Model.1.Comp[6, 2:5] <- c(mod1f$aic, mod1f$dispersion, mod1f$deviance, mod1f$df.residual)
-Model.1.Comp[7, 2:5] <- c(mod1g$aic, mod1g$dispersion, mod1g$deviance, mod1g$df.residual)
-Model.1.Comp[8, 2:5] <- c(mod1h$aic, mod1h$dispersion, mod1h$deviance, mod1h$df.residual)
-
-## Order by lowest AIC and clean up ##
-Model.1.Comp <- Model.1.Comp[order(Model.1.Comp$AIC, decreasing = FALSE),]
-
-Model.1.Comp$del_AIC <- abs(Model.1.Comp[1,2] - Model.1.Comp$AIC)
-```
-
-### Model 1 Comparison
-Manual comparison of models
-```{r model 1 comp}
-Model.1.Comp <- data.frame(Model = Model.1.Comp$model, resid_df = Model.1.Comp$df.resid, round(Model.1.Comp[, c(2, 3, 4, 6)], 2))
-
-datatable(Model.1.Comp)
 ```
 
 ### Best Model 1
@@ -202,7 +157,31 @@ par(mfrow = c(2, 2))
 plot(mod1.best)
 par(mfrow = c(1, 1))
 
-## Insert plot ##
+## Predicted Values ##
+# Create dataframes for plotting fixed effects: assume Model1h
+mind <- min(dat$date_julian)
+maxd <- max(dat$date_julian)
+Julday <- numeric(length = length(seq(mind:maxd)))
+Predict <- numeric(length = length(seq(mind:maxd)))
+Lwr <- numeric(length = length(seq(mind:maxd)))
+Upr <- numeric(length = length(seq(mind:maxd)))
+int <- mod1.best$coefficients[1]
+time1 <- mod1.best$coefficients[2]
+time2 <- mod1.best$coefficients[3]
+soi1 <- mod1.best$coefficients[4]
+soi2 <- mod1.best$coefficients[5]
+sig <- mod1.best$
+
+for (d in mind:maxd){
+  Julday[d] <- d - 1 + mind
+  Mu <- int + time1*d + time2*d^2
+  Predict[d] <- mean(exp(Mu + sig^2/2))
+  Lwr[d] <- as.numeric(quantile(exp(Mu + sig^2/2), .025))
+  Upr[d] <- as.numeric(quantile(exp(Mu + sig^2/2), .975))
+}
+
+dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
+
 ```
 
 ### Model 2 - Belowground biomass
@@ -491,7 +470,7 @@ datatable(Model.5.Comp)
 
 ### Best Model 5
 ```{r model 5 best}
-mod5.best <- glm(log(node2) ~  poly(date_julian, 2) + sea_otter_index + light_atten + Ntotal_site, data = dat)
+mod5.best <- glm(log(node2) ~  poly(date_julian, 2) + light_atten + Ntotal_site, data = dat)
 summary(mod5.best)
 par(mfrow = c(2, 2))
 plot(mod5.best)
@@ -504,7 +483,7 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 ```{r model 6}
 ## Global Model ##
 mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + log(dat$grazermass_shootmass) + dat$Ntotal_site), direction = "both")
+                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + dat$sed_inside_prim + dat$light_atten + log(dat$grazermass_shootmass) + dat$Ntotal_site), direction = "both")
 
 mod6$anova
 
@@ -725,11 +704,27 @@ fish.sp.trsfrm <- (fish.site.sp[, 2:56]^0.25)
 fish.std <- as.data.frame(scale(fish.sp.trsfrm, center = FALSE, scale = apply(fish.sp.trsfrm, 2, max)))
 ```
 
-PERMANOVAs
-```{r permanova}
+```{r multivariate mass}
+## Transform ##
+fishmass.sp.trsfrm <- (fishmass.site.sp[,2:56]^0.25)
+
+## Standardize to column maximum i.e. species maximum ##
+fishmass.std <- as.data.frame(scale(fishmass.sp.trsfrm, center = FALSE, scale = apply(fishmass.sp.trsfrm, 2, max)))
+```
+
+Multivariate analysis of fish counts
+```{r}
 ## Dissimilarity matirx ##
 fish.diss <- vegdist(fish.std, method = "bray")
 round(fish.diss, 2)
+
+## PCA ##
+fish.pca <- prcomp(fish.std)
+summary(fish.pca)
+biplot(fish.pca, cex = 0.5)
+
+screeplot(pca, ylim = c(0, 0.8))
+pca$scores 
 
 ## PERMDISP ##
 fish.disp <- betadisper(fish.diss, fish.site.sp$site)
@@ -747,6 +742,34 @@ plot(mod9.mds$points, asp = 1)
 mod9.mds
 
 ```
+
+Multivariate analysis of fish mass
+```{r}
+## Dissimilarity matirx ##
+fishmass.diss <- vegdist(fishmass.std, method = "bray")
+round(fishmass.diss, 2)
+
+## PCA ##
+fishmass.pca <- prcomp(fishmass.std)
+summary(fishmass.pca)
+biplot(fishmass.pca, cex = 0.5)
+screeplot(fishmass.pca)
+
+## PERMDISP ##
+fishmass.disp <- betadisper(fishmass.diss, fish.site.sp$site)
+fishmass.disp
+anova(fishmass.disp)
+
+## PERMANOVA ##
+mod9b <- adonis2(fishmass.diss ~ site, data = fishmass.site.sp, permutations = 9999)
+mod9b
+
+## MDS ##
+mod9b.mds <- metaMDS(fishmass.diss, k = 2)
+plot(mod9b.mds$points, asp = 1)
+mod9b.mds
+```
+
 
 #### Simple models and summaries
 Simple models
@@ -776,7 +799,7 @@ mod13$anova
 
 Given that fish are not well explained by any of our data, lets take a look at all the data together. First we will look at basic summary statistics, and the average relative fq by species.
 ```{r}
-## Bassic summar yastats of all seines ##
+## Basic summar yastats of all seines ##
 fish.sum <- dat %>% 
   summarise(abundance = mean(fish_count),
             abundance_se = (sd(fish_count) / sqrt(21)),
@@ -807,8 +830,7 @@ fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
 ### Modling results table
 Table to look at result from best models
 ```{r full results best model, echo = FALSE, }
-all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE,
-        depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second node distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE)
+all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second node distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE)
 
 all.results.simp
 ```
