@@ -1019,7 +1019,7 @@ We want to manipulate df.all in the following ways:
 
 * Add a new column, where we determine Julian Day for our dates
 * Reorder columns so titles for variables are easier to locate for later analysis (there are a lot of unique # variables)
-* Temporarily remove some variables from the df.all (e.g. node lengths)
+* Temporarily remove some variables from the df.all (e.g. node length)
 
 
 ```{r, include = FALSE}

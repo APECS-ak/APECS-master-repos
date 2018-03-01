@@ -103,7 +103,7 @@ leaflet(locations_all) %>%
 ### 4. Plotting by site and region
 <br>
 
-#### Below, the depth profile for organic matter (right) and inorganic mater (left) from each site is roughly plotted to compare the overall matter content. You will notice that site L06 is way different than the rest. 
+#### Below, the depth profile for organic matter (right) and inorganic mater (left) from each site is roughly plotted to compare the overall matter content. You will notice that site L06 is way different than the rest
 ```{r, fig.height = 30, fig.width = 8, echo = FALSE, warning = FALSE}
 df.core$site=factor(df.core$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order sites
 
