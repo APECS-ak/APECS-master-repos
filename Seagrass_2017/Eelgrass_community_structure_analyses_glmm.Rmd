@@ -16,7 +16,6 @@ library(lme4)
 library(MASS)
 library(lmerTest)
 library(DT)
-library(AER)
 library(ggplot2)
 library(sjPlot)
 
@@ -77,9 +76,9 @@ seds <- sed.site %>%
 dat <- merge(tran.dat, seds, by = "site")
 ```
 
-Light attenuation calculation
-```{r light atten}
-dat$light_atten <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
+Light availability calculation
+```{r light avail}
+dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
 ```
 
 Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
@@ -140,260 +139,85 @@ fishmass.site.sp[is.na(fishmass.site.sp)] <- 0
 Each model will get its own individual hypothesis and set up but will follow the same general framework. Initially I will be copying and learning from example code from Tim Tinker. Models will use a mixed effects Bayesian modeling stucture. Fixed effects and the random effect of site will be modeled with normally distribution density funtions. Response variables will be paramterized in a way that best fits their distribution (see above). Count data (shoot density) will be modeled with a negative binomial distrbution.
 
 ### Model 1 - Aboveground biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect aboveground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light availability may effect aboveground biomass of eelgrass.
 
-We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type and light attenuation. A combine forward and backwad election approach indicated that a model with quadratic effects of julian data and sea otter index was the best model.
+We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type, light availability, and total surface water nutirents.
 ```{r model 1}
 ## Global Model ##
-mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
 ```
 
 ### Best Model 1
 ```{r model 1 best}
-mod1.best <- glm(log(abvgnd_mass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2), data = dat) 
+mod1.best <- glm(log(abvgnd_mass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), data = dat) 
 summary(mod1.best)
 par(mfrow = c(2, 2))
 plot(mod1.best)
 par(mfrow = c(1, 1))
 
 ## Predicted Values ##
-# Create dataframes for plotting fixed effects: assume Model1h
-mind <- min(dat$date_julian)
-maxd <- max(dat$date_julian)
-Julday <- numeric(length = length(seq(mind:maxd)))
-Predict <- numeric(length = length(seq(mind:maxd)))
-Lwr <- numeric(length = length(seq(mind:maxd)))
-Upr <- numeric(length = length(seq(mind:maxd)))
-int <- mod1.best$coefficients[1]
-time1 <- mod1.best$coefficients[2]
-time2 <- mod1.best$coefficients[3]
-soi1 <- mod1.best$coefficients[4]
-soi2 <- mod1.best$coefficients[5]
-sig <- mod1.best$
-
-for (d in mind:maxd){
-  Julday[d] <- d - 1 + mind
-  Mu <- int + time1*d + time2*d^2
-  Predict[d] <- mean(exp(Mu + sig^2/2))
-  Lwr[d] <- as.numeric(quantile(exp(Mu + sig^2/2), .025))
-  Upr[d] <- as.numeric(quantile(exp(Mu + sig^2/2), .975))
-}
-
-dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
+predict(mod1.best, type = "response")
 
 ```
 
 ### Model 2 - Belowground biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect aboveground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light availability may effect aboveground biomass of eelgrass.
 
-We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type and light attenuation. A combined forward and backwad election approach indicated that a model with quadratic effects of julian data and sea otter index was the best model.
+We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
 ```{r model 2}
 ## Global Model ##
-mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 mod2$anova
-
-## Model 2a - belowground biomass ~ Julian day ##
-mod2a <- summary(glm(log(blwgnd_mass) ~  date_julian, data = dat))
-
-## Model 2b - belowground biomass ~ Julian day + SOI ##
-mod2b <- summary(glm(log(blwgnd_mass) ~  date_julian + sea_otter_index, data = dat))
-
-## Model 2c - belowground biomass ~ Julian day + SOI + sediment ##
-mod2c <- summary(glm(log(blwgnd_mass) ~  date_julian + sea_otter_index + sed_inside_prim, data = dat))
-
-## Model 2d - belowground biomass ~ Julian day + SOI + sediment + light ##
-mod2d <- summary(glm(log(blwgnd_mass) ~  date_julian + sea_otter_index + sed_inside_prim + light_atten, data = dat))
-
-## Model 2e - belowground biomass ~ Julian day + quad(SOI) ##
-mod2e <- summary(glm(log(blwgnd_mass) ~  date_julian + poly(sea_otter_index, 2), data = dat))
-
-## Model 2f - belowground biomass ~ Julian day + quad(SOI) + sediment ##
-mod2f <- summary(glm(log(blwgnd_mass) ~  date_julian + poly(sea_otter_index, 2) + sed_inside_prim, data = dat))
-
-## Model 2g - belowground biomass ~ quad(Julian day) + SOI ##
-mod2g <- summary(glm(log(blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index, data = dat))
-
-## Model 2h - belowground biomass ~ quad(Julian day) + quad(SOI) ##
-mod2h <- summary(glm(log(blwgnd_mass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2), data = dat))
-
-## Model 2 Comparison ##
-Model.2.Comp <- data.frame(model = c("mod2a", "mod2b", "mod2c", "mod2d", "mod2e", "mod2f", "mod2g", "mod2h"),
-                           AIC = numeric(length = 8),
-                           dispersion = numeric(length = 8),
-                           deviance = numeric(length = 8),
-                           df.resid = numeric(length = 8))
-
-Model.2.Comp[1, 2:5] <- c(mod2a$aic, mod2a$dispersion, mod2a$deviance, mod2a$df.residual)
-Model.2.Comp[2, 2:5] <- c(mod2b$aic, mod2b$dispersion, mod2b$deviance, mod2b$df.residual)
-Model.2.Comp[3, 2:5] <- c(mod2c$aic, mod2c$dispersion, mod2c$deviance, mod2c$df.residual)
-Model.2.Comp[4, 2:5] <- c(mod2d$aic, mod2d$dispersion, mod2d$deviance, mod2d$df.residual)
-Model.2.Comp[5, 2:5] <- c(mod2e$aic, mod2e$dispersion, mod2e$deviance, mod2e$df.residual)
-Model.2.Comp[6, 2:5] <- c(mod2f$aic, mod2f$dispersion, mod2f$deviance, mod2f$df.residual)
-Model.2.Comp[7, 2:5] <- c(mod2g$aic, mod2g$dispersion, mod2g$deviance, mod2g$df.residual)
-Model.2.Comp[8, 2:5] <- c(mod2h$aic, mod2h$dispersion, mod2h$deviance, mod2h$df.residual)
-
-## Order by lowest AIC and clean up ##
-Model.2.Comp <- Model.2.Comp[order(Model.2.Comp$AIC, decreasing = FALSE),]
-
-Model.2.Comp$del_AIC <- abs(Model.2.Comp[1,2] - Model.2.Comp$AIC)
-```
-
-### Model 2 Comparison
-```{r model 2 comp}
-Model.2.Comp <- data.frame(Model = Model.2.Comp$model, resid_df = Model.2.Comp$df.resid, round(Model.2.Comp[, c(2, 3, 4, 6)], 2))
-
-datatable(Model.2.Comp)
 ```
 
 ### Best Model 2
 ```{r model 2 best}
-mod2.best <- glm(log(blwgnd_mass) ~  date_julian, data = dat)
+mod2.best <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat)
 summary(mod2.best)
 par(mfrow = c(2, 2))
 plot(mod2.best)
 par(mfrow = c(1, 1))
 
+
+## Predicted values ##
 ```
 
 ### Model 3 - Shoot density
-Response  - negative binomial. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect aboveground biomass of eelgrass.
+Response  - negative binomial. We hypothesise that time (as julian day), sea otter index, sediment type, light availability and total surface nitrogen may effect aboveground biomass of eelgrass.
 
+We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents. 
 ```{r model 3}
 ## Count need to integers ##
 dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
-mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + log(dat$epiphmass_shootmass) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 mod3$anova
-
-## Model 3a - shoot density biomass ~ Julian day ##
-mod3a <- summary(glm.nb(shoot_dens_rnd ~  date_julian, link = "log", data = dat))
-
-## Model 3b - shoot density biomass ~ Julian day + SOI ##
-mod3b <- summary(glm.nb(shoot_dens_rnd ~  date_julian + sea_otter_index, link = "log", data = dat))
-
-## Model 3c - shoot density biomass ~ Julian day + SOI + sediment ##
-mod3c <- summary(glm.nb(shoot_dens_rnd ~  date_julian + sea_otter_index + sed_inside_prim, link = "log", data = dat))
-
-## Model 3d - shoot density biomass ~ Julian day + SOI + sediment + light ##
-mod3d <- summary(glm.nb(shoot_dens_rnd ~  date_julian + sea_otter_index + sed_inside_prim + light_atten, link = "log", data = dat))
-
-## Model 3e - shoot density biomass ~ Julian day + quad(SOI) ##
-mod3e <- summary(glm.nb(shoot_dens_rnd ~  date_julian + poly(sea_otter_index, 2), link = "log", data = dat))
-
-## Model 3f - shoot density biomass ~ Julian day + quad(SOI) + sediment ##
-mod3f <- summary(glm.nb(shoot_dens_rnd ~  date_julian + poly(sea_otter_index, 2) + sed_inside_prim, link = "log",data = dat))
-
-## Model 3g - shoot density biomass ~ quad(Julian day) + SOI ##
-mod3g <- summary(glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + sea_otter_index, link = "log", data = dat))
-
-## Model 3h - shoot density biomass ~ quad(Julian day) + quad(SOI) ##
-mod3h <- summary(glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2), link = "log", data = dat))
-
-## Model 3 Comparison ##
-Model.3.Comp <- data.frame(model = c("mod3a", "mod3b", "mod3c", "mod3d", "mod3e", "mod3f", "mod3g", "mod3h"),
-                           AIC = numeric(length = 8),
-                           dispersion = numeric(length = 8),
-                           deviance = numeric(length = 8),
-                           df.resid = numeric(length = 8))
-
-Model.3.Comp[1, 2:5] <- c(mod3a$aic, mod3a$dispersion, mod3a$deviance, mod3a$df.residual)
-Model.3.Comp[2, 2:5] <- c(mod3b$aic, mod3b$dispersion, mod3b$deviance, mod3b$df.residual)
-Model.3.Comp[3, 2:5] <- c(mod3c$aic, mod3c$dispersion, mod3c$deviance, mod3c$df.residual)
-Model.3.Comp[4, 2:5] <- c(mod3d$aic, mod3d$dispersion, mod3d$deviance, mod3d$df.residual)
-Model.3.Comp[5, 2:5] <- c(mod3e$aic, mod3e$dispersion, mod3e$deviance, mod3e$df.residual)
-Model.3.Comp[6, 2:5] <- c(mod3f$aic, mod3f$dispersion, mod3f$deviance, mod3f$df.residual)
-Model.3.Comp[7, 2:5] <- c(mod3g$aic, mod3g$dispersion, mod3g$deviance, mod3g$df.residual)
-Model.3.Comp[8, 2:5] <- c(mod3h$aic, mod3h$dispersion, mod3h$deviance, mod3h$df.residual)
-
-## Order by lowest AIC and clean up ##
-Model.3.Comp <- Model.3.Comp[order(Model.3.Comp$AIC, decreasing = FALSE),]
-
-Model.3.Comp$del_AIC <- abs(Model.3.Comp[1,2] - Model.3.Comp$AIC)
-```
-
-### Model 3 Comparison
-```{r model 3 comp}
-Model.3.Comp <- data.frame(Model = Model.3.Comp$model, resid_df = Model.3.Comp$df.resid, round(Model.3.Comp[, c(2, 3, 4, 6)], 2))
-
-datatable(Model.3.Comp)
 ```
 
 ### Best Model 3
 ```{r model 3 best}
-mod3.best <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2), link = "log", data = dat)
+mod3.best <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), link = "log", data = dat)
 summary(mod3.best)
 par(mfrow = c(2, 2))
 plot(mod3.best)
 par(mfrow = c(1, 1))
+
+
+## Predicted Values ##
 ```
 
 ### Model 4 - Aboveground:Belowground Biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect belowground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and total surface water nitrogen may effect belowground biomass of eelgrass.
 
+We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
 ```{r model 4}
 ## Global Model ##
-mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + log(dat$epiphmass_shootmass) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 mod4$anova
-
-## Model 4a - aboveground : belowground biomass ~ Julian day ##
-mod4a <- summary(glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian, data = dat))
-
-## Model 4b - aboveground : belowground biomass ~ Julian day + SOI ##
-mod4b <- summary(glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + sea_otter_index, data = dat))
-
-## Model 4c - aboveground : belowground biomass ~ Julian day + SOI + sediment ##
-mod4c <- summary(glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + sea_otter_index + sed_inside_prim, data = dat))
-
-## Model 4d - aboveground : belowground biomass ~ Julian day + SOI + sediment + light ##
-mod4d <- summary(glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + sea_otter_index + sed_inside_prim + light_atten, data = dat))
-
-## Model 4e - aboveground : belowground biomass ~ Julian day + quad(SOI) ##
-mod4e <- summary(glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + poly(sea_otter_index, 2), data = dat))
-
-## Model 4f - aboveground : belowground biomass ~ Julian day + quad(SOI) + sediment ##
-mod4f <- summary(glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + poly(sea_otter_index, 2) + sed_inside_prim, data = dat))
-
-## Model 4g - aboveground : belowground biomass ~ quad(Julian day) + SOI ##
-mod4g <- summary(glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index, data = dat))
-
-## Model 4h - aboveground : belowground biomass ~ quad(Julian day) + quad(SOI) ##
-mod4h <- summary(glm(abvgnd_mass / log(blwgnd_mass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2), data = dat))
-
-## Model 4 Comparison ##
-Model.4.Comp <- data.frame(model = c("mod4a", "mod4b", "mod4c", "mod4d", "mod4e", "mod4f", "mod4g", "mod4h"),
-                           AIC = numeric(length = 8),
-                           dispersion = numeric(length = 8),
-                           deviance = numeric(length = 8),
-                           df.resid = numeric(length = 8))
-
-Model.4.Comp[1, 2:5] <- c(mod4a$aic, mod4a$dispersion, mod4a$deviance, mod4a$df.residual)
-Model.4.Comp[2, 2:5] <- c(mod4b$aic, mod4b$dispersion, mod4b$deviance, mod4b$df.residual)
-Model.4.Comp[3, 2:5] <- c(mod4c$aic, mod4c$dispersion, mod4c$deviance, mod4c$df.residual)
-Model.4.Comp[4, 2:5] <- c(mod4d$aic, mod4d$dispersion, mod4d$deviance, mod4d$df.residual)
-Model.4.Comp[5, 2:5] <- c(mod4e$aic, mod4e$dispersion, mod4e$deviance, mod4e$df.residual)
-Model.4.Comp[6, 2:5] <- c(mod4f$aic, mod4f$dispersion, mod4f$deviance, mod4f$df.residual)
-Model.4.Comp[7, 2:5] <- c(mod4g$aic, mod4g$dispersion, mod4g$deviance, mod4g$df.residual)
-Model.4.Comp[8, 2:5] <- c(mod4h$aic, mod4h$dispersion, mod4h$deviance, mod4h$df.residual)
-
-## Order by lowest AIC and clean up ##
-Model.4.Comp <- Model.4.Comp[order(Model.4.Comp$AIC, decreasing = FALSE),]
-
-Model.4.Comp$del_AIC <- abs(Model.4.Comp[1,2] - Model.4.Comp$AIC)
-```
-
-### Model 4 Comparison
-```{r model 4 comp}
-Model.4.Comp <- data.frame(Model = Model.4.Comp$model, resid_df = Model.4.Comp$df.resid, round(Model.4.Comp[, c(2, 3, 4, 6)], 2))
-
-datatable(Model.4.Comp)
 ```
 
 ### Best Model 4
@@ -406,71 +230,19 @@ par(mfrow = c(1, 1))
 ```
 
 ### Model 5 - Node 2 distance
-Responce - log normal. We hypothesise that time (as julian day), sea otter index, sediment type, and light attenuation may effect belowground biomass of eelgrass.
+Responce - log normal. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and total surface water nitrogen may effect 2nd internode distance of eelgrass rhizomes.
 
+We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
 ```{r model 5}
 ## Global Model ##
-mod5 <- stepAIC(glm(log(dat$node2) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + dat$sed_inside_prim + dat$light_atten + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod5 <- stepAIC(glm(log(dat$node2) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
 mod5$anova
-
-## Model 5a - node 2 ~ Julian day ##
-mod5a <- summary(glm(log(node2) ~  date_julian, data = dat))
-
-## Model 5b - node 2 ~ Julian day + SOI ##
-mod5b <- summary(glm(log(node2) ~  date_julian + sea_otter_index, data = dat))
-
-## Model 5c - node 2 ~ Julian day + SOI + sediment ##
-mod5c <- summary(glm(log(node2) ~  date_julian + sea_otter_index + sed_inside_prim, data = dat))
-
-## Model 5d - node 2 ~ Julian day + SOI + sediment + light ##
-mod5d <- summary(glm(log(node2) ~  date_julian + sea_otter_index + sed_inside_prim + light_atten, data = dat))
-
-## Model 5e - node 2 ~ Julian day + quad(SOI) ##
-mod5e <- summary(glm(log(node2) ~  date_julian + poly(sea_otter_index, 2), data = dat))
-
-## Model 5f - node 2 ~ Julian day + quad(SOI) + sediment ##
-mod5f <- summary(glm(log(node2) ~  date_julian + poly(sea_otter_index, 2) + sed_inside_prim, data = dat))
-
-## Model 5g - node 2 ~ quad(Julian day) + SOI ##
-mod5g <- summary(glm(log(node2) ~  poly(date_julian, 2) + sea_otter_index, data = dat))
-
-## Model 5h - node 2 ~ quad(Julian day) + quad(SOI) ##
-mod5h <- summary(glm(log(node2) ~  poly(date_julian, 2) + poly(sea_otter_index, 2), data = dat))
-
-## Model 5 Comparison ##
-Model.5.Comp <- data.frame(model = c("mod5a", "mod5b", "mod5c", "mod5d", "mod5e", "mod5f", "mod5g", "mod5h"),
-                           AIC = numeric(length = 8),
-                           dispersion = numeric(length = 8),
-                           deviance = numeric(length = 8),
-                           df.resid = numeric(length = 8))
-
-Model.5.Comp[1, 2:5] <- c(mod5a$aic, mod5a$dispersion, mod5a$deviance, mod5a$df.residual)
-Model.5.Comp[2, 2:5] <- c(mod5b$aic, mod5b$dispersion, mod5b$deviance, mod5b$df.residual)
-Model.5.Comp[3, 2:5] <- c(mod5c$aic, mod5c$dispersion, mod5c$deviance, mod5c$df.residual)
-Model.5.Comp[4, 2:5] <- c(mod5d$aic, mod5d$dispersion, mod5d$deviance, mod5d$df.residual)
-Model.5.Comp[5, 2:5] <- c(mod5e$aic, mod5e$dispersion, mod5e$deviance, mod5e$df.residual)
-Model.5.Comp[6, 2:5] <- c(mod5f$aic, mod5f$dispersion, mod5f$deviance, mod5f$df.residual)
-Model.5.Comp[7, 2:5] <- c(mod5g$aic, mod5g$dispersion, mod5g$deviance, mod5g$df.residual)
-Model.5.Comp[8, 2:5] <- c(mod5h$aic, mod5h$dispersion, mod5h$deviance, mod5h$df.residual)
-
-## Order by lowest AIC and clean up ##
-Model.5.Comp <- Model.5.Comp[order(Model.5.Comp$AIC, decreasing = FALSE),]
-
-Model.5.Comp$del_AIC <- abs(Model.5.Comp[1,2] - Model.5.Comp$AIC)
-```
-
-### Model 5 Comparison
-```{r model 5 comp}
-Model.5.Comp <- data.frame(Model = Model.5.Comp$model, resid_df = Model.5.Comp$df.resid, round(Model.5.Comp[, c(2, 3, 4, 6)], 2))
-
-datatable(Model.5.Comp)
 ```
 
 ### Best Model 5
 ```{r model 5 best}
-mod5.best <- glm(log(node2) ~  poly(date_julian, 2) + light_atten + Ntotal_site, data = dat)
+mod5.best <- glm(log(node2) ~  poly(date_julian, 2) + light_avail + Ntotal_site, data = dat)
 summary(mod5.best)
 par(mfrow = c(2, 2))
 plot(mod5.best)
@@ -478,86 +250,19 @@ par(mfrow = c(1, 1))
 ```
 
 ### Model 6 - Epiphyte load
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light attenuation, and grazer load may effect piephyte load on eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and grazer load may effect piephyte load on eelgrass.
 
+We generated a global model that includes the lienar effects of date, sea otter index, sediment type, light availability, log grazer load, and total surface water nitrogen.
 ```{r model 6}
 ## Global Model ##
-mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + dat$sed_inside_prim + dat$light_atten + log(dat$grazermass_shootmass) + dat$Ntotal_site), direction = "both")
+mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + dat$sed_inside_prim + dat$light_avail + log(dat$grazermass_shootmass) + dat$Ntotal_site), direction = "both")
 
 mod6$anova
-
-## Model 6a - epi ~ Julian day ##
-mod6a <- summary(glm(log(epiphmass_shootmass) ~  date_julian, data = dat))
-
-## Model 6b - epi ~ Julian day + SOI ##
-mod6b <- summary(glm(log(epiphmass_shootmass) ~  date_julian + sea_otter_index, data = dat))
-
-## Model 6c - epi ~ Julian day + SOI + sediment ##
-mod6c <- summary(glm(log(epiphmass_shootmass) ~  date_julian + sea_otter_index + sed_inside_prim, data = dat))
-
-## Model 6d - epi ~ Julian day + SOI + sediment + light ##
-mod6d <- summary(glm(log(epiphmass_shootmass) ~  date_julian + sea_otter_index + sed_inside_prim + light_atten, data = dat))
-
-## Model 6e - epi ~ Julian day + SOI + sediment + light + grazer load ##
-mod6e <- summary(glm(log(epiphmass_shootmass) ~  date_julian + sea_otter_index + sed_inside_prim + light_atten + log(grazermass_shootmass), data = dat))
-
-## Model 6f - epi ~ Julian day + SOI + grazer load ##
-mod6f <- summary(glm(log(epiphmass_shootmass) ~  date_julian + sea_otter_index + log(grazermass_shootmass), data = dat))
-
-## Model 6g - epi ~ Julian day + grazer load ##
-mod6g <- summary(glm(log(epiphmass_shootmass) ~  date_julian + log(grazermass_shootmass), data = dat))
-
-## Model 6h - epi ~ Julian day + quad(SOI)  ##
-mod6h <- summary(glm(log(epiphmass_shootmass) ~  date_julian + poly(sea_otter_index, 2), data = dat))
-
-## Model 6i - epi ~ Julian day + quad(SOI) + grazer load ##
-mod6i <- summary(glm(log(epiphmass_shootmass) ~  date_julian + poly(sea_otter_index, 2) + log(grazermass_shootmass), data = dat))
-
-## Model 6j - epi ~ quad(Julian dat) + quad(SOI) + grazer load ##
-mod6j <- summary(glm(log(epiphmass_shootmass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(grazermass_shootmass), data = dat))
-
-## Model 6k - epi ~ quad(Julian dat) + quad(SOI) + grazer load ##
-mod6k <- summary(glm(log(epiphmass_shootmass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2), data = dat))
-
-## Model 6l - epi ~ SOI + grazer load ##
-mod6l <- summary(glm(log(epiphmass_shootmass) ~  sea_otter_index + log(grazermass_shootmass), data = dat))
-
-## Model 6 Comparison ##
-Model.6.Comp <- data.frame(model = c("mod6a", "mod6b", "mod6c", "mod6d", "mod6e", "mod6f", "mod6g", "mod6h", "mod6i", "mod6j", "mod6k", "mod6l"), AIC = numeric(length = 12),
-          dispersion = numeric(length = 12),
-          deviance = numeric(length = 12),
-          df.resid = numeric(length = 12))
-
-Model.6.Comp[1, 2:5] <- c(mod6a$aic, mod6a$dispersion, mod6a$deviance, mod6a$df.residual)
-Model.6.Comp[2, 2:5] <- c(mod6b$aic, mod6b$dispersion, mod6b$deviance, mod6b$df.residual)
-Model.6.Comp[3, 2:5] <- c(mod6c$aic, mod6c$dispersion, mod6c$deviance, mod6c$df.residual)
-Model.6.Comp[4, 2:5] <- c(mod6d$aic, mod6d$dispersion, mod6d$deviance, mod6d$df.residual)
-Model.6.Comp[5, 2:5] <- c(mod6e$aic, mod6e$dispersion, mod6e$deviance, mod6e$df.residual)
-Model.6.Comp[6, 2:5] <- c(mod6f$aic, mod6f$dispersion, mod6f$deviance, mod6f$df.residual)
-Model.6.Comp[7, 2:5] <- c(mod6g$aic, mod6g$dispersion, mod6g$deviance, mod6g$df.residual)
-Model.6.Comp[8, 2:5] <- c(mod6h$aic, mod6h$dispersion, mod6h$deviance, mod6h$df.residual)
-Model.6.Comp[9, 2:5] <- c(mod6i$aic, mod6i$dispersion, mod6i$deviance, mod6i$df.residual)
-Model.6.Comp[10, 2:5] <- c(mod6j$aic, mod6j$dispersion, mod6j$deviance, mod6j$df.residual)
-Model.6.Comp[11, 2:5] <- c(mod6k$aic, mod6k$dispersion, mod6k$deviance, mod6k$df.residual)
-Model.6.Comp[12, 2:5] <- c(mod6l$aic, mod6l$dispersion, mod6l$deviance, mod6l$df.residual)
-
-## Order by lowest AIC and clean up ##
-Model.6.Comp <- Model.6.Comp[order(Model.6.Comp$AIC, decreasing = FALSE),]
-
-Model.6.Comp$del_AIC <- abs(Model.6.Comp[1,2] - Model.6.Comp$AIC)
-```
-
-### Model 6 Comparison
-```{r model 6 comp}
-Model.6.Comp <- data.frame(Model = Model.6.Comp$model, resid_df = Model.6.Comp$df.resid, round(Model.6.Comp[, c(2, 3, 4, 6)], 2))
-
-datatable(Model.6.Comp)
 ```
 
 ### Best Model 6
 ```{r model 6 best}
-mod6.best <- glm(log(dat$epiphmass_shootmass) ~ log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_atten)
+mod6.best <- glm(log(dat$epiphmass_shootmass) ~ log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail)
 summary(mod6.best)
 par(mfrow = c(2, 2))
 plot(mod6.best)
@@ -565,54 +270,14 @@ par(mfrow = c(1, 1))
 ```
 
 ### Model 7 - Grazer load
-Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, crab biomass may affect grazer load on eelgrass.
+Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, log crab biomass may affect grazer load on eelgrass.
 
+We generated a global model that includes the linear effects of date, sea otter index, log epiphyte load, and log crab biomass.
 ```{r model 7}
 ## Global Model ##
-mod7 <- stepAIC(glm(log(dat$grazermass_shootmass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + dat$crab_mass), direction = "both")
+mod7 <- stepAIC(glm(log(dat$grazermass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$crab_mass)), direction = "both")
 
 mod7$anova
-
-## Model 7a - grz ~ Julian day ##
-mod7a <- summary(glm(log(grazermass_shootmass) ~ date_julian, data = dat))
-
-## Model 7b - grz ~ Julian day + SOI ##
-mod7b <- summary(glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index, data = dat))
-
-## Model 7c - grz ~ Julian day + SOI + epi ##
-mod7c <- summary(glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass), data = dat))
-
-## Model 7d - grz ~ Julian day + SOI + epi + crab ##
-mod7d <- summary(glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(crab_mass), data = dat))
-
-## Model 7e - grz ~ epi  ##
-mod7e <- summary(glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat))
-
-## Model 7 Comparison ##
-Model.7.Comp <- data.frame(model = c("mod7a", "mod7b", "mod7c", "mod7d", "mod7e"), AIC = numeric(length = 5),
-          dispersion = numeric(length = 5),
-          deviance = numeric(length = 5),
-          df.resid = numeric(length = 5))
-
-Model.7.Comp[1, 2:5] <- c(mod7a$aic, mod7a$dispersion, mod7a$deviance, mod7a$df.residual)
-Model.7.Comp[2, 2:5] <- c(mod7b$aic, mod7b$dispersion, mod7b$deviance, mod7b$df.residual)
-Model.7.Comp[3, 2:5] <- c(mod7c$aic, mod7c$dispersion, mod7c$deviance, mod7c$df.residual)
-Model.7.Comp[4, 2:5] <- c(mod7d$aic, mod7d$dispersion, mod7d$deviance, mod7d$df.residual)
-Model.7.Comp[5, 2:5] <- c(mod7e$aic, mod7e$dispersion, mod7e$deviance, mod7e$df.residual)
-
-
-## Order by lowest AIC and clean up ##
-Model.7.Comp <- Model.7.Comp[order(Model.7.Comp$AIC, decreasing = FALSE),]
-
-Model.7.Comp$del_AIC <- abs(Model.7.Comp[1,2] - Model.7.Comp$AIC)
-```
-
-### Model 7 Comparison
-```{r model 7 comp}
-Model.7.Comp <- data.frame(Model = Model.7.Comp$model, resid_df = Model.7.Comp$df.resid, round(Model.7.Comp[, c(2, 3, 4, 6)], 2))
-
-datatable(Model.7.Comp)
 ```
 
 ### Best Model 7
@@ -627,56 +292,12 @@ par(mfrow = c(1, 1))
 ### Model 8 - Crabs
 Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, grazer biomass, may affect grazer load on eelgrass.
 
+We generated a global model that includes the linear effects of date, sea oter index and log grazer load. 
 ```{r model 8}
 ## Global Model ##
-mod8 <- stepAIC(glm(log(dat$crab_mass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass)), direction = "both")
+mod8 <- stepAIC(glm(log(dat$crab_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass)), direction = "both")
 
 mod8$anova
-
-## Model 8a - crab ~ Julian day ##
-mod8a <- summary(glm(log(crab_mass) ~ date_julian, data = dat))
-
-## Model 8b - crab ~  SOI ##
-mod8b <- summary(glm(log(crab_mass) ~ sea_otter_index, data = dat))
-
-## Model 8c - crab  ~ Julian day + SOI ##
-mod8c <- summary(glm(log(crab_mass) ~ date_julian + sea_otter_index, data = dat))
-
-## Model 8d - crab  ~ Julian day + SOI + crab ##
-mod8d <- summary(glm(log(crab_mass) ~ date_julian + sea_otter_index + log(grazermass_shootmass), data = dat))
-
-## Model 8e - crab ~ grz  ##
-mod8e <- summary(glm(log(crab_mass) ~ log(grazermass_shootmass), data = dat))
-
-## Model 8f - crab ~ SOI + grz ##
-mod8f <- summary(glm(log(crab_mass) ~ sea_otter_index + log(grazermass_shootmass), data = dat))
-
-## Model 8 Comparison ##
-Model.8.Comp <- data.frame(model = c("mod8a", "mod8b", "mod8c", "mod8d", "mod8e", "mod8f"), AIC = numeric(length = 6),
-          dispersion = numeric(length = 6),
-          deviance = numeric(length = 6),
-          df.resid = numeric(length = 6))
-
-Model.8.Comp[1, 2:5] <- c(mod8a$aic, mod8a$dispersion, mod8a$deviance, mod8a$df.residual)
-Model.8.Comp[2, 2:5] <- c(mod8b$aic, mod8b$dispersion, mod8b$deviance, mod8b$df.residual)
-Model.8.Comp[3, 2:5] <- c(mod8c$aic, mod8c$dispersion, mod8c$deviance, mod8c$df.residual)
-Model.8.Comp[4, 2:5] <- c(mod8d$aic, mod8d$dispersion, mod8d$deviance, mod8d$df.residual)
-Model.8.Comp[5, 2:5] <- c(mod8e$aic, mod8e$dispersion, mod8e$deviance, mod8e$df.residual)
-Model.8.Comp[6, 2:5] <- c(mod8f$aic, mod8f$dispersion, mod8f$deviance, mod8f$df.residual)
-
-
-## Order by lowest AIC and clean up ##
-Model.8.Comp <- Model.8.Comp[order(Model.8.Comp$AIC, decreasing = FALSE),]
-
-Model.8.Comp$del_AIC <- abs(Model.8.Comp[1,2] - Model.8.Comp$AIC)
-```
-
-### Model 8 Comparison
-```{r model 8 comp}
-Model.8.Comp <- data.frame(Model = Model.8.Comp$model, resid_df = Model.8.Comp$df.resid, round(Model.8.Comp[, c(2, 3, 4, 6)], 2))
-
-datatable(Model.8.Comp)
 ```
 
 ### Best Model 8
@@ -827,13 +448,21 @@ fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
 
 
 ## Collating Model results
-### Modling results table
+### Modeling results table
 Table to look at result from best models
-```{r full results best model, echo = FALSE, }
-all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second node distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE)
+```{r full results best model, echo = FALSE}
+all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE)
 
 all.results.simp
 ```
+
+Another type of table to look at model results
+```{r}
+summary(mod1.best)
+
+sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), pred.labels = c("Day", "Day^2", "SO Index", "SO Index^2", "Epiphyte Load", "Day", "SO Index", "Total N", "Grazer Load", "Sediment Type", "Light Avail."), exp.coef = FALSE, show.r2 = TRUE)
+```
+
 
 ## Environmental Data
 Summary stats from environmental data from all sites.
@@ -841,7 +470,7 @@ Summary stats from environmental data from all sites.
 ## Collate environmental data ##
 site.envi <- cbind.data.frame(dat[,2:3], round(dat[,15:24],2), round(dat[,57:61], 2), round(dat[, 115], 1), round(dat[, 116], 2))
 colnames(site.envi)[18] <- "sediment"
-colnames(site.envi)[19] <- "light_attenuation"
+colnames(site.envi)[19] <- "light_availability"
 
 ## Export ##
 write.csv(site.envi, "Eelgrass_structure_MS_results/envi_summary_stats.csv", row.names =  FALSE)
@@ -852,6 +481,6 @@ write.csv(site.envi, "Eelgrass_structure_MS_results/envi_summary_stats.csv", row
 #### Plots
 ```{r}
 ggplot(dat) +
-  geom_point(aes(x = dat$sea_otter_index, y = dat$fish_SW_diverse), size = 3)
+  geom_point(aes(x =log(dat$grazermass_shootmass) , y = log(dat$abvgnd_mass)), size = 3)
 ```
 
