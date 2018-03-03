@@ -344,9 +344,6 @@ fish.pca <- prcomp(fish.std)
 summary(fish.pca)
 biplot(fish.pca, cex = 0.5)
 
-screeplot(pca, ylim = c(0, 0.8))
-pca$scores 
-
 ## PERMDISP ##
 fish.disp <- betadisper(fish.diss, fish.site.sp$site)
 fish.disp
@@ -375,6 +372,9 @@ fishmass.pca <- prcomp(fishmass.std)
 summary(fishmass.pca)
 biplot(fishmass.pca, cex = 0.5)
 screeplot(fishmass.pca)
+
+# Nice plot #
+autoplot(fishmass.pca, loadings = TRUE, loadings.label = TRUE)
 
 ## PERMDISP ##
 fishmass.disp <- betadisper(fishmass.diss, fish.site.sp$site)
@@ -464,16 +464,16 @@ sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.b
 ```
 
 
-## Environmental Data
-Summary stats from environmental data from all sites.
+## Site characterization data
+Summary information on site characterization including date, sea otter index, envi conditions, sediment characteristics.
 ```{r}
 ## Collate environmental data ##
-site.envi <- cbind.data.frame(dat[,2:3], round(dat[,15:24],2), round(dat[,57:61], 2), round(dat[, 115], 1), round(dat[, 116], 2))
-colnames(site.envi)[18] <- "sediment"
-colnames(site.envi)[19] <- "light_availability"
+site.envi <- cbind.data.frame(dat[,2:3], round(dat[, 5:6], 2), round(dat[, c(15,17,19,21,23,25,27,29,31,33)],2), round(dat[,45:51], 2), round(dat[, 57:61], 2), round(dat[, 115], 2), round(dat[, 116], 2))
+colnames(site.envi)[27] <- "sediment"
+colnames(site.envi)[28] <- "light_availability"
 
 ## Export ##
-write.csv(site.envi, "Eelgrass_structure_MS_results/envi_summary_stats.csv", row.names =  FALSE)
+write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row.names =  FALSE)
 
 ```
 
