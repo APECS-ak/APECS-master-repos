@@ -481,6 +481,7 @@ write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row
 #### Plots
 ```{r}
 ggplot(dat) +
-  geom_point(aes(x =log(dat$grazermass_shootmass) , y = log(dat$abvgnd_mass)), size = 3)
+  geom_point(aes(x =(dat$date), y = (dat$abvgnd_mass)), size = 3) +
+  theme(axis.text.x=element_text(angle = 90, vjust = 0.5))
 ```
 
