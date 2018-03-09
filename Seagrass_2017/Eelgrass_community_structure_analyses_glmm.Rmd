@@ -144,7 +144,7 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type, light availability, and total surface water nutirents.
 ```{r model 1}
 ## Global Model ##
-mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
 ```
 
 ### Best Model 1
@@ -171,16 +171,20 @@ mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_ju
 mod2$anova
 ```
 
-### Best Model 2
-```{r model 2 best}
-mod2.best <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat)
-summary(mod2.best)
-par(mfrow = c(2, 2))
-plot(mod2.best)
-par(mfrow = c(1, 1))
+### Top Models 2
+Table of top three models their AIC values and resid df
+```{r}
+## Fit other top models ##
+mod2.1 <- summary(mod2.best)
+mod2.2 <- summary(glm(log(blwgnd_mass) ~  date_julian, data = dat))
 
+## Print AIC values ##
+mod2.1$aic
+mod2.2$aic
 
-## Predicted values ##
+## Print resid df ##
+mod2.1$df.residual
+mod2.2$df.residual
 ```
 
 ### Model 3 - Shoot density
@@ -208,6 +212,7 @@ par(mfrow = c(1, 1))
 
 ## Predicted Values ##
 ```
+
 
 ### Model 4 - Aboveground:Belowground Biomass
 Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and total surface water nitrogen may effect belowground biomass of eelgrass.
