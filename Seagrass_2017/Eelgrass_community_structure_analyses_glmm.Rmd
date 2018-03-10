@@ -154,38 +154,26 @@ summary(mod1.best)
 par(mfrow = c(2, 2))
 plot(mod1.best)
 par(mfrow = c(1, 1))
+```
 
+### Model 1 Plots
+Calculate predicted vales and plot
+```{r plots}
 ## Predicted Values ##
-newdata = data.frame(date_julian = 150, sea_otter_index = 0, epiphmass_shootmass = 0.04) # wrap the parameter
-predict.glm(mod1.best, type = "response", newdata = newdata, se.fir = TRUE)
+newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), sea_otter_index = rep(median(dat$sea_otter_index), 116), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
+pred.1.jday <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.jday)
+newdata.1.jday$Predict <- exp(pred.1.jday$fit)
+newdata.1.jday$Lwr <- exp(pred.1.jday$fit - pred.1.jday$se.fit)
+newdata.1.jday$Upr <- exp(pred.1.jday$fit + pred.1.jday$se.fit)
 
-Minday <- min(dat$date_julian)
-Julianday <- as.numeric(tran.dat$date_julian)
-Dayindx <- Julianday - Minday + 1
-
-mind <- min(Dayindx)
-maxd <- max(Dayindx)
-Julday <- numeric(length = length(seq(mind:maxd)))
-Predict <- numeric(length = length(seq(mind:maxd)))
-Lwr <- numeric(length = length(seq(mind:maxd)))
-Upr <- numeric(length = length(seq(mind:maxd)))
-int <- mod1.1$coefficients[1]
-time <- mod1.1$coefficients[2]
-time2 <- mod1.1$coefficients[3]
-soi <- mod1.1$coefficients[4]
-soi2 <- mod1.1$coefficients[5]
-epi <- mod1.1$coefficients[6]
-
-for (d in mind:maxd){
-  Julday[d] = d - 1 + Minday
-  Mu = int + time*d + time2*d^2
-  pred[d] = mean(exp(Mu))
-  lwr[d] = as.numeric(quantile(exp(Mu), .025))
-  upr[d] = as.numeric(quantile(exp(Mu), .975))
-} 
-
-dfDay = data.frame(Julianday = Julday, Mean = Predict, Lwr = Lwr, Upr = Upr)
-
+## Plot ##
+ggplot(newdata.1.jday) +
+  geom_line(aes(x = date_julian, y = Predict), size = 1) +
+  geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
+  labs(x = "Julian Day", y = "Predicted aboveground mass +/- se") +
+  scale_x_continuous(breaks = seq(120, 240, by = 20)) +
+  scale_y_continuous(breaks = seq(0, 150, by = 20)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
 ### Model 2 - Belowground biomass
@@ -325,29 +313,25 @@ summary(mod8.best)
 par(mfrow = c(2, 2))
 plot(mod8.best)
 par(mfrow = c(1, 1))
+```
 
+### Model 8 Plots
+Calculate predicted vales and plot
+```{r plots}
 ## Predicted Values ##
-predict(mod8.best, type = "response")
+newdata.8 <- data.frame(sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100))
+pred.8 <- predict(mod8.best, se.fit = TRUE, type = "response", newdata = newdata.8)
+newdata.8$Predict <- exp(pred.8$fit)
+newdata.8$Lwr <- exp(pred.8$fit - pred.8$se.fit)
+newdata.8$Upr <- exp(pred.8$fit + pred.8$se.fit)
 
-soi <- seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100)
-
-minsoi <- min(soi)
-maxsoi <- max(soi)
-Predict <- numeric(length = 100)
-Lwr <- numeric(length = 100)
-Upr <- numeric(length = 100)
-int <- mod8.best$coefficients[1]
-so <- mod8.best$coefficients[2]
-
-for(s in unique(soi)){
-  Mu = int + so*s
-  Predict[s] = mean(exp(Mu))
-  Lwr[s] = as.numeric(quantile(exp(Mu), .025))
-  Upr[s] = as.numeric(quantile(exp(Mu), .975))
-} 
-
-dfSOI.8 <- data.frame(sea_otter_index = soi, Mean = Predict, Lwr = Lwr, Upr = Upr)
-
+## Plot ##
+ggplot(newdata.8) +
+  geom_line(aes(x = sea_otter_index, y = Predict), size = 1) +
+  geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
+  labs(x = "Sea otter index", y = "Predicted Crab Biomass (g)") +
+  scale_y_continuous(breaks = seq(0, 150, by = 20)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
 ### Fishes
@@ -522,7 +506,7 @@ write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row
 #### Plots
 ```{r}
 ggplot(dat) +
-  geom_point(aes(x =(dat$sea_otter_index), y = (dat$crab_mass)), size = 3) +
+  geom_point(aes(x =(dat$date_julian), y = (dat$abvgnd_mass)), size = 3) +
   theme(axis.text.x=element_text(angle = 90, vjust = 0.5))
 ```
 
