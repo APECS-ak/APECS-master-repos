@@ -64,6 +64,9 @@ crab.dat$string <- as.character(crab.dat$string)
 
 ## Fish ##
 fish.dat <- read.csv("../ALL_DATA/eelgrass_beach_seine_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## Fish Taxonomy ##
+fish.tax <- read.csv("../ALL_DATA/fish_taxonomy_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ### Data Prep
@@ -106,8 +109,17 @@ crab.rock <- crab.dat %>%
 dat <- merge(dat, crab.rock, by = "site")
 ```
 
-Fish data preparation. This needs to be done to summarise by site across all species.
+Fish data preparation. 
+append taxonomy
+```{r}
+fish.dat <- merge(fish.dat, fish.tax, by.x = "species_scientific", by.y = "scientific_name", all = TRUE)
+```
+
+
+This needs to be done to summarise by site across all species.
 ```{r fish site, echo = FALSE}
+## Full species List ##
+# prep #
 fish.site <- fish.dat %>% 
   group_by(site) %>% 
   summarise(fish_count = n(),
@@ -127,13 +139,31 @@ fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:58)], by = "site")
 
 dat <- merge(dat, fish.site, by = "site")
 
-## biomass community matirx ##
+# biomass community matirx #
 fishmass.site.sp <- fish.dat %>% 
   group_by(site, sp_code) %>% 
   summarise(mass = sum(mass_g)) %>% 
   spread(key = sp_code, value = mass)
 
 fishmass.site.sp[is.na(fishmass.site.sp)] <- 0
+
+## Group by family counts ##
+fish.site.fam <- fish.dat %>% 
+  group_by(site, family) %>% 
+  summarise(count = n()) %>% 
+  spread(key = family, value = count)
+
+fish.site.fam[is.na(fish.site.fam)] <- 0
+
+## Group by family Mass ##
+fishmass.site.fam <- fish.dat %>% 
+  group_by(site, family) %>% 
+  summarise(mass = sum(mass_g)) %>% 
+  spread(key = family, value = mass)
+
+fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
+
+dat <- merge(dat, fishmass.site.fam, by = "site")
 ```
 
 ## Models
@@ -591,6 +621,24 @@ fishmass.sp.trsfrm <- (fishmass.site.sp[,2:56]^0.25)
 fishmass.std <- as.data.frame(scale(fishmass.sp.trsfrm, center = FALSE, scale = apply(fishmass.sp.trsfrm, 2, max)))
 ```
 
+Transform fish family counts
+```{r}
+## Transform ##
+fish.fam.trsnfrm <- (fish.site.fam[,2:20]^0.25)
+
+## Standardize to column maximum i.e. species maximum ##
+fish.fam.std <- as.data.frame(scale(fish.fam.trsnfrm, center = FALSE, scale = apply(fish.fam.trsnfrm, 2, max)))
+```
+
+Transform fish family mass
+```{r}
+## Transform ##
+fishmass.fam.trsnfrm <- (fishmass.site.fam[,2:20]^0.25)
+
+## Standardize to column maximum i.e. species maximum ##
+fishmass.fam.std <- as.data.frame(scale(fishmass.fam.trsnfrm, center = FALSE, scale = apply(fishmass.fam.trsnfrm, 2, max)))
+```
+
 Multivariate analysis of fish counts
 ```{r}
 ## Dissimilarity matirx ##
@@ -649,7 +697,31 @@ plot(mod9b.mds$points, asp = 1)
 mod9b.mds
 ```
 
+Multivariate analysis of fish family counts
+```{r}
+## Dissimilarity matirx ##
+fish.fam.diss <- vegdist(fish.fam.std, method = "bray")
+round(fish.fam.diss, 2)
 
+## PCA ##
+fish.fam.pca <- prcomp(fish.fam.std)
+summary(fish.fam.pca)
+biplot(fish.fam.pca, cex = 0.5)
+screeplot(fish.fam.pca)
+```
+
+Multivariate analysis of fish family mass
+```{r}
+## Dissimilarity matirx ##
+fishmass.fam.diss <- vegdist(fishmass.fam.std, method = "bray")
+round(fish.fam.diss, 2)
+
+## PCA ##
+fishmass.fam.pca <- prcomp(fishmass.fam.std)
+summary(fishmass.fam.pca)
+biplot(fishmass.fam.pca, cex = 0.5)
+screeplot(fish.fam.pca)
+```
 #### Simple models and summaries
 Simple models
 ```{r}
@@ -754,7 +826,6 @@ write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row
 #### Plots
 ```{r}
 ggplot(dat) +
-  geom_point(aes(x =(dat$date_julian), y = (dat$shoot_dens)), size = 3) +
-  theme(axis.text.x=element_text(angle = 90, vjust = 0.5))
+  geom_point(aes(x = sea_otter_index, y = log(Embiotocidae + 1)), size = 3)
 ```
 
