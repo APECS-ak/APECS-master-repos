@@ -722,6 +722,7 @@ summary(fishmass.fam.pca)
 biplot(fishmass.fam.pca, cex = 0.5)
 screeplot(fish.fam.pca)
 ```
+
 #### Simple models and summaries
 Simple models
 ```{r}
@@ -747,6 +748,22 @@ mod13 <- stepAIC(glm(dat$fish_rich ~ 1),
 mod13$anova
 
 ```
+
+Analysis of Fish Families. Stacked proportion bar plots of mass by family for all samples
+```{r}
+fishmass.fam <- fishmass.site.fam %>% 
+  gather("family", "mass", 2:20) %>% 
+  group_by(family) %>% 
+  summarise(mean_mass = mean(mass),
+            se_mass = (sd(mass)/sqrt(21)))
+
+ggplot(fishmass.fam) +
+  geom_col(aes(x = family, y = log(mean_mass + 1))) +
+  geom_errorbar(aes(x = family, ymin = log(mean_mass + 1) - log(se_mass + 1), ymax = log(mean_mass + 1) + log(se_mass + 1), width = 0), size = 1) +
+  labs(x = "Family", y = "Log mean mass per seine +/- se (g)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), axis.text.x=element_text(angle = 45, hjust = 1))
+```
+
 
 Given that fish are not well explained by any of our data, lets take a look at all the data together. First we will look at basic summary statistics, and the average relative fq by species.
 ```{r}
@@ -786,12 +803,14 @@ all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.bes
 all.results.simp
 ```
 
-Another type of table to look at model results
+More pretty table
 ```{r}
-summary(mod1.best)
+all.results <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), pred.labels = c("Julian Day", "Julian Day^2", "Sea otter index", "Sea otter index ^2", "log Epiphyte load", "Julian Day", "Sea otter index", "Light availability", "Total surface nitrogen", "log Grazer load", "Sediment type"), exp.coef = FALSE, show.r2 = TRUE, show.aic = TRUE)
 
-sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), pred.labels = c("Day", "Day^2", "SO Index", "SO Index^2", "Epiphyte Load", "Day", "SO Index", "Total N", "Grazer Load", "Sediment Type", "Light Avail."), exp.coef = FALSE, show.r2 = TRUE)
+all.results
 ```
+
+
 
 ### Predicted Values Plots
 Above and below ground biomass
@@ -826,6 +845,6 @@ write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row
 #### Plots
 ```{r}
 ggplot(dat) +
-  geom_point(aes(x = sea_otter_index, y = log(Embiotocidae + 1)), size = 3)
+  geom_point(aes(x = sea_otter_index, y = Gadidae), size = 3)
 ```
 
