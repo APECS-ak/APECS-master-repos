@@ -832,9 +832,9 @@ plot_grid(p6.grz, p6.sed, p7.epi, p8.crb)
 Summary information on site characterization including date, sea otter index, envi conditions, sediment characteristics.
 ```{r}
 ## Collate environmental data ##
-site.envi <- cbind.data.frame(dat[,2:3], round(dat[, 5:6], 2), round(dat[, c(15,17,19,21,23,25,27,29,31,33)],2), round(dat[,45:51], 2), round(dat[, 57:61], 2), round(dat[, 115], 2), round(dat[, 116], 2))
-colnames(site.envi)[27] <- "sediment"
-colnames(site.envi)[28] <- "light_availability"
+site.envi <- cbind.data.frame(dat[,2:3], round(dat[, 5:6], 2), round(dat[, c(15,17,19,21,23,25,27,29,31,33)],2), round(dat[,25:51], 2), round(dat[, 57:61], 2), round(dat[, 115], 2), round(dat[, 116], 2))
+colnames(site.envi)[47] <- "sediment"
+colnames(site.envi)[48] <- "light_availability"
 
 ## Export ##
 write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row.names =  FALSE)
