@@ -11,7 +11,13 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The purpose of this file is to prepare a .csv file that includes only seagrass (in this case, eelgrass) data that W.W. Raymond collected in the summer of 2017. To build this file, T.A. Stephens combined data from two datasheets for all seagrass sites. 
+The purpose of this file is to prepare a .csv file that includes all seagrass (in this case, eelgrass) community data that W.W. Raymond collected in the summer of 2017. To build this file, T.A. Stephens combined data from two files into one. Generally, the final datasheet will include coverage of macroalgae and epiphytes (% area), shoot counts per area, eelgrass + rhizome lengths and biomass, epiphyte biomass, and epifauna counts and biomass. Site data (e.g. coordinates, dates, times, depths) are also included. 
+
+```{r}
+library(tidyr)
+library(plyr)
+```
+
 
 ```{r}
 df.bio <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
