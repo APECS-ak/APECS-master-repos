@@ -24,6 +24,8 @@ library(tidyr)
 df.bio <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.trans <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.coor <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 
@@ -67,11 +69,11 @@ colnames(df.bio)
 colnames(df.bio)[which(names(df.bio) == "quadrat")] <- "quadrat_number"
 colnames(df.bio)[which(names(df.bio) == "plant")] <- "plant_number"
 colnames(df.bio)[which(names(df.bio) == "rhi_length")] <- "rhizome_length_cm"
-colnames(df.bio)[which(names(df.bio) == "node1")] <- "node1_length_cm"
-colnames(df.bio)[which(names(df.bio) == "node2")] <- "node2_length_cm"
-colnames(df.bio)[which(names(df.bio) == "node3")] <- "node3_length_cm"
-colnames(df.bio)[which(names(df.bio) == "node4")] <- "node4_length_cm"
-colnames(df.bio)[which(names(df.bio) == "node5")] <- "node5_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node1")] <- "internode1_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node2")] <- "internode2_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node3")] <- "internode3_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node4")] <- "internode4_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node5")] <- "internode5_length_cm"
 colnames(df.bio)[which(names(df.bio) == "leaf_length1")] <- "leaf1_length_cm"
 colnames(df.bio)[which(names(df.bio) == "leaf_length2")] <- "leaf2_length_cm"
 colnames(df.bio)[which(names(df.bio) == "leaf_length3")] <- "leaf3_length_cm"
@@ -112,8 +114,9 @@ colnames(df.bio)
 
 
 ```{r}
-# join the two eelgrass DFs together by site name
+# join the two eelgrass DFs together by site name, as well as coordinates
 df.community <- left_join(df.bio, df.trans, by = c("site"))
+df.community <- left_join(df.community, df.coor, by = c("site"))
 
 
 # combine the two note columns into one, seperated by a semi-colon
@@ -126,6 +129,7 @@ df.community <- df.community %>%
 
 
 # rename columns for clarity
+colnames(df.community)[which(names(df.community) == "site")] <- "site_code"
 colnames(df.community)[which(names(df.community) == "depth_m")] <- "depth_MLLW_m"
 colnames(df.community)[which(names(df.community) == "macroalgae_cover_0.25msq")] <- "macroalgae_percover_0.25msq"
 colnames(df.community)[which(names(df.community) == "diatom_cover_0.25msq")] <- "epiphyte_percover_0.25msq"
@@ -135,7 +139,7 @@ colnames(df.community)[which(names(df.community) == "flowering_shoots_0.25msq")]
 
 
 # reorgonize columns
-df.community <- df.community[c("site","date_DDMMYYYY","date_YYYYMMDD","start_time","end_time","depth_MLLW_m","quadrat_number","plant_number","eelgrass_shoots_0.25msq","flowering_shoots_0.25msq","epiphyte_percover_0.25msq","macroalgae_percover_0.25msq","epiphyte_dw_g","shoot_fw_g","shoot_dw_g","xs_shoot_fw_g","xs_shoot_dw_g","rhizome_fw_g","rhizome_dw_g","leaf1_length_cm","leaf2_length_cm","leaf3_length_cm","leaf4_length_cm","leaf5_length_cm","leaf6_length_cm","leaf7_length_cm","leaf8_length_cm","leaf9_length_cm","leaf10_length_cm","leaf1_width_cm","leaf2_width_cm","leaf3_width_cm","leaf4_width_cm","leaf5_width_cm","leaf6_width_cm","leaf7_width_cm","leaf8_width_cm","leaf9_width_cm","leaf10_width_cm","rhizome_length_cm","node1_length_cm","node2_length_cm","node3_length_cm","node4_length_cm","node5_length_cm","isopod_count","isopod_fw_g","isopod_dw_g","gammarid_count","gammarid_fw_g","gammarid_dw_g","caprelid_count","caprelid_fw_g","caprelid_dw_g","limpet_count","limpet_fw_g","limpet_dw_g","gastropod_count","gastropod_fw_g","gastropod_dw_g","crab_count","crab_fw_g","crab_dw_g","polychaete_count","other_epifauna","notes")]
+df.community <- df.community[c("site_code","site_name","latitude","longitude","date_DDMMYYYY","date_YYYYMMDD","start_time","end_time","depth_MLLW_m","quadrat_number","plant_number","eelgrass_shoots_0.25msq","flowering_shoots_0.25msq","epiphyte_percover_0.25msq","macroalgae_percover_0.25msq","epiphyte_dw_g","shoot_fw_g","shoot_dw_g","xs_shoot_fw_g","xs_shoot_dw_g","rhizome_fw_g","rhizome_dw_g","leaf1_length_cm","leaf2_length_cm","leaf3_length_cm","leaf4_length_cm","leaf5_length_cm","leaf6_length_cm","leaf7_length_cm","leaf8_length_cm","leaf9_length_cm","leaf10_length_cm","leaf1_width_cm","leaf2_width_cm","leaf3_width_cm","leaf4_width_cm","leaf5_width_cm","leaf6_width_cm","leaf7_width_cm","leaf8_width_cm","leaf9_width_cm","leaf10_width_cm","rhizome_length_cm","internode1_length_cm","internode2_length_cm","internode3_length_cm","internode4_length_cm","internode5_length_cm","isopod_count","isopod_fw_g","isopod_dw_g","gammarid_count","gammarid_fw_g","gammarid_dw_g","caprelid_count","caprelid_fw_g","caprelid_dw_g","limpet_count","limpet_fw_g","limpet_dw_g","gastropod_count","gastropod_fw_g","gastropod_dw_g","crab_count","crab_fw_g","crab_dw_g","polychaete_count","other_epifauna","notes")]
 
 colnames(df.community)
 ```
