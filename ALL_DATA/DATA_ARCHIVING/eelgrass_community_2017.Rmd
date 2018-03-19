@@ -1,10 +1,150 @@
 ---
-title: "eelgrass community"
+title: "Eelgrass Biometrics"
 author: "Tiff Stephens"
 date: "3/18/2018"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+The purpose of this file is to prepare a .csv file that includes all seagrass (in this case, eelgrass) community data that W.W. Raymond collected in the summer of 2017. To build this file, T.A. Stephens combined data from two files into one. Generally, the final datasheet will include coverage of macroalgae and epiphytes (% area), shoot counts per area, eelgrass + rhizome lengths and biomass, epiphyte biomass, and epifauna counts and biomass. Site data (e.g. coordinates, dates, times, depths) are also included. 
+
+```{r}
+library(dplyr)
+library(plyr)
+library(tidyr)
+```
+
+
+```{r}
+df.bio <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.trans <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+
+
+```{r, include = FALSE}
+str(df.bio)
+na.omit(df.bio)
+
+
+# change column name for consistency with other DFs
+colnames(df.bio)[which(names(df.bio) == "collection_date")] <- "date_DDMMYYYY"
+colnames(df.bio)[which(names(df.bio) == "YYYYMMDD")] <- "date_YYYYMMDD"
+
+
+# need to calculate the weights of epiphytes + rhizomes + shoots + xs shoots + isopods + gammarid amphipods + caprelids + limpets + gastropods + crab
+df.bio <- df.bio %>% 
+  mutate(epiphyte_dw_g = pad_epiphyte_mass_g - pad_mass_g) %>%
+  mutate(rhizome_dw_g = rhi_foil_dw_g - rhi_foil) %>%
+  mutate(shoot_dw_g = shoot_foil_dw - shoot_foil) %>%
+  mutate(xs_shoot_dw_g = xs_shoot_foil_dw - xs_shoot_foil) %>%
+  mutate(isopod_dw_g = iso_foil_dw - iso_foil) %>%
+  mutate(gammarid_dw_g = gamm_amph_foil_dw - gamm_amph_foil) %>%
+  mutate(caprelid_dw_g = caprel_foil_dw - caprel_foil) %>%
+  mutate(limpet_dw_g = limpet_foil_dw - limpet_foil) %>%
+  mutate(gastropod_dw_g = gastropod_foil_dw - gastropod_foil) %>%
+  mutate(crab_dw_g = crab_foil_dw - crab_foil)
+  
+
+# delete derivitive weights not necessary for analysis
+df.bio <- df.bio %>% 
+  select(-pad_epiphyte_mass_g, -pad_mass_g, -xs_pad_mass_g, -xs_epiphyte_pad_mass_g) %>% #epiphyte
+  select(-rhi_foil_dw_g, -rhi_foil) %>% #rhizome
+  select(-shoot_foil, -shoot_foil_dw, -xs_shoot_foil_dw, -xs_shoot_foil) %>% #eelgrass
+  select(-iso_foil_dw, -iso_foil, -gamm_amph_foil_dw, -gamm_amph_foil, -caprel_foil_dw, -caprel_foil, -limpet_foil_dw, -limpet_foil, -gastropod_foil_dw, -gastropod_foil, -crab_foil_dw, -crab_foil) #invertebrates
+
+colnames(df.bio)
+
+
+
+# rename columns for clarity
+colnames(df.bio)[which(names(df.bio) == "quadrat")] <- "quadrat_number"
+colnames(df.bio)[which(names(df.bio) == "plant")] <- "plant_number"
+colnames(df.bio)[which(names(df.bio) == "rhi_length")] <- "rhizome_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node1")] <- "node1_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node2")] <- "node2_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node3")] <- "node3_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node4")] <- "node4_length_cm"
+colnames(df.bio)[which(names(df.bio) == "node5")] <- "node5_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length1")] <- "leaf1_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length2")] <- "leaf2_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length3")] <- "leaf3_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length4")] <- "leaf4_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length5")] <- "leaf5_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length6")] <- "leaf6_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length7")] <- "leaf7_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length8")] <- "leaf8_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length9")] <- "leaf9_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_length10")] <- "leaf10_length_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width1")] <- "leaf1_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width2")] <- "leaf2_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width3")] <- "leaf3_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width4")] <- "leaf4_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width5")] <- "leaf5_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width6")] <- "leaf6_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width7")] <- "leaf7_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width8")] <- "leaf8_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width9")] <- "leaf9_width_cm"
+colnames(df.bio)[which(names(df.bio) == "leaf_width10")] <- "leaf10_width_cm"
+colnames(df.bio)[which(names(df.bio) == "rhi_mass_fw")] <- "rhizome_fw_g"
+colnames(df.bio)[which(names(df.bio) == "shoot_mass_fw")] <- "shoot_fw_g"
+colnames(df.bio)[which(names(df.bio) == "xs_shoot_mass_fw")] <- "xs_shoot_fw_g"
+colnames(df.bio)[which(names(df.bio) == "iso_count")] <- "isopod_count"
+colnames(df.bio)[which(names(df.bio) == "iso_fw")] <- "isopod_fw_g"
+colnames(df.bio)[which(names(df.bio) == "gamm_amph_count")] <- "gammarid_count"
+colnames(df.bio)[which(names(df.bio) == "gamm_amph_fw")] <- "gammarid_fw_g"
+colnames(df.bio)[which(names(df.bio) == "caprel_count")] <- "caprelid_count"
+colnames(df.bio)[which(names(df.bio) == "caprel_fw")] <- "caprelid_fw_g"
+colnames(df.bio)[which(names(df.bio) == "limpet_fw")] <- "limpet_fw_g"
+colnames(df.bio)[which(names(df.bio) == "gastropod_fw")] <- "gastropod_fw_g"
+colnames(df.bio)[which(names(df.bio) == "crab_fw")] <- "crab_fw_g"
+colnames(df.bio)[which(names(df.bio) == "other_animal_notes")] <- "other_epifauna"
+
+
+colnames(df.bio)
+```
+
+
+```{r}
+# join the two eelgrass DFs together by site name
+df.community <- left_join(df.bio, df.trans, by = c("site"))
+
+
+# combine the two note columns into one, seperated by a semi-colon
+df.community$notes <- paste(df.community$notes.x,df.community$notes.y,sep="; ")
+
+
+# remove redundant columns from new DF
+df.community <- df.community %>% 
+  select(-date, -YYYYMMDD, -primary_observer, -secondary_observer, -quadrat, -notes.x, -notes.y)
+
+
+# rename columns for clarity
+colnames(df.community)[which(names(df.community) == "depth_m")] <- "depth_MLLW_m"
+colnames(df.community)[which(names(df.community) == "macroalgae_cover_0.25msq")] <- "macroalgae_percover_0.25msq"
+colnames(df.community)[which(names(df.community) == "diatom_cover_0.25msq")] <- "epiphyte_percover_0.25msq"
+colnames(df.community)[which(names(df.community) == "eelgrass_shoots_0.25msq")] <- "eelgrass_shoots_0.25msq"
+colnames(df.community)[which(names(df.community) == "flowering_shoots_0.25msq")] <- "flowering_shoots_0.25msq"
+
+
+
+# reorgonize columns
+df.community <- df.community[c("site","date_DDMMYYYY","date_YYYYMMDD","start_time","end_time","depth_MLLW_m","quadrat_number","plant_number","eelgrass_shoots_0.25msq","flowering_shoots_0.25msq","epiphyte_percover_0.25msq","macroalgae_percover_0.25msq","epiphyte_dw_g","shoot_fw_g","shoot_dw_g","xs_shoot_fw_g","xs_shoot_dw_g","rhizome_fw_g","rhizome_dw_g","leaf1_length_cm","leaf2_length_cm","leaf3_length_cm","leaf4_length_cm","leaf5_length_cm","leaf6_length_cm","leaf7_length_cm","leaf8_length_cm","leaf9_length_cm","leaf10_length_cm","leaf1_width_cm","leaf2_width_cm","leaf3_width_cm","leaf4_width_cm","leaf5_width_cm","leaf6_width_cm","leaf7_width_cm","leaf8_width_cm","leaf9_width_cm","leaf10_width_cm","rhizome_length_cm","node1_length_cm","node2_length_cm","node3_length_cm","node4_length_cm","node5_length_cm","isopod_count","isopod_fw_g","isopod_dw_g","gammarid_count","gammarid_fw_g","gammarid_dw_g","caprelid_count","caprelid_fw_g","caprelid_dw_g","limpet_count","limpet_fw_g","limpet_dw_g","gastropod_count","gastropod_fw_g","gastropod_dw_g","crab_count","crab_fw_g","crab_dw_g","polychaete_count","other_epifauna","notes")]
+
+colnames(df.community)
+```
+
+
+
+```{r}
+write.csv(df.community, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017.csv", row.names = TRUE)
+```
+
+
+
