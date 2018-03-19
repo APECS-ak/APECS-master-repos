@@ -1,0 +1,46 @@
+---
+title: "seawater_nutrients_2017"
+author: "Tiff Stephens"
+date: "3/18/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r}
+df.abiotic <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_environment_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.coor <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+```{r}
+# remove unecessary columnns
+colnames(df.envir)
+
+df.abiotic <- df.abiotic %>% 
+  select(-sample_serial, -data_file, -site_type, -otter_region, -month, -DO_., -conductivity, -tot_N, -N.P)
+
+colnames(df.abiotic)[which(names(df.abiotic) == "date")] <- "date_MMDDYYYY"
+
+```
+
+```{r}
+# joing add site names to DF
+df.abiotic <- left_join(df.abiotic, df.coor, by = c("site"))
+
+df.abiotic <- df.abiotic %>% 
+  select(-latitude.y, -longitude.y)
+
+colnames(df.abiotic)[which(names(df.abiotic) == "site")] <- "site_code"
+colnames(df.abiotic)[which(names(df.abiotic) == "latitude.x")] <- "latitude"
+colnames(df.abiotic)[which(names(df.abiotic) == "longitude.x")] <- "longitude"
+
+
+colnames(df.abiotic)
+```
+
+```{r}
+df.abiotic <- df.abiotic[c("site_code","site_name","latitude","longitude","date_MMDDYYYY","date_YYYYMMDD","time_24hr","depth_m","temperature_c","salinity_ppt","DO_mg.L","light_umol_water","light_umol_air","nox_umol","nh4_umol","po4_umol")]
+```
+
