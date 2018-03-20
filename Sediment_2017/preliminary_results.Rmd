@@ -1,7 +1,7 @@
 ---
 title: "Preliminary sedimentary OM and IM results"
 author: "Tiff Stephens"
-date: "25 Jan 2018"
+date: "26 Jan 2018"
 output: html_document
 editor_options: 
 chunk_output_type: console

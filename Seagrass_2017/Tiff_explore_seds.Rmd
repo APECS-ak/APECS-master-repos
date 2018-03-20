@@ -53,19 +53,19 @@ General findings
 #### 1. Importing data: we need the sediment_pit, biometrics, and transect dataframes from the seagrass sites. Also throw in the coordinate info and the sea otter index. All of these cleaned files are found in the GitHub repositry.
 
 ```{r, tidy = TRUE}
-df.sedpit <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_seaotter_pit_sediment_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+df.sedpit <- read.csv('/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_seaotter_pit_sediment_2017_CLEAN.csv', row.names=1)
 
-df.bio <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+df.bio <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
-df.trans <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+df.trans <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
-df.coords <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
+df.coords <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
 
-df.soi <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
+df.soi <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
 
-df.nut <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/seagrass_nutrients_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+df.nut <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_nutrients_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
-df.grazer <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
+df.grazer <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/eelgrass_and_grazer_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 <br><br><br><br>
 
@@ -1044,7 +1044,7 @@ df.all <- df.all[c('site','site_name','latitude','longitude','date','julian_day'
 df.all <- df.all[, -c(40:41,44:53)] # delete rhi_length, rhi_mass_tot, and all nodes
 colnames(df.all) # leaf_area_plant and shoot_mass_m2_sd should be there, still
 
-df.all <- df.all[-c(1,8),] # delete April sites
+#df.all <- df.all[-c(1,8),] # delete April sites
 
 ```
 
@@ -2669,6 +2669,58 @@ p11 = ggplot(df.all, aes(so_index, shoot_density_m2, color = julian_day)) +
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 4)
 plot(p11)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# new data frame for zones
+zone <- matrix(c('2017_H_01','2017_H_02','2017_H_03','2017_H_04','2017_H_05','2017_H_06','2017_H_07','2017_M_02','2017_M_03','2017_M_04','2017_M_05','2017_M_06','2017_M_07','2017_M_08','2017_L_01','2017_L_02','2017_L_03','2017_L_04','2017_L_05','2017_L_06','2017_L_07',"High","High","High","High","High","High","High","Mid","Mid","Mid","Mid","Mid","Mid","Mid","Low","Low","Low","Low","Low","Low","Low"), nrow = 21, ncol = 2)
+
+colnames(zone) <- c("site", "zone")
+
+df.all <- left_join(df.all, df.zone, by = c("site"))
+
+df.all$site=factor(df.all$site, levels=c('2017_L_01','2017_L_02','2017_L_03','2017_L_04','2017_L_05','2017_L_06','2017_L_07','2017_M_02','2017_M_03','2017_M_04','2017_M_05','2017_M_06','2017_M_07','2017_M_08','2017_H_01','2017_H_02','2017_H_03','2017_H_04','2017_H_05','2017_H_06','2017_H_07'))
+
+df.all$zone=factor(df.all$zone, levels=c('Low','Mid','High'))
+
+
+df.all <- df.all %>% 
+  mutate(inout1_ratio = sed1_in / sed1_out, na.rm = TRUE) +
+  mutate(inoutmean_ratio = sedmean_in / sedmean_out, na.rm = TRUE)
+
+
+my.formula <- y ~ x
+
+pits <- ggplot(df.all, aes(zone, inout1_ratio)) +
+  geom_point(size=3, color='black') +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  #coord_cartesian(ylim = c(0, 10)) 
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  stat_poly_eq(formula = my.formula, 
+              aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+  #stat_summary(fun.y=mean, geom="bar", position="dodge") 
+  #facet_wrap(~trans_type)
+plot(pits)
+
+
+
 
 ```
 
