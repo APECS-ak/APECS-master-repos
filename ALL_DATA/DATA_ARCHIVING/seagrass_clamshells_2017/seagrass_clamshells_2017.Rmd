@@ -19,13 +19,13 @@ library(tidyr)
 ```
 
 
+
 ```{r}
 # upload required RAW dataframes
 df.shells <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.coor <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
-
 
 ```{r}
 # rename columns for clarity
@@ -50,7 +50,6 @@ colnames(df.coor)[which(names(df.coor) == "longitude")] <- "longitude_E"
 df.shelldeath <- left_join(df.shells, df.coor, by = c("site_code"))
 ```
 
-
 ```{r}
 colnames(df.shelldeath)
 
@@ -58,8 +57,6 @@ colnames(df.shelldeath)
 df.shelldeath <- df.shelldeath[c("site_code","site_name","latitude_N","longitude_E","date_MMDDYYYY","date_YYYYMMDD","transect_location","transect_bin_no","transect_bin_m","species_common","species_scientific","species_code","death_estimate","width_mm","notes","measurers")]
 
 ```
-
-
 
 ```{r}
 # print final, cleaned .csv file
