@@ -6,7 +6,9 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
 The purpose of this file is to prepare a .csv file that includes all abiotic factors measured for a seperate dataset that describes eelgrass community data that W.W. Raymond collected in the summer of 2017 (also archived on KNB). To build this file, T.A. Stephens combined data from two files into one. Generally, the final datasheet will include temperature (C), salinity (ppt), dissolved oxygen (mg per L), seawater nutrients (umol; nitrate + nitrite, ammonium, phosphate), and light. Site data (e.g. coordinates, dates, times, depths) are also included.
 
