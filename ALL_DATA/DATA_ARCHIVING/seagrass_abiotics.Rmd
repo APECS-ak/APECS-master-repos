@@ -33,14 +33,21 @@ df.abiotic <- df.abiotic %>%
   select(-latitude.y, -longitude.y)
 
 colnames(df.abiotic)[which(names(df.abiotic) == "site")] <- "site_code"
-colnames(df.abiotic)[which(names(df.abiotic) == "latitude.x")] <- "latitude"
-colnames(df.abiotic)[which(names(df.abiotic) == "longitude.x")] <- "longitude"
+colnames(df.abiotic)[which(names(df.abiotic) == "latitude.x")] <- "latitude_N"
+colnames(df.abiotic)[which(names(df.abiotic) == "longitude.x")] <- "longitude_E"
 
 
 colnames(df.abiotic)
 ```
 
 ```{r}
-df.abiotic <- df.abiotic[c("site_code","site_name","latitude","longitude","date_MMDDYYYY","date_YYYYMMDD","time_24hr","depth_m","temperature_c","salinity_ppt","DO_mg.L","light_umol_water","light_umol_air","nox_umol","nh4_umol","po4_umol")]
+df.abiotic <- df.abiotic[c("site_code","site_name","latitude_N","longitude_E","date_MMDDYYYY","date_YYYYMMDD","time_24hr","depth_m","temperature_c","salinity_ppt","DO_mg.L","light_umol_water","light_umol_air","nox_umol","nh4_umol","po4_umol")]
+```
+
+
+
+```{r}
+```{r}
+write.csv(df.abiotic, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_abiotics_2017.csv", row.names = TRUE)
 ```
 

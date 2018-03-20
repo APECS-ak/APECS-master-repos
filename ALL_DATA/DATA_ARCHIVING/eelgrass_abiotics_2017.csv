@@ -1,4 +1,4 @@
-"","site_code","site_name","latitude","longitude","date_MMDDYYYY","date_YYYYMMDD","time_24hr","depth_m","temperature_c","salinity_ppt","DO_mg.L","light_umol_water","light_umol_air","nox_umol","nh4_umol","po4_umol"
+"","site_code","site_name","latitude_N","longitude_E","date_MMDDYYYY","date_YYYYMMDD","time_24hr","depth_m","temperature_c","salinity_ppt","DO_mg.L","light_umol_water","light_umol_air","nox_umol","nh4_umol","po4_umol"
 "1","2017_H_01","Salt Lake Bay",55.67264,-133.378,"4/29/2017",20170429,"11:30",1,8,28,13.3,219,591,NA,NA,NA
 "2","2017_H_01","Salt Lake Bay",55.67264,-133.378,"4/29/2017",20170429,"11:30",0,8,6,12.8,341,591,0.585,3.931,0.377
 "3","2017_H_01","Salt Lake Bay",55.67264,-133.378,"8/14/2017",20170814,"10:30",1,14,30.6,8.63,NA,NA,0.146,0.82,0.331
