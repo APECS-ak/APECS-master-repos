@@ -20,7 +20,7 @@ library(tidyr)
 ```{r}
 # upload relevant DFs
 
-df.abiotic <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_environment_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+df.envir <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_environment_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.coor <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
@@ -29,40 +29,40 @@ df.coor <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/si
 # remove unecessary columnns
 colnames(df.envir)
 
-df.abiotic <- df.abiotic %>% 
+df.envir <- df.envir %>% 
   select(-sample_serial, -data_file, -site_type, -otter_region, -month, -DO_., -conductivity, -tot_N, -N.P)
 
 # rename column
-colnames(df.abiotic)[which(names(df.abiotic) == "date")] <- "date_MMDDYYYY"
+colnames(df.envir)[which(names(df.envir) == "date")] <- "date_MMDDYYYY"
 ```
 
 ```{r}
 # joing add site names to DF
-df.abiotic <- left_join(df.abiotic, df.coor, by = c("site"))
+df.envir <- left_join(df.envir, df.coor, by = c("site"))
 
 # remove redundant columns after join
-df.abiotic <- df.abiotic %>% 
+df.envir <- df.envir %>% 
   select(-latitude.y, -longitude.y)
 
 # rename columns for clarity
-colnames(df.abiotic)[which(names(df.abiotic) == "site")] <- "site_code"
-colnames(df.abiotic)[which(names(df.abiotic) == "latitude.x")] <- "latitude_N"
-colnames(df.abiotic)[which(names(df.abiotic) == "longitude.x")] <- "longitude_E"
+colnames(df.envir)[which(names(df.envir) == "site")] <- "site_code"
+colnames(df.envir)[which(names(df.envir) == "latitude.x")] <- "latitude_N"
+colnames(df.envir)[which(names(df.envir) == "longitude.x")] <- "longitude_E"
 ```
 
 ```{r}
 # reorganize column order
-df.abiotic <- df.abiotic[c("site_code","site_name","latitude_N","longitude_E","date_MMDDYYYY","date_YYYYMMDD","time_24hr","depth_m","temperature_c","salinity_ppt","DO_mg.L","light_umol_water","light_umol_air","nox_umol","nh4_umol","po4_umol")]
+df.envir <- df.envir[c("site_code","site_name","latitude_N","longitude_E","date_MMDDYYYY","date_YYYYMMDD","time_24hr","depth_m","temperature_c","salinity_ppt","DO_mg.L","light_umol_water","light_umol_air","nox_umol","nh4_umol","po4_umol")]
 ```
 
 
 
 ```{r}
 # print final, cleaned .csv file
-write.csv(df.abiotic, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_abiotics_2017_CLEANDATA.csv", row.names = TRUE)
+write.csv(df.abiotic, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/seagrass_abiotic_2017/seagrass_abiotic_2017_CLEANDATA.csv", row.names = TRUE)
 
 # print supporting DFs as .csv files to go with .Rmd file on KNB
-write.csv(df.abiotic, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017/df.abtioc_RAW.csv", row.names = TRUE)
-write.csv(df.coor, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017/df.coor_RAW.csv", row.names = TRUE)
+write.csv(df.envir, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/seagrass_abiotic_2017/df.envir_RAW.csv", row.names = TRUE)
+write.csv(df.coor, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/seagrass_abiotic_2017/df.coor_RAW.csv", row.names = TRUE)
 ```
 

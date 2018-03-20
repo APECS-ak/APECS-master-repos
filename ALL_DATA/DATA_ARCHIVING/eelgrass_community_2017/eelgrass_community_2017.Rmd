@@ -132,6 +132,8 @@ df.community <- df.community %>%
 
 # rename columns for clarity
 colnames(df.community)[which(names(df.community) == "site")] <- "site_code"
+colnames(df.community)[which(names(df.community) == "latitude")] <- "latitude_N"
+colnames(df.community)[which(names(df.community) == "longitude")] <- "longitude_E"
 colnames(df.community)[which(names(df.community) == "depth_m")] <- "depth_MLLW_m"
 colnames(df.community)[which(names(df.community) == "macroalgae_cover_0.25msq")] <- "macroalgae_percover_0.25msq"
 colnames(df.community)[which(names(df.community) == "diatom_cover_0.25msq")] <- "epiphyte_percover_0.25msq"
@@ -141,7 +143,7 @@ colnames(df.community)[which(names(df.community) == "flowering_shoots_0.25msq")]
 
 
 # reorgonize columns
-df.community <- df.community[c("site_code","site_name","latitude","longitude","date_DDMMYY","date_YYYYMMDD","start_time","end_time","depth_MLLW_m","quadrat_number","plant_number","eelgrass_shoots_0.25msq","flowering_shoots_0.25msq","epiphyte_percover_0.25msq","macroalgae_percover_0.25msq","epiphyte_dw_g","shoot_fw_g","shoot_dw_g","xs_shoot_fw_g","xs_shoot_dw_g","rhizome_fw_g","rhizome_dw_g","leaf1_length_cm","leaf2_length_cm","leaf3_length_cm","leaf4_length_cm","leaf5_length_cm","leaf6_length_cm","leaf7_length_cm","leaf8_length_cm","leaf9_length_cm","leaf10_length_cm","leaf1_width_cm","leaf2_width_cm","leaf3_width_cm","leaf4_width_cm","leaf5_width_cm","leaf6_width_cm","leaf7_width_cm","leaf8_width_cm","leaf9_width_cm","leaf10_width_cm","rhizome_length_cm","internode1_length_cm","internode2_length_cm","internode3_length_cm","internode4_length_cm","internode5_length_cm","isopod_count","isopod_fw_g","isopod_dw_g","gammarid_count","gammarid_fw_g","gammarid_dw_g","caprelid_count","caprelid_fw_g","caprelid_dw_g","limpet_count","limpet_fw_g","limpet_dw_g","gastropod_count","gastropod_fw_g","gastropod_dw_g","crab_count","crab_fw_g","crab_dw_g","polychaete_count","other_epifauna","notes")]
+df.community <- df.community[c("site_code","site_name","latitude_N","longitude_E","date_DDMMYY","date_YYYYMMDD","start_time","end_time","depth_MLLW_m","quadrat_number","plant_number","eelgrass_shoots_0.25msq","flowering_shoots_0.25msq","epiphyte_percover_0.25msq","macroalgae_percover_0.25msq","epiphyte_dw_g","shoot_fw_g","shoot_dw_g","xs_shoot_fw_g","xs_shoot_dw_g","rhizome_fw_g","rhizome_dw_g","leaf1_length_cm","leaf2_length_cm","leaf3_length_cm","leaf4_length_cm","leaf5_length_cm","leaf6_length_cm","leaf7_length_cm","leaf8_length_cm","leaf9_length_cm","leaf10_length_cm","leaf1_width_cm","leaf2_width_cm","leaf3_width_cm","leaf4_width_cm","leaf5_width_cm","leaf6_width_cm","leaf7_width_cm","leaf8_width_cm","leaf9_width_cm","leaf10_width_cm","rhizome_length_cm","internode1_length_cm","internode2_length_cm","internode3_length_cm","internode4_length_cm","internode5_length_cm","isopod_count","isopod_fw_g","isopod_dw_g","gammarid_count","gammarid_fw_g","gammarid_dw_g","caprelid_count","caprelid_fw_g","caprelid_dw_g","limpet_count","limpet_fw_g","limpet_dw_g","gastropod_count","gastropod_fw_g","gastropod_dw_g","crab_count","crab_fw_g","crab_dw_g","polychaete_count","other_epifauna","notes")]
 
 colnames(df.community)
 ```
