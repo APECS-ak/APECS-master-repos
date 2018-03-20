@@ -8,7 +8,18 @@ editor_options:
 ---
 
 
+The purpose of this file is to prepare a .csv file that includes all abiotic factors measured for a seperate dataset that describes eelgrass community data that W.W. Raymond collected in the summer of 2017 (also archived on KNB). To build this file, T.A. Stephens combined data from two files into one. Generally, the final datasheet will include temperature (C), salinity (ppt), dissolved oxygen (mg per L), seawater nutrients (umol; nitrate + nitrite, ammonium, phosphate), and light. Site data (e.g. coordinates, dates, times, depths) are also included.
+
 ```{r}
+library(dplyr)
+library(plyr)
+library(tidyr)
+```
+
+
+```{r}
+# upload relevant DFs
+
 df.abiotic <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_environment_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.coor <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/sites_coordinates.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -21,33 +32,37 @@ colnames(df.envir)
 df.abiotic <- df.abiotic %>% 
   select(-sample_serial, -data_file, -site_type, -otter_region, -month, -DO_., -conductivity, -tot_N, -N.P)
 
+# rename column
 colnames(df.abiotic)[which(names(df.abiotic) == "date")] <- "date_MMDDYYYY"
-
 ```
 
 ```{r}
 # joing add site names to DF
 df.abiotic <- left_join(df.abiotic, df.coor, by = c("site"))
 
+# remove redundant columns after join
 df.abiotic <- df.abiotic %>% 
   select(-latitude.y, -longitude.y)
 
+# rename columns for clarity
 colnames(df.abiotic)[which(names(df.abiotic) == "site")] <- "site_code"
 colnames(df.abiotic)[which(names(df.abiotic) == "latitude.x")] <- "latitude_N"
 colnames(df.abiotic)[which(names(df.abiotic) == "longitude.x")] <- "longitude_E"
-
-
-colnames(df.abiotic)
 ```
 
 ```{r}
+# reorganize column order
 df.abiotic <- df.abiotic[c("site_code","site_name","latitude_N","longitude_E","date_MMDDYYYY","date_YYYYMMDD","time_24hr","depth_m","temperature_c","salinity_ppt","DO_mg.L","light_umol_water","light_umol_air","nox_umol","nh4_umol","po4_umol")]
 ```
 
 
 
 ```{r}
-```{r}
-write.csv(df.abiotic, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_abiotics_2017.csv", row.names = TRUE)
+# print final, cleaned .csv file
+write.csv(df.abiotic, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_abiotics_2017_CLEANDATA.csv", row.names = TRUE)
+
+# print supporting DFs as .csv files to go with .Rmd file on KNB
+write.csv(df.abiotic, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017/df.abtioc_RAW.csv", row.names = TRUE)
+write.csv(df.coor, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017/df.coor_RAW.csv", row.names = TRUE)
 ```
 

@@ -11,7 +11,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-The purpose of this file is to prepare a .csv file that includes all seagrass (in this case, eelgrass) community data that W.W. Raymond collected in the summer of 2017. To build this file, T.A. Stephens combined data from two files into one. Generally, the final datasheet will include coverage of macroalgae and epiphytes (% area), shoot counts per area, eelgrass + rhizome lengths and biomass, epiphyte biomass, and epifauna counts and biomass. Site data (e.g. coordinates, dates, times, depths) are also included. 
+The purpose of this file is to prepare a .csv file that includes all seagrass (in this case, eelgrass) community data that W.W. Raymond collected in the summer of 2017. To build this file, T.A. Stephens combined data from three files into one. Generally, the final datasheet will include coverage of macroalgae and epiphytes (% area), shoot counts per area, eelgrass + rhizome lengths and biomass, epiphyte biomass, and epifauna counts and biomass. Site data (e.g. coordinates, dates, times, depths) are also included. 
 
 ```{r}
 library(dplyr)
@@ -21,6 +21,8 @@ library(tidyr)
 
 
 ```{r}
+# upload working DFs
+
 df.bio <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
 
 df.trans <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -147,11 +149,13 @@ colnames(df.community)
 
 
 ```{r}
-write.csv(df.community, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017.csv", row.names = TRUE)
+# print clean .csv file
+write.csv(df.community, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017/eelgrass_community_2017_CLEANDATA.csv", row.names = TRUE)
 
-write.csv(df.bio, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/df.bio_RAW", row.names = TRUE)
-write.csv(df.coor, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/df.coor_RAW", row.names = TRUE)
-write.csv(df.trans, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/df.trans_RAW", row.names = TRUE)
+# print supporting DFs as .csv files to go with .Rmd file on KNB
+write.csv(df.bio, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017/df.bio_RAW.csv", row.names = TRUE)
+write.csv(df.coor, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017/df.coor_RAW.csv", row.names = TRUE)
+write.csv(df.trans, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/eelgrass_community_2017/df.trans_RAW.csv", row.names = TRUE)
 ```
 
 

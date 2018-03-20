@@ -175,12 +175,13 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type, light availability, and total surface water nutirents.
 ```{r model 1}
 ## Global Model ##
-mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both",AICc = TRUE)
 
 mod1$anova
 ```
 
 ### Best Model 1
+Minimum AIC value was greater tha 4 AIC from next model. Only one model will be reported.
 ```{r model 1 best}
 mod1.best <- glm(log(abvgnd_mass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), data = dat) 
 summary(mod1.best)
@@ -249,19 +250,26 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
 ```{r model 2}
 ## Global Model ##
-mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod2$anova
 ```
 
 ### Best Model 2
+Top 2 models are with in 4 AIC so models will be averaged.
 ```{r}
-mod2.best <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat) 
+## Averaging ##
+mod2.1 <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat) 
+mod2.2 <- glm(log(blwgnd_mass) ~  date_julian, data = dat) 
+mod2.best <- model.avg(list(mod2.1, mod2.2), fit = TRUE)
+
+## Results ##
 summary(mod2.best)
 par(mfrow = c(2, 2))
 plot(mod1.best)
 par(mfrow = c(1, 1))
 ```
+
 
 ### Model 2 Plots
 Calculate predicted values and plot
@@ -310,14 +318,21 @@ We generated a global model that includes linear and quadratic effects of julian
 dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
-mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod3$anova
 ```
 
 ### Best Model 3
+Top 3 models are within 4 AIC of minimun AIC so model everaging procedure will be employed
 ```{r model 3 best}
-mod3.best <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), link = "log", data = dat)
+## Averging ##
+mod3.1 <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), link = "log", data = dat)
+mod3.2 <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2), link = "log", data = dat)
+mod3.3 <- glm.nb(shoot_dens_rnd ~  date_julian + poly(sea_otter_index, 2), link = "log", data = dat)
+mod3.best <- model.avg(list(mod3.1, mod3.2, mod3.3), fit = TRUE)
+
+## Results ##
 summary(mod3.best)
 par(mfrow = c(2, 2))
 plot(mod3.best)
@@ -384,19 +399,32 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
 ```{r model 4}
 ## Global Model ##
-mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod4$anova
 ```
 
 ### Best Model 4
+Top 2 models are within 4 AIC, therefore model average.
 ```{r model 4 best}
-mod4.best <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index + log(grazermass_shootmass), data = dat)
+## Averaging ##
+mod4.1 <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index + log(grazermass_shootmass), data = dat)
+mod4.2 <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index, data = dat)
+mod4.best <- model.avg(list(mod4.1, mod4.2), fit = TRUE)
+
+## Results ##
 summary(mod4.best)
 par(mfrow = c(2, 2))
 plot(mod4.best)
 par(mfrow = c(1, 1))
 ```
+
+### Model 4 Averaging
+```{r model 4 averaging}
+mod4.1 <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index + log(grazermass_shootmass), data = dat)
+mod4.2 <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index, data = dat)
+```
+
 
 ### Model 4 Plots
 Calculate predicted values and plot
@@ -458,14 +486,21 @@ Responce - log normal. We hypothesise that time (as julian day), sea otter index
 We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
 ```{r model 5}
 ## Global Model ##
-mod5 <- stepAIC(glm(log(dat$node2) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
+mod5 <- stepAIC(glm(log(dat$node2) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod5$anova
 ```
 
 ### Best Model 5
+Top 3 models are within 4 AIC, therefore model average.
 ```{r model 5 best}
-mod5.best <- glm(log(node2) ~  poly(date_julian, 2) + light_avail + Ntotal_site, data = dat)
+## Averaging ###
+mod5.1 <- glm(log(node2) ~  poly(date_julian, 2) + light_avail + Ntotal_site, data = dat) 
+mod5.2 <- glm(log(node2) ~  poly(date_julian, 2) + light_avail, data = dat)
+mod5.3 <- glm(log(node2) ~  poly(date_julian, 2), data = dat)
+mod5.best <- model.avg(list(mod5.1, mod5.2, mod5.3), fit = TRUE)
+  
+## Results ##  
 summary(mod5.best)
 par(mfrow = c(2, 2))
 plot(mod5.best)
@@ -530,12 +565,13 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 We generated a global model that includes the lienar effects of date, sea otter index, sediment type, light availability, log grazer load, and total surface water nitrogen.
 ```{r model 6}
 ## Global Model ##
-mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$abvgnd_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site  , lower = ~1), direction = "both")
+mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$abvgnd_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site  , lower = ~1), direction = "both", AICc = TRUE)
 
 mod6$anova
 ```
 
 ### Best Model 6
+No model within 4 AIC.
 ```{r model 6 best}
 mod6.best <- glm(log(epiphmass_shootmass) ~ log(abvgnd_mass) + sea_otter_index, data = dat)
 summary(mod6.best)
@@ -587,14 +623,20 @@ Response - Log normally distributed. We hypothesise that time (as julian day), s
 We generated a global model that includes the linear effects of date, sea otter index, log epiphyte load, and log crab biomass.
 ```{r model 7}
 ## Global Model ##
-mod7 <- stepAIC(glm(log(dat$grazermass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$crab_mass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~1), direction = "both")
+mod7 <- stepAIC(glm(log(dat$grazermass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$crab_mass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~1), direction = "both", AICc = TRUE)
 
 mod7$anova
 ```
 
 ### Best Model 7
+Model with epiphyte load is 3.87 AIC away from ~1 model. Will report model with epiphyte load but should note that it it poor fit, probably does not mean much. 
 ```{r model 7 best}
-mod7.best <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
+## Averaging ##
+mod7.1 <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
+mod7.2 <- glm(log(grazermass_shootmass) ~  1, data = dat)
+mod7.best <- model.avg(list(mod7.1, mod7.2), fit = TRUE)
+
+## Results ##
 summary(mod7.best)
 par(mfrow = c(2, 2))
 plot(mod7.best)
@@ -628,12 +670,13 @@ Response - Log normally distributed. We hypothesise that time (as julian day), s
 We generated a global model that includes the linear effects of date, sea oter index and log grazer load. 
 ```{r model 8}
 ## Global Model ##
-mod8 <- stepAIC(glm(log(dat$crab_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~1), direction = "both")
+mod8 <- stepAIC(glm(log(dat$crab_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~1), direction = "both", AICc = TRUE)
 
 mod8$anova
 ```
 
 ### Best Model 8
+No model within 4 AIC. 
 ```{r model 8 best}
 mod8.best <- glm(log(crab_mass) ~ sea_otter_index, data = dat)
 summary(mod8.best)
