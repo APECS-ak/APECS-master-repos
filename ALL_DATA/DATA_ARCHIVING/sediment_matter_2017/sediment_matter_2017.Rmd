@@ -133,6 +133,14 @@ df.matter <- df.matter[c("site_code","site_name","latitude_N","longitude_E","dat
 
 
 
+```{r}
+# print final, cleaned .csv file
+write.csv(df.matter, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/sediment_matter_2017/sediment_matter_2017_CLEANDATA.csv", row.names = TRUE)
+
+# print supporting DFs as .csv files to go with .Rmd file on KNB
+write.csv(df.mat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/sediment_matter_2017/df.mat_RAW.csv", row.names = TRUE)
+write.csv(df.info, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/sediment_matter_2017/df.info_RAW.csv", row.names = TRUE)
+```
 
 
 
