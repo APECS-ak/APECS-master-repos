@@ -67,5 +67,3 @@ write.csv(df.shells, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/D
 write.csv(df.coor, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/seagrass_clamshells_2017/df.coor_RAW.csv", row.names = TRUE)
 ```
 
-
-
