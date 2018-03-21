@@ -215,6 +215,10 @@ t.test(site.quad.5$ag_mass[site.quad.5$site=="2017_L_04"], site.quad.5$ag_mass[s
 t.test(site.quad$bg_mass[site.quad$site=="2017_L_04"], site.quad$bg_mass[site.quad$site=="2017_H_04"], var.equal = FALSE)
 
 t.test(site.quad.5$bg_mass[site.quad.5$site=="2017_L_04"], site.quad.5$bg_mass[site.quad.5$site=="2017_H_04"], var.equal = FALSE)
+
+t.test(site.quad$grazmass_shootmass[site.quad$site=="2017_L_04"], site.quad$grazmass_shootmass[site.quad$site=="2017_H_04"], var.equal = FALSE)
+
+t.test(site.quad.5$grazmass_shootmass[site.quad.5$site=="2017_L_04"], site.quad.5$grazmass_shootmass[site.quad.5$site=="2017_H_04"], var.equal = FALSE)
 ```
 
 
