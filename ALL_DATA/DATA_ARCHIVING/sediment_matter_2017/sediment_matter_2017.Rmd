@@ -1,0 +1,147 @@
+---
+title: "sediment_matter_2017"
+author: "Tiff Stephens"
+date: "3/20/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(plyr)
+library(tidyr)
+```
+
+
+
+```{r}
+# import RAW data
+df.mat <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/core_matter_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.info <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/seagrass_site_info.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+```{r}
+# change the site names so that they match the format in the rest of the APECS data files
+newsitenames <- mapvalues(df.mat$site, from = c("L01","L02","L03","L04","L05","L06","L07","M02","M03","M04","M05","M06","M07","M08","H01","H02","H03","H04","H05","H06","H07"), to = c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07"))
+
+df.newsitenames <- data.frame(newsitenames)
+df.newsitenames <- tibble::rowid_to_column(df.newsitenames, "X") # add order column for joining
+df.mat <- tibble::rowid_to_column(df.mat, "X") # add order column for joining
+df.mat <- left_join(df.mat, df.newsitenames, by = "X") 
+
+names(df.mat)[names(df.mat) == 'site'] <- 'oldsite' # rename site columns
+names(df.mat)[names(df.mat) == 'newsitenames'] <- 'site' # rename site columns
+
+
+
+# remove temporary DFs
+rm(df.newsitenames)
+rm(newsitenames)
+
+
+
+# remove redundant and unceccesary columns
+df.mat <- df.mat %>% 
+  select(-X, -otter_region, -oldsite)
+```
+
+```{r}
+# rename columns for clarity
+colnames(df.mat)[which(names(df.mat) == "site")] <- "site_code"
+colnames(df.mat)[which(names(df.mat) == "latitude")] <- "latitude_N"
+colnames(df.mat)[which(names(df.mat) == "longitude")] <- "longitude_E"
+colnames(df.mat)[which(names(df.mat) == "layer_thickness")] <- "layer_thickness_cm"
+```
+
+```{r}
+# joing two datasets together to get dates for each sampling
+df.matter <- left_join(df.mat, df.info, by = c("site_code"))
+```
+
+```{r}
+# remove uneccesaary and/or redundant columns
+df.matter <- df.matter %>% 
+  select(-latitude, -longitude, -start_time, -end_time, -tide_time, -weather, -general_description)
+
+
+# rename comlumns for clarity
+colnames(df.matter)[which(names(df.matter) == "date")] <- "date_MMDDYYYY"
+colnames(df.matter)[which(names(df.matter) == "tide_height_m")] <- "depth_m_MLLW"
+colnames(df.matter)[which(names(df.matter) == "freshwater")] <- "freshwater_input"
+```
+
+```{r}
+# reorganize column order
+df.matter <- df.matter[c("site_code","site_name","latitude_N","longitude_E","date_MMDDYYYY","depth_m_MLLW","layer_number","layer_thickness_cm","pan_weight","pan_sed_ww_pre_60C","pan_sed_dw_post_60C","pan_sed_dw_pre_450C","pan_sed_dw_post450C","crucible_weight","crucible_sed_dw_pre_950C","crucible_sed_dw_post_950C","sediment_description","freshwater_input")]
+```
+
+```{r}
+# calculate dry bulk density (DBD)
+df.matter = df.matter %>% 
+  mutate(layer_volume_cm3 = pi*((2.5)^2)*layer_thickness_cm, na.rm = TRUE) %>%
+  mutate(sed_ww_pre_60C = pan_sed_ww_pre_60C - pan_weight, na.rm = TRUE) %>% # not needed for DBD but a good factor to have for later ww:dw conversions
+  mutate(sed_dw_post_60C = pan_sed_dw_post_60C - pan_weight, na.rm = TRUE) %>%
+  mutate(dry_bulk_density = sed_dw_post_60C / layer_volume_cm3, na.rm = TRUE)
+
+
+# calculate organic matter (OM)
+df.matter = df.matter %>% 
+  mutate(sed_dw_pre_450C = pan_sed_dw_pre_450C - pan_weight, na.rm = TRUE) %>%
+  mutate(sed_dw_post_450C = pan_sed_dw_post450C - pan_weight, na.rm = TRUE) %>%
+  mutate(organic_dw_g = sed_dw_pre_450C - sed_dw_post_450C, na.rm = TRUE)
+  
+
+# calculate inorganic matter (IM)
+df.matter = df.matter %>%   
+  mutate(sed_dw_pre_950C = crucible_sed_dw_pre_950C - crucible_weight, na.rm = TRUE) %>%
+  mutate(sed_dw_post_950C = crucible_sed_dw_post_950C - crucible_weight, na.rm = TRUE) %>%
+  mutate(inorganic_dw_g = sed_dw_pre_950C - sed_dw_post_950C)
+
+
+# calculate the depth of each layer using the layer number (each layer was cut at 2 cm but adjusted using the compaction coefficient that was pre-determined prior to slicing the cores)
+df.matter = df.matter %>% 
+  mutate(layer_depth_cm = (layer_number * 2) - 2, na.rm = TRUE)
+```
+
+```{r}
+# calculate other important data
+df.matter = df.matter %>% 
+  mutate(organic_dw_percent = (organic_dw_g / sed_dw_pre_450C) * 100, na.rm = TRUE) %>%
+  mutate(inorganic_dw_percent = (inorganic_dw_g / sed_dw_pre_950C) * 100, na.rm = TRUE) %>%
+  mutate(organic_density = organic_dw_g * dry_bulk_density, na.rm = TRUE) %>%
+  mutate(inorganic_density = inorganic_dw_g * dry_bulk_density, na.rm = TRUE)
+```
+
+```{r}
+colnames(df.matter)
+
+# remove columns that are not useful for archiving
+df.matter = df.matter %>% 
+  select(-pan_weight, -pan_sed_ww_pre_60C, -pan_sed_dw_post_60C, -pan_sed_dw_pre_450C, -pan_sed_dw_post450C, -crucible_weight, -crucible_sed_dw_pre_950C, -crucible_sed_dw_post_950C, -na.rm, -sed_ww_pre_60C, -sed_dw_post_60C, -sed_dw_pre_450C, -sed_dw_post_450C, -sed_dw_pre_950C, -sed_dw_post_950C) 
+```
+
+```{r}
+# reorganize so df is easier to navigate
+df.matter <- df.matter[c("site_code","site_name","latitude_N","longitude_E","date_MMDDYYYY","depth_m_MLLW","layer_number","layer_thickness_cm","layer_depth_cm","layer_volume_cm3","dry_bulk_density","organic_dw_g","organic_dw_percent","organic_density","inorganic_dw_g","inorganic_dw_percent","inorganic_density","sediment_description","freshwater_input")]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
