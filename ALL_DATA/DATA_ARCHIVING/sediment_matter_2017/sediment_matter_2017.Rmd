@@ -143,13 +143,3 @@ write.csv(df.info, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DAT
 ```
 
 
-
-
-
-
-
-
-
-
-
-
