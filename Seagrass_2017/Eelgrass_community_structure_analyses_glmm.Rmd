@@ -589,30 +589,46 @@ newdata.6.grz$Predict <- exp(pred.6.grz$fit)
 newdata.6.grz$Lwr <- exp(pred.6.grz$fit - pred.6.grz$se.fit)
 newdata.6.grz$Upr <- exp(pred.6.grz$fit + pred.6.grz$se.fit)
 
-# Sea Otter Index #
-newdata.6.soi <- data.frame(abvgnd_mass = rep(median(dat$abvgnd_mass), 100), sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100))
-pred.6.soi <- predict(mod6.best, se.fit = TRUE, type = "response", newdata = newdata.6.soi)
-newdata.6.soi$Predict <- exp(pred.6.soi$fit)
-newdata.6.soi$Lwr <- exp(pred.6.soi$fit - pred.6.soi$se.fit)
-newdata.6.soi$Upr <- exp(pred.6.soi$fit + pred.6.soi$se.fit)
+# Light Availability #
+newdata.6.lite <- data.frame(grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100), sed_inside_prim = rep(median(dat$sed_inside_prim), 100), light_avail = seq(min(dat$light_avail), max(dat$light_avail), length.out = 100))
+pred.6.lite <- predict(mod6.best, se.fit = TRUE, type = "response", newdata = newdata.6.lite)
+newdata.6.lite$Predict <- exp(pred.6.lite$fit)
+newdata.6.lite$Lwr <- exp(pred.6.lite$fit - pred.6.lite$se.fit)
+newdata.6.lite$Upr <- exp(pred.6.lite$fit + pred.6.lite$se.fit)
+
+# Sediment Type #
+newdata.6.sed <- data.frame(grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100), sed_inside_prim = seq(min(dat$sed_inside_prim), max(dat$sed_inside_prim), length.out = 100), light_avail = rep(median(dat$light_avail), 100))
+pred.6.sed <- predict(mod6.best, se.fit = TRUE, type = "response", newdata = newdata.6.sed)
+newdata.6.sed$Predict <- exp(pred.6.sed$fit)
+newdata.6.sed$Lwr <- exp(pred.6.sed$fit - pred.6.sed$se.fit)
+newdata.6.sed$Upr <- exp(pred.6.sed$fit + pred.6.sed$se.fit)
 
 ## Plots ##
 # Grazer load #
-p6.abv <- ggplot(newdata.6.abv) +
-  geom_line(aes(x = abvgnd_mass, y = Predict), size = 1) +
-  geom_ribbon(aes(x = abvgnd_mass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Aboveground biomass", y = "Epiphyte Load +/- se (g/g)") +
-  scale_x_continuous(breaks = seq(0, 160, by = 40)) +
-  scale_y_continuous(lim = c(0,0.3), breaks = seq(0, 0.3, by = 0.1)) +
+p6.grz <- ggplot(newdata.6.grz) +
+  geom_line(aes(x = grazermass_shootmass, y = Predict), size = 1) +
+  geom_ribbon(aes(x = grazermass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
+  labs(x = "Grazer load (g/g)", y = "Epiphyte Load +/- se (g/g)") +
+  scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
+  scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 
-# Sea Otter Index #
-p6.soi <- ggplot(newdata.6.soi) +
-  geom_line(aes(x = sea_otter_index, y = Predict), size = 1) +
-  geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Sea otter index", y = "Epiphyte Load +/- se (g/g)") +
-  scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
-  scale_y_continuous(lim = c(0,0.1), breaks = seq(0, 0.1, by = 0.025)) +
+# Light Availability #
+p6.lite <- ggplot(newdata.6.lite) +
+  geom_line(aes(x = light_avail, y = Predict), size = 1) +
+  geom_ribbon(aes(x = light_avail, ymin = Lwr, ymax = Upr), alpha = 0.2) +
+  labs(x = "Light Availability", y = "Epiphyte Load +/- se (g/g)") +
+  scale_x_continuous(breaks = seq(0, 5, by = 0.4)) +
+  scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+
+# Sediment Type #
+p6.sed <- ggplot(newdata.6.sed) +
+  geom_line(aes(x = sed_inside_prim, y = Predict), size = 1) +
+  geom_ribbon(aes(x = sed_inside_prim, ymin = Lwr, ymax = Upr), alpha = 0.2) +
+  labs(x = "Sediment Type Score", y = "Epiphyte Load +/- se (g/g)") +
+  scale_x_continuous(breaks = seq(0, 6, by = 1)) +
+  scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
@@ -981,8 +997,11 @@ write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row
 
 #### Plots
 ```{r}
-ggplot(dat) +
-  geom_point(aes(y = log(abvgnd_mass), x = log(epi_mass)), size = 3)
+pa <- ggplot(dat) +
+  geom_point(aes(y = grazermass_shootmass, x = epiphmass_shootmass), size = 3)
+
+pb <- ggplot(dat) +
+  geom_point(aes(x = grazermass_shootmass, y = epiphmass_shootmass), size = 3)
 
 ```
 
