@@ -19,7 +19,7 @@ library(DT)
 library(ggplot2)
 library(sjPlot)
 library(cowplot)
-
+library(MuMIn)
 theme_set(theme_classic())
 ```
 
@@ -240,7 +240,7 @@ p1.epi <- ggplot(newdata.1.epi) +
   geom_ribbon(aes(x = epiphmass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Epiphyte Load", y = bquote("Aboveground mass +/- se"  ~(g/m^2))) +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
-  scale_y_continuous(lim = c(0,100), breaks = seq(0, 100, by = 20)) +
+  scale_y_continuous(lim = c(0,115), breaks = seq(0, 115, by = 20)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
@@ -277,7 +277,7 @@ Calculate predicted values and plot
 ## Predicted Values ##
 # Julian Day #
 newdata.2.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
-pred.2.jday <- predict(mod2.best, se.fit = TRUE, type = "response", newdata = newdata.2.jday)
+pred.2.jday <- predict(mod2.best, se.fit = TRUE, type = "response", newdata = newdata.2.jday, full = FALSE)
 newdata.2.jday$Predict <- exp(pred.2.jday$fit)
 newdata.2.jday$Lwr <- exp(pred.2.jday$fit - pred.2.jday$se.fit)
 newdata.2.jday$Upr <- exp(pred.2.jday$fit + pred.2.jday$se.fit)
@@ -565,15 +565,21 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 We generated a global model that includes the lienar effects of date, sea otter index, sediment type, light availability, log grazer load, and total surface water nitrogen.
 ```{r model 6}
 ## Global Model ##
-mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$abvgnd_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site  , lower = ~1), direction = "both", AICc = TRUE)
+mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site  , lower = ~1), direction = "both", AICc = TRUE)
 
 mod6$anova
 ```
 
 ### Best Model 6
-No model within 4 AIC.
+Two models within 4 AIC.
 ```{r model 6 best}
-mod6.best <- glm(log(epiphmass_shootmass) ~ log(abvgnd_mass) + sea_otter_index, data = dat)
+## Averaging ##
+mod6.1 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + light_avail + sed_inside_prim, data = dat) 
+mod6.2 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + sed_inside_prim, data = dat) 
+mod6.3 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass), data = dat) 
+mod6.best <- model.avg(list(mod6.1, mod6.2, mod6.3), fit = TRUE)
+
+## Results ##
 summary(mod6.best)
 par(mfrow = c(2, 2))
 plot(mod6.best)
@@ -985,5 +991,14 @@ write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row
 ggplot(dat) +
   geom_point(aes(y = log(abvgnd_mass), x = log(epi_mass)), size = 3)
 
+```
+
+```{r}
+ggplot(dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 90))
 ```
 
