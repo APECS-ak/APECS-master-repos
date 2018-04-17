@@ -32,8 +32,7 @@ We are interested in size-frequency data of shiner perch, pacific staghorn sculp
 ```{r fish data filtering}
 fish <- data.frame(
   fish.dat %>% 
-    filter(YYYYMMDD > 20170706) %>% 
-    filter(sp_code == "SCULPSTG" | sp_code == "GREENWHI" | sp_code == "PERCHSH" | sp_code == "SCULGRT")
+    filter(YYYYMMDD > 20170706)
 )
 ```
 
@@ -70,6 +69,13 @@ ggplot(subset(fish, sp_code == "SCULGRT")) +
   geom_histogram(aes(fork_length), binwidth = 10) +
   scale_x_continuous(breaks = seq(0, 150, by = 50)) +
   ggtitle("Great Sculpin") +
+  facet_wrap(~date)
+
+## Snake Prickleback ##
+ggplot(subset(fish, sp_code == "PRICKSN")) +
+  geom_histogram(aes(fork_length), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 300, by = 50)) +
+  ggtitle("Snake Prickleback") +
   facet_wrap(~date)
 ```
 
