@@ -167,22 +167,21 @@ dat <- merge(dat, fishmass.site.fam, by = "site")
 ```
 
 ## Models
-Each model will get its own individual hypothesis and set up but will follow the same general framework. Initially I will be copying and learning from example code from Tim Tinker. Models will use a mixed effects Bayesian modeling stucture. Fixed effects and the random effect of site will be modeled with normally distribution density funtions. Response variables will be paramterized in a way that best fits their distribution (see above). Count data (shoot density) will be modeled with a negative binomial distrbution.
+Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That glocal model will be run through an forward/backward model selection procedure with AICc disrimination. If top candidate models are <= 4 AICc values they will be average using a model avergin procedure.
 
 ### Model 1 - Aboveground biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light availability may effect aboveground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
-We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type, light availability, and total surface water nutirents.
-```{r model 1}
+```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both",AICc = TRUE)
+mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + poly(dat$date_julian, 2) + dat$sea_otter_index + + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod1$anova
 ```
 
 ### Best Model 1
-Minimum AIC value was greater tha 4 AIC from next model. Only one model will be reported.
-```{r model 1 best}
+Minimum AIC value was greater than 4 AIC from next model. Only one model will be reported.
+```{r model 1 best, echo = FALSE}
 mod1.best <- glm(log(abvgnd_mass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), data = dat) 
 summary(mod1.best)
 par(mfrow = c(2, 2))
@@ -192,7 +191,7 @@ par(mfrow = c(1, 1))
 
 ### Model 1 Plots
 Calculate predicted values and plot
-```{r plots}
+```{r mod 1 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
 newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), sea_otter_index = rep(median(dat$sea_otter_index), 116), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
@@ -245,10 +244,9 @@ p1.epi <- ggplot(newdata.1.epi) +
 ```
 
 ### Model 2 - Belowground biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, and light availability may effect aboveground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
-We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
-```{r model 2}
+```{r model 2, echo = FALSE}
 ## Global Model ##
 mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
@@ -257,7 +255,7 @@ mod2$anova
 
 ### Best Model 2
 Top 2 models are with in 4 AIC so models will be averaged.
-```{r}
+```{r best mod 2, echo = FALSE}
 ## Averaging ##
 mod2.1 <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat) 
 mod2.2 <- glm(log(blwgnd_mass) ~  date_julian, data = dat) 
@@ -272,12 +270,12 @@ par(mfrow = c(1, 1))
 
 
 ### Model 2 Plots
-Calculate predicted values and plot
-```{r}
+Calculate predicted values and plot, using conditional/subset coefficients
+```{r mod 2 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
 newdata.2.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
-pred.2.jday <- predict(mod2.best, se.fit = TRUE, type = "response", newdata = newdata.2.jday, full = FALSE)
+pred.2.jday <- predict(mod2.best, se.fit = TRUE, type = "response", newdata = newdata.2.jday)
 newdata.2.jday$Predict <- exp(pred.2.jday$fit)
 newdata.2.jday$Lwr <- exp(pred.2.jday$fit - pred.2.jday$se.fit)
 newdata.2.jday$Upr <- exp(pred.2.jday$fit + pred.2.jday$se.fit)
@@ -310,10 +308,9 @@ p2.epi <- ggplot(newdata.2.epi) +
 
 
 ### Model 3 - Shoot density
-Response  - negative binomial. We hypothesise that time (as julian day), sea otter index, sediment type, light availability and total surface nitrogen may effect aboveground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
-We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents. 
-```{r model 3}
+```{r model 3, echo = FALSE}
 ## Count need to integers ##
 dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
@@ -325,7 +322,8 @@ mod3$anova
 
 ### Best Model 3
 Top 3 models are within 4 AIC of minimun AIC so model everaging procedure will be employed
-```{r model 3 best}
+
+```{r model 3 best, echo = FALSE}
 ## Averging ##
 mod3.1 <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), link = "log", data = dat)
 mod3.2 <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2), link = "log", data = dat)
@@ -340,7 +338,7 @@ par(mfrow = c(1, 1))
 ```
 
 ### Model 3 Plots
-```{r}
+```{r mod 3 plots}
 ## Predicted Values ##
 # Julian Day #
 newdata.3.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), sea_otter_index = rep(median(dat$sea_otter_index), 116), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
@@ -379,7 +377,7 @@ p3.soi <- ggplot(newdata.3.soi) +
   geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Sea otter index", y = bquote("Shoot density +/- se"  ~(m^-2))) +
   scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
-  scale_y_continuous(lim = c(0, 350), breaks = seq(0, 350, by = 50)) +
+  scale_y_continuous(lim = c(0, 500), breaks = seq(0, 500, by = 100)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 
 # Epiphyte Load #
@@ -388,16 +386,15 @@ p3.epi <- ggplot(newdata.3.epi) +
   geom_ribbon(aes(x = epiphmass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Epiphyte Load", y = bquote("Shoot density +/- se"  ~(g/m^2))) +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
-  scale_y_continuous(lim = c(0,350), breaks = seq(0, 350, by = 50)) +
+  scale_y_continuous(lim = c(0, 500), breaks = seq(0, 500, by = 100)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
 
 ### Model 4 - Aboveground:Belowground Biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and total surface water nitrogen may effect belowground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
-We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
-```{r model 4}
+```{r model 4, echo = FALSE}
 ## Global Model ##
 mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
@@ -406,7 +403,7 @@ mod4$anova
 
 ### Best Model 4
 Top 2 models are within 4 AIC, therefore model average.
-```{r model 4 best}
+```{r model 4 best, echo = FALSE}
 ## Averaging ##
 mod4.1 <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index + log(grazermass_shootmass), data = dat)
 mod4.2 <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index, data = dat)
@@ -421,7 +418,7 @@ par(mfrow = c(1, 1))
 
 ### Model 4 Plots
 Calculate predicted values and plot
-```{r plots}
+```{r plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
 newdata.4.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), sea_otter_index = rep(median(dat$sea_otter_index), 116), grazermass_shootmass = rep(median(dat$grazermass_shootmass), 116))
@@ -451,7 +448,7 @@ p4.jday <- ggplot(newdata.4.jday) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Julian day", y = "Aboveground : Belowground biomass +/- se") +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
-  scale_y_continuous(lim = c(0,4), breaks = seq(0, 4, by = 1)) +
+  scale_y_continuous(lim = c(0,6), breaks = seq(0, 6, by = 1)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 
 # Sea Otter Index #
@@ -469,15 +466,14 @@ p4.grz <- ggplot(newdata.4.grz) +
   geom_ribbon(aes(x = grazermass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Grazer load", y =  "Aboveground : Belowground biomass +/- se") +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
-  scale_y_continuous(lim = c(0,5), breaks = seq(0, 5, by = 1)) +
+  scale_y_continuous(lim = c(0,6), breaks = seq(0, 6, by = 1)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
 ### Model 5 - Node 2 distance
-Responce - log normal. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and total surface water nitrogen may effect 2nd internode distance of eelgrass rhizomes.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
-We generated a global model that includes linear and quadratic effects of julian day and sea otter index, and linear effects of sediment type,light availability, and total surface water nutirents.
-```{r model 5}
+```{r model 5, echo = FALSE}
 ## Global Model ##
 mod5 <- stepAIC(glm(log(dat$node2) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
@@ -486,7 +482,7 @@ mod5$anova
 
 ### Best Model 5
 Top 3 models are within 4 AIC, therefore model average.
-```{r model 5 best}
+```{r model 5 best, echo = FALSE}
 ## Averaging ###
 mod5.1 <- glm(log(node2) ~  poly(date_julian, 2) + light_avail + Ntotal_site, data = dat) 
 mod5.2 <- glm(log(node2) ~  poly(date_julian, 2) + light_avail, data = dat)
@@ -502,7 +498,7 @@ par(mfrow = c(1, 1))
 
 ### Model 5 Plots
 Plots of predicted values.
-```{r}
+```{r mod 5 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
 newdata.5.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), light_avail = rep(median(dat$light_avail), 116), Ntotal_site = rep(median(dat$Ntotal_site), 116))
@@ -530,7 +526,7 @@ newdata.5.nitro$Upr <- exp(pred.5.nitro$fit + pred.5.nitro$se.fit)
 p5.jday <- ggplot(newdata.5.jday) +
   geom_line(aes(x = date_julian, y = Predict), size = 1) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Julian day", y = "Rhizome second internode length +/- se (cm)") +
+  labs(x = "Julian day", y = " Second rhizome internode length +/- se (cm)") +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
@@ -539,7 +535,7 @@ p5.jday <- ggplot(newdata.5.jday) +
 p5.light <- ggplot(newdata.5.light) +
   geom_line(aes(x = light_avail, y = Predict), size = 1) +
   geom_ribbon(aes(x = light_avail, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Light availability", y = "Rhizome second internode length +/- se (cm)") +
+  labs(x = "Julian day", y = " Second rhizome internode length +/- se (cm)") +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 
@@ -547,16 +543,15 @@ p5.light <- ggplot(newdata.5.light) +
 p5.nitro <- ggplot(newdata.5.nitro) +
   geom_line(aes(x = Ntotal_site, y = Predict), size = 1) +
   geom_ribbon(aes(x = Ntotal_site, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Notal N", y = "Rhizome second internode length +/- se (cm)") +
+  labs(x = "Julian day", y = " Second rhizome internode length +/- se (cm)") +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
 ### Model 6 - Epiphyte load
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and grazer load may effect piephyte load on eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and grazer load may effect epiephyte load on eelgrass.
 
-We generated a global model that includes the lienar effects of date, sea otter index, sediment type, light availability, log grazer load, and total surface water nitrogen.
-```{r model 6}
+```{r model 6, echo = FALSE}
 ## Global Model ##
 mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site  , lower = ~1), direction = "both", AICc = TRUE)
 
@@ -565,7 +560,7 @@ mod6$anova
 
 ### Best Model 6
 Two models within 4 AIC.
-```{r model 6 best}
+```{r model 6 best, echo = FALSE}
 ## Averaging ##
 mod6.1 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + light_avail + sed_inside_prim, data = dat) 
 mod6.2 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + sed_inside_prim, data = dat) 
@@ -580,7 +575,7 @@ par(mfrow = c(1, 1))
 ```
 
 ### Model 6 Plots
-```{r}
+```{r model 6, echo = FALSE}
 ## Predicted Values ##
 # Grazer load #
 newdata.6.grz <- data.frame(grazermass_shootmass = seq(min(dat$grazermass_shootmass), max(dat$grazermass_shootmass), length.out = 100), sed_inside_prim = rep(median(dat$sed_inside_prim), 100), light_avail = rep(median(dat$light_avail), 100)) 
@@ -633,19 +628,18 @@ p6.sed <- ggplot(newdata.6.sed) +
 ```
 
 ### Model 7 - Grazer load
-Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, log crab biomass may affect grazer load on eelgrass.
+Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, log crab biomass, log fish biomass, log above ground biomass, and shoot density may affect grazer load on eelgrass.
 
-We generated a global model that includes the linear effects of date, sea otter index, log epiphyte load, and log crab biomass.
-```{r model 7}
+```{r model 7, echo = FALSE}
 ## Global Model ##
-mod7 <- stepAIC(glm(log(dat$grazermass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$crab_mass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~1), direction = "both", AICc = TRUE)
+mod7 <- stepAIC(glm(log(dat$grazermass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$crab_mass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod7$anova
 ```
 
 ### Best Model 7
 Model with epiphyte load is 3.87 AIC away from ~1 model. Will report model with epiphyte load but should note that it it poor fit, probably does not mean much. 
-```{r model 7 best}
+```{r model 7 best, echo = FALSE}
 ## Averaging ##
 mod7.1 <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
 mod7.2 <- glm(log(grazermass_shootmass) ~  1, data = dat)
@@ -659,7 +653,7 @@ par(mfrow = c(1, 1))
 ```
 
 ### Model 7 Plots
-```{r}
+```{r mod 7 plots, echo = FALSE}
 ## Predicted Values ##
 # Epiphyte Load #
 newdata.7.epi <- data.frame(epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
@@ -680,10 +674,9 @@ p7.epi <- ggplot(newdata.7.epi) +
 ```
 
 ### Model 8 - Crabs
-Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, grazer biomass, may affect grazer load on eelgrass.
+Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, grazer biomass, fish biomass, aboveground biomass, and shoot density, may affect grazer load on eelgrass.
 
-We generated a global model that includes the linear effects of date, sea oter index and log grazer load. 
-```{r model 8}
+```{r model 8, echo = FALSE}
 ## Global Model ##
 mod8 <- stepAIC(glm(log(dat$crab_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~1), direction = "both", AICc = TRUE)
 
@@ -692,7 +685,7 @@ mod8$anova
 
 ### Best Model 8
 No model within 4 AIC. 
-```{r model 8 best}
+```{r model 8 best, echo = FALSE}
 mod8.best <- glm(log(crab_mass) ~ sea_otter_index, data = dat)
 summary(mod8.best)
 par(mfrow = c(2, 2))
@@ -702,7 +695,7 @@ par(mfrow = c(1, 1))
 
 ### Model 8 Plots
 Calculate predicted vales and plot
-```{r plots}
+```{r plots, echo = FALSE}
 ## Predicted Values ##
 newdata.8 <- data.frame(sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100))
 pred.8 <- predict(mod8.best, se.fit = TRUE, type = "response", newdata = newdata.8)
@@ -724,7 +717,7 @@ Since we only sampled fishes with one beach seine at each site we have a limited
 
 #### Multivariate
 First values should be standardized and transformed. We will use a 4th root tranformation which is often used with hihgly abundant variable species data. 
-```{r multivariate prep fish}
+```{r multivariate prep fish, echo = FALSE}
 ## Fish by species ##
 str(fish.site.sp)
 
@@ -735,7 +728,7 @@ fish.sp.trsfrm <- (fish.site.sp[, 2:56]^0.25)
 fish.std <- as.data.frame(scale(fish.sp.trsfrm, center = FALSE, scale = apply(fish.sp.trsfrm, 2, max)))
 ```
 
-```{r multivariate mass}
+```{r multivariate prep mass, echo = FALSE}
 ## Transform ##
 fishmass.sp.trsfrm <- (fishmass.site.sp[,2:56]^0.25)
 
@@ -744,7 +737,7 @@ fishmass.std <- as.data.frame(scale(fishmass.sp.trsfrm, center = FALSE, scale = 
 ```
 
 Transform fish family counts
-```{r}
+```{r fish tax, echo = FALSE}
 ## Transform ##
 fish.fam.trsnfrm <- (fish.site.fam[,2:20]^0.25)
 
@@ -753,7 +746,7 @@ fish.fam.std <- as.data.frame(scale(fish.fam.trsnfrm, center = FALSE, scale = ap
 ```
 
 Transform fish family mass
-```{r}
+```{r fish tax math, echo = FALSE}
 ## Transform ##
 fishmass.fam.trsnfrm <- (fishmass.site.fam[,2:20]^0.25)
 
@@ -762,7 +755,7 @@ fishmass.fam.std <- as.data.frame(scale(fishmass.fam.trsnfrm, center = FALSE, sc
 ```
 
 Multivariate analysis of fish counts
-```{r}
+```{r multivariate counts, echo = FALSE}
 ## Dissimilarity matirx ##
 fish.diss <- vegdist(fish.std, method = "bray")
 round(fish.diss, 2)
@@ -790,7 +783,7 @@ mod9.mds
 ```
 
 Multivariate analysis of fish mass
-```{r}
+```{r multivariate mass, echo = FALSE}
 ## Dissimilarity matirx ##
 fishmass.diss <- vegdist(fishmass.std, method = "bray")
 round(fishmass.diss, 2)
@@ -820,7 +813,7 @@ mod9b.mds
 ```
 
 Multivariate analysis of fish family counts
-```{r}
+```{r family count, echo = FALSE}
 ## Dissimilarity matirx ##
 fish.fam.diss <- vegdist(fish.fam.std, method = "bray")
 round(fish.fam.diss, 2)
@@ -833,7 +826,7 @@ screeplot(fish.fam.pca)
 ```
 
 Multivariate analysis of fish family mass
-```{r}
+```{r family mass, echo = FLASE}
 ## Dissimilarity matirx ##
 fishmass.fam.diss <- vegdist(fishmass.fam.std, method = "bray")
 round(fish.fam.diss, 2)
@@ -847,7 +840,7 @@ screeplot(fish.fam.pca)
 
 #### Simple models and summaries
 Simple models
-```{r}
+```{r simp fish models, echo = FALSE}
 mod10 <- stepAIC(glm(log(dat$fish_mass) ~ 1), 
                 scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
 
@@ -872,7 +865,7 @@ mod13$anova
 ```
 
 Analysis of Fish Families. Stacked proportion bar plots of mass by family for all samples
-```{r}
+```{r fish plots, echo = FALSE}
 fishmass.fam <- fishmass.site.fam %>% 
   gather("family", "mass", 2:20) %>% 
   group_by(family) %>% 
@@ -888,7 +881,7 @@ ggplot(fishmass.fam) +
 
 
 Given that fish are not well explained by any of our data, lets take a look at all the data together. First we will look at basic summary statistics, and the average relative fq by species.
-```{r}
+```{r fish sum stats, echo = FALSE}
 ## Basic summar yastats of all seines ##
 fish.sum <- dat %>% 
   summarise(abundance = mean(fish_count),
@@ -968,7 +961,7 @@ plot_grid(p5.jday, p5.light)
 
 Epiphyte load
 ```{r}
-plot_grid(p6.abv, p6.soi)
+plot_grid(p6.grz, p6.lite, p6.sed, nrow = 3, ncol = 1)
 ```
 
 Grazer load
