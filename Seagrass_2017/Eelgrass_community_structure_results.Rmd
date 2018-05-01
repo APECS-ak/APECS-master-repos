@@ -1,0 +1,65 @@
+---
+title: "Eelgrass community structure results"
+author: "Wendel Raymond"
+date: "May 1, 2018"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Methods (brief)
+All statistical analyses were performed using the R statistical environment (R Core Team 2017). We used generalized linear models to test our hypotheses on factors influencing eelgrass community structure. Upon inspection of exploratory plots were identified that some responses showed signs of a quadratic relationship with time and sea otter index. For those response variables we included quadratic terms of time and sea otter index in our model selection procedure, as indicated below. We tested for the linear and quadratic effects of time (Julian day), sea otter index,  and the linear effects of epiphyte load, sediment type, light availability, and total water nitrogen (from sample collected of day of biological sampling) on eelgrass aboveground and belowground biomass, shoot density, ratio of aboveground to belowground biomass, and second internode distance. We tested for the linear effects of time (Julian day), sea otter index, sediment type, light availability, total water nitrogen and grazer load on epiphyte load. We tested for the linear effects of time (Julian day), sea otter index, epiphyte load, and crab biomass on grazer load. Finally we tested the linear effects of time (Julian day), sea otter index, and grazer biomass on crab biomass. Data were natural log transformed to meet assumptions of normality when needed. The model for shoot density was fit using a negative binomial distribution as is common with ecological count data. Models selections was performed using a joint forward and backward selection procedure using AIC scores to compare model fits (‘stepAIC’ function of R MASS package (Venables and Ripley 2002)). For each response the model with the lowest AIC score was fit separately. Residuals and normality was assessed visually. We determined that none of the best fit models violated any assumptions.
+
+# Results
+Model results are summarized in Figure 1. Aboveground biomass and shoot density has a strong positive curvilinear relationship with time and sea otter index, and a negative relationship with epiphyte load. Belowground biomass has a positive relationship with time, and a negative relationship with epiphyte load. The ratio of above to belowground biomass has a strong positive curvilinear relationship with time and sea otter index and a positive relationship with grazer load. Second rhizome internode distance has a strong positive curvilinear relationship with time, a positive relationship with total N and a negative relationship with light availability. Epiphyte load has a positive relationship with light availability and a negative relationship with grazer load and primary sediment type. Grazer load has a negative relationship with epiphyte load. Crab biomass has a negative relationship with sea otter index.
+
+<div style="width:6inch; height:3inch">
+![Summary of model results. Green indicates positive relationships and red indicates negative relationships. ++ indicate high significance of predictor. * indicated curvilinear relationship. White/blank cells indicate that the predictor was included in global model but was not included in final best model. Grey indicates predictors that were not included in global model.](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/Model_results_simple.png)
+</div>
+
+Taken together we see a few major themes.
+
+1. Time plays a strong role in eelgrass growth. This is not that surprising given the intense seasonality of this part of the world. What is perhaps more interesting it that time shows no relationship with epiphyte load, suggesting that epiphyte load (g epiphyte/g eelgrass) is fairly constant through the summer. This may connect to the lack of N in the system. Also even though time is significant, the effect of sea otters and other factors is still detectable. 
+2. Sea otters (sea otter index) shows a positive relationship with most eelgrass metrics, suggesting the trophic linkage seen elsewhere.
+3. Epiphyte load, while low in magnitude, has a negative relationship with most eelgrass metrics. This is inline with the prevailing epiphyte-eelgrass paradigm.
+4. Sea otters have a negative relationship with crabs. Not that surprising, but we show this over a fairly large scale. What is more interesting is that we see no evidence of a relationship between crabs and grazers
+5. Fish (plots not presented here) are abundant and diverse. While there are not statistically significant relationships, out data confirms the presence of fishes in eelgrass in SE Alaska. There is a large body of research supporting that fishes can be strong actors in eelgrass trophic ecology, suggesting that they may be important in SE Alaska too. This deserves more research.
+
+# The emerging story
+First its important to note that the SE Alaska scale analysis of overlap between sea otter extent and seagrass extent is not reported here but the take home message is that there is more seagrass shoreline in areas where there are sea otters versus places where sea otters are not present. 
+
+Our broad approach to investigate relationships in SE Alaska eelgrass communities suggests that sea otter have a positive relationship with eelgrass itself. Our study represents the largest scale investigation of a marine top predator effects in communities, certainly in eelgrass (at least I think). In general ecologists and conservationists are in the dark when is comes to the ecological role of recovered top predators, especially in marine environments.
+
+More specific to trophic cascades in eelgrass ecosystems we see confirmation of many of the trophic relationships. Figure 2 compares the model trophic cascade relationships based off other literature and what we observed in our study. We see that some of the classic environmental-eelgrass-epiphyte-grazer dynamics are the same, and that the top predator has a positive indirect relationship with eelgrass, and a direct negative relationship with the mesopredator. However the connection between mesopredators and grazers is still a mystery (cough cough experiments, biomarkers, stomach contents).
+
+<div style="width:7inch; height:7inch">
+![Comparison of model/predicted/literature supported trophic cascade relationships in eelgrass to what we oberved in our study. Blue arrows indicate relationships that are the same as the model, and yellow arrows indicate relationships that are different than the model.](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/TC_comp_diagram.png)
+</div>
+
+In summary there are two parts to the story.
+1. Sea otters have a positive relationship with eelgrass at a large scale
+2. The specific relationships within the community are similar to other eelgrass trophic cascade literature, but some are different. There is a lot to talk about here.
+
+# Plots
+Below are a series of plots of predicted values from model output organized by response variable. 
+
+![Aboveground eelgrass biomass as a function of Julian day, sea otter index, and epiphyte load](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/Abv_pred_plots.pdf)
+
+![Belowground eelgrass biomass as a function of Julian day, and epiphyte load](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/Blw_pred_plots.pdf)
+
+![Eelgrass shoot density as a function of Julian day, sea otter index, and epiphyte load](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/Shoot_pred_plots.pdf)
+
+![Ratio of above to belowground biomass as a function of Julian day, sea otter index, and grazer load](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/AbvBlw_pred_plots.pdf)
+
+![Second rhizome internode distance as a funciton of Julian day, light availability and total N](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/2nd_pred_plots.pdf)
+
+![Eelgrass epiphyte load as a funciton of grazer load, light availability, and sediment type. Sediment type is a catagorical score with 1 = mud and 10 = bedrock](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/Epi_pred_plots.pdf)
+
+![Eelgrass grazer load as a function of epiphyte load](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/Grz_pred_plots.pdf)
+
+![Crab biomass as a function of sea otter index](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/Crb_pred_plots.pdf)

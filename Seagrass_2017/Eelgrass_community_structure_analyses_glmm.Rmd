@@ -1007,3 +1007,4 @@ ggplot(dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter
   theme(axis.text.x = element_text(angle = 90))
 ```
 
+![Alt](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/AbvBlw_pred_plots.pdf)
