@@ -5,9 +5,6 @@ date: "May 1, 2018"
 output:
   pdf_document:
     latex_engine: xelatex
-  word_document: default
-  html_document:
-    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
