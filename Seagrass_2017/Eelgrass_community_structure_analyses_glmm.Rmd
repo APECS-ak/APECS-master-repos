@@ -217,30 +217,30 @@ newdata.1.epi$Upr <- exp(pred.1.epi$fit + pred.1.epi$se.fit)
 ## Plots ##
 # Julian Day #
 p1.jday <- ggplot(newdata.1.jday) +
-  geom_line(aes(x = date_julian, y = Predict), size = 1) +
+  geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Julian day", y = bquote("Aboveground mass +/- se"  ~(g/m^2))) +
+  labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
   scale_y_continuous(lim = c(0, 130), breaks = seq(0, 130, by = 30)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
 # Sea Otter Index #
 p1.soi <- ggplot(newdata.1.soi) +
-  geom_line(aes(x = sea_otter_index, y = Predict), size = 1) +
+  geom_line(aes(x = sea_otter_index, y = Predict)) +
   geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Sea otter index", y = bquote("Aboveground mass +/- se"  ~(g/m^2))) +
+  labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
   scale_y_continuous(lim = c(0,100), breaks = seq(0, 100, by = 20)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
 # Epiphyte Load #
 p1.epi <- ggplot(newdata.1.epi) +
-  geom_line(aes(x = epiphmass_shootmass, y = Predict), size = 1) +
+  geom_line(aes(x = epiphmass_shootmass, y = Predict)) +
   geom_ribbon(aes(x = epiphmass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Epiphyte Load", y = bquote("Aboveground mass +/- se"  ~(g/m^2))) +
+  labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0,115), breaks = seq(0, 115, by = 20)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 ```
 
 ### Model 2 - Belowground biomass
@@ -290,20 +290,20 @@ newdata.2.epi$Upr <- exp(pred.2.epi$fit + pred.2.epi$se.fit)
 ## Plots ##
 # Julian Day #
 p2.jday <- ggplot(newdata.2.jday) +
-  geom_line(aes(x = date_julian, y = Predict), size = 1) +
+  geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Julian day", y = bquote("Belowground mass +/- se"  ~(g/m^2))) +
+  labs(x = "", y = bquote(atop("Belowground biomass", " +/- se"  ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
   scale_y_continuous(lim = c(0,40), breaks = seq(0, 40, by = 10)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
 p2.epi <- ggplot(newdata.2.epi) +
-  geom_line(aes(x = epiphmass_shootmass, y = Predict), size = 1) +
+  geom_line(aes(x = epiphmass_shootmass, y = Predict)) +
   geom_ribbon(aes(x = epiphmass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = bquote("Epiphyte load" ~g/g), y = bquote("Belowground mass +/- se"  ~(g/m^2))) +
+  labs(x = "", y = bquote(atop("Belowground biomass", " +/- se"  ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(0, 0.2, by = 0.05)) +
   scale_y_continuous(lim = c(0,40), breaks = seq(0, 40, by = 10)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 ```
 
 
@@ -364,30 +364,30 @@ newdata.3.epi$Upr <- (pred.3.epi$fit + pred.3.epi$se.fit)
 ## Plots ##
 # Julian Day #
 p3.jday <- ggplot(newdata.3.jday) +
-  geom_line(aes(x = date_julian, y = Predict), size = 1) +
+  geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Julian day", y = bquote("Shoot density +/- se"  ~(m^-2))) +
+  labs(x = "", y = bquote(atop("Shoot density", " +/- se"  ~(m^-2)))) +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
   scale_y_continuous(lim = c(0, 500), breaks = seq(0, 500, by = 100)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
 # Sea Otter Index #
 p3.soi <- ggplot(newdata.3.soi) +
-  geom_line(aes(x = sea_otter_index, y = Predict), size = 1) +
+  geom_line(aes(x = sea_otter_index, y = Predict)) +
   geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Sea otter index", y = bquote("Shoot density +/- se"  ~(m^-2))) +
+  labs(x = "", y = bquote(atop("Shoot density", " +/- se"  ~(m^-2)))) +
   scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
   scale_y_continuous(lim = c(0, 500), breaks = seq(0, 500, by = 100)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
 # Epiphyte Load #
 p3.epi <- ggplot(newdata.3.epi) +
-  geom_line(aes(x = epiphmass_shootmass, y = Predict), size = 1) +
+  geom_line(aes(x = epiphmass_shootmass, y = Predict)) +
   geom_ribbon(aes(x = epiphmass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Epiphyte Load", y = bquote("Shoot density +/- se"  ~(g/m^2))) +
+  labs(x = "", y = bquote(atop("Shoot density", " +/- se"  ~(m^-2)))) +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0, 500), breaks = seq(0, 500, by = 100)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 ```
 
 
@@ -444,21 +444,21 @@ newdata.4.grz$Upr <- exp(pred.4.grz$fit + pred.4.grz$se.fit)
 ## Plots ##
 # Julian Day #
 p4.jday <- ggplot(newdata.4.jday) +
-  geom_line(aes(x = date_julian, y = Predict), size = 1) +
+  geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Julian day", y = "Aboveground : Belowground biomass +/- se") +
+  labs(x = "", y = bquote(atop("Aboveground : Belowground", " biomass +/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
   scale_y_continuous(lim = c(0,6), breaks = seq(0, 6, by = 1)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
 # Sea Otter Index #
 p4.soi <- ggplot(newdata.4.soi) +
-  geom_line(aes(x = sea_otter_index, y = Predict), size = 1) +
+  geom_line(aes(x = sea_otter_index, y = Predict)) +
   geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Sea otter index", y =  "Aboveground : Belowground biomass +/- se") +
+  labs(x = "", y =  bquote(atop("Aboveground : Belowground", " biomass +/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
   scale_y_continuous(lim = c(0,6), breaks = seq(0, 6, by = 1)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
 # Grazer Load #
 p4.grz <- ggplot(newdata.4.grz) +
@@ -467,7 +467,7 @@ p4.grz <- ggplot(newdata.4.grz) +
   labs(x = "Grazer load", y =  "Aboveground : Belowground biomass +/- se") +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0,6), breaks = seq(0, 6, by = 1)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
 ### Model 5 - Node 2 distance
@@ -524,12 +524,12 @@ newdata.5.nitro$Upr <- exp(pred.5.nitro$fit + pred.5.nitro$se.fit)
 ## Plots ##
 # Julian Day #
 p5.jday <- ggplot(newdata.5.jday) +
-  geom_line(aes(x = date_julian, y = Predict), size = 1) +
+  geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Julian day", y = " Second rhizome internode length +/- se (cm)") +
+  labs(x = "Julian day", y = " Second rhizome \n internode +/- se (cm)") +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
 # Light Availability #
 p5.light <- ggplot(newdata.5.light) +
@@ -537,7 +537,7 @@ p5.light <- ggplot(newdata.5.light) +
   geom_ribbon(aes(x = light_avail, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Julian day", y = " Second rhizome internode length +/- se (cm)") +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
 
 # Total N #
 p5.nitro <- ggplot(newdata.5.nitro) +
@@ -545,7 +545,7 @@ p5.nitro <- ggplot(newdata.5.nitro) +
   geom_ribbon(aes(x = Ntotal_site, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Julian day", y = " Second rhizome internode length +/- se (cm)") +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
 ### Model 6 - Epiphyte load
@@ -606,7 +606,7 @@ p6.grz <- ggplot(newdata.6.grz) +
   labs(x = "Grazer load (g/g)", y = "Epiphyte Load +/- se (g/g)") +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
 
 # Light Availability #
 p6.lite <- ggplot(newdata.6.lite) +
@@ -615,7 +615,7 @@ p6.lite <- ggplot(newdata.6.lite) +
   labs(x = "Light Availability", y = "Epiphyte Load +/- se (g/g)") +
   scale_x_continuous(breaks = seq(0, 5, by = 0.4)) +
   scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
 
 # Sediment Type #
 p6.sed <- ggplot(newdata.6.sed) +
@@ -624,7 +624,7 @@ p6.sed <- ggplot(newdata.6.sed) +
   labs(x = "Sediment Type Score", y = "Epiphyte Load +/- se (g/g)") +
   scale_x_continuous(breaks = seq(0, 6, by = 1)) +
   scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
 ```
 
 ### Model 7 - Grazer load
@@ -665,12 +665,12 @@ newdata.7.epi$Upr <- exp(pred.7.epi$fit + pred.7.epi$se.fit)
 ## Plots ##
 # Epiphyte Load #
 p7.epi <- ggplot(newdata.7.epi) +
-  geom_line(aes(x = epiphmass_shootmass, y = Predict), size = 1) +
+  geom_line(aes(x = epiphmass_shootmass, y = Predict)) +
   geom_ribbon(aes(x = epiphmass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Epiphyte load (g/g)", y = "Grazer load +/- se (g/g)") +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0, 0.08), breaks = seq(0, 0.08, by = 0.02)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 ```
 
 ### Model 8 - Crabs
@@ -704,12 +704,12 @@ newdata.8$Lwr <- exp(pred.8$fit - pred.8$se.fit)
 newdata.8$Upr <- exp(pred.8$fit + pred.8$se.fit)
 
 ## Plot ##
-p8.crb <- ggplot(newdata.8) +
-  geom_line(aes(x = sea_otter_index, y = Predict), size = 1) +
+p8.soi <- ggplot(newdata.8) +
+  geom_line(aes(x = sea_otter_index, y = Predict)) +
   geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Sea otter index", y = "Crab biomass (g)") +
   scale_y_continuous(breaks = seq(0, 150, by = 20)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 ```
 
 ### Fishes
@@ -876,7 +876,7 @@ ggplot(fishmass.fam) +
   geom_col(aes(x = family, y = log(mean_mass + 1))) +
   geom_errorbar(aes(x = family, ymin = log(mean_mass + 1) - log(se_mass + 1), ymax = log(mean_mass + 1) + log(se_mass + 1), width = 0), size = 1) +
   labs(x = "Family", y = "Log mean mass per seine +/- se (g)") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 1), axis.text.x=element_text(angle = 45, hjust = 1))
+  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), axis.text.x=element_text(angle = 45, hjust = 1))
 ```
 
 
@@ -910,8 +910,15 @@ fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
 
 
 ## Collating Model results
-### Modeling results table
-Table to look at result from best models
+### Extracting model results
+```{r model results}
+exp(mod1.best$coefficients)
+
+```
+
+
+### Modeling results table with sjPlot
+Table to look at result from best models. This function does not work with the averaged models.
 ```{r full results best model, echo = FALSE}
 all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE)
 
@@ -933,7 +940,9 @@ all.results.exp
 ```
 
 
-### Predicted Values Plots
+## Predicted Values Plots
+
+### Plots by Responce
 Aboveground biomass
 ```{r}
 plot_grid(p1.jday, p1.soi, p1.epi, nrow = 3, ncol = 1)
@@ -974,6 +983,25 @@ Crabs
 p8.crb
 ```
 
+### Plots by Factor
+Time (Julian Day)
+```{r}
+theme_set(theme_cowplot(font_size = 10))
+plot_grid(p1.jday, p2.jday, p4.jday, p3.jday, p5.jday, nrow = 5, ncol = 1, align = "v", labels = c("auto"), label_size = 10, hjust = 0.05)
+```
+
+Sea otter index
+```{r}
+theme_set(theme_cowplot(font_size = 10))
+plot_grid(p1.soi, p4.soi, p3.soi, p8.soi, nrow = 4, ncol = 1, align = "v", labels = c("auto"), label_size = 10, hjust = 0.05)
+```
+
+Epiphytes
+```{r}
+theme_set(theme_cowplot(font_size = 10))
+plot_grid(p1.epi, p2.epi, p3.epi, p7.epi, nrow = 4, ncol = 1, align = "v", labels = c("auto"), label_size = 10, hjust = 0.05)
+```
+
 ## Site characterization data
 Summary information on site characterization including date, sea otter index, envi conditions, sediment characteristics.
 ```{r}
@@ -1003,7 +1031,7 @@ ggplot(dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter
   geom_point(size = 4) +
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(text = element_text(size = 10), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 90))
 ```
 
