@@ -70,6 +70,7 @@ fish.tax <- read.csv("../ALL_DATA/fish_taxonomy_RAW.csv", header = TRUE, strings
 ```
 
 ### Data Prep
+
 Sediment data preparation. Average by site.
 ```{r seds by site}
 seds <- sed.site %>% 
@@ -166,6 +167,15 @@ fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
 dat <- merge(dat, fishmass.site.fam, by = "site")
 ```
 
+Adding quadratic transformations of date and sea otter index
+```{r quadratic}
+## Date ##
+dat$date_julian_2 <- dat$date_julian^2
+
+## Sea otter index ##
+dat$sea_otter_index_2 <- dat$sea_otter_index^2
+```
+
 ## Models
 Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That glocal model will be run through an forward/backward model selection procedure with AICc disrimination. If top candidate models are <= 4 AICc values they will be average using a model avergin procedure.
 
@@ -174,19 +184,19 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 
 ```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + poly(dat$date_julian, 2) + dat$sea_otter_index + + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2  + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod1$anova
 ```
 
 ### Best Model 1
-Minimum AIC value was greater than 4 AIC from next model. Only one model will be reported.
+Two models were within 4 AIC from next model. Model averaging over top two models
 ```{r model 1 best, echo = FALSE}
-mod1.best <- glm(log(abvgnd_mass) ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), data = dat) 
+mod1.1 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + sea_otter_index_2 + log(epiphmass_shootmass), data = dat)
+mod1.2 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + log(epiphmass_shootmass), data = dat)
+mod1.best <- model.avg(list(mod1.1, mod1.2), fit = TRUE)
+
 summary(mod1.best)
-par(mfrow = c(2, 2))
-plot(mod1.best)
-par(mfrow = c(1, 1))
 ```
 
 ### Model 1 Plots
@@ -194,21 +204,33 @@ Calculate predicted values and plot
 ```{r mod 1 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
-newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), sea_otter_index = rep(median(dat$sea_otter_index), 116), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
+newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
+                             date_julian_2 = (119 : 234)^2, 
+                             sea_otter_index = rep(median(dat$sea_otter_index), 116), 
+                             sea_otter_index_2 = rep(median(dat$sea_otter_index_2), 116), 
+                             epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
 pred.1.jday <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.jday)
 newdata.1.jday$Predict <- exp(pred.1.jday$fit)
 newdata.1.jday$Lwr <- exp(pred.1.jday$fit - pred.1.jday$se.fit)
 newdata.1.jday$Upr <- exp(pred.1.jday$fit + pred.1.jday$se.fit)
 
 # Sea Otter Index #
-newdata.1.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100), sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 100)) 
+newdata.1.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
+                            date_julian_2 = rep(median(dat$date_julian_2), 100),
+                            sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), 
+                            sea_otter_index_2 = seq(min(dat$sea_otter_index_2), max(dat$sea_otter_index_2), length.out = 100),
+                            epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 100)) 
 pred.1.soi <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.soi)
 newdata.1.soi$Predict <- exp(pred.1.soi$fit)
 newdata.1.soi$Lwr <- exp(pred.1.soi$fit - pred.1.soi$se.fit)
 newdata.1.soi$Upr <- exp(pred.1.soi$fit + pred.1.soi$se.fit)
 
 # Epiphyte Load #
-newdata.1.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100), sea_otter_index = rep(median(dat$sea_otter_index), 100), epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
+newdata.1.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
+                            date_julian_2 = rep(median(dat$date_julian_2), 100), 
+                            sea_otter_index = rep(median(dat$sea_otter_index), 100), 
+                            sea_otter_index_2 = rep(median(dat$sea_otter_index_2), 100),
+                            epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
 pred.1.epi <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.epi)
 newdata.1.epi$Predict <- exp(pred.1.epi$fit)
 newdata.1.epi$Lwr <- exp(pred.1.epi$fit - pred.1.epi$se.fit)
@@ -221,7 +243,7 @@ p1.jday <- ggplot(newdata.1.jday) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
-  scale_y_continuous(lim = c(0, 130), breaks = seq(0, 130, by = 30)) +
+  scale_y_continuous(lim = c(0, 120), breaks = seq(0, 120, by = 20)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
 # Sea Otter Index #
@@ -230,7 +252,7 @@ p1.soi <- ggplot(newdata.1.soi) +
   geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
-  scale_y_continuous(lim = c(0,100), breaks = seq(0, 100, by = 20)) +
+  scale_y_continuous(lim = c(0,120), breaks = seq(0, 120, by = 20)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
 # Epiphyte Load #
@@ -239,7 +261,7 @@ p1.epi <- ggplot(newdata.1.epi) +
   geom_ribbon(aes(x = epiphmass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
-  scale_y_continuous(lim = c(0,115), breaks = seq(0, 115, by = 20)) +
+  scale_y_continuous(lim = c(0,120), breaks = seq(0, 120, by = 20)) +
   theme(text = element_text(size = 10), legend.position = "none")
 ```
 
@@ -248,7 +270,7 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 
 ```{r model 2, echo = FALSE}
 ## Global Model ##
-mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod2$anova
 ```
@@ -263,9 +285,6 @@ mod2.best <- model.avg(list(mod2.1, mod2.2), fit = TRUE)
 
 ## Results ##
 summary(mod2.best)
-par(mfrow = c(2, 2))
-plot(mod1.best)
-par(mfrow = c(1, 1))
 ```
 
 
@@ -274,14 +293,16 @@ Calculate predicted values and plot, using conditional/subset coefficients
 ```{r mod 2 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
-newdata.2.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
+newdata.2.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
+                             epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
 pred.2.jday <- predict(mod2.best, se.fit = TRUE, type = "response", newdata = newdata.2.jday)
 newdata.2.jday$Predict <- exp(pred.2.jday$fit)
 newdata.2.jday$Lwr <- exp(pred.2.jday$fit - pred.2.jday$se.fit)
 newdata.2.jday$Upr <- exp(pred.2.jday$fit + pred.2.jday$se.fit)
 
 # Epiphyte Load #
-newdata.2.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100), epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
+newdata.2.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100), 
+                            epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
 pred.2.epi <- predict(mod2.best, se.fit = TRUE, type = "response", newdata = newdata.2.epi)
 newdata.2.epi$Predict <- exp(pred.2.epi$fit)
 newdata.2.epi$Lwr <- exp(pred.2.epi$fit - pred.2.epi$se.fit)
@@ -315,7 +336,7 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
-mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod3$anova
 ```
@@ -325,41 +346,35 @@ Top 3 models are within 4 AIC of minimun AIC so model everaging procedure will b
 
 ```{r model 3 best, echo = FALSE}
 ## Averging ##
-mod3.1 <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2) + log(epiphmass_shootmass), link = "log", data = dat)
-mod3.2 <- glm.nb(shoot_dens_rnd ~  poly(date_julian, 2) + poly(sea_otter_index, 2), link = "log", data = dat)
-mod3.3 <- glm.nb(shoot_dens_rnd ~  date_julian + poly(sea_otter_index, 2), link = "log", data = dat)
-mod3.best <- model.avg(list(mod3.1, mod3.2, mod3.3), fit = TRUE)
+mod3.1 <- glm.nb(shoot_dens_rnd ~ date_julian_2 + sea_otter_index_2, link = "log", data = dat)
+mod3.2 <- glm.nb(shoot_dens_rnd ~ date_julian_2, link = "log", data = dat)
+mod3.best <- model.avg(list(mod3.1, mod3.2), fit = TRUE)
 
 ## Results ##
 summary(mod3.best)
-par(mfrow = c(2, 2))
-plot(mod3.best)
-par(mfrow = c(1, 1))
 ```
 
 ### Model 3 Plots
 ```{r mod 3 plots}
 ## Predicted Values ##
 # Julian Day #
-newdata.3.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), sea_otter_index = rep(median(dat$sea_otter_index), 116), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
+newdata.3.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)),
+                             date_julian_2 = (119 : 234)^2,
+                             sea_otter_index = rep(median(dat$sea_otter_index), 116),
+                             sea_otter_index_2 = rep(median(dat$sea_otter_index_2), 116)) 
 pred.3.jday <- predict(mod3.best, se.fit = TRUE, type = "response", newdata = newdata.3.jday)
 newdata.3.jday$Predict <- (pred.3.jday$fit)
 newdata.3.jday$Lwr <- (pred.3.jday$fit - pred.3.jday$se.fit)
 newdata.3.jday$Upr <- (pred.3.jday$fit + pred.3.jday$se.fit)
 
 # Sea Otter Index #
-newdata.3.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100), sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 100)) 
+newdata.3.soi <- data.frame(date_julian_2 = rep(median(dat$date_julian), 100), 
+                            sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100),
+                            sea_otter_index_2 = seq(min(dat$sea_otter_index_2), max(dat$sea_otter_index_2), length.out = 100)) 
 pred.3.soi <- predict(mod3.best, se.fit = TRUE, type = "response", newdata = newdata.3.soi)
 newdata.3.soi$Predict <- (pred.3.soi$fit)
 newdata.3.soi$Lwr <- (pred.3.soi$fit - pred.3.soi$se.fit)
 newdata.3.soi$Upr <- (pred.3.soi$fit + pred.3.soi$se.fit)
-
-# Epiphyte Load #
-newdata.3.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100), sea_otter_index = rep(median(dat$sea_otter_index), 100), epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
-pred.3.epi <- predict(mod3.best, se.fit = TRUE, type = "response", newdata = newdata.3.epi)
-newdata.3.epi$Predict <- (pred.3.epi$fit)
-newdata.3.epi$Lwr <- (pred.3.epi$fit - pred.3.epi$se.fit)
-newdata.3.epi$Upr <- (pred.3.epi$fit + pred.3.epi$se.fit)
 
 ## Plots ##
 # Julian Day #
@@ -367,8 +382,8 @@ p3.jday <- ggplot(newdata.3.jday) +
   geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Shoot density", " +/- se"  ~(m^-2)))) +
-  scale_x_continuous(breaks = seq(120, 240, by = 20)) +
-  scale_y_continuous(lim = c(0, 500), breaks = seq(0, 500, by = 100)) +
+  scale_x_sqrt() +
+  scale_y_continuous(lim = c(0, 400), breaks = seq(0, 400, by = 100)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
 # Sea Otter Index #
@@ -379,41 +394,30 @@ p3.soi <- ggplot(newdata.3.soi) +
   scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
   scale_y_continuous(lim = c(0, 500), breaks = seq(0, 500, by = 100)) +
   theme(text = element_text(size = 10), legend.position = "none")
-
-# Epiphyte Load #
-p3.epi <- ggplot(newdata.3.epi) +
-  geom_line(aes(x = epiphmass_shootmass, y = Predict)) +
-  geom_ribbon(aes(x = epiphmass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "", y = bquote(atop("Shoot density", " +/- se"  ~(m^-2)))) +
-  scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
-  scale_y_continuous(lim = c(0, 500), breaks = seq(0, 500, by = 100)) +
-  theme(text = element_text(size = 10), legend.position = "none")
 ```
-
 
 ### Model 4 - Aboveground:Belowground Biomass
 Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
 ```{r model 4, echo = FALSE}
 ## Global Model ##
-mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod4$anova
 ```
 
 ### Best Model 4
-Top 2 models are within 4 AIC, therefore model average.
+Top 4 models are within 4 AIC, therefore model average.
 ```{r model 4 best, echo = FALSE}
 ## Averaging ##
-mod4.1 <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index + log(grazermass_shootmass), data = dat)
-mod4.2 <- glm(log(abvgnd_mass / blwgnd_mass) ~  poly(date_julian, 2) + sea_otter_index, data = dat)
-mod4.best <- model.avg(list(mod4.1, mod4.2), fit = TRUE)
+mod4.1 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat)
+mod4.2 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass) + sed_inside_prim, data = dat)
+mod4.3 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + sed_inside_prim, data = dat)
+mod4.4 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sed_inside_prim, data = dat)
+mod4.best <- model.avg(list(mod4.1, mod4.2, mod4.3, mod4.4), fit = TRUE)
 
 ## Results ##
 summary(mod4.best)
-par(mfrow = c(2, 2))
-plot(mod4.best)
-par(mfrow = c(1, 1))
 ```
 
 ### Model 4 Plots
@@ -421,21 +425,33 @@ Calculate predicted values and plot
 ```{r plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
-newdata.4.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), sea_otter_index = rep(median(dat$sea_otter_index), 116), grazermass_shootmass = rep(median(dat$grazermass_shootmass), 116))
+newdata.4.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
+                             date_julian_2 = (119 : 234)^2, 
+                             sea_otter_index = rep(median(dat$sea_otter_index), 116), 
+                             grazermass_shootmass = rep(median(dat$grazermass_shootmass), 116),
+                             sed_inside_prim = rep(median(dat$sed_inside_prim), 116))
 pred.4.jday <- predict(mod4.best, se.fit = TRUE, type = "response", newdata = newdata.4.jday)
 newdata.4.jday$Predict <- exp(pred.4.jday$fit)
 newdata.4.jday$Lwr <- exp(pred.4.jday$fit - pred.4.jday$se.fit)
 newdata.4.jday$Upr <- exp(pred.4.jday$fit + pred.4.jday$se.fit)
 
 # Sea Otter Index #
-newdata.4.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100), sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100)) 
+newdata.4.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
+                            date_julian_2 = rep(median(dat$date_julian_2), 100),
+                            sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), 
+                            grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100),
+                            sed_inside_prim = rep(median(dat$sed_inside_prim), 100)) 
 pred.4.soi <- predict(mod4.best, se.fit = TRUE, type = "response", newdata = newdata.4.soi)
 newdata.4.soi$Predict <- exp(pred.4.soi$fit)
 newdata.4.soi$Lwr <- exp(pred.4.soi$fit - pred.4.soi$se.fit)
 newdata.4.soi$Upr <- exp(pred.4.soi$fit + pred.4.soi$se.fit)
 
 # Grazer Load #
-newdata.4.grz <- data.frame(date_julian = rep(median(dat$date_julian), 100), sea_otter_index = rep(median(dat$sea_otter_index), 100), grazermass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
+newdata.4.grz <- data.frame(date_julian = rep(median(dat$date_julian), 100),
+                            date_julian_2 = rep(median(dat$date_julian_2), 100),
+                            sea_otter_index = rep(median(dat$sea_otter_index), 100), 
+                            grazermass_shootmass = seq(min(dat$grazermass_shootmass), max(dat$grazermass_shootmass), length.out = 100),
+                            sed_inside_prim = rep(median(dat$sed_inside_prim), 100)) 
 pred.4.grz <- predict(mod4.best, se.fit = TRUE, type = "response", newdata = newdata.4.grz)
 newdata.4.grz$Predict <- exp(pred.4.grz$fit)
 newdata.4.grz$Lwr <- exp(pred.4.grz$fit - pred.4.grz$se.fit)
@@ -448,7 +464,7 @@ p4.jday <- ggplot(newdata.4.jday) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Aboveground : Belowground", " biomass +/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(120, 240, by = 20)) +
-  scale_y_continuous(lim = c(0,6), breaks = seq(0, 6, by = 1)) +
+  scale_y_continuous(lim = c(0,5.5), breaks = seq(0, 6, by = 1)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
 # Sea Otter Index #
@@ -457,17 +473,17 @@ p4.soi <- ggplot(newdata.4.soi) +
   geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y =  bquote(atop("Aboveground : Belowground", " biomass +/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
-  scale_y_continuous(lim = c(0,6), breaks = seq(0, 6, by = 1)) +
+  scale_y_continuous(lim = c(0,5.5), breaks = seq(0, 6, by = 1)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
 # Grazer Load #
 p4.grz <- ggplot(newdata.4.grz) +
-  geom_line(aes(x = grazermass_shootmass, y = Predict), size = 1) +
+  geom_line(aes(x = grazermass_shootmass, y = Predict)) +
   geom_ribbon(aes(x = grazermass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Grazer load", y =  "Aboveground : Belowground biomass +/- se") +
+  labs(x = "Grazer load", y =  bquote(atop("Aboveground : Belowground", " biomass +/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
-  scale_y_continuous(lim = c(0,6), breaks = seq(0, 6, by = 1)) +
-  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
+  scale_y_continuous(lim = c(0,5.5), breaks = seq(0, 6, by = 1)) +
+  theme(text = element_text(size = 10), legend.position = "none")
 ```
 
 ### Model 5 - Node 2 distance
@@ -475,25 +491,21 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 
 ```{r model 5, echo = FALSE}
 ## Global Model ##
-mod5 <- stepAIC(glm(log(dat$node2) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + poly(dat$date_julian, 2) + poly(dat$sea_otter_index, 2) + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod5 <- stepAIC(glm(log(dat$node2) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
 mod5$anova
 ```
 
 ### Best Model 5
-Top 3 models are within 4 AIC, therefore model average.
+Top 2 models are within 4 AIC, therefore model average.
 ```{r model 5 best, echo = FALSE}
 ## Averaging ###
-mod5.1 <- glm(log(node2) ~  poly(date_julian, 2) + light_avail + Ntotal_site, data = dat) 
-mod5.2 <- glm(log(node2) ~  poly(date_julian, 2) + light_avail, data = dat)
-mod5.3 <- glm(log(node2) ~  poly(date_julian, 2), data = dat)
-mod5.best <- model.avg(list(mod5.1, mod5.2, mod5.3), fit = TRUE)
+mod5.1 <- glm(log(node2) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat) 
+mod5.2 <- glm(log(node2) ~  date_julian + date_julian_2 + log(grazermass_shootmass), data = dat)
+mod5.best <- model.avg(list(mod5.1, mod5.2), fit = TRUE)
   
 ## Results ##  
 summary(mod5.best)
-par(mfrow = c(2, 2))
-plot(mod5.best)
-par(mfrow = c(1, 1))
 ```
 
 ### Model 5 Plots
@@ -501,25 +513,34 @@ Plots of predicted values.
 ```{r mod 5 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
-newdata.5.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), light_avail = rep(median(dat$light_avail), 116), Ntotal_site = rep(median(dat$Ntotal_site), 116))
+newdata.5.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
+                             date_julian_2 = (119 : 234)^2, 
+                             sea_otter_index = rep(median(dat$sea_otter_index), 116), 
+                             grazermass_shootmass = rep(median(dat$grazermass_shootmass), 116))
 pred.5.jday <- predict(mod5.best, se.fit = TRUE, type = "response", newdata = newdata.5.jday)
 newdata.5.jday$Predict <- exp(pred.5.jday$fit)
 newdata.5.jday$Lwr <- exp(pred.5.jday$fit - pred.5.jday$se.fit)
 newdata.5.jday$Upr <- exp(pred.5.jday$fit + pred.5.jday$se.fit)
 
-# Light Availability #
-newdata.5.light <- data.frame(date_julian = rep(median(dat$date_julian), 100), light_avail = seq(min(dat$light_avail), max(dat$light_avail), length.out = 100), Ntotal_site = rep(median(dat$Ntotal_site), 100))
-pred.5.light <- predict(mod5.best, se.fit = TRUE, type = "response", newdata = newdata.5.light)
-newdata.5.light$Predict <- exp(pred.5.light$fit)
-newdata.5.light$Lwr <- exp(pred.5.light$fit - pred.5.light$se.fit)
-newdata.5.light$Upr <- exp(pred.5.light$fit + pred.5.light$se.fit)
+# Sea otter index #
+newdata.5.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
+                            date_julian_2 = rep(median(dat$date_julian_2), 100),
+                            sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), 
+                            grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100))
+pred.5.soi <- predict(mod5.best, se.fit = TRUE, type = "response", newdata = newdata.5.soi)
+newdata.5.soi$Predict <- exp(pred.5.soi$fit)
+newdata.5.soi$Lwr <- exp(pred.5.soi$fit - pred.5.soi$se.fit)
+newdata.5.soi$Upr <- exp(pred.5.soi$fit + pred.5.soi$se.fit)
 
-# Notal N #
-newdata.5.nitro <- data.frame(date_julian = rep(median(dat$date_julian), 100), light_avail = rep(median(dat$light_avail), 100), Ntotal_site = seq(min(dat$Ntotal_site), max(dat$Ntotal_site), length.out = 100))
-pred.5.nitro <- predict(mod5.best, se.fit = TRUE, type = "response", newdata = newdata.5.nitro)
-newdata.5.nitro$Predict <- exp(pred.5.nitro$fit)
-newdata.5.nitro$Lwr <- exp(pred.5.nitro$fit - pred.5.nitro$se.fit)
-newdata.5.nitro$Upr <- exp(pred.5.nitro$fit + pred.5.nitro$se.fit)
+# Grazer Load #
+newdata.5.grz <- data.frame(date_julian = rep(median(dat$date_julian), 100),
+                            date_julian_2 = rep(median(dat$date_julian_2), 100),
+                            sea_otter_index = rep(median(dat$sea_otter_index), 100), 
+                            grazermass_shootmass = seq(min(dat$grazermass_shootmass), max(dat$grazermass_shootmass), length.out = 100))
+pred.5.grz <- predict(mod5.best, se.fit = TRUE, type = "response", newdata = newdata.5.grz)
+newdata.5.grz$Predict <- exp(pred.5.grz$fit)
+newdata.5.grz$Lwr <- exp(pred.5.grz$fit - pred.5.grz$se.fit)
+newdata.5.grz$Upr <- exp(pred.5.grz$fit + pred.5.grz$se.fit)
 
 ## Plots ##
 # Julian Day #
@@ -531,21 +552,23 @@ p5.jday <- ggplot(newdata.5.jday) +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
-# Light Availability #
-p5.light <- ggplot(newdata.5.light) +
-  geom_line(aes(x = light_avail, y = Predict), size = 1) +
-  geom_ribbon(aes(x = light_avail, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Julian day", y = " Second rhizome internode length +/- se (cm)") +
+# Sea otter index #
+p5.soi <- ggplot(newdata.5.soi) +
+  geom_line(aes(x = sea_otter_index, y = Predict)) +
+  geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
+  labs(x = "Sea otter index", y = " Second rhizome \n internode +/- se (cm)") +
+  scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4))  +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
-  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
-# Total N #
-p5.nitro <- ggplot(newdata.5.nitro) +
-  geom_line(aes(x = Ntotal_site, y = Predict), size = 1) +
-  geom_ribbon(aes(x = Ntotal_site, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Julian day", y = " Second rhizome internode length +/- se (cm)") +
+# Grazer load #
+p5.grz <- ggplot(newdata.5.grz) +
+  geom_line(aes(x = grazermass_shootmass, y = Predict)) +
+  geom_ribbon(aes(x = grazermass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
+  labs(x = "Grazer Load", y = " Second rhizome \n internode +/- se (cm)") +
+  scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
-  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 ```
 
 ### Model 6 - Epiphyte load
@@ -569,9 +592,6 @@ mod6.best <- model.avg(list(mod6.1, mod6.2, mod6.3), fit = TRUE)
 
 ## Results ##
 summary(mod6.best)
-par(mfrow = c(2, 2))
-plot(mod6.best)
-par(mfrow = c(1, 1))
 ```
 
 ### Model 6 Plots
@@ -912,8 +932,34 @@ fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
 ## Collating Model results
 ### Extracting model results
 ```{r model results}
-exp(mod1.best$coefficients)
+library(broom)
 
+out.1 <- tidy(mod1.best)
+sumout.1 <- data.frame(Responce = "Aboveground",
+                       Term = out.1$term, 
+                       Estimate = round(exp(out.1$estimate), 2), 
+                       CIlow = round(exp(confint(mod1.best))[,1], 2), 
+                       CIhigh = round(exp(confint(mod1.best))[,2], 2),
+                       CI = do.call(paste, c(data.frame(round(exp(confint(mod1.best)),2))[,1:2], sep = "-")),
+                       p = round(out.1$p.value, 4))
+
+out.2 <- data.frame(summary(mod2.best)$coefmat.subset)
+sumout.2 <- data.frame(Responce = "Belowground",
+                       Term = rownames(out.2), 
+                       Estimate = round(exp(out.2$Estimate), 2), 
+                       CIlow = round(exp(out.2$Estimate) - (1.96 * exp(out.2$Adjusted.SE)), 2), 
+                       CIhigh = round(exp(out.2$Estimate) + (1.96 * exp(out.2$Adjusted.SE)), 2),
+                       CI = do.call(paste, c(data.frame(round(exp(out.2$Estimate) - (1.96 * exp(out.2$Adjusted.SE)), 2), round(exp(out.2$Estimate) + (1.96 * exp(out.2$Adjusted.SE)), 2)), sep = "-")),
+                       p = round(out.2$Pr...z.., 4))
+
+out.3 <- data.frame(summary(mod3.best)$coefmat.subset)
+sumout.3 <- data.frame(Responce = "Shoot Density",
+                       Term = rownames(out.3), 
+                       Estimate = round(exp(out.3$Estimate), 2), 
+                       CIlow = round(exp(out.3$Estimate) - (1.96 * exp(out.3$Adjusted.SE)), 2), 
+                       CIhigh = round(exp(out.3$Estimate) + (1.96 * exp(out.3$Adjusted.SE)), 2),
+                       CI = do.call(paste, c(data.frame(round(exp(out.3$Estimate) - (1.96 * exp(out.3$Adjusted.SE)), 2), round(exp(out.3$Estimate) + (1.96 * exp(out.3$Adjusted.SE)), 2)), sep = "-")),
+                       p = round(out.3$Pr...z.., 4))
 ```
 
 
