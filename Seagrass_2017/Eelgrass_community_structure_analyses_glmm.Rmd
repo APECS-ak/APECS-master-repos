@@ -932,16 +932,14 @@ fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
 ## Collating Model results
 ### Extracting model results
 ```{r model results}
-library(broom)
-
-out.1 <- tidy(mod1.best)
+out.1 <- data.frame(summary(mod1.best)$coefmat.subset)
 sumout.1 <- data.frame(Responce = "Aboveground",
-                       Term = out.1$term, 
-                       Estimate = round(exp(out.1$estimate), 2), 
-                       CIlow = round(exp(confint(mod1.best))[,1], 2), 
-                       CIhigh = round(exp(confint(mod1.best))[,2], 2),
-                       CI = do.call(paste, c(data.frame(round(exp(confint(mod1.best)),2))[,1:2], sep = "-")),
-                       p = round(out.1$p.value, 4))
+                       Term = rownames(out.1), 
+                       Estimate = round(exp(out.1$Estimate), 2), 
+                       CIlow = round(exp(out.1$Estimate) - (1.96 * exp(out.1$Adjusted.SE)), 2), 
+                       CIhigh = round(exp(out.1$Estimate) + (1.96 * exp(out.1$Adjusted.SE)), 2),
+                       CI = do.call(paste, c(data.frame(round(exp(out.1$Estimate) - (1.96 * exp(out.1$Adjusted.SE)), 2), round(exp(out.1$Estimate) + (1.96 * exp(out.1$Adjusted.SE)), 2)), sep = "-")),
+                       p = round(out.1$Pr...z.., 4))
 
 out.2 <- data.frame(summary(mod2.best)$coefmat.subset)
 sumout.2 <- data.frame(Responce = "Belowground",
