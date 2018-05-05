@@ -177,21 +177,18 @@ dat$sea_otter_index_2 <- dat$sea_otter_index^2
 ```
 
 ## Models
-Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That glocal model will be run through an forward/backward model selection procedure with AICc disrimination. If top candidate models are <= 4 AICc values they will be average using a model avergin procedure.
+Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That global model will be run through the `dredge` function. Interaction terms will only be included if deems appropriate for the given response / hypothesized mechanism. 
 
 ### Model 1 - Aboveground biomass
 Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
 ```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2  + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
-
-mod1t <- dredge(glm(log(dat$abvgnd_mass) ~ dat$date_julian + dat$date_julian_2  + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", evaluate = TRUE)
+mod1 <- dredge(glm(log(dat$abvgnd_mass) ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
 
 # AICc comp #
-mod1.tbl <- cbind.data.frame(mod1t$df, mod1t$logLik, mod1t$AICc, mod1t$delta, mod1t$weight)
-colnames(mod1.tbl) <- c("df", "logLik", "AICc", "delta", "weight")
-mod1.tbl$delAICprop <- mod1.tbl$delta / mod1.tbl$AICc
+mod1$delAICprop <- mod1$delta / mod1$AICc
+mod1.tbl <- filter(mod1, delAICprop <= 0.05)
 
 datatable(mod1.tbl)
 ```
@@ -200,7 +197,7 @@ datatable(mod1.tbl)
 Two models were within 5% AIC from next model. Model averaging over top two models
 ```{r model 1 best, echo = FALSE}
 ## Best Model ##
-mod1.best <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + sea_otter_index_2 + log(epiphmass_shootmass), data = dat)
+mod1.best <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + log(epiphmass_shootmass), data = dat)
 
 summary(mod1.best)
 
@@ -224,7 +221,6 @@ Calculate predicted values and plot
 newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
                              date_julian_2 = (119 : 234)^2, 
                              sea_otter_index = rep(median(dat$sea_otter_index), 116), 
-                             sea_otter_index_2 = rep(median(dat$sea_otter_index_2), 116), 
                              epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
 pred.1.jday <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.jday)
 newdata.1.jday$Predict <- exp(pred.1.jday$fit)
@@ -235,7 +231,6 @@ newdata.1.jday$Upr <- exp(pred.1.jday$fit + pred.1.jday$se.fit)
 newdata.1.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
                             date_julian_2 = rep(median(dat$date_julian_2), 100),
                             sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), 
-                            sea_otter_index_2 = seq(min(dat$sea_otter_index_2), max(dat$sea_otter_index_2), length.out = 100),
                             epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 100)) 
 pred.1.soi <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.soi)
 newdata.1.soi$Predict <- exp(pred.1.soi$fit)
@@ -246,7 +241,6 @@ newdata.1.soi$Upr <- exp(pred.1.soi$fit + pred.1.soi$se.fit)
 newdata.1.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
                             date_julian_2 = rep(median(dat$date_julian_2), 100), 
                             sea_otter_index = rep(median(dat$sea_otter_index), 100), 
-                            sea_otter_index_2 = rep(median(dat$sea_otter_index_2), 100),
                             epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
 pred.1.epi <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.epi)
 newdata.1.epi$Predict <- exp(pred.1.epi$fit)
