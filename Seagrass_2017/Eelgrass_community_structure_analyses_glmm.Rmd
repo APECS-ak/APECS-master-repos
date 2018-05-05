@@ -184,19 +184,36 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 
 ```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2  + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod1 <- stepAIC(glm(log(dat$abvgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2  + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both")
 
-mod1$anova
+mod1t <- dredge(glm(log(dat$abvgnd_mass) ~ dat$date_julian + dat$date_julian_2  + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", evaluate = TRUE)
+
+# AICc comp #
+mod1.tbl <- cbind.data.frame(mod1t$df, mod1t$logLik, mod1t$AICc, mod1t$delta, mod1t$weight)
+colnames(mod1.tbl) <- c("df", "logLik", "AICc", "delta", "weight")
+mod1.tbl$delAICprop <- mod1.tbl$delta / mod1.tbl$AICc
+
+datatable(mod1.tbl)
 ```
 
 ### Best Model 1
-Two models were within 4 AIC from next model. Model averaging over top two models
+Two models were within 5% AIC from next model. Model averaging over top two models
 ```{r model 1 best, echo = FALSE}
-mod1.1 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + sea_otter_index_2 + log(epiphmass_shootmass), data = dat)
-mod1.2 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + log(epiphmass_shootmass), data = dat)
-mod1.best <- model.avg(list(mod1.1, mod1.2), fit = TRUE)
+## Best Model ##
+mod1.best <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + sea_otter_index_2 + log(epiphmass_shootmass), data = dat)
 
 summary(mod1.best)
+
+# Diagnostics #
+par(mfrow = c(2, 2))
+plot(mod1.best)
+par(mfrow = c(1, 1))
+
+## Model Averaging ##
+#mod1.1 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + sea_otter_index_2 + log(epiphmass_shootmass), data = dat)
+#mod1.2 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + log(epiphmass_shootmass), data = dat)
+#mod1.best <- model.avg(list(mod1.1, mod1.2), fit = TRUE)
+
 ```
 
 ### Model 1 Plots
@@ -272,19 +289,36 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 ## Global Model ##
 mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
-mod2$anova
+# AIC comp #
+mod2.tbl <- data.frame(mod2$anova)
+mod2.tbl <- mod2.tbl[order(mod2.tbl$AIC),]
+mod2.tbl$delAIC <- NA
+for(r in 2:nrow(mod2.tbl)){
+  mod2.tbl$delAIC[r] <- round((mod2.tbl[r, 6] - mod2.tbl[1, 6]), 2) 
+}
+
+mod2.tbl$delAICprop <- round((mod2.tbl$delAIC / mod2.tbl$AIC), 2)
+
+datatable(mod2.tbl)
 ```
 
 ### Best Model 2
 Top 2 models are with in 4 AIC so models will be averaged.
 ```{r best mod 2, echo = FALSE}
-## Averaging ##
-mod2.1 <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat) 
-mod2.2 <- glm(log(blwgnd_mass) ~  date_julian, data = dat) 
-mod2.best <- model.avg(list(mod2.1, mod2.2), fit = TRUE)
+## Best Model ##
+mod2.best <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat) 
 
-## Results ##
-summary(mod2.best)
+summary(mod1.best)
+
+# Diagnostics #
+par(mfrow = c(2, 2))
+plot(mod2.best)
+par(mfrow = c(1, 1))
+
+## Model Averaging ##
+#mod2.1 <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat) 
+#mod2.2 <- glm(log(blwgnd_mass) ~  date_julian, data = dat) 
+#mod2.best <- model.avg(list(mod2.1, mod2.2), fit = TRUE)
 ```
 
 
@@ -329,7 +363,7 @@ p2.epi <- ggplot(newdata.2.epi) +
 
 
 ### Model 3 - Shoot density
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
+Response  - negative binomially distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
 ```{r model 3, echo = FALSE}
 ## Count need to integers ##
@@ -338,20 +372,37 @@ dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 ## Global Model ##
 mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
-mod3$anova
+# AIC comp #
+mod3.tbl <- data.frame(mod3$anova)
+mod3.tbl <- mod3.tbl[order(mod3.tbl$AIC),]
+mod3.tbl$delAIC <- NA
+for(r in 2:nrow(mod3.tbl)){
+  mod3.tbl$delAIC[r] <- round((mod3.tbl[r, 6] - mod3.tbl[1, 6]), 2) 
+}
+
+mod3.tbl$delAICprop <- round((mod3.tbl$delAIC / mod3.tbl$AIC), 2)
+
+datatable(mod3.tbl)
 ```
 
 ### Best Model 3
 Top 3 models are within 4 AIC of minimun AIC so model everaging procedure will be employed
 
 ```{r model 3 best, echo = FALSE}
-## Averging ##
-mod3.1 <- glm.nb(shoot_dens_rnd ~ date_julian_2 + sea_otter_index_2, link = "log", data = dat)
-mod3.2 <- glm.nb(shoot_dens_rnd ~ date_julian_2, link = "log", data = dat)
-mod3.best <- model.avg(list(mod3.1, mod3.2), fit = TRUE)
+## Best Model ##
+mod3.best <- glm.nb(shoot_dens_rnd ~ date_julian_2 + sea_otter_index_2, link = "log", data = dat)
 
-## Results ##
 summary(mod3.best)
+
+# Diagnostics #
+par(mfrow = c(2, 2))
+plot(mod3.best)
+par(mfrow = c(1, 1))
+
+## Model Averging ##
+#mod3.1 <- glm.nb(shoot_dens_rnd ~ date_julian_2 + sea_otter_index_2, link = "log", data = dat)
+#mod3.2 <- glm.nb(shoot_dens_rnd ~ date_julian_2, link = "log", data = dat)
+#mod3.best <- model.avg(list(mod3.1, mod3.2), fit = TRUE)
 ```
 
 ### Model 3 Plots
@@ -403,21 +454,38 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 ## Global Model ##
 mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
-mod4$anova
+# AIC comp #
+mod4.tbl <- data.frame(mod4$anova)
+mod4.tbl <- mod4.tbl[order(mod4.tbl$AIC),]
+mod4.tbl$delAIC <- NA
+for(r in 2:nrow(mod4.tbl)){
+  mod4.tbl$delAIC[r] <- round((mod4.tbl[r, 6] - mod4.tbl[1, 6]), 2) 
+}
+
+mod4.tbl$delAICprop <- round((mod4.tbl$delAIC / mod4.tbl$AIC), 2)
+
+datatable(mod4.tbl)
 ```
 
 ### Best Model 4
 Top 4 models are within 4 AIC, therefore model average.
 ```{r model 4 best, echo = FALSE}
-## Averaging ##
-mod4.1 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat)
-mod4.2 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass) + sed_inside_prim, data = dat)
-mod4.3 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + sed_inside_prim, data = dat)
-mod4.4 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sed_inside_prim, data = dat)
-mod4.best <- model.avg(list(mod4.1, mod4.2, mod4.3, mod4.4), fit = TRUE)
+## Best Model ##
+mod4.best <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat)
 
-## Results ##
 summary(mod4.best)
+
+# Diagnostics #
+par(mfrow = c(2,2))
+plot(mod4.best)
+par(mfrow = c(1, 1))
+
+## Model Averaging ##
+#mod4.1 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat)
+#mod4.2 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass) + sed_inside_prim, data = dat)
+#mod4.3 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + sed_inside_prim, data = dat)
+#mod4.4 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sed_inside_prim, data = dat)
+#mod4.best <- model.avg(list(mod4.1, mod4.2, mod4.3, mod4.4), fit = TRUE)
 ```
 
 ### Model 4 Plots
@@ -493,19 +561,36 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 ## Global Model ##
 mod5 <- stepAIC(glm(log(dat$node2) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
 
-mod5$anova
+# AIC comp #
+mod5.tbl <- data.frame(mod5$anova)
+mod5.tbl <- mod5.tbl[order(mod5.tbl$AIC),]
+mod5.tbl$delAIC <- NA
+for(r in 2:nrow(mod5.tbl)){
+  mod5.tbl$delAIC[r] <- round((mod5.tbl[r, 6] - mod5.tbl[1, 6]), 2) 
+}
+
+mod5.tbl$delAICprop <- round((mod5.tbl$delAIC / mod5.tbl$AIC), 2)
+
+datatable(mod5.tbl)
 ```
 
 ### Best Model 5
 Top 2 models are within 4 AIC, therefore model average.
 ```{r model 5 best, echo = FALSE}
-## Averaging ###
-mod5.1 <- glm(log(node2) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat) 
-mod5.2 <- glm(log(node2) ~  date_julian + date_julian_2 + log(grazermass_shootmass), data = dat)
-mod5.best <- model.avg(list(mod5.1, mod5.2), fit = TRUE)
-  
-## Results ##  
+## Best Model ##
+mod5.best <- glm(log(node2) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat) 
+
 summary(mod5.best)
+
+# Diagnostics #
+par(mfrow = c(2,2))
+plot(mod5.best)
+par(mfrow = c(1, 1))
+
+## Model Averaging ##
+#mod5.1 <- glm(log(node2) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat) 
+#mod5.2 <- glm(log(node2) ~  date_julian + date_julian_2 + log(grazermass_shootmass), data = dat)
+#mod5.best <- model.avg(list(mod5.1, mod5.2), fit = TRUE)
 ```
 
 ### Model 5 Plots
@@ -578,20 +663,37 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 ## Global Model ##
 mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site  , lower = ~1), direction = "both", AICc = TRUE)
 
-mod6$anova
+# AIC comp #
+mod6.tbl <- data.frame(mod6$anova)
+mod6.tbl <- mod6.tbl[order(mod6.tbl$AIC),]
+mod6.tbl$delAIC <- NA
+for(r in 2:nrow(mod6.tbl)){
+  mod6.tbl$delAIC[r] <- round((mod6.tbl[r, 6] - mod6.tbl[1, 6]), 2) 
+}
+
+mod6.tbl$delAICprop <- round((mod6.tbl$delAIC / mod6.tbl$AIC), 2)
+
+datatable(mod6.tbl)
 ```
 
 ### Best Model 6
 Two models within 4 AIC.
 ```{r model 6 best, echo = FALSE}
-## Averaging ##
-mod6.1 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + light_avail + sed_inside_prim, data = dat) 
-mod6.2 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + sed_inside_prim, data = dat) 
-mod6.3 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass), data = dat) 
-mod6.best <- model.avg(list(mod6.1, mod6.2, mod6.3), fit = TRUE)
+## Best Model ##
+mod6.best <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + light_avail + sed_inside_prim, data = dat) 
 
-## Results ##
 summary(mod6.best)
+
+# Diagnostics #
+par(mfrow = c(2,2))
+plot(mod6.best)
+par(mfrow = c(1, 1))
+
+## Model Averaging ##
+#mod6.1 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + light_avail + sed_inside_prim, data = dat) 
+#mod6.2 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + sed_inside_prim, data = dat) 
+#mod6.3 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass), data = dat) 
+#mod6.best <- model.avg(list(mod6.1, mod6.2, mod6.3), fit = TRUE)
 ```
 
 ### Model 6 Plots
@@ -654,22 +756,36 @@ Response - Log normally distributed. We hypothesise that time (as julian day), s
 ## Global Model ##
 mod7 <- stepAIC(glm(log(dat$grazermass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$crab_mass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~ 1), direction = "both", AICc = TRUE)
 
-mod7$anova
+# AIC comp #
+mod7.tbl <- data.frame(mod7$anova)
+mod7.tbl <- mod7.tbl[order(mod7.tbl$AIC),]
+mod7.tbl$delAIC <- NA
+for(r in 2:nrow(mod7.tbl)){
+  mod7.tbl$delAIC[r] <- round((mod7.tbl[r, 6] - mod7.tbl[1, 6]), 2) 
+}
+
+mod7.tbl$delAICprop <- round((mod7.tbl$delAIC / mod7.tbl$AIC), 2)
+
+datatable(mod7.tbl)
 ```
 
 ### Best Model 7
 Model with epiphyte load is 3.87 AIC away from ~1 model. Will report model with epiphyte load but should note that it it poor fit, probably does not mean much. 
 ```{r model 7 best, echo = FALSE}
-## Averaging ##
-mod7.1 <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
-mod7.2 <- glm(log(grazermass_shootmass) ~  1, data = dat)
-mod7.best <- model.avg(list(mod7.1, mod7.2), fit = TRUE)
+## Best Model ##
+mod7.best <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
 
-## Results ##
 summary(mod7.best)
+
+# Diagnostics #
 par(mfrow = c(2, 2))
 plot(mod7.best)
 par(mfrow = c(1, 1))
+
+## Model Averaging ##
+#mod7.1 <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
+#mod7.2 <- glm(log(grazermass_shootmass) ~  1, data = dat)
+#mod7.best <- model.avg(list(mod7.1, mod7.2), fit = TRUE)
 ```
 
 ### Model 7 Plots
@@ -700,14 +816,28 @@ Response - Log normally distributed. We hypothesise that time (as julian day), s
 ## Global Model ##
 mod8 <- stepAIC(glm(log(dat$crab_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~1), direction = "both", AICc = TRUE)
 
-mod8$anova
+# AIC comp #
+mod8.tbl <- data.frame(mod8$anova)
+mod8.tbl <- mod8.tbl[order(mod8.tbl$AIC),]
+mod8.tbl$delAIC <- NA
+for(r in 2:nrow(mod8.tbl)){
+  mod8.tbl$delAIC[r] <- round((mod8.tbl[r, 6] - mod8.tbl[1, 6]), 2) 
+}
+
+mod8.tbl$delAICprop <- round((mod8.tbl$delAIC / mod8.tbl$AIC), 2)
+
+datatable(mod8.tbl)
 ```
 
 ### Best Model 8
 No model within 4 AIC. 
 ```{r model 8 best, echo = FALSE}
+## Best Model ##
 mod8.best <- glm(log(crab_mass) ~ sea_otter_index, data = dat)
+
 summary(mod8.best)
+
+# Diagnostics #
 par(mfrow = c(2, 2))
 plot(mod8.best)
 par(mfrow = c(1, 1))
@@ -932,6 +1062,7 @@ fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
 ## Collating Model results
 ### Extracting model results
 ```{r model results}
+## Aboveground biomass ##
 out.1 <- data.frame(summary(mod1.best)$coefmat.subset)
 sumout.1 <- data.frame(Responce = "Aboveground",
                        Term = rownames(out.1), 
@@ -941,6 +1072,7 @@ sumout.1 <- data.frame(Responce = "Aboveground",
                        CI = do.call(paste, c(data.frame(round(exp(out.1$Estimate) - (1.96 * exp(out.1$Adjusted.SE)), 2), round(exp(out.1$Estimate) + (1.96 * exp(out.1$Adjusted.SE)), 2)), sep = "-")),
                        p = round(out.1$Pr...z.., 4))
 
+## Belowground biomass ##
 out.2 <- data.frame(summary(mod2.best)$coefmat.subset)
 sumout.2 <- data.frame(Responce = "Belowground",
                        Term = rownames(out.2), 
@@ -950,6 +1082,7 @@ sumout.2 <- data.frame(Responce = "Belowground",
                        CI = do.call(paste, c(data.frame(round(exp(out.2$Estimate) - (1.96 * exp(out.2$Adjusted.SE)), 2), round(exp(out.2$Estimate) + (1.96 * exp(out.2$Adjusted.SE)), 2)), sep = "-")),
                        p = round(out.2$Pr...z.., 4))
 
+## Shoot Density ##
 out.3 <- data.frame(summary(mod3.best)$coefmat.subset)
 sumout.3 <- data.frame(Responce = "Shoot Density",
                        Term = rownames(out.3), 
@@ -958,6 +1091,16 @@ sumout.3 <- data.frame(Responce = "Shoot Density",
                        CIhigh = round(exp(out.3$Estimate) + (1.96 * exp(out.3$Adjusted.SE)), 2),
                        CI = do.call(paste, c(data.frame(round(exp(out.3$Estimate) - (1.96 * exp(out.3$Adjusted.SE)), 2), round(exp(out.3$Estimate) + (1.96 * exp(out.3$Adjusted.SE)), 2)), sep = "-")),
                        p = round(out.3$Pr...z.., 4))
+
+## Aboveground:belowground biomass ##
+out.4 <- data.frame(summary(mod4.best)$coefmat.subset)
+sumout.4 <- data.frame(Responce = "Abv:Blw",
+                       Term = rownames(out.4), 
+                       Estimate = round(exp(out.4$Estimate), 2), 
+                       CIlow = round(exp(out.4$Estimate) - (1.96 * exp(out.4$Adjusted.SE)), 2), 
+                       CIhigh = round(exp(out.4$Estimate) + (1.96 * exp(out.4$Adjusted.SE)), 2),
+                       CI = do.call(paste, c(data.frame(round(exp(out.4$Estimate) - (1.96 * exp(out.4$Adjusted.SE)), 2), round(exp(out.4$Estimate) + (1.96 * exp(out.4$Adjusted.SE)), 2)), sep = "-")),
+                       p = round(out.4$Pr...z.., 4))
 ```
 
 
@@ -971,7 +1114,7 @@ all.results.simp
 
 More pretty table
 ```{r}
-all.results <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), pred.labels = c("Julian Day", "Julian Day^2", "Sea otter index", "Sea otter index ^2", "log Epiphyte load", "Julian Day", "Sea otter index", "log Grazer load", "Light availability", "Total surface nitrogen", "log Aboveground mass"), exp.coef = FALSE, show.r2 = TRUE, show.aic = TRUE)
+all.results <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), pred.labels = c("Julian Day", "Julian Day^2", "Sea otter index", "Sea otter index ^2", "log Epiphyte load", "Julian Day", "Sea otter index", "log Grazer load", "Light availability", "Total surface nitrogen", "log Aboveground mass"), exp.coef = FALSE, show.r2 = TRUE, show.aicc = TRUE, digits.est = 4, digits.p = 4, digits.ci = 4)
 
 all.results
 ```
@@ -1058,7 +1201,6 @@ colnames(site.envi)[48] <- "light_availability"
 write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row.names =  FALSE)
 
 ```
-
 
 #### Plots
 ```{r}
