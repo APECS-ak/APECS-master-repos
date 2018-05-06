@@ -180,7 +180,7 @@ dat$sea_otter_index_2 <- dat$sea_otter_index^2
 Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That global model will be run through the `dredge` function. Interaction terms will only be included if deems appropriate for the given response / hypothesized mechanism. 
 
 ### Model 1 - Aboveground biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, total N, and crab biomass may effect aboveground biomass of eelgrass.
 
 ```{r model 1, echo = FLASE}
 ## Global Model ##
@@ -277,21 +277,15 @@ p1.epi <- ggplot(newdata.1.epi) +
 ```
 
 ### Model 2 - Belowground biomass
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, total N, and crab biomass may effect aboveground biomass of eelgrass
 
 ```{r model 2, echo = FALSE}
 ## Global Model ##
-mod2 <- stepAIC(glm(log(dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
 
-# AIC comp #
-mod2.tbl <- data.frame(mod2$anova)
-mod2.tbl <- mod2.tbl[order(mod2.tbl$AIC),]
-mod2.tbl$delAIC <- NA
-for(r in 2:nrow(mod2.tbl)){
-  mod2.tbl$delAIC[r] <- round((mod2.tbl[r, 6] - mod2.tbl[1, 6]), 2) 
-}
-
-mod2.tbl$delAICprop <- round((mod2.tbl$delAIC / mod2.tbl$AIC), 2)
+# AICc comp #
+mod2$delAICprop <- mod2$delta / mod2$AICc
+mod2.tbl <- filter(mod2, delAICprop <= 0.05)
 
 datatable(mod2.tbl)
 ```
@@ -300,9 +294,9 @@ datatable(mod2.tbl)
 Top 2 models are with in 4 AIC so models will be averaged.
 ```{r best mod 2, echo = FALSE}
 ## Best Model ##
-mod2.best <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat) 
+mod2.best <- glm(log(blwgnd_mass) ~  date_julian_2 + log(epiphmass_shootmass), data = dat) 
 
-summary(mod1.best)
+summary(mod2.best)
 
 # Diagnostics #
 par(mfrow = c(2, 2))
