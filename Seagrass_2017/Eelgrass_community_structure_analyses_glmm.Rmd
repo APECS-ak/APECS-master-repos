@@ -189,8 +189,9 @@ mod1 <- dredge(glm(log(dat$abvgnd_mass) ~ dat$date_julian + dat$date_julian_2 + 
 # AICc comp #
 mod1$delAICprop <- mod1$delta / mod1$AICc
 mod1.tbl <- filter(mod1, delta <= 2)
+mod1.tbl <- mod1.tbl[, colSums(is.na(mod1.tbl)) != nrow(mod1.tbl)]
 
-datatable(mod1.tbl)
+datatable(round(mod1.tbl,4))
 ```
 
 ### Best Model 1
@@ -252,7 +253,7 @@ p1.jday <- ggplot(newdata.1.jday) +
   geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
-  scale_x_continuous(breaks = seq(120, 240, by = 20)) +
+  scale_x_continuous(lim = c(120, 240), breaks = seq(120, 240, by = 30)) +
   scale_y_continuous(lim = c(0, 120), breaks = seq(0, 120, by = 20)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
@@ -285,8 +286,9 @@ mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$date_julian_2 + 
 # AICc comp #
 mod2$delAICprop <- mod2$delta / mod2$AICc
 mod2.tbl <- filter(mod2, delta <= 2)
+mod2.tbl <- mod2.tbl[, colSums(is.na(mod2.tbl)) != nrow(mod2.tbl)]
 
-datatable(mod2.tbl)
+datatable(round(mod2.tbl,4))
 ```
 
 ### Best Model 2
@@ -313,7 +315,8 @@ Calculate predicted values and plot, using conditional/subset coefficients
 ```{r mod 2 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
-newdata.2.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
+newdata.2.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)),
+                             date_julian_2 = (119 : 234)^2,
                              epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 116))
 pred.2.jday <- predict(mod2.best, se.fit = TRUE, type = "response", newdata = newdata.2.jday)
 newdata.2.jday$Predict <- exp(pred.2.jday$fit)
@@ -321,8 +324,9 @@ newdata.2.jday$Lwr <- exp(pred.2.jday$fit - pred.2.jday$se.fit)
 newdata.2.jday$Upr <- exp(pred.2.jday$fit + pred.2.jday$se.fit)
 
 # Epiphyte Load #
-newdata.2.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100), 
-                            epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
+newdata.2.epi <- data.frame(date_julian = rep(median(dat$date_julian), 116),
+                            date_julian_2 = (119 : 234)^2,
+                            epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 116))
 pred.2.epi <- predict(mod2.best, se.fit = TRUE, type = "response", newdata = newdata.2.epi)
 newdata.2.epi$Predict <- exp(pred.2.epi$fit)
 newdata.2.epi$Lwr <- exp(pred.2.epi$fit - pred.2.epi$se.fit)
@@ -334,7 +338,7 @@ p2.jday <- ggplot(newdata.2.jday) +
   geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Belowground biomass", " +/- se"  ~(g/m^2)))) +
-  scale_x_continuous(breaks = seq(120, 240, by = 20)) +
+  scale_x_continuous(lim = c(120, 240), breaks = seq(120, 240, by = 30)) +
   scale_y_continuous(lim = c(0,40), breaks = seq(0, 40, by = 10)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
@@ -361,8 +365,9 @@ mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian + dat$date_julian_2 +
 # AICc comp #
 mod3$delAICprop <- mod3$delta / mod3$AICc
 mod3.tbl <- filter(mod3, delta <= 2)
+mod3.tbl <- mod3.tbl[, colSums(is.na(mod3.tbl)) != nrow(mod3.tbl)]
 
-datatable(mod3.tbl)
+datatable(round(mod3.tbl,4))
 ```
 
 ### Best Model 3
@@ -413,7 +418,7 @@ p3.jday <- ggplot(newdata.3.jday) +
   geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Shoot density", " +/- se"  ~(m^-2)))) +
-  scale_x_sqrt() +
+  scale_x_sqrt(lim = c(120, 240), breaks = seq(120, 240, by = 30)) +
   scale_y_continuous(lim = c(0, 400), breaks = seq(0, 400, by = 100)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
@@ -437,8 +442,9 @@ mod4 <- dredge(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + da
 # AICc comp #
 mod4$delAICprop <- mod4$delta / mod4$AICc
 mod4.tbl <- filter(mod4, delta <= 2)
+mod4.tbl <- mod4.tbl[, colSums(is.na(mod4.tbl)) != nrow(mod4.tbl)]
 
-datatable(mod4.tbl)
+datatable(round(mod4.tbl,4))
 ```
 
 ### Best Model 4
@@ -505,7 +511,7 @@ p4.jday <- ggplot(newdata.4.jday) +
   geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Aboveground : Belowground", " biomass +/- se" ~(g/m^2)))) +
-  scale_x_continuous(breaks = seq(120, 240, by = 20)) +
+  scale_x_continuous(lim = c(120, 240), breaks = seq(120, 240, by = 30)) +
   scale_y_continuous(lim = c(0,5.5), breaks = seq(0, 6, by = 1)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
@@ -522,7 +528,7 @@ p4.soi <- ggplot(newdata.4.soi) +
 p4.grz <- ggplot(newdata.4.grz) +
   geom_line(aes(x = grazermass_shootmass, y = Predict)) +
   geom_ribbon(aes(x = grazermass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Grazer load", y =  bquote(atop("Aboveground : Belowground", " biomass +/- se" ~(g/m^2)))) +
+  labs(x = "", y =  bquote(atop("Aboveground : Belowground", " biomass +/- se" ~(g/m^2)))) +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0,5.5), breaks = seq(0, 6, by = 1)) +
   theme(text = element_text(size = 10), legend.position = "none")
@@ -538,8 +544,9 @@ mod5 <- dredge(glm(log(dat$node2) ~ dat$date_julian + dat$date_julian_2 + dat$se
 # AICc comp #
 mod5$delAICprop <- mod5$delta / mod5$AICc
 mod5.tbl <- filter(mod5, delta <= 2)
+mod5.tbl <- mod5.tbl[, colSums(is.na(mod5.tbl)) != nrow(mod5.tbl)]
 
-datatable(round(mod5.tbl, 4))
+datatable(round(mod5.tbl,4))
 ```
 
 ### Best Model 5
@@ -601,7 +608,7 @@ p5.jday <- ggplot(newdata.5.jday) +
   geom_line(aes(x = date_julian, y = Predict)) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Julian day", y = " Second rhizome \n internode +/- se (cm)") +
-  scale_x_continuous(breaks = seq(120, 240, by = 20)) +
+  scale_x_continuous(lim = c(120, 240), breaks = seq(120, 240, by = 30)) +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
@@ -634,8 +641,9 @@ mod6 <- dredge(glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otte
 # AICc comp #
 mod6$delAICprop <- mod6$delta / mod6$AICc
 mod6.tbl <- filter(mod6, delta <= 2)
+mod6.tbl <- mod3.tbl[, colSums(is.na(mod6.tbl)) != nrow(mod6.tbl)]
 
-datatable(round(mod6.tbl, 4))
+datatable(round(mod6.tbl,4))
 ```
 
 ### Best Model 6
@@ -691,7 +699,7 @@ newdata.6.sed$Upr <- exp(pred.6.sed$fit + pred.6.sed$se.fit)
 ## Plots ##
 # Grazer load #
 p6.grz <- ggplot(newdata.6.grz) +
-  geom_line(aes(x = grazermass_shootmass, y = Predict), size = 1) +
+  geom_line(aes(x = grazermass_shootmass, y = Predict)) +
   geom_ribbon(aes(x = grazermass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Grazer load (g/g)", y = "Epiphyte Load +/- se (g/g)") +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
@@ -727,8 +735,9 @@ mod7 <- dredge(glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_ott
 # AICc comp #
 mod7$delAICprop <- mod7$delta / mod7$AICc
 mod7.tbl <- filter(mod7, delta <= 2)
+mod7.tbl <- mod7.tbl[, colSums(is.na(mod7.tbl)) != nrow(mod7.tbl)]
 
-datatable(round(mod7.tbl, 4))
+datatable(round(mod7.tbl,4))
 ```
 
 ### Best Model 7
@@ -781,8 +790,9 @@ mod8 <- dredge(glm(log(dat$crab_mass) ~ dat$date_julian + dat$sea_otter_index + 
 # AICc comp #
 mod8$delAICprop <- mod8$delta / mod8$AICc
 mod8.tbl <- filter(mod8, delta <= 2)
+mod8.tbl <- mod8.tbl[, colSums(is.na(mod8.tbl)) != nrow(mod8.tbl)]
 
-datatable(round(mod8.tbl, 4))
+datatable(round(mod8.tbl,4))
 ```
 
 ### Best Model 8
@@ -1064,7 +1074,7 @@ all.results
 
 Exponetiated results
 ```{r}
-all.results.exp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, exp.coef = TRUE, show.r2 = TRUE, show.aic = TRUE, digits.est = 4, digits.p = 4, digits.ci = 4)
+all.results.exp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, exp.coef = TRUE, show.r2 = TRUE, show.aicc = TRUE, digits.est = 4, digits.p = 4, digits.ci = 4, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), pred.labels = c("Julian day", "Julian day^2", "Sea otter index", "log Epiphyte load", "Sea otter index^2", "log Grazer load", "Sediment type", "log Crab bimass"))
 
 all.results.exp
 ```
@@ -1129,7 +1139,23 @@ plot_grid(p1.soi, p4.soi, p3.soi, p8.soi, nrow = 4, ncol = 1, align = "v", label
 Epiphytes
 ```{r}
 theme_set(theme_cowplot(font_size = 10))
-plot_grid(p1.epi, p2.epi, p3.epi, p7.epi, nrow = 4, ncol = 1, align = "v", labels = c("auto"), label_size = 10, hjust = 0.05)
+plot_grid(p1.epi, p2.epi, p7.epi, nrow = 3, ncol = 1, align = "v", labels = c("auto"), label_size = 10, hjust = 0.05)
+```
+
+Grazers
+```{r}
+theme_set(theme_cowplot(font_size = 10))
+plot_grid(p4.grz, p6.grz, nrow = 2, ncol = 1, align = "v", labels = c("auto"), label_size = 10, hjust = 0.05)
+```
+
+Sediment
+```{r}
+p6.sed
+```
+
+Crabs
+```{r}
+p6.crb
 ```
 
 ## Site characterization data
