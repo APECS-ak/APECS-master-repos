@@ -177,7 +177,7 @@ dat$sea_otter_index_2 <- dat$sea_otter_index^2
 ```
 
 ## Models
-Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That global model will be run through the `dredge` function. Interaction terms will only be included if deems appropriate for the given response / hypothesized mechanism. 
+Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That global model will be run through the `dredge` function. Models within 2 of lowes AICc will be reported and lowest AICc model woll be fit for formal analysis and predicted values plots. 
 
 ### Model 1 - Aboveground biomass
 Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, total N, and crab biomass may effect aboveground biomass of eelgrass.
@@ -188,13 +188,12 @@ mod1 <- dredge(glm(log(dat$abvgnd_mass) ~ dat$date_julian + dat$date_julian_2 + 
 
 # AICc comp #
 mod1$delAICprop <- mod1$delta / mod1$AICc
-mod1.tbl <- filter(mod1, delAICprop <= 0.05)
+mod1.tbl <- filter(mod1, delta <= 2)
 
 datatable(mod1.tbl)
 ```
 
 ### Best Model 1
-Two models were within 5% AIC from next model. Model averaging over top two models
 ```{r model 1 best, echo = FALSE}
 ## Best Model ##
 mod1.best <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + log(epiphmass_shootmass), data = dat)
@@ -285,13 +284,12 @@ mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$date_julian_2 + 
 
 # AICc comp #
 mod2$delAICprop <- mod2$delta / mod2$AICc
-mod2.tbl <- filter(mod2, delAICprop <= 0.05)
+mod2.tbl <- filter(mod2, delta <= 2)
 
 datatable(mod2.tbl)
 ```
 
 ### Best Model 2
-Top 2 models are with in 4 AIC so models will be averaged.
 ```{r best mod 2, echo = FALSE}
 ## Best Model ##
 mod2.best <- glm(log(blwgnd_mass) ~  date_julian_2 + log(epiphmass_shootmass), data = dat) 
@@ -358,17 +356,11 @@ Response  - negative binomially distributed. We hypothesise that time (as julian
 dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
-mod3 <- stepAIC(glm.nb(dat$shoot_dens_rnd ~ 1, link = "log"), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass), link = "log"), rank = "AICc", evaluate = TRUE)
 
-# AIC comp #
-mod3.tbl <- data.frame(mod3$anova)
-mod3.tbl <- mod3.tbl[order(mod3.tbl$AIC),]
-mod3.tbl$delAIC <- NA
-for(r in 2:nrow(mod3.tbl)){
-  mod3.tbl$delAIC[r] <- round((mod3.tbl[r, 6] - mod3.tbl[1, 6]), 2) 
-}
-
-mod3.tbl$delAICprop <- round((mod3.tbl$delAIC / mod3.tbl$AIC), 2)
+# AICc comp #
+mod3$delAICprop <- mod3$delta / mod3$AICc
+mod3.tbl <- filter(mod3, delta <= 2)
 
 datatable(mod3.tbl)
 ```
@@ -440,17 +432,11 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 
 ```{r model 4, echo = FALSE}
 ## Global Model ##
-mod4 <- stepAIC(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
-
-# AIC comp #
-mod4.tbl <- data.frame(mod4$anova)
-mod4.tbl <- mod4.tbl[order(mod4.tbl$AIC),]
-mod4.tbl$delAIC <- NA
-for(r in 2:nrow(mod4.tbl)){
-  mod4.tbl$delAIC[r] <- round((mod4.tbl[r, 6] - mod4.tbl[1, 6]), 2) 
-}
-
-mod4.tbl$delAICprop <- round((mod4.tbl$delAIC / mod4.tbl$AIC), 2)
+mod4 <- dredge(glm(log(dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
+                    
+# AICc comp #
+mod4$delAICprop <- mod4$delta / mod4$AICc
+mod4.tbl <- filter(mod4, delta <= 2)
 
 datatable(mod4.tbl)
 ```
@@ -547,26 +533,20 @@ Response  - log normally distributed. We hypothesise that time (as julian day), 
 
 ```{r model 5, echo = FALSE}
 ## Global Model ##
-mod5 <- stepAIC(glm(log(dat$node2) ~ 1), scope = list(upper = ~dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site, lower = ~ 1), direction = "both", AICc = TRUE)
+mod5 <- dredge(glm(log(dat$node2) ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
+                    
+# AICc comp #
+mod5$delAICprop <- mod5$delta / mod5$AICc
+mod5.tbl <- filter(mod5, delta <= 2)
 
-# AIC comp #
-mod5.tbl <- data.frame(mod5$anova)
-mod5.tbl <- mod5.tbl[order(mod5.tbl$AIC),]
-mod5.tbl$delAIC <- NA
-for(r in 2:nrow(mod5.tbl)){
-  mod5.tbl$delAIC[r] <- round((mod5.tbl[r, 6] - mod5.tbl[1, 6]), 2) 
-}
-
-mod5.tbl$delAICprop <- round((mod5.tbl$delAIC / mod5.tbl$AIC), 2)
-
-datatable(mod5.tbl)
+datatable(round(mod5.tbl, 4))
 ```
 
 ### Best Model 5
 Top 2 models are within 4 AIC, therefore model average.
 ```{r model 5 best, echo = FALSE}
 ## Best Model ##
-mod5.best <- glm(log(node2) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat) 
+mod5.best <- glm(log(node2) ~  date_julian + date_julian_2, data = dat) 
 
 summary(mod5.best)
 
@@ -645,30 +625,24 @@ p5.grz <- ggplot(newdata.5.grz) +
 ```
 
 ### Model 6 - Epiphyte load
-Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light availability, and grazer load may effect epiephyte load on eelgrass.
+Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, sediment type, light availability,  grazer load, and crab biomass may effect epiephyte load on eelgrass.
 
 ```{r model 6, echo = FALSE}
 ## Global Model ##
-mod6 <- stepAIC(glm(log(dat$epiphmass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site  , lower = ~1), direction = "both", AICc = TRUE)
+mod6 <- dredge(glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
 
-# AIC comp #
-mod6.tbl <- data.frame(mod6$anova)
-mod6.tbl <- mod6.tbl[order(mod6.tbl$AIC),]
-mod6.tbl$delAIC <- NA
-for(r in 2:nrow(mod6.tbl)){
-  mod6.tbl$delAIC[r] <- round((mod6.tbl[r, 6] - mod6.tbl[1, 6]), 2) 
-}
+# AICc comp #
+mod6$delAICprop <- mod6$delta / mod6$AICc
+mod6.tbl <- filter(mod6, delta <= 2)
 
-mod6.tbl$delAICprop <- round((mod6.tbl$delAIC / mod6.tbl$AIC), 2)
-
-datatable(mod6.tbl)
+datatable(round(mod6.tbl, 4))
 ```
 
 ### Best Model 6
 Two models within 4 AIC.
 ```{r model 6 best, echo = FALSE}
 ## Best Model ##
-mod6.best <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + light_avail + sed_inside_prim, data = dat) 
+mod6.best <- glm(log(epiphmass_shootmass) ~ sed_inside_prim + log(crab_mass) + log(grazermass_shootmass) , data = dat) 
 
 summary(mod6.best)
 
@@ -688,21 +662,27 @@ par(mfrow = c(1, 1))
 ```{r model 6, echo = FALSE}
 ## Predicted Values ##
 # Grazer load #
-newdata.6.grz <- data.frame(grazermass_shootmass = seq(min(dat$grazermass_shootmass), max(dat$grazermass_shootmass), length.out = 100), sed_inside_prim = rep(median(dat$sed_inside_prim), 100), light_avail = rep(median(dat$light_avail), 100)) 
+newdata.6.grz <- data.frame(grazermass_shootmass = seq(min(dat$grazermass_shootmass), max(dat$grazermass_shootmass), length.out = 100), 
+                            sed_inside_prim = rep(median(dat$sed_inside_prim), 100), 
+                            crab_mass = rep(median(dat$crab_mass), 100)) 
 pred.6.grz <- predict(mod6.best, se.fit = TRUE, type = "response", newdata = newdata.6.grz)
 newdata.6.grz$Predict <- exp(pred.6.grz$fit)
 newdata.6.grz$Lwr <- exp(pred.6.grz$fit - pred.6.grz$se.fit)
 newdata.6.grz$Upr <- exp(pred.6.grz$fit + pred.6.grz$se.fit)
 
-# Light Availability #
-newdata.6.lite <- data.frame(grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100), sed_inside_prim = rep(median(dat$sed_inside_prim), 100), light_avail = seq(min(dat$light_avail), max(dat$light_avail), length.out = 100))
-pred.6.lite <- predict(mod6.best, se.fit = TRUE, type = "response", newdata = newdata.6.lite)
-newdata.6.lite$Predict <- exp(pred.6.lite$fit)
-newdata.6.lite$Lwr <- exp(pred.6.lite$fit - pred.6.lite$se.fit)
-newdata.6.lite$Upr <- exp(pred.6.lite$fit + pred.6.lite$se.fit)
+# Crab Biomass #
+newdata.6.crb <- data.frame(grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100), 
+                             sed_inside_prim = rep(median(dat$sed_inside_prim), 100), 
+                             crab_mass = seq(min(dat$crab_mass), max(dat$crab_mass), length.out = 100))
+pred.6.crb <- predict(mod6.best, se.fit = TRUE, type = "response", newdata = newdata.6.crb)
+newdata.6.crb$Predict <- exp(pred.6.crb$fit)
+newdata.6.crb$Lwr <- exp(pred.6.crb$fit - pred.6.crb$se.fit)
+newdata.6.crb$Upr <- exp(pred.6.crb$fit + pred.6.crb$se.fit)
 
 # Sediment Type #
-newdata.6.sed <- data.frame(grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100), sed_inside_prim = seq(min(dat$sed_inside_prim), max(dat$sed_inside_prim), length.out = 100), light_avail = rep(median(dat$light_avail), 100))
+newdata.6.sed <- data.frame(grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100), 
+                            sed_inside_prim = seq(min(dat$sed_inside_prim), max(dat$sed_inside_prim), length.out = 100), 
+                            crab_mass = rep(median(dat$crab_mass), 100))
 pred.6.sed <- predict(mod6.best, se.fit = TRUE, type = "response", newdata = newdata.6.sed)
 newdata.6.sed$Predict <- exp(pred.6.sed$fit)
 newdata.6.sed$Lwr <- exp(pred.6.sed$fit - pred.6.sed$se.fit)
@@ -716,45 +696,39 @@ p6.grz <- ggplot(newdata.6.grz) +
   labs(x = "Grazer load (g/g)", y = "Epiphyte Load +/- se (g/g)") +
   scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
-  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 
-# Light Availability #
-p6.lite <- ggplot(newdata.6.lite) +
-  geom_line(aes(x = light_avail, y = Predict), size = 1) +
-  geom_ribbon(aes(x = light_avail, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Light Availability", y = "Epiphyte Load +/- se (g/g)") +
-  scale_x_continuous(breaks = seq(0, 5, by = 0.4)) +
+# Crab Biomass#
+p6.crb <- ggplot(newdata.6.crb) +
+  geom_line(aes(x = crab_mass, y = Predict)) +
+  geom_ribbon(aes(x = crab_mass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
+  labs(x = "Crab Biomass (g)", y = "Epiphyte Load +/- se (g/g)") +
+  scale_x_continuous(breaks = seq(0, 300, by = 50)) +
   scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
-  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10),  legend.position = "none")
 
 # Sediment Type #
 p6.sed <- ggplot(newdata.6.sed) +
-  geom_line(aes(x = sed_inside_prim, y = Predict), size = 1) +
+  geom_line(aes(x = sed_inside_prim, y = Predict)) +
   geom_ribbon(aes(x = sed_inside_prim, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Sediment Type Score", y = "Epiphyte Load +/- se (g/g)") +
   scale_x_continuous(breaks = seq(0, 6, by = 1)) +
   scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
-  theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), legend.position = "none")
+  theme(text = element_text(size = 10), legend.position = "none")
 ```
 
 ### Model 7 - Grazer load
-Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, log crab biomass, log fish biomass, log above ground biomass, and shoot density may affect grazer load on eelgrass.
+Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, log crab biomass, log fish biomass, light availability, total N, and sediment type may effect grazer biomass.
 
 ```{r model 7, echo = FALSE}
 ## Global Model ##
-mod7 <- stepAIC(glm(log(dat$grazermass_shootmass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$crab_mass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~ 1), direction = "both", AICc = TRUE)
+mod7 <- dredge(glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass) + log(dat$fish_mass)) , rank = "AICc", evaluate = TRUE)
 
-# AIC comp #
-mod7.tbl <- data.frame(mod7$anova)
-mod7.tbl <- mod7.tbl[order(mod7.tbl$AIC),]
-mod7.tbl$delAIC <- NA
-for(r in 2:nrow(mod7.tbl)){
-  mod7.tbl$delAIC[r] <- round((mod7.tbl[r, 6] - mod7.tbl[1, 6]), 2) 
-}
+# AICc comp #
+mod7$delAICprop <- mod7$delta / mod7$AICc
+mod7.tbl <- filter(mod7, delta <= 2)
 
-mod7.tbl$delAICprop <- round((mod7.tbl$delAIC / mod7.tbl$AIC), 2)
-
-datatable(mod7.tbl)
+datatable(round(mod7.tbl, 4))
 ```
 
 ### Best Model 7
@@ -798,23 +772,17 @@ p7.epi <- ggplot(newdata.7.epi) +
 ```
 
 ### Model 8 - Crabs
-Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, grazer biomass, fish biomass, aboveground biomass, and shoot density, may affect grazer load on eelgrass.
+Response - Log normally distributed. We hypothesise that time (as julian day), sea otter index, grazer biomass, fish biomass, aboveground biomass, and shoot density, and epiphyte mass may affect crab biomass.
 
 ```{r model 8, echo = FALSE}
 ## Global Model ##
-mod8 <- stepAIC(glm(log(dat$crab_mass) ~ 1), scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens, lower = ~1), direction = "both", AICc = TRUE)
+mod8 <- dredge(glm(log(dat$crab_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + dat$shoot_dens + log(dat$epiphmass_shootmass)), rank  ="AICc", evaluate = TRUE)
 
-# AIC comp #
-mod8.tbl <- data.frame(mod8$anova)
-mod8.tbl <- mod8.tbl[order(mod8.tbl$AIC),]
-mod8.tbl$delAIC <- NA
-for(r in 2:nrow(mod8.tbl)){
-  mod8.tbl$delAIC[r] <- round((mod8.tbl[r, 6] - mod8.tbl[1, 6]), 2) 
-}
+# AICc comp #
+mod8$delAICprop <- mod8$delta / mod8$AICc
+mod8.tbl <- filter(mod8, delta <= 2)
 
-mod8.tbl$delAICprop <- round((mod8.tbl$delAIC / mod8.tbl$AIC), 2)
-
-datatable(mod8.tbl)
+datatable(round(mod8.tbl, 4))
 ```
 
 ### Best Model 8
@@ -979,26 +947,13 @@ screeplot(fish.fam.pca)
 #### Simple models and summaries
 Simple models
 ```{r simp fish models, echo = FALSE}
-mod10 <- stepAIC(glm(log(dat$fish_mass) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
+mod10 <- dredge(glm(log(dat$fish_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), rank =  "AICc", evaluate = TRUE)
 
-mod10$anova
+mod11 <- dredge(glm(log(dat$fish_count) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), rank =  "AICc", evaluate = TRUE)
 
+mod12 <- dredge(glm(log(dat$fish_SW_diverse) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), rank =  "AICc", evaluate = TRUE)
 
-mod11 <- stepAIC(glm(log(dat$fish_count) ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
-
-mod11$anova
-
-mod12 <- stepAIC(glm(dat$fish_SW_diverse ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
-
-mod12$anova
-
-mod13 <- stepAIC(glm(dat$fish_rich ~ 1), 
-                scope = list(upper = ~dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), direction = "both")
-
-mod13$anova
+mod13 <- dredge(glm(log(dat$fish_rich) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), rank =  "AICc", evaluate = TRUE)
 
 ```
 
@@ -1095,7 +1050,7 @@ sumout.4 <- data.frame(Responce = "Abv:Blw",
 ### Modeling results table with sjPlot
 Table to look at result from best models. This function does not work with the averaged models.
 ```{r full results best model, echo = FALSE}
-all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE)
+all.results.simp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), exp.coef = FALSE, show.r2 = TRUE, digits.est = 4, digits.p = 4, digits.ci = 4)
 
 all.results.simp
 ```
@@ -1109,7 +1064,7 @@ all.results
 
 Exponetiated results
 ```{r}
-all.results.exp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, depvar.labels = c("Aboveground", "Belowground", "Shoot density", "Aboveground/Belowground", "Second internode distance", "Epiphyte Load", "Grazer Load", "Crab biomass"), pred.labels = c("Julian Day", "Julian Day^2", "Sea otter index", "Sea otter index ^2", "log Epiphyte load", "Julian Day", "Sea otter index", "Light availability", "Total surface nitrogen", "log Grazer load", "Sediment type"), exp.coef = TRUE, show.r2 = TRUE, show.aic = TRUE)
+all.results.exp <- sjt.glm(mod1.best, mod2.best, mod3.best, mod4.best, mod5.best, mod6.best, mod7.best, mod8.best, group.pred = FALSE, exp.coef = TRUE, show.r2 = TRUE, show.aic = TRUE, digits.est = 4, digits.p = 4, digits.ci = 4)
 
 all.results.exp
 ```
