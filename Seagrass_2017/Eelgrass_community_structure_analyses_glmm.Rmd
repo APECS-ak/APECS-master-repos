@@ -574,33 +574,11 @@ Plots of predicted values.
 ## Predicted Values ##
 # Julian Day #
 newdata.5.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
-                             date_julian_2 = (119 : 234)^2, 
-                             sea_otter_index = rep(median(dat$sea_otter_index), 116), 
-                             grazermass_shootmass = rep(median(dat$grazermass_shootmass), 116))
+                             date_julian_2 = (119 : 234)^2)
 pred.5.jday <- predict(mod5.best, se.fit = TRUE, type = "response", newdata = newdata.5.jday)
 newdata.5.jday$Predict <- exp(pred.5.jday$fit)
 newdata.5.jday$Lwr <- exp(pred.5.jday$fit - pred.5.jday$se.fit)
 newdata.5.jday$Upr <- exp(pred.5.jday$fit + pred.5.jday$se.fit)
-
-# Sea otter index #
-newdata.5.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
-                            date_julian_2 = rep(median(dat$date_julian_2), 100),
-                            sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100), 
-                            grazermass_shootmass = rep(median(dat$grazermass_shootmass), 100))
-pred.5.soi <- predict(mod5.best, se.fit = TRUE, type = "response", newdata = newdata.5.soi)
-newdata.5.soi$Predict <- exp(pred.5.soi$fit)
-newdata.5.soi$Lwr <- exp(pred.5.soi$fit - pred.5.soi$se.fit)
-newdata.5.soi$Upr <- exp(pred.5.soi$fit + pred.5.soi$se.fit)
-
-# Grazer Load #
-newdata.5.grz <- data.frame(date_julian = rep(median(dat$date_julian), 100),
-                            date_julian_2 = rep(median(dat$date_julian_2), 100),
-                            sea_otter_index = rep(median(dat$sea_otter_index), 100), 
-                            grazermass_shootmass = seq(min(dat$grazermass_shootmass), max(dat$grazermass_shootmass), length.out = 100))
-pred.5.grz <- predict(mod5.best, se.fit = TRUE, type = "response", newdata = newdata.5.grz)
-newdata.5.grz$Predict <- exp(pred.5.grz$fit)
-newdata.5.grz$Lwr <- exp(pred.5.grz$fit - pred.5.grz$se.fit)
-newdata.5.grz$Upr <- exp(pred.5.grz$fit + pred.5.grz$se.fit)
 
 ## Plots ##
 # Julian Day #
@@ -609,24 +587,6 @@ p5.jday <- ggplot(newdata.5.jday) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "Julian day", y = " Second rhizome \n internode +/- se (cm)") +
   scale_x_continuous(lim = c(120, 240), breaks = seq(120, 240, by = 30)) +
-  scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
-  theme(text = element_text(size = 10), legend.position = "none")
-
-# Sea otter index #
-p5.soi <- ggplot(newdata.5.soi) +
-  geom_line(aes(x = sea_otter_index, y = Predict)) +
-  geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Sea otter index", y = " Second rhizome \n internode +/- se (cm)") +
-  scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4))  +
-  scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
-  theme(text = element_text(size = 10), legend.position = "none")
-
-# Grazer load #
-p5.grz <- ggplot(newdata.5.grz) +
-  geom_line(aes(x = grazermass_shootmass, y = Predict)) +
-  geom_ribbon(aes(x = grazermass_shootmass, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Grazer Load", y = " Second rhizome \n internode +/- se (cm)") +
-  scale_x_continuous(breaks = seq(0, 0.15, by = 0.05)) +
   scale_y_continuous(lim = c(0,2), breaks = seq(0, 2, by = 0.5)) +
   theme(text = element_text(size = 10), legend.position = "none")
 ```
@@ -1170,6 +1130,31 @@ colnames(site.envi)[48] <- "light_availability"
 write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row.names =  FALSE)
 
 ```
+
+Fish summary stats
+```{r}
+fish.sum <- dat[,c(2:3, 121:124)]
+write.csv(fish.sum, "Eelgrass_structure_MS_results/fish_summary_stats.csv", row.names =  FALSE)
+
+mean(dat$fish_count)
+sd(dat$fish_count)/sqrt(21)
+
+mean(dat$fish_mass)/1000
+sd(dat$fish_mass/1000)/sqrt(21)
+
+mean(dat$fish_rich)
+sd(dat$fish_rich)/sqrt(21)
+
+mean(dat$fish_SW_diverse)
+sd(dat$fish_SW_diverse)/sqrt(21)
+
+fish.fams <- dat[,c(2:3, 125:143)]
+fish.fams$n <- Reduce(`+`, lapply(fish.fams[3:21], `>`, 0))
+
+mean(fish.fams$n)
+sd(fish.fams$n)/sqrt(21)
+```
+
 
 #### Plots
 ```{r}
