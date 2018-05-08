@@ -1126,6 +1126,39 @@ site.envi <- cbind.data.frame(dat[,2:3], round(dat[, 5:6], 2), round(dat[, c(15,
 colnames(site.envi)[47] <- "sediment"
 colnames(site.envi)[48] <- "light_availability"
 
+mean(site.envi$temperature_C_transect)
+sd(site.envi$temperature_C_transect)/sqrt(21)
+mean(site.envi$sediment)
+sd(site.envi$sediment)/sqrt(21)
+mean(site.envi$light_availability)
+sd(site.envi$light_availability)/sqrt(21)
+mean(site.envi$salinity_ppt_transect)
+sd(site.envi$salinity_ppt_transect)/sqrt(21)
+max(site.envi$NOX_site)
+max(site.envi$NOX_1m_ND)
+max(site.envi$NOX_4m_ND)
+
+max(site.envi$NH4_site)
+min(site.envi$NH4_site)
+max(site.envi$NH4_1m_ND)
+min(site.envi$NH4_1m_ND)
+max(site.envi$NH4_4m_ND)
+min(site.envi$NH4_4m_ND)
+
+max(site.envi$PO4_site)
+min(site.envi$PO4_site)
+max(site.envi$PO4_1m_ND)
+min(site.envi$PO4_1m_ND)
+max(site.envi$PO4_4m_ND)
+min(site.envi$PO4_4m_ND)
+
+max(site.envi$NP_site)
+min(site.envi$NP_site)
+max(site.envi$NP_1m_ND)
+min(site.envi$NP_1m_ND)
+max(site.envi$NP_4m_ND)
+min(site.envi$NP_4m_ND)
+
 ## Export ##
 write.csv(site.envi, "Eelgrass_structure_MS_results/site_summary_stats.csv", row.names =  FALSE)
 
