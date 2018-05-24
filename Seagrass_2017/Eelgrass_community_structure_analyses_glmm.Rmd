@@ -37,17 +37,15 @@ theme_set(theme_classic())
 7. crab biomass (g) - can also be counts
 8. fish biomass (g) - can also be counts
 
-**Primary explanatory factors**
-Not all these fators will necessarily be used in all models
-1. Time
-2. Sediment type (primary sediment type from the "inside" eelgrass transect)
-3. Percent light
-
-**Secondary explanatory factors**
-Factors that are more specific to certain tests
-1. crab biomass (g)
-2. fish biomass (g)
-3. grazer biomass (g)
+**Explanatory factors**
+1. Sea otter index
+2. Time
+3. Sediment type (primary sediment type from the "inside" eelgrass transect)
+4. Light attenuation
+5. crab biomass (g)
+6. fish biomass (g)
+7. grazer load (g/g)
+8. epiphyte load (g/g)
 
 ```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
 ## Transect ##
@@ -117,7 +115,6 @@ append taxonomy
 fish.dat <- merge(fish.dat, fish.tax, by.x = "species_scientific", by.y = "scientific_name", all = TRUE)
 ```
 
-
 This needs to be done to summarise by site across all species.
 ```{r fish site, echo = FALSE}
 ## Full species List ##
@@ -178,7 +175,7 @@ dat$sea_otter_index_2 <- dat$sea_otter_index^2
 ```
 
 ## Models
-Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That global model will be run through the `dredge` function. Models within 2 of lowes AICc will be reported and lowest AICc model woll be fit for formal analysis and predicted values plots. 
+Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That global model will be run through the `dredge` function. Models within 2 of lowes AICc will be reported and lowest AICc model will be fit for formal analysis and predicted values plots. 
 
 ### Model 1 - Aboveground biomass
 Response  - log normally distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, total N, and crab biomass may effect aboveground biomass of eelgrass.
@@ -211,7 +208,6 @@ par(mfrow = c(1, 1))
 #mod1.1 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + sea_otter_index_2 + log(epiphmass_shootmass), data = dat)
 #mod1.2 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + log(epiphmass_shootmass), data = dat)
 #mod1.best <- model.avg(list(mod1.1, mod1.2), fit = TRUE)
-
 ```
 
 ### Model 1 Plots
@@ -372,8 +368,6 @@ datatable(round(mod3.tbl,4))
 ```
 
 ### Best Model 3
-Top 3 models are within 4 AIC of minimun AIC so model everaging procedure will be employed
-
 ```{r model 3 best, echo = FALSE}
 ## Best Model ##
 mod3.best <- glm.nb(shoot_dens_rnd ~ date_julian_2 + sea_otter_index_2, link = "log", data = dat)
@@ -449,7 +443,6 @@ datatable(round(mod4.tbl,4))
 ```
 
 ### Best Model 4
-Top 4 models are within 4 AIC, therefore model average.
 ```{r model 4 best, echo = FALSE}
 ## Best Model ##
 mod4.best <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat)
@@ -702,7 +695,6 @@ datatable(round(mod7.tbl,4))
 ```
 
 ### Best Model 7
-Model with epiphyte load is 3.87 AIC away from ~1 model. Will report model with epiphyte load but should note that it it poor fit, probably does not mean much. 
 ```{r model 7 best, echo = FALSE}
 ## Best Model ##
 mod7.best <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
@@ -757,7 +749,6 @@ datatable(round(mod8.tbl,4))
 ```
 
 ### Best Model 8
-No model within 4 AIC. 
 ```{r model 8 best, echo = FALSE}
 ## Best Model ##
 mod8.best <- glm(log(crab_mass) ~ sea_otter_index, data = dat)
@@ -794,6 +785,8 @@ Since we only sampled fishes with one beach seine at each site we have a limited
 
 #### Multivariate
 First values should be standardized and transformed. We will use a 4th root tranformation which is often used with hihgly abundant variable species data. 
+
+##### Counts by species
 ```{r multivariate prep fish, echo = FALSE}
 ## Fish by species ##
 str(fish.site.sp)
@@ -803,36 +796,7 @@ fish.sp.trsfrm <- (fish.site.sp[, 2:56]^0.25)
 
 ## Standardize to column maximum i.e. species maximum ##
 fish.std <- as.data.frame(scale(fish.sp.trsfrm, center = FALSE, scale = apply(fish.sp.trsfrm, 2, max)))
-```
 
-```{r multivariate prep mass, echo = FALSE}
-## Transform ##
-fishmass.sp.trsfrm <- (fishmass.site.sp[,2:56]^0.25)
-
-## Standardize to column maximum i.e. species maximum ##
-fishmass.std <- as.data.frame(scale(fishmass.sp.trsfrm, center = FALSE, scale = apply(fishmass.sp.trsfrm, 2, max)))
-```
-
-Transform fish family counts
-```{r fish tax, echo = FALSE}
-## Transform ##
-fish.fam.trsnfrm <- (fish.site.fam[,2:20]^0.25)
-
-## Standardize to column maximum i.e. species maximum ##
-fish.fam.std <- as.data.frame(scale(fish.fam.trsnfrm, center = FALSE, scale = apply(fish.fam.trsnfrm, 2, max)))
-```
-
-Transform fish family mass
-```{r fish tax math, echo = FALSE}
-## Transform ##
-fishmass.fam.trsnfrm <- (fishmass.site.fam[,2:20]^0.25)
-
-## Standardize to column maximum i.e. species maximum ##
-fishmass.fam.std <- as.data.frame(scale(fishmass.fam.trsnfrm, center = FALSE, scale = apply(fishmass.fam.trsnfrm, 2, max)))
-```
-
-Multivariate analysis of fish counts
-```{r multivariate counts, echo = FALSE}
 ## Dissimilarity matirx ##
 fish.diss <- vegdist(fish.std, method = "bray")
 round(fish.diss, 2)
@@ -856,11 +820,17 @@ mod9
 mod9.mds <- metaMDS(fish.diss, k = 2)
 plot(mod9.mds$points, asp = 1)
 mod9.mds
-
 ```
 
-Multivariate analysis of fish mass
-```{r multivariate mass, echo = FALSE}
+##### Mass by species
+```{r multivariate prep mass, echo = FALSE}
+## Transform ##
+fishmass.sp.trsfrm <- (fishmass.site.sp[,2:56]^0.25)
+
+## Standardize to column maximum i.e. species maximum ##
+fishmass.std <- as.data.frame(scale(fishmass.sp.trsfrm, center = FALSE, scale = apply(fishmass.sp.trsfrm, 2, max)))
+
+
 ## Dissimilarity matirx ##
 fishmass.diss <- vegdist(fishmass.std, method = "bray")
 round(fishmass.diss, 2)
@@ -889,8 +859,14 @@ plot(mod9b.mds$points, asp = 1)
 mod9b.mds
 ```
 
-Multivariate analysis of fish family counts
-```{r family count, echo = FALSE}
+##### Counts by Family
+```{r fish tax, echo = FALSE}
+## Transform ##
+fish.fam.trsnfrm <- (fish.site.fam[,2:20]^0.25)
+
+## Standardize to column maximum i.e. species maximum ##
+fish.fam.std <- as.data.frame(scale(fish.fam.trsnfrm, center = FALSE, scale = apply(fish.fam.trsnfrm, 2, max)))
+
 ## Dissimilarity matirx ##
 fish.fam.diss <- vegdist(fish.fam.std, method = "bray")
 round(fish.fam.diss, 2)
@@ -902,8 +878,14 @@ biplot(fish.fam.pca, cex = 0.5)
 screeplot(fish.fam.pca)
 ```
 
-Multivariate analysis of fish family mass
-```{r family mass, echo = FLASE}
+##### Mass by Family
+```{r fish tax math, echo = FALSE}
+## Transform ##
+fishmass.fam.trsnfrm <- (fishmass.site.fam[,2:20]^0.25)
+
+## Standardize to column maximum i.e. species maximum ##
+fishmass.fam.std <- as.data.frame(scale(fishmass.fam.trsnfrm, center = FALSE, scale = apply(fishmass.fam.trsnfrm, 2, max)))
+                                        
 ## Dissimilarity matirx ##
 fishmass.fam.diss <- vegdist(fishmass.fam.std, method = "bray")
 round(fish.fam.diss, 2)
@@ -912,7 +894,7 @@ round(fish.fam.diss, 2)
 fishmass.fam.pca <- prcomp(fishmass.fam.std)
 summary(fishmass.fam.pca)
 biplot(fishmass.fam.pca, cex = 0.5)
-screeplot(fish.fam.pca)
+screeplot(fishmass.fam.pca)
 ```
 
 #### Simple models and summaries
@@ -920,11 +902,19 @@ Simple models
 ```{r simp fish models, echo = FALSE}
 mod10 <- dredge(glm(log(dat$fish_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), rank =  "AICc", evaluate = TRUE)
 
+datatable(mod10)
+
 mod11 <- dredge(glm(log(dat$fish_count) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), rank =  "AICc", evaluate = TRUE)
+
+datatable(mod11)
 
 mod12 <- dredge(glm(log(dat$fish_SW_diverse) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), rank =  "AICc", evaluate = TRUE)
 
+datatable(mod12)
+
 mod13 <- dredge(glm(log(dat$fish_rich) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$crab_mass) + log(dat$abvgnd_mass) + log(dat$shoot_dens)), rank =  "AICc", evaluate = TRUE)
+
+datatable(mod13)
 
 ```
 
@@ -938,11 +928,10 @@ fishmass.fam <- fishmass.site.fam %>%
 
 ggplot(fishmass.fam) +
   geom_col(aes(x = family, y = log(mean_mass + 1))) +
-  geom_errorbar(aes(x = family, ymin = log(mean_mass + 1) - log(se_mass + 1), ymax = log(mean_mass + 1) + log(se_mass + 1), width = 0), size = 1) +
+  geom_errorbar(aes(x = family, ymin = log(mean_mass + 1) - log(se_mass + 1), ymax = log(mean_mass + 1) + log(se_mass + 1), width = 0)) +
   labs(x = "Family", y = "Log mean mass per seine +/- se (g)") +
   theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), axis.text.x=element_text(angle = 45, hjust = 1))
 ```
-
 
 Given that fish are not well explained by any of our data, lets take a look at all the data together. First we will look at basic summary statistics, and the average relative fq by species.
 ```{r fish sum stats, echo = FALSE}
@@ -975,6 +964,7 @@ fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
 
 ## Collating Model results
 ### Extracting model results
+Not operational at the moment use sjPlot example below
 ```{r model results}
 ## Aboveground biomass ##
 out.1 <- data.frame(summary(mod1.best)$coefmat.subset)
