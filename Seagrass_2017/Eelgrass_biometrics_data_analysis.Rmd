@@ -560,5 +560,6 @@ m02 <- fish.all.m[fish.all.m$site == "2017_M_02",]
 Save to master file for use elsewhere
 ```{r export}
 write.csv(fish.all.m, "../ALL_DATA/eelgrass_beach_seine_derived.csv", row.names = FALSE)
+write.csv(LW.master, "../ALL_DATA/fish_mean_LW_factors.csv", row.names = FALSE)
 ```
 
