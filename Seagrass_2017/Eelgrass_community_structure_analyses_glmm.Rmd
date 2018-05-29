@@ -924,10 +924,10 @@ fishmass.fam <- fishmass.site.fam %>%
   gather("family", "mass", 2:20) %>% 
   group_by(family) %>% 
   summarise(mean_mass = mean(mass),
-            se_mass = (sd(mass)/sqrt(21)))
+            se_mass = ((sd(mass))/sqrt(21)))
 
 ggplot(fishmass.fam) +
-  geom_col(aes(x = family, y = log(mean_mass + 1))) +
+  geom_col(aes(reorder(family, -log(mean_mass + 1)), log(mean_mass +1))) +
   geom_errorbar(aes(x = family, ymin = log(mean_mass + 1) - log(se_mass + 1), ymax = log(mean_mass + 1) + log(se_mass + 1), width = 0)) +
   labs(x = "Family", y = "Log mean mass per seine +/- se (g)") +
   theme(text = element_text(size = 10), axis.ticks = element_line(size = 1), axis.text.x=element_text(angle = 45, hjust = 1))
