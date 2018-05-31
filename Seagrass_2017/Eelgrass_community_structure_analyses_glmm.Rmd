@@ -673,7 +673,7 @@ p6.crb <- ggplot(newdata.6.crb) +
 p6.sed <- ggplot(newdata.6.sed) +
   geom_line(aes(x = sed_inside_prim, y = Predict)) +
   geom_ribbon(aes(x = sed_inside_prim, ymin = Lwr, ymax = Upr), alpha = 0.2) +
-  labs(x = "Sediment Type Score", y = "Epiphyte Load +/- se (g/g)") +
+  labs(x = "Sediment type score", y = "Epiphyte Load +/- se (g/g)") +
   scale_x_continuous(breaks = seq(0, 6, by = 1)) +
   scale_y_continuous(lim = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
   theme(text = element_text(size = 10), legend.position = "none")
@@ -1183,7 +1183,7 @@ sd(fish.fams$n)/sqrt(21)
 #### Plots
 ```{r}
 pa <- ggplot(dat) +
-  geom_point(aes(y = grazermass_shootmass, x = epiphmass_shootmass), size = 3)
+  geom_point(aes(y = epiphmass_shootmass, x = sed_inside_prim), size = 3)
 
 pb <- ggplot(dat) +
   geom_point(aes(x = grazermass_shootmass, y = epiphmass_shootmass), size = 3)
