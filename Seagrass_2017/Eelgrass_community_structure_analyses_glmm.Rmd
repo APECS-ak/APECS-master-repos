@@ -22,6 +22,11 @@ library(cowplot)
 library(MuMIn)
 options(na.action = "na.fail")
 theme_set(theme_classic())
+
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
 ```
 
 ## Data
@@ -66,6 +71,9 @@ fish.dat <- read.csv("../ALL_DATA/eelgrass_beach_seine_derived.csv", header = TR
 
 ## Fish Taxonomy ##
 fish.tax <- read.csv("../ALL_DATA/fish_taxonomy_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## RAW Nutrient Data ##
+nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ### Data Prep
@@ -1116,6 +1124,33 @@ Summary information on site characterization including date, sea otter index, en
 site.envi <- cbind.data.frame(dat[,2:3], round(dat[, 5:6], 2), round(dat[, c(15,17,19,21,23,25,27,29,31,33)],2), round(dat[,25:51], 2), round(dat[, 57:61], 2), round(dat[, 115], 2), round(dat[, 116], 2))
 colnames(site.envi)[47] <- "sediment"
 colnames(site.envi)[48] <- "light_availability"
+
+site.envi.means <- site.envi[, c(1, 42:43, 45:48)] %>% 
+  summarise(o2_m = mean(dissolved_02_mg.l_transect, na.rm = TRUE),
+            o2_se = st.er(dissolved_02_mg.l_transect),
+            o2p_m = mean(dissolved_02_percent_transect, na.rm = TRUE),
+            o2p_se = st.er(dissolved_02_percent_transect),
+            sal_m = mean(salinity_ppt_transect, na.rm = TRUE),
+            sal_se = st.er(salinity_ppt_transect),
+            temp_m = mean(temperature_C_transect, na.rm = TRUE),
+            temp_se = st.er(temperature_C_transect),
+            sed_m = mean(sediment),
+            sed_se = st.er(sediment),
+            lit_m = mean(light_availability),
+            lit_se = st.er(light_availability))
+
+site.nuts.means <- nut.dat %>% 
+  group_by(sampling_type, depth_m) %>% 
+  summarise(nox_m = mean(nox_umol, na.rm = TRUE),
+            nox_se = st.er(nox_umol),
+            nh4_umol_m = mean(nh4_umol, na.rm = TRUE),
+            nh4_umol_se = st.er(nh4_umol),
+            po4_umol_m = mean(po4_umol, na.rm = TRUE),
+            po4_umol_se = st.er(po4_umol),
+            tot_N_m = mean(tot_N, na.rm = TRUE),
+            tot_N_se = st.er(tot_N),
+            N.P_m = mean(N.P, na.rm = TRUE),
+            N.P_se = st.er(N.P))
 
 mean(site.envi$temperature_C_transect)
 sd(site.envi$temperature_C_transect)/sqrt(21)
