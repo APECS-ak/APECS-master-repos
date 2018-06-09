@@ -362,7 +362,7 @@ Given the distributions of the data we will log transform the heavily skewed dat
 # Separate values only
 dat.redu <- site.dat[, 10:15]
 
-# log transfor appropriate columns
+# log transform appropriate columns
 dat.l <- cbind(log(dat.redu[,1:2] + 1), dat.redu[,3:4], log(dat.redu[,5:6] + 1)) 
 pairs(dat.l)
 
