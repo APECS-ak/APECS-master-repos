@@ -1,0 +1,121 @@
+---
+title: "Fish_and_crab_size_fq"
+author: "Wendel Raymond"
+date: "April 17, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r libraries}
+library(ggplot2)
+library(dplyr)
+
+theme_set(theme_classic())
+```
+
+
+# Fish and crab size frequency
+Here we will examine the size frequency relationships of fish and crab species. This can be useful for identifiy key species in the eelgrass and how large they and how many. Of particual interest in identifying species that will make good candidates for biomarker analysis.
+
+```{r data}
+## Crab ##
+crab.dat <- read.csv("../ALL_DATA/seagrass_crab_pot_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+crab.dat$string <- as.character(crab.dat$string)
+
+## Fish ##
+fish.dat <- read.csv("../ALL_DATA/eelgrass_beach_seine_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+## Fish
+We are interested in size-frequency data of shiner perch, pacific staghorn sculpins, whitespotted greenling, and great sculpins. However, we want to limit data to the mid/late summer which is when I will likley sample biomarker data.
+
+```{r fish data filtering}
+fish <- data.frame(
+  fish.dat %>% 
+    filter(YYYYMMDD > 20170706)
+)
+```
+
+Length-Frequency
+```{r fish len-fq}
+## All Species ##
+ggplot(fish) +
+  geom_histogram(aes(fork_length), binwidth = 10) +
+  facet_wrap(~sp_code)
+
+## Whitespotted greenling ##
+ggplot(subset(fish, sp_code == "GREENWHI")) +
+  geom_histogram(aes(fork_length), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 300, by = 50)) +
+  ggtitle("Whitespotted Greenling") +
+  facet_wrap(~date)
+
+## Staghorn Sculpin ##
+ggplot(subset(fish, sp_code == "SCULPSTG")) +
+  geom_histogram(aes(fork_length), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 300, by = 50)) +
+  ggtitle("Staghorn Sculpin") +
+  facet_wrap(~date)
+
+## Shiner Perch ##
+ggplot(subset(fish, sp_code == "PERCHSH")) +
+  geom_histogram(aes(fork_length), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 150, by = 50)) +
+  ggtitle("Shiner Perch") +
+  facet_wrap(~date)
+
+## Great Sculpin ##
+ggplot(subset(fish, sp_code == "SCULGRT")) +
+  geom_histogram(aes(fork_length), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 150, by = 50)) +
+  ggtitle("Great Sculpin") +
+  facet_wrap(~date)
+
+## Snake Prickleback ##
+ggplot(subset(fish, sp_code == "PRICKSN")) +
+  geom_histogram(aes(fork_length), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 300, by = 50)) +
+  ggtitle("Snake Prickleback") +
+  facet_wrap(~date)
+```
+
+## Crabs
+We are interested in size-frequency data of all crab species. However, we want to limit data to the mid/late summer which is when I will likley sample biomarker data.
+
+```{r crab data filtering}
+crab <- data.frame(
+  crab.dat %>% 
+    filter(YYYYMMDD_set > 20170801) %>% 
+    filter(taxon == "Decapoda")
+)
+```
+
+Size-frequncy
+```{r crab sz-fq}
+## All Species ##
+ggplot(crab) +
+  geom_histogram(aes(carapace_width_mm), binwidth = 10) +
+  facet_wrap(~sp_code)
+
+## Dungeness ##
+ggplot(subset(crab, sp_code == "CRABDUN")) +
+  geom_histogram(aes(carapace_width_mm), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 160, by = 20)) +
+  ggtitle("Dungeness Crab") +
+  facet_wrap(~ site)
+
+## Red Rock ##
+ggplot(subset(crab, sp_code == "CRABRR")) +
+  geom_histogram(aes(carapace_width_mm), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 160, by = 20)) +
+  ggtitle("Red rock Crab") +
+  facet_wrap(~ site)
+
+## Helmet ##
+ggplot(subset(crab, sp_code == "CRABHEL")) +
+  geom_histogram(aes(carapace_width_mm), binwidth = 10) +
+  scale_x_continuous(breaks = seq(0, 160, by = 20)) +
+  ggtitle("Helmet Crab") +
+  facet_wrap(~ site)
+```
+

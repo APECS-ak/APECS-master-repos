@@ -1,5 +1,5 @@
 ---
-title: '---in_progress(Sea_otter_impact_index_full)'
+title: 'Sea otter index - 2017 eelgrass edition'
 author: "Wendel Raymond"
 date: "December 14, 2017"
 output: html_document
@@ -7,10 +7,10 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Sea otter impact index
+# Sea otter index
 Sea otters are hard to keep track of. Until the 2017 field season the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summaries and then combined these measures to create a sea otter impact index. 
 
-## Note for non eelgrass site users
+## Note for non-eelgrass site users
 This script provides the details of how to calculate the sea otter index for eelgrass sites. You may want to do this differently. You my also have to clean up the resulting data in a different way than it is done here, because of how your data is formated etc. This script should be "generalizable" though and it should not be terribly difficult to creat a new version of this code that suits a slightly differnt set of needs.
 
 # Getting started
@@ -362,7 +362,7 @@ Given the distributions of the data we will log transform the heavily skewed dat
 # Separate values only
 dat.redu <- site.dat[, 10:15]
 
-# log transfor appropriate columns
+# log transform appropriate columns
 dat.l <- cbind(log(dat.redu[,1:2] + 1), dat.redu[,3:4], log(dat.redu[,5:6] + 1)) 
 pairs(dat.l)
 
