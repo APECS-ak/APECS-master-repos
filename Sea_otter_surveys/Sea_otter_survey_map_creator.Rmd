@@ -35,7 +35,7 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ### Where is your site?
 Input Lat/Long in decimal degrees below. Make sure that the site is "in the water"! Otherwise this wont work.
 ```{r site}
-site <- structure(list(id = "site", longitude = -133.166397, latitude = 55.594827), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
+site <- structure(list(id = "site", longitude = -132.899774, latitude = 55.192876), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
 xy <- site[,c(2,3)]
 
 site <- SpatialPointsDataFrame(coords = xy, data = site,
@@ -74,7 +74,7 @@ leaflet() %>%
   addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "yellow", fillOpacity = 0.5, group = "POW")
 
 #leaflet() %>% 
-  #addTiles(https://tileservice.charts.noaa.gov/tileset.html) %>% 
+  #addTiles(owi.usgs.gov/blog/basemaps) %>% 
   #addCircleMarkers(data = site, ~longitude, ~latitude, color = "black", fillOpacity = 1, stroke = FALSE, radius = 5) %>% 
   #addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "yellow", fillOpacity = 0.5, group = "POW")
 ```
