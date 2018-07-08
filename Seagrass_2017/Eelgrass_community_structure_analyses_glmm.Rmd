@@ -1218,7 +1218,7 @@ sd(fish.fams$n)/sqrt(21)
 #### Plots
 ```{r}
 pa <- ggplot(dat) +
-  geom_point(aes(y = epiphmass_shootmass, x = sed_inside_prim), size = 3)
+  geom_point(aes(x = log(grazermass_shootmass), y =log(epiphmass_shootmass), size = 3))
 
 pb <- ggplot(dat) +
   geom_point(aes(x = grazermass_shootmass, y = epiphmass_shootmass), size = 3)
