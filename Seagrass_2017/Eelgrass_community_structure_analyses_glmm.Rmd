@@ -1214,6 +1214,14 @@ mean(fish.fams$n)
 sd(fish.fams$n)/sqrt(21)
 ```
 
+Summary table for ADFG
+```{r adfg summary table}
+names(dat)
+adfg <- dat[,c(2:6, 14, 65:80, 95:114, 117:143)]
+
+write.csv(adfg, "adfg_report_summaries_2017.csv", row.names = FALSE)
+```
+
 
 #### Plots
 ```{r}
