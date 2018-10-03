@@ -1,0 +1,561 @@
+site,place_name,date,YYYYMMDD,quadrat,species_common,species_scientific,sp_code,width_mm
+2018_L_01,North Pass,7/11/2018,20180711,1,Butter clam,Saxidomus gigantea,CLMBUT,80
+2018_L_01,North Pass,7/11/2018,20180711,1,Butter clam,Saxidomus gigantea,CLMBUT,67
+2018_L_01,North Pass,7/11/2018,20180711,1,Butter clam,Saxidomus gigantea,CLMBUT,65
+2018_L_01,North Pass,7/11/2018,20180711,1,Butter clam,Saxidomus gigantea,CLMBUT,52
+2018_L_01,North Pass,7/11/2018,20180711,1,Butter clam,Saxidomus gigantea,CLMBUT,40
+2018_L_01,North Pass,7/11/2018,20180711,1,Cockle,Clinocardium nuttalli,CLMCKL,57
+2018_L_01,North Pass,7/11/2018,20180711,1,Cockle,Clinocardium nuttalli,CLMCKL,14
+2018_L_01,North Pass,7/11/2018,20180711,1,Steamer clam,Protothaca staminea,CLMSTM,34
+2018_L_01,North Pass,7/11/2018,20180711,1,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_L_01,North Pass,7/11/2018,20180711,1,Pointed macoma,Macoma inquinata,CLMPOI,37
+2018_L_01,North Pass,7/11/2018,20180711,1,Pointed macoma,Macoma inquinata,CLMPOI,35
+2018_L_01,North Pass,7/11/2018,20180711,1,Pointed macoma,Macoma inquinata,CLMPOI,29
+2018_L_01,North Pass,7/11/2018,20180711,1,Pointed macoma,Macoma inquinata,CLMPOI,27
+2018_L_01,North Pass,7/11/2018,20180711,1,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_L_01,North Pass,7/11/2018,20180711,2,Cockle,Clinocardium nuttalli,CLMCKL,61
+2018_L_01,North Pass,7/11/2018,20180711,2,Butter clam,Saxidomus gigantea,CLMBUT,49
+2018_L_01,North Pass,7/11/2018,20180711,2,Butter clam,Saxidomus gigantea,CLMBUT,49
+2018_L_01,North Pass,7/11/2018,20180711,2,Butter clam,Saxidomus gigantea,CLMBUT,41
+2018_L_01,North Pass,7/11/2018,20180711,2,Steamer clam,Protothaca staminea,CLMSTM,43
+2018_L_01,North Pass,7/11/2018,20180711,2,Steamer clam,Protothaca staminea,CLMSTM,42
+2018_L_01,North Pass,7/11/2018,20180711,2,Steamer clam,Protothaca staminea,CLMSTM,36
+2018_L_01,North Pass,7/11/2018,20180711,2,Steamer clam,Protothaca staminea,CLMSTM,36
+2018_L_01,North Pass,7/11/2018,20180711,2,Steamer clam,Protothaca staminea,CLMSTM,31
+2018_L_01,North Pass,7/11/2018,20180711,2,Steamer clam,Protothaca staminea,CLMSTM,29
+2018_L_01,North Pass,7/11/2018,20180711,2,Steamer clam,Protothaca staminea,CLMSTM,31
+2018_L_01,North Pass,7/11/2018,20180711,2,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_L_01,North Pass,7/11/2018,20180711,2,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_L_01,North Pass,7/11/2018,20180711,2,Pointed macoma,Macoma inquinata,CLMPOI,34
+2018_L_01,North Pass,7/11/2018,20180711,2,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_L_01,North Pass,7/11/2018,20180711,2,Pointed macoma,Macoma inquinata,CLMPOI,29
+2018_L_01,North Pass,7/11/2018,20180711,2,Pointed macoma,Macoma inquinata,CLMPOI,28
+2018_L_01,North Pass,7/11/2018,20180711,2,Pointed macoma,Macoma inquinata,CLMPOI,19
+2018_L_01,North Pass,7/11/2018,20180711,3,Butter clam,Saxidomus gigantea,CLMBUT,62
+2018_L_01,North Pass,7/11/2018,20180711,3,Butter clam,Saxidomus gigantea,CLMBUT,54
+2018_L_01,North Pass,7/11/2018,20180711,3,Butter clam,Saxidomus gigantea,CLMBUT,49
+2018_L_01,North Pass,7/11/2018,20180711,3,Butter clam,Saxidomus gigantea,CLMBUT,36
+2018_L_01,North Pass,7/11/2018,20180711,3,Steamer clam,Protothaca staminea,CLMSTM,43
+2018_L_01,North Pass,7/11/2018,20180711,3,Steamer clam,Protothaca staminea,CLMSTM,37
+2018_L_01,North Pass,7/11/2018,20180711,3,Steamer clam,Protothaca staminea,CLMSTM,31
+2018_L_01,North Pass,7/11/2018,20180711,3,Cockle,Clinocardium nuttalli,CLMCKL,22
+2018_L_01,North Pass,7/11/2018,20180711,3,Pointed macoma,Macoma inquinata,CLMPOI,38
+2018_L_01,North Pass,7/11/2018,20180711,3,Pointed macoma,Macoma inquinata,CLMPOI,34
+2018_L_01,North Pass,7/11/2018,20180711,3,Pointed macoma,Macoma inquinata,CLMPOI,12
+2018_L_01,North Pass,7/11/2018,20180711,4,Butter clam,Saxidomus gigantea,CLMBUT,63
+2018_L_01,North Pass,7/11/2018,20180711,4,Butter clam,Saxidomus gigantea,CLMBUT,44
+2018_L_01,North Pass,7/11/2018,20180711,4,Steamer clam,Protothaca staminea,CLMSTM,33
+2018_L_01,North Pass,7/11/2018,20180711,4,Steamer clam,Protothaca staminea,CLMSTM,40
+2018_L_01,North Pass,7/11/2018,20180711,4,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_L_01,North Pass,7/11/2018,20180711,4,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_L_01,North Pass,7/11/2018,20180711,4,Steamer clam,Protothaca staminea,CLMSTM,29
+2018_L_01,North Pass,7/11/2018,20180711,4,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_L_01,North Pass,7/11/2018,20180711,4,Steamer clam,Protothaca staminea,CLMSTM,32
+2018_L_01,North Pass,7/11/2018,20180711,4,Pointed macoma,Macoma inquinata,CLMPOI,35
+2018_L_01,North Pass,7/11/2018,20180711,4,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_L_01,North Pass,7/11/2018,20180711,4,Pointed macoma,Macoma inquinata,CLMPOI,33
+2018_L_01,North Pass,7/11/2018,20180711,4,Pointed macoma,Macoma inquinata,CLMPOI,15
+2018_L_01,North Pass,7/11/2018,20180711,4,Pointed macoma,Macoma inquinata,CLMPOI,16
+2018_L_01,North Pass,7/11/2018,20180711,4,Pointed macoma,Macoma inquinata,CLMPOI,18
+2018_L_01,North Pass,7/11/2018,20180711,5,Butter clam,Saxidomus gigantea,CLMBUT,76
+2018_L_01,North Pass,7/11/2018,20180711,5,Butter clam,Saxidomus gigantea,CLMBUT,70
+2018_L_01,North Pass,7/11/2018,20180711,5,Butter clam,Saxidomus gigantea,CLMBUT,74
+2018_L_01,North Pass,7/11/2018,20180711,5,Steamer clam,Protothaca staminea,CLMSTM,40
+2018_L_01,North Pass,7/11/2018,20180711,5,Steamer clam,Protothaca staminea,CLMSTM,42
+2018_L_01,North Pass,7/11/2018,20180711,5,Steamer clam,Protothaca staminea,CLMSTM,43
+2018_L_01,North Pass,7/11/2018,20180711,5,Steamer clam,Protothaca staminea,CLMSTM,35
+2018_L_01,North Pass,7/11/2018,20180711,5,Steamer clam,Protothaca staminea,CLMSTM,35
+2018_L_01,North Pass,7/11/2018,20180711,5,Steamer clam,Protothaca staminea,CLMSTM,26
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,38
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,33
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,35
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,23
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,19
+2018_L_01,North Pass,7/11/2018,20180711,5,Pointed macoma,Macoma inquinata,CLMPOI,29
+2018_L_01,North Pass,7/11/2018,20180711,6,Butter clam,Saxidomus gigantea,CLMBUT,70
+2018_L_01,North Pass,7/11/2018,20180711,6,Butter clam,Saxidomus gigantea,CLMBUT,67
+2018_L_01,North Pass,7/11/2018,20180711,6,Butter clam,Saxidomus gigantea,CLMBUT,62
+2018_L_01,North Pass,7/11/2018,20180711,6,Butter clam,Saxidomus gigantea,CLMBUT,62
+2018_L_01,North Pass,7/11/2018,20180711,6,Steamer clam,Protothaca staminea,CLMSTM,47
+2018_L_01,North Pass,7/11/2018,20180711,6,Steamer clam,Protothaca staminea,CLMSTM,53
+2018_L_01,North Pass,7/11/2018,20180711,6,Steamer clam,Protothaca staminea,CLMSTM,42
+2018_L_01,North Pass,7/11/2018,20180711,6,Steamer clam,Protothaca staminea,CLMSTM,37
+2018_L_01,North Pass,7/11/2018,20180711,6,Pointed macoma,Macoma inquinata,CLMPOI,38
+2018_L_01,North Pass,7/11/2018,20180711,6,Pointed macoma,Macoma inquinata,CLMPOI,34
+2018_L_01,North Pass,7/11/2018,20180711,8,Butter clam,Saxidomus gigantea,CLMBUT,74
+2018_L_01,North Pass,7/11/2018,20180711,8,Butter clam,Saxidomus gigantea,CLMBUT,67
+2018_L_01,North Pass,7/11/2018,20180711,8,Butter clam,Saxidomus gigantea,CLMBUT,64
+2018_L_01,North Pass,7/11/2018,20180711,8,Butter clam,Saxidomus gigantea,CLMBUT,51
+2018_L_01,North Pass,7/11/2018,20180711,8,Steamer clam,Protothaca staminea,CLMSTM,42
+2018_L_01,North Pass,7/11/2018,20180711,8,Steamer clam,Protothaca staminea,CLMSTM,38
+2018_L_01,North Pass,7/11/2018,20180711,8,Steamer clam,Protothaca staminea,CLMSTM,37
+2018_L_01,North Pass,7/11/2018,20180711,8,Steamer clam,Protothaca staminea,CLMSTM,34
+2018_L_01,North Pass,7/11/2018,20180711,8,Pointed macoma,Macoma inquinata,CLMPOI,36
+2018_L_01,North Pass,7/11/2018,20180711,8,Pointed macoma,Macoma inquinata,CLMPOI,41
+2018_L_01,North Pass,7/11/2018,20180711,8,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_L_01,North Pass,7/11/2018,20180711,8,Pointed macoma,Macoma inquinata,CLMPOI,36
+2018_L_01,North Pass,7/11/2018,20180711,7,Butter clam,Saxidomus gigantea,CLMBUT,47
+2018_L_01,North Pass,7/11/2018,20180711,7,Butter clam,Saxidomus gigantea,CLMBUT,53
+2018_L_01,North Pass,7/11/2018,20180711,7,Steamer clam,Protothaca staminea,CLMSTM,43
+2018_L_01,North Pass,7/11/2018,20180711,7,Steamer clam,Protothaca staminea,CLMSTM,38
+2018_L_01,North Pass,7/11/2018,20180711,7,Steamer clam,Protothaca staminea,CLMSTM,37
+2018_L_01,North Pass,7/11/2018,20180711,7,Steamer clam,Protothaca staminea,CLMSTM,42
+2018_L_01,North Pass,7/11/2018,20180711,7,Steamer clam,Protothaca staminea,CLMSTM,38
+2018_L_01,North Pass,7/11/2018,20180711,7,Steamer clam,Protothaca staminea,CLMSTM,43
+2018_L_01,North Pass,7/11/2018,20180711,7,Pointed macoma,Macoma inquinata,CLMPOI,38
+2018_L_01,North Pass,7/11/2018,20180711,7,Pointed macoma,Macoma inquinata,CLMPOI,26
+2018_L_01,North Pass,7/11/2018,20180711,7,Pointed macoma,Macoma inquinata,CLMPOI,18
+2018_L_01,North Pass,7/11/2018,20180711,7,Pointed macoma,Macoma inquinata,CLMPOI,17
+2018_L_02,Natzuhini,7/12/2018,20180712,1,Butter clam,Saxidomus gigantea,CLMBUT,42
+2018_L_02,Natzuhini,7/12/2018,20180712,1,Steamer clam,Protothaca staminea,CLMPOI,53
+2018_L_02,Natzuhini,7/12/2018,20180712,1,Steamer clam,Protothaca staminea,CLMPOI,54
+2018_L_02,Natzuhini,7/12/2018,20180712,1,Steamer clam,Protothaca staminea,CLMPOI,55
+2018_L_02,Natzuhini,7/12/2018,20180712,1,Macoma,Macoma sp.,CLMMAC,17
+2018_L_02,Natzuhini,7/12/2018,20180712,1,Macoma,Macoma sp.,CLMMAC,17
+2018_L_02,Natzuhini,7/12/2018,20180712,1,Soft-shell clam,Mya arenaria,CLMSOF,22
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Butter clam,Saxidomus gigantea,CLMBUT,50
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Butter clam,Saxidomus gigantea,CLMBUT,66
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Butter clam,Saxidomus gigantea,CLMBUT,52
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Macoma,Macoma sp.,CLMMAC,36
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Macoma,Macoma sp.,CLMMAC,37
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Macoma,Macoma sp.,CLMMAC,17
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Macoma,Macoma sp.,CLMMAC,32
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Macoma,Macoma sp.,CLMMAC,12
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Soft-shell clam,Mya arenaria,CLMSOF,16
+2018_L_02,Natzuhini,7/12/2018,20180712,2,Soft-shell clam,Mya arenaria,CLMSOF,20
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Butter clam,Saxidomus gigantea,CLMBUT,55
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Butter clam,Saxidomus gigantea,CLMBUT,48
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Butter clam,Saxidomus gigantea,CLMBUT,40
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Cockle,Clinocardium nuttalli,CLMCKL,63
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Cockle,Clinocardium nuttalli,CLMCKL,51
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Cockle,Clinocardium nuttalli,CLMCKL,15
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Steamer clam,Protothaca staminea,CLMSTM,52
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Steamer clam,Protothaca staminea,CLMSTM,52
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Steamer clam,Protothaca staminea,CLMSTM,55
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Steamer clam,Protothaca staminea,CLMSTM,51
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Steamer clam,Protothaca staminea,CLMSTM,41
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Steamer clam,Protothaca staminea,CLMSTM,44
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Steamer clam,Protothaca staminea,CLMSTM,29
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Macoma,Macoma sp.,CLMMAC,20
+2018_L_02,Natzuhini,7/12/2018,20180712,3,Macoma,Macoma sp.,CLMMAC,19
+2018_L_02,Natzuhini,7/12/2018,20180712,4,Butter clam,Saxidomus gigantea,CLMBUT,75
+2018_L_02,Natzuhini,7/12/2018,20180712,4,Steamer clam,Protothaca staminea,CLMSTM,55
+2018_L_02,Natzuhini,7/12/2018,20180712,4,Steamer clam,Protothaca staminea,CLMSTM,50
+2018_L_02,Natzuhini,7/12/2018,20180712,4,Steamer clam,Protothaca staminea,CLMSTM,51
+2018_L_02,Natzuhini,7/12/2018,20180712,4,Soft-shell clam,Mya arenaria,CLMSOF,60
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Butter clam,Saxidomus gigantea,CLMBUT,71
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Butter clam,Saxidomus gigantea,CLMBUT,77
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Steamer clam,Protothaca staminea,CLMSTM,55
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Steamer clam,Protothaca staminea,CLMSTM,46
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Steamer clam,Protothaca staminea,CLMSTM,61
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Steamer clam,Protothaca staminea,CLMSTM,53
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Steamer clam,Protothaca staminea,CLMSTM,42
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Steamer clam,Protothaca staminea,CLMSTM,52
+2018_L_02,Natzuhini,7/12/2018,20180712,5,Macoma,Macoma sp.,CLMMAC,38
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Butter clam,Saxidomus gigantea,CLMBUT,69
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Butter clam,Saxidomus gigantea,CLMBUT,65
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Butter clam,Saxidomus gigantea,CLMBUT,68
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Steamer clam,Protothaca staminea,CLMSTM,52
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Steamer clam,Protothaca staminea,CLMSTM,40
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Steamer clam,Protothaca staminea,CLMSTM,49
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Steamer clam,Protothaca staminea,CLMSTM,42
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Macoma,Macoma sp.,CLMMAC,40
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Macoma,Macoma sp.,CLMMAC,33
+2018_L_02,Natzuhini,7/12/2018,20180712,6,Macoma,Macoma sp.,CLMMAC,21
+2018_L_02,Natzuhini,7/12/2018,20180712,7,Butter clam,Saxidomus gigantea,CLMBUT,70
+2018_L_02,Natzuhini,7/12/2018,20180712,7,Butter clam,Saxidomus gigantea,CLMBUT,64
+2018_L_02,Natzuhini,7/12/2018,20180712,7,Butter clam,Saxidomus gigantea,CLMBUT,57
+2018_L_02,Natzuhini,7/12/2018,20180712,7,Butter clam,Saxidomus gigantea,CLMBUT,58
+2018_L_02,Natzuhini,7/12/2018,20180712,7,Steamer clam,Protothaca staminea,CLMSTM,36
+2018_L_02,Natzuhini,7/12/2018,20180712,7,Macoma,Macoma sp.,CLMMAC,33
+2018_L_02,Natzuhini,7/12/2018,20180712,7,Macoma,Macoma sp.,CLMMAC,37
+2018_L_02,Natzuhini,7/12/2018,20180712,7,Macoma,Macoma sp.,CLMMAC,21
+2018_L_02,Natzuhini,7/12/2018,20180712,8,Cockle,Clinocardium nuttalli,CLMCKL,19
+2018_L_02,Natzuhini,7/12/2018,20180712,8,Steamer clam,Protothaca staminea,CLMSTM,51
+2018_L_02,Natzuhini,7/12/2018,20180712,8,Steamer clam,Protothaca staminea,CLMSTM,42
+2018_L_02,Natzuhini,7/12/2018,20180712,8,Steamer clam,Protothaca staminea,CLMSTM,34
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Steamer clam,Protothaca staminea,CLMSTM,41
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Cockle,Clinocardium nuttalli,CLMCKL,26
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Pointed macoma,Macoma inquinata,CLMPOI,26
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Pointed macoma,Macoma inquinata,CLMPOI,17
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Butter clam,Saxidomus gigantea,CLMBUT,37
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Butter clam,Saxidomus gigantea,CLMBUT,20
+2018_L_03,Sukkwan,7/13/2018,20180713,1,Butter clam,Saxidomus gigantea,CLMBUT,16
+2018_L_03,Sukkwan,7/13/2018,20180713,2,Steamer clam,Protothaca staminea,CLMSTM,57
+2018_L_03,Sukkwan,7/13/2018,20180713,2,Steamer clam,Protothaca staminea,CLMSTM,15
+2018_L_03,Sukkwan,7/13/2018,20180713,2,Cockle,Clinocardium nuttalli,CLMCKL,29
+2018_L_03,Sukkwan,7/13/2018,20180713,2,Soft-shell clam,Mya arenaria,CLMSOF,16
+2018_L_03,Sukkwan,7/13/2018,20180713,2,Pointed macoma,Macoma inquinata,CLMPOI,26
+2018_L_03,Sukkwan,7/13/2018,20180713,2,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_L_03,Sukkwan,7/13/2018,20180713,2,Pointed macoma,Macoma inquinata,CLMPOI,16
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Pointed macoma,Macoma inquinata,CLMPOI,29
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Pointed macoma,Macoma inquinata,CLMPOI,34
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Pointed macoma,Macoma inquinata,CLMPOI,42
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Pointed macoma,Macoma inquinata,CLMPOI,19
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Pointed macoma,Macoma inquinata,CLMPOI,16
+2018_L_03,Sukkwan,7/13/2018,20180713,3,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_L_03,Sukkwan,7/13/2018,20180713,4,Butter clam,Saxidomus gigantea,CLMBUT,85
+2018_L_03,Sukkwan,7/13/2018,20180713,4,Butter clam,Saxidomus gigantea,CLMBUT,68
+2018_L_03,Sukkwan,7/13/2018,20180713,4,Pointed macoma,Macoma inquinata,CLMPOI,27
+2018_L_03,Sukkwan,7/13/2018,20180713,4,Pointed macoma,Macoma inquinata,CLMPOI,27
+2018_L_03,Sukkwan,7/13/2018,20180713,4,Pointed macoma,Macoma inquinata,CLMPOI,30
+2018_L_03,Sukkwan,7/13/2018,20180713,4,Cockle,Clinocardium nuttalli,CLMCKL,24
+2018_L_03,Sukkwan,7/13/2018,20180713,4,Macoma,Macoma sp.,CLMMAC,30
+2018_L_03,Sukkwan,7/13/2018,20180713,5,Cockle,Clinocardium nuttalli,CLMCKL,70
+2018_L_03,Sukkwan,7/13/2018,20180713,5,Steamer clam,Protothaca staminea,CLMSTM,47
+2018_L_03,Sukkwan,7/13/2018,20180713,5,Butter clam,Saxidomus gigantea,CLMBUT,82
+2018_L_03,Sukkwan,7/13/2018,20180713,5,Butter clam,Saxidomus gigantea,CLMBUT,55
+2018_L_03,Sukkwan,7/13/2018,20180713,5,Pointed macoma,Macoma inquinata,CLMPOI,45
+2018_L_03,Sukkwan,7/13/2018,20180713,5,Pointed macoma,Macoma inquinata,CLMPOI,50
+2018_L_03,Sukkwan,7/13/2018,20180713,5,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_L_03,Sukkwan,7/13/2018,20180713,6,Steamer clam,Protothaca staminea,CLMSTM,35
+2018_L_03,Sukkwan,7/13/2018,20180713,6,Steamer clam,Protothaca staminea,CLMSTM,43
+2018_L_03,Sukkwan,7/13/2018,20180713,6,Pointed macoma,Macoma inquinata,CLMPOI,45
+2018_L_03,Sukkwan,7/13/2018,20180713,6,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_L_03,Sukkwan,7/13/2018,20180713,6,Pointed macoma,Macoma inquinata,CLMPOI,40
+2018_L_03,Sukkwan,7/13/2018,20180713,6,Bentnose macoma,Macoma nasuta,CLMBNT,40
+2018_L_03,Sukkwan,7/13/2018,20180713,6,Macoma,Macoma sp.,CLMMAC,25
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Steamer clam,Protothaca staminea,CLMSTM,64
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Steamer clam,Protothaca staminea,CLMSTM,47
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Steamer clam,Protothaca staminea,CLMSTM,43
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Steamer clam,Protothaca staminea,CLMSTM,49
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Butter clam,Saxidomus gigantea,CLMBUT,44
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Butter clam,Saxidomus gigantea,CLMBUT,22
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Bentnose macoma,Macoma nasuta,CLMBNT,46
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,53
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,29
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,18
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,35
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,51
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,19
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_L_03,Sukkwan,7/13/2018,20180713,7,Pointed macoma,Macoma inquinata,CLMPOI,30
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Steamer clam,Protothaca staminea,CLMSTM,40
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Butter clam,Saxidomus gigantea,CLMBUT,43
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,49
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,38
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,42
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,43
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,33
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,30
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Pointed macoma,Macoma inquinata,CLMPOI,26
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Bentnose macoma,Macoma nasuta,CLMBNT,50
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Bentnose macoma,Macoma nasuta,CLMBNT,48
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Bentnose macoma,Macoma nasuta,CLMBNT,45
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Bentnose macoma,Macoma nasuta,CLMBNT,32
+2018_L_03,Sukkwan,7/13/2018,20180713,8,Macoma,Macoma sp.,CLMMAC,45
+2018_H_01,Kaguk Cove,7/14/2018,20180714,1,Cockle,Clinocardium nuttalli,CLMCKL,35
+2018_H_01,Kaguk Cove,7/14/2018,20180714,1,Pointed macoma,Macoma inquinata,CLMPOI,35
+2018_H_01,Kaguk Cove,7/14/2018,20180714,1,Pointed macoma,Macoma inquinata,CLMPOI,35
+2018_H_01,Kaguk Cove,7/14/2018,20180714,1,Bentnose macoma,Macoma nasuta,CLMBNT,31
+2018_H_01,Kaguk Cove,7/14/2018,20180714,2,Pointed macoma,Macoma inquinata,CLMPOI,23
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Bentnose macoma,Macoma nasuta,CLMBNT,41
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Bentnose macoma,Macoma nasuta,CLMBNT,35
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Bentnose macoma,Macoma nasuta,CLMBNT,36
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Bentnose macoma,Macoma nasuta,CLMBNT,37
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Pointed macoma,Macoma inquinata,CLMPOI,17
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Pointed macoma,Macoma inquinata,CLMPOI,23
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Macoma,Macoma sp.,CLMMAC,45
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Cockle,Clinocardium nuttalli,CLMCKL,27
+2018_H_01,Kaguk Cove,7/14/2018,20180714,3,Steamer clam,Protothaca staminea,CLMSTM,31
+2018_H_01,Kaguk Cove,7/14/2018,20180714,4,Steamer clam,Protothaca staminea,CLMSTM,34
+2018_H_01,Kaguk Cove,7/14/2018,20180714,4,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_01,Kaguk Cove,7/14/2018,20180714,4,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_01,Kaguk Cove,7/14/2018,20180714,4,Steamer clam,Protothaca staminea,CLMSTM,15
+2018_H_01,Kaguk Cove,7/14/2018,20180714,4,Steamer clam,Protothaca staminea,CLMSTM,17
+2018_H_01,Kaguk Cove,7/14/2018,20180714,4,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_01,Kaguk Cove,7/14/2018,20180714,4,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_H_01,Kaguk Cove,7/14/2018,20180714,4,Pointed macoma,Macoma inquinata,CLMPOI,18
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,40
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,30
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,27
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,27
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_H_01,Kaguk Cove,7/14/2018,20180714,5,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Cockle,Clinocardium nuttalli,CLMCKL,45
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Bentnose macoma,Macoma nasuta,CLMBNT,43
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Bentnose macoma,Macoma nasuta,CLMBNT,28
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Steamer clam,Protothaca staminea,CLMSTM,41
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Steamer clam,Protothaca staminea,CLMSTM,37
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Steamer clam,Protothaca staminea,CLMSTM,28
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,37
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,27
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,28
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,23
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,23
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_01,Kaguk Cove,7/14/2018,20180714,6,Butter clam,Saxidomus gigantea,CLMBUT,24
+2018_H_01,Kaguk Cove,7/14/2018,20180714,7,Pointed macoma,Macoma inquinata,CLMPOI,50
+2018_H_01,Kaguk Cove,7/14/2018,20180714,7,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_H_01,Kaguk Cove,7/14/2018,20180714,7,Pointed macoma,Macoma inquinata,CLMPOI,28
+2018_H_01,Kaguk Cove,7/14/2018,20180714,7,Pointed macoma,Macoma inquinata,CLMPOI,26
+2018_H_01,Kaguk Cove,7/14/2018,20180714,7,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_H_01,Kaguk Cove,7/14/2018,20180714,8,Pointed macoma,Macoma inquinata,CLMPOI,49
+2018_H_01,Kaguk Cove,7/14/2018,20180714,8,Pointed macoma,Macoma inquinata,CLMPOI,31
+2018_H_01,Kaguk Cove,7/14/2018,20180714,8,Steamer clam,Protothaca staminea,CLMSTM,35
+2018_H_01,Kaguk Cove,7/14/2018,20180714,8,Steamer clam,Protothaca staminea,CLMSTM,31
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,26
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Pointed macoma,Macoma inquinata,CLMPOI,16
+2018_H_02,Gaktu Cove,7/15/2018,20180715,1,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Steamer clam,Protothaca staminea,CLMSTM,28
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Pointed macoma,Macoma inquinata,CLMPOI,29
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Pointed macoma,Macoma inquinata,CLMPOI,18
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Pointed macoma,Macoma inquinata,CLMPOI,12
+2018_H_02,Gaktu Cove,7/15/2018,20180715,2,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Pointed macoma,Macoma inquinata,CLMPOI,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Pointed macoma,Macoma inquinata,CLMPOI,19
+2018_H_02,Gaktu Cove,7/15/2018,20180715,3,Pointed macoma,Macoma inquinata,CLMPOI,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,15
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,16
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Steamer clam,Protothaca staminea,CLMSTM,38
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Cockle,Clinocardium nuttalli,CLMCKL,17
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Pointed macoma,Macoma inquinata,CLMPOI,15
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Pointed macoma,Macoma inquinata,CLMPOI,18
+2018_H_02,Gaktu Cove,7/15/2018,20180715,4,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,18
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,16
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,17
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,16
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,16
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,17
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,18
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,17
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,16
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Cockle,Clinocardium nuttalli,CLMCKL,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Pointed macoma,Macoma inquinata,CLMPOI,19
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Pointed macoma,Macoma inquinata,CLMPOI,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Pointed macoma,Macoma inquinata,CLMPOI,18
+2018_H_02,Gaktu Cove,7/15/2018,20180715,5,Pointed macoma,Macoma inquinata,CLMPOI,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,26
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,18
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Steamer clam,Protothaca staminea,CLMSTM,13
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Cockle,Clinocardium nuttalli,CLMCKL,18
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Butter clam,Saxidomus gigantea,CLMBUT,26
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,6,Pointed macoma,Macoma inquinata,CLMPOI,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,14
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Steamer clam,Protothaca staminea,CLMSTM,35
+2018_H_02,Gaktu Cove,7/15/2018,20180715,7,Pointed macoma,Macoma inquinata,CLMPOI,23
+2018_H_02,Gaktu Cove,7/15/2018,20180715,8,Steamer clam,Protothaca staminea,CLMSTM,39
+2018_H_02,Gaktu Cove,7/15/2018,20180715,8,Steamer clam,Protothaca staminea,CLMSTM,28
+2018_H_02,Gaktu Cove,7/15/2018,20180715,8,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_02,Gaktu Cove,7/15/2018,20180715,8,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_02,Gaktu Cove,7/15/2018,20180715,8,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_02,Gaktu Cove,7/15/2018,20180715,8,Pointed macoma,Macoma inquinata,CLMPOI,40
+2018_H_02,Gaktu Cove,7/15/2018,20180715,8,Pointed macoma,Macoma inquinata,CLMPOI,32
+2018_H_02,Gaktu Bay,7/15/2018,20180715,8,Pointed macoma,Macoma inquinata,CLMPOI,25
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Butter clam,Saxidomus gigantea,CLMBUT,47
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Butter clam,Saxidomus gigantea,CLMBUT,33
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Cockle,Clinocardium nuttalli,CLMCKL,17
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,40
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,26
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,43
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,26
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,38
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,18
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,26
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Steamer clam,Protothaca staminea,CLMSTM,17
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Pointed macoma,Macoma inquinata,CLMPOI,37
+2018_H_03,Nossuk Bay,7/16/2018,20180716,1,Pointed macoma,Macoma inquinata,CLMPOI,35
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,37
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Steamer clam,Protothaca staminea,CLMSTM,31
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Cockle,Clinocardium nuttalli,CLMCKL,19
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Butter clam,Saxidomus gigantea,CLMBUT,25
+2018_H_03,Nossuk Bay,7/16/2018,20180716,2,Butter clam,Saxidomus gigantea,CLMBUT,17
+2018_H_03,Nossuk Bay,7/16/2018,20180716,3,Pointed macoma,Macoma inquinata,CLMPOI,35
+2018_H_03,Nossuk Bay,7/16/2018,20180716,3,Steamer clam,Protothaca staminea,CLMSTM,40
+2018_H_03,Nossuk Bay,7/16/2018,20180716,3,Steamer clam,Protothaca staminea,CLMSTM,35
+2018_H_03,Nossuk Bay,7/16/2018,20180716,3,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_03,Nossuk Bay,7/16/2018,20180716,4,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_03,Nossuk Bay,7/16/2018,20180716,4,Steamer clam,Protothaca staminea,CLMSTM,34
+2018_H_03,Nossuk Bay,7/16/2018,20180716,4,Steamer clam,Protothaca staminea,CLMSTM,26
+2018_H_03,Nossuk Bay,7/16/2018,20180716,4,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_03,Nossuk Bay,7/16/2018,20180716,4,Butter clam,Saxidomus gigantea,CLMBUT,32
+2018_H_03,Nossuk Bay,7/16/2018,20180716,5,Bentnose macoma,Macoma nasuta,CLMBNT,47
+2018_H_03,Nossuk Bay,7/16/2018,20180716,5,Pointed macoma,Macoma inquinata,CLMPOI,39
+2018_H_03,Nossuk Bay,7/16/2018,20180716,5,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_03,Nossuk Bay,7/16/2018,20180716,5,Steamer clam,Protothaca staminea,CLMSTM,26
+2018_H_03,Nossuk Bay,7/16/2018,20180716,5,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_03,Nossuk Bay,7/16/2018,20180716,5,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_03,Nossuk Bay,7/16/2018,20180716,6,Steamer clam,Protothaca staminea,CLMSTM,33
+2018_H_03,Nossuk Bay,7/16/2018,20180716,6,Steamer clam,Protothaca staminea,CLMSTM,22
+2018_H_03,Nossuk Bay,7/16/2018,20180716,6,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_03,Nossuk Bay,7/16/2018,20180716,6,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,24
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,27
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,19
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Butter clam,Saxidomus gigantea,CLMBUT,33
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Butter clam,Saxidomus gigantea,CLMBUT,32
+2018_H_03,Nossuk Bay,7/16/2018,20180716,7,Pointed macoma,Macoma inquinata,CLMPOI,22
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,29
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,29
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,36
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,30
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,21
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,20
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,25
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,28
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,23
+2018_H_03,Nossuk Bay,7/16/2018,20180716,8,Steamer clam,Protothaca staminea,CLMSTM,22
