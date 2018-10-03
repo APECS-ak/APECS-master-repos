@@ -21,6 +21,6 @@ library(ggplot2)
 ```
 
 ```{r data}
-
+bio <- read.csv("../../ALL_DATA/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE) ## no such directory
 ```
 
