@@ -1,0 +1,26 @@
+---
+title: "Biomarker_collecitons_summary"
+author: "Wendel Raymond"
+date: "October 3, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Biomarker collections summary from summer 2018
+Here we will take a look at all the tissue samples taken for biomarker analysis from the 2018 field season. From this summary anaysis we hope to identify the spatial and treatment coverage of the samples and therefore be able to decide what samples to actually process. 
+
+```{r library}
+library(dplyr)
+library(DT)
+library(ggplot2)
+```
+
+```{r data}
+
+```
+
