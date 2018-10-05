@@ -1,0 +1,280 @@
+---
+title: "elevations_2018"
+author: "Tiff Stephens"
+date: "10/1/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubridate); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf); library(knitr); library(cowplot); library(ggpmisc); library(DT); library(plyr); library(magick)
+```
+
+```{r}
+# import RAW data
+df.elev <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass_carbon_disturbance/2018_data_efforts/elevation_density3.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+```{r}
+
+# view dimensions of df.elev
+dim(df.elev)
+
+
+# look at structure of df. elev
+glimpse(df.elev)
+
+
+# view summary of df.elev
+summary(df.elev)
+
+
+# coerce date column into date object
+df.elev$date_yyyymmdd <- as.Date(df.elev$date_yyyymmdd, "%Y/%m/%d")
+
+
+# check spread of some data via histograms...but doesn't ultimately matter yet because the elevation data are not yet calculated for MLLW values
+hist(df.elev$fucus_upper_elev_stadia_cm)
+hist(df.elev$fucus_lower_elev_stadia_cm)
+hist(df.elev$edge_diffuse_elev_stadia_cm)
+hist(df.elev$edge_continuous_elev_stadia_cm)
+hist(df.elev$distance_diffuse_band_cm)
+hist(df.elev$shoot_density_inside_0.25m2)
+hist(df.elev$shoot_density_continuous_0.25m2)
+hist(df.elev$shoot_density_diffuse_0.25m2)
+hist(df.elev$flower_density_inside_0.25m2)
+hist(df.elev$flower_density_continuous_0.25m2)
+hist(df.elev$flower_density_diffuse_0.25m2)
+```
+
+```{r}
+
+# convert/calculate (1) MLLW feet to MLLW centimeters, (2) MLLW cm values for Fucus elevations, (3) MLLW cm values for seagrass elevations
+df.elev = df.elev %>% 
+  mutate(waterline_elev_mllw_cm = waterline_elev_mllw_feet_corrected * 30.48, na.rm = TRUE) %>%
+  mutate(fucus_upper_elev_mllw_cm = waterline_elev_mllw_cm + (waterline_elev_stadia_avg_cm - fucus_upper_elev_stadia_cm), na.rm = TRUE) %>%
+  mutate(fucus_lower_elev_mllw_cm = waterline_elev_mllw_cm + (waterline_elev_stadia_avg_cm - fucus_lower_elev_stadia_cm), na.rm = TRUE) %>%
+  mutate(fucus_band_height_cm = fucus_upper_elev_mllw_cm - fucus_lower_elev_mllw_cm, na.rm = TRUE) %>%
+  mutate(edge_diffuse_elev_mllw_cm = waterline_elev_mllw_cm + (waterline_elev_stadia_avg_cm - edge_diffuse_elev_stadia_cm), na.rm = TRUE) %>%
+  mutate(edge_continuous_elev_mllw_cm = waterline_elev_mllw_cm + (waterline_elev_stadia_avg_cm - edge_continuous_elev_stadia_cm), na.rm = TRUE) %>%
+  mutate(diffuse_band_height_cm = edge_diffuse_elev_mllw_cm -edge_continuous_elev_mllw_cm, na.rm = TRUE)
+  
+
+
+# calculate beach slope and diffuse band area
+df.elev = df.elev %>%
+  mutate(beach_slope = diffuse_band_height_cm / (sqrt(((distance_diffuse_band_cm)^2)-((diffuse_band_height_cm)^2))), na.rm = TRUE) %>%
+  mutate(area_diffuse_band_m2 = ((distance_diffuse_band_cm)/100) * 50, na.rm = TRUE)
+
+
+
+
+# this is here becasue I was beginning to calculate the potential percent area decrease due to sea otters and got distracted!
+aggregate(df.elev[, "beach_slope"], list(df.elev$otter_zone2), mean, na.rm = TRUE)
+aggregate(df.elev[, "edge_continuous_elev_mllw_cm"], list(df.elev$otter_zone2), mean, na.rm = TRUE)
+aggregate(df.elev[, "edge_diffuse_elev_mllw_cm"], list(df.elev$otter_zone2), mean, na.rm = TRUE)
+
+mean.slope.all <- (0.0619955 + 0.0515073) / 2
+height.loss.cont.highotter <- (23.592092 - 3.934082)
+height.loss.diff.highotter <- (11.418030 - (-5.301312))
+area.potential.loss.m2 <- (sqrt((19.65801^2) + ((19.65801 / 0.0567514)^2))) / 100
+
+
+
+
+
+
+# convert all density data to meters squared
+df.elev = df.elev %>% 
+  mutate(shoot_density_inside_m2 = shoot_density_inside_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(shoot_density_continuous_m2 = shoot_density_continuous_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(shoot_density_diffuse_m2 = shoot_density_diffuse_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(flower_density_inside_m2 = flower_density_inside_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(flower_density_continuous_m2 = flower_density_continuous_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(flower_density_diffuse_m2 = flower_density_diffuse_0.25m2 * 4, na.rm = TRUE)
+
+
+
+
+df.elev <- df.elev %>% 
+  select(-time_waterline_marked, -visit, -waterline_elev_stadia_cm, -waterline_elev_stadia_avg_cm, -waterline_elev_mllw_feet_corrected, -fucus_upper_elev_stadia_cm, -fucus_lower_elev_stadia_cm, -edge_diffuse_elev_stadia_cm, -edge_continuous_elev_stadia_cm, -shoot_density_inside_0.25m2, -shoot_density_continuous_0.25m2, -shoot_density_diffuse_0.25m2, -flower_density_inside_0.25m2, -flower_density_continuous_0.25m2, -flower_density_diffuse_0.25m2, -na.rm)
+```
+
+
+\boxplots \for \seagrass \densities \OTTERZONE
+```{r}
+colnames(df.elev)
+summary(df.elev)
+
+# order zones
+df.elev$otter_zone = factor(df.elev$otter_zone, levels=c("low","mid","high")) 
+df.elev$otter_zone2 = factor(df.elev$otter_zone2, levels=c("low","high"))
+df.elev$sediment = factor(df.elev$sediment, levels=c("mud","mix","sand")) 
+
+
+# box plots
+p1 <- ggplot(df.elev, aes(site, fucus_band_height_cm, color = otter_zone2)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="right") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+  #facet_wrap(~sediment)
+plot(p1)
+
+p2 <- ggplot(df.elev, aes(otter_zone2, shoot_density_continuous_m2)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="right") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+plot(p2)
+
+p3 <- ggplot(df.elev, aes(otter_zone2, shoot_density_inside_m2)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="right") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+plot(p3)
+```
+
+
+\boxplots \for \seagrass \densities \SEDIMENT
+```{r}
+colnames(df.elev)
+
+# order zones
+df.elev$otter_zone = factor(df.elev$otter_zone, levels=c("low","mid","high")) 
+df.elev$otter_zone2 = factor(df.elev$otter_zone2, levels=c("low","high"))
+df.elev$sediment = factor(df.elev$sediment, levels=c("mud","mix","sand")) 
+
+
+# box plots
+p4 <- ggplot(ag.join, aes(beach_slope, x)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="right") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+plot(p4)
+
+p5 <- ggplot(df.elev, aes(beach_slope, shoot_density_continuous_m2)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="right") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+plot(p5)
+
+p6 <- ggplot(df.elev, aes(sediment, shoot_density_inside_m2)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="right") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+plot(p6)
+```
+
+
+```{r}
+colnames(df.elev)
+
+# order zones
+df.elev$otter_zone = factor(df.elev$otter_zone, levels=c("low","mid","high")) 
+df.elev$otter_zone2 = factor(df.elev$otter_zone2, levels=c("low","high"))
+df.elev$sediment = factor(df.elev$sediment, levels=c("mud","mix","sand")) 
+
+p7=ggplot(df.elev, aes(otter_zone2, area_diffuse_band_m2)) +
+  stat_summary(fun.y=mean, geom="bar", position="dodge") +
+  stat_summary(fun.data=mean_se, geom="errorbar", position=position_dodge(width=0.90), width=0.2) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+  #labs(y="Stipe RGR (d -1)", title="Stipe Elongation") +
+  #facet_wrap(~sediment)
+plot(p7)
+```
+
+
+\MAPPING
+```{r}
+
+# new data frame for all cores
+locations_all = df.elev %>%
+  distinct(df.elev, latitude_N, longitude_W, site) %>%
+  drop_na()
+
+# map "locations_all"
+leaflet(locations_all) %>%
+  addTiles() %>%
+  addMarkers(~longitude_W, ~latitude_N, popup = ~site, label = ~site)
+```
+
+\MAPPING
+```{r}
+leaflet(df.elev) %>% addTiles() %>% 
+  addCircleMarkers(
+    lng = ~longitude_W, lat = ~latitude_N,
+    radius = ~(shoot_density_diffuse_m2) * 0.05,
+    stroke = FALSE, fillOpacity = 0.5, 
+    color = ~'Red',
+    label = as.character(df.elev$shoot_density_diffuse_m2)
+  )
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# print final, cleaned .csv file
+write.csv(df.elev, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass_carbon_disturbance/2018_data_efforts/elevation_density3_cleaned.csv", row.names = TRUE)
+
+```
+
+
+
+
+
+\PLAYING
+```{r}
+# densities
+rm.high.dens <- df.elev %>% filter(shoot_density_continuous_m2 < 800) 
+ag.cont.dens1 <- aggregate(df.elev[, "shoot_density_inside_m2"], list(df.elev$site, df.elev$sediment2), mean, na.rm = TRUE)
+ag.cont.dens2 <- aggregate(rm.high.dens[, "shoot_density_inside_m2"], list(rm.high.dens$site, rm.high.dens$sediment2), mean, na.rm = TRUE)
+
+# slopes
+rm.high.slope <- df.elev %>% filter(beach_slope < 0.3) 
+ag.slope1 <- aggregate(df.elev[, "beach_slope"], list(df.elev$site, df.elev$sediment2), mean, na.rm = TRUE)
+ag.slope2 <- aggregate(rm.high.slope[, "beach_slope"], list(rm.high.slope$site, rm.high.slope$sediment2), mean, na.rm = TRUE)
+
+# join dfs
+ag.join1 <- left_join(ag.cont.dens1, ag.slope1, by = c("Group.1"))
+ag.join2 <- left_join(ag.cont.dens2, ag.slope2, by = c("Group.1"))
+
+
+# scatter plot
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+px = ggplot(ag.join1, aes(x.y, x.x)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #xlab("Sea otter index\n")+ylab("\nPrimary sediment class (site)") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  facet_wrap(~Group.2.y)
+plot(px)
+```
+
+
