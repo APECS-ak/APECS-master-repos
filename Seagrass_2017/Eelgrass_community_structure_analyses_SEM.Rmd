@@ -175,6 +175,9 @@ fishmass.site.fam <- fish.dat %>%
 fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
 
 dat <- merge(dat, fishmass.site.fam, by = "site")
+
+## Create fish predator group ##
+dat$fish_pred_mass <- (dat$Cottidae + dat$Hexagrammidae + dat$Stichaeidae)
 ```
 
 Adding quadratic transformations of date and sea otter index
@@ -186,6 +189,13 @@ dat$date_julian_2 <- dat$date_julian^2
 dat$sea_otter_index_2 <- dat$sea_otter_index^2
 ```
 
+## Correlation exploration
+```{r}
+names(dat)
+pairs(dat[,c(95, 65, 101, 109, 118, 146, 21, 51)])
+pairs(dat[, c(95, 97, 65, 118)])
+```
+
 ## Models
 We will use a piecewise structual equation modeling approach in the piecewiseSEM package. This will be implemented the 'psem' function in the package.
 
@@ -194,11 +204,27 @@ A list of models that characterize the eelgrass community with the data availabl
 
 ```{r mod list}
 mods <- list(
-    glm(log(dat$abvgnd_mass) ~ dat$date_julian + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass)
-),
-    glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass),
-    glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass) + log(dat$fish_mass),
-    glm(log(dat$crab_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + log(dat$epiphmass_shootmass),
-    
+    glm(log(abvgnd_mass) ~  sea_otter_index + log(epiphmass_shootmass), data = dat),
+    glm(log(epiphmass_shootmass) ~  sea_otter_index  + log(abvgnd_mass) , data = dat),
+    glm(sea_otter_index ~  log(abvgnd_mass) + log(epiphmass_shootmass) , data = dat))
+```
+
+```{r}
+test <- psem(glm(log(abvgnd_mass) ~  sea_otter_index + log(epiphmass_shootmass), data = dat),
+    glm(log(epiphmass_shootmass) ~  sea_otter_index + log(abvgnd_mass) , data = dat),
+    glm(sea_otter_index ~ log(abvgnd_mass) + log(epiphmass_shootmass) , data = dat))
+
+summary(test)
+```
+
+glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + sed_inside_prim + light_avail + Ntotal_site + log(crab_mass) + sqrt(fish_pred_mass), data = dat),
+    glm(log(crab_mass) ~ date_julian + sea_otter_index + log(grazermass_shootmass) + sqrt(fish_pred_mass) + log(abvgnd_mass) + log(epiphmass_shootmass), data = dat),
+    glm(sqrt(fish_pred_mass) ~ date_julian + sea_otter_index + log(grazermass_shootmass) + log(fish_mass) + log(abvgnd_mass) + log(epiphmass_shootmass) + log(crab_mass), data = dat)
+
+```{r}
+dat <- data.frame(x1 = runif(50), y1 = runif(50), y2 = runif(50), y3 = runif(50))
+mods <- list()
+model <- psem(lm(y1 ~ x1 + y2, dat), lm(y2 ~ x1, dat), lm(y3 ~ y1, dat))
+summary(model, .progressBar = F)
 ```
 
