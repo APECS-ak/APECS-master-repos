@@ -1,0 +1,204 @@
+---
+title: "Eelgrass_community_structure_analyses_SEM"
+author: "Wendel Raymond"
+date: "October 4, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# An SEM approach to eelgrass communities in southeast Alaska
+As an alternative to using only limear models we may also be able to describe the eelgrass community structure with strutual equation modeling (SEM). This will follow the apprach and package developed by [Lefcheck](https://jonlefcheck.net/2014/07/06/piecewise-structural-equation-modeling-in-ecological-research/). All of the pre data processing will follow that same as the glm models in other scripts.
+
+```{r libraries}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(vegan)
+library(nlme)
+library(lme4)
+library(MASS)
+library(lmerTest)
+library(DT)
+library(sjPlot)
+library(cowplot)
+library(MuMIn)
+library(piecewiseSEM)
+options(na.action = "na.fail")
+theme_set(theme_classic())
+
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+## Data
+**Response metrics**
+1. eelgrass aboveground biomass density (g / m^2^)
+2. eelgrass belowground biomass density (g / m^2^)
+3. eelgrass shoot density (count / m^2^)
+4. ratio of aboveground to belowground biomass density (g / m^2^)
+5. epiphyte load (g epiphyte / g eelgrass)
+6. total grazer load (g grazers/ g eelgrass)
+    + gastropod load (g grazers/ g eelgrass)
+    + crustaecean load (g grazers/ g eelgrass)
+7. crab biomass (g) - can also be counts
+8. fish biomass (g) - can also be counts
+
+**Explanatory factors**
+1. Sea otter index
+2. Time
+3. Sediment type (primary sediment type from the "inside" eelgrass transect)
+4. Light attenuation
+5. crab biomass (g)
+6. fish biomass (g)
+7. grazer load (g/g)
+8. epiphyte load (g/g)
+
+```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
+## Transect ##
+tran.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## Sea Otter Impact Index ##
+so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Sediment ##
+sed.site <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Crab ##
+crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crab.dat$string <- as.character(crab.dat$string)
+
+## Fish ##
+fish.dat <- read.csv("../ALL_DATA/eelgrass_beach_seine_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## Fish Taxonomy ##
+fish.tax <- read.csv("../ALL_DATA/fish_taxonomy_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## RAW Nutrient Data ##
+nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+### Data Prep
+
+Sediment data preparation. Average by site.
+```{r seds by site}
+seds <- sed.site %>% 
+  filter(trans_type == "Inside") %>% 
+  group_by(site) %>% 
+  summarise(sed_inside_prim = mean(sed1_no, na.rm = TRUE))
+
+dat <- merge(tran.dat, seds, by = "site")
+```
+
+Light availability calculation
+```{r light avail}
+dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
+```
+
+Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
+```{r crab sites string, echo=FALSE}
+crab.site <- crab.dat %>% 
+  group_by(site) %>% 
+  summarise(crab_count = mean(count, na.rm = TRUE),
+            crab_mass = mean(mass_g, na.rm = TRUE))
+
+dat <- merge(dat, crab.site, by = "site")
+
+crab.site.fuk <- crab.dat %>% 
+  filter()
+```
+
+Crab data preparation. Summarize counts and mass of cancer/rock crabs. Average by site.
+```{r rock crabs string, echo=FALSE}
+crab.rock <- crab.dat %>% 
+  filter(sp_code == "CRABDUN" | sp_code == "CRABRR" | sp_code == "CRAGRA"| sp_code == "UNRKCB") %>% 
+  group_by(site) %>% 
+    summarise(rock_count = mean(count, na.rm = TRUE),
+            rock_mass = mean(mass_g, na.rm = TRUE))
+
+dat <- merge(dat, crab.rock, by = "site")
+```
+
+Fish data preparation. 
+append taxonomy
+```{r}
+fish.dat <- merge(fish.dat, fish.tax, by.x = "species_scientific", by.y = "scientific_name", all = TRUE)
+```
+
+This needs to be done to summarise by site across all species.
+```{r fish site, echo = FALSE}
+## Full species List ##
+# prep #
+fish.site <- fish.dat %>% 
+  group_by(site) %>% 
+  summarise(fish_count = n(),
+            fish_mass = sum(mass_g))
+
+fish.site.sp <- fish.dat %>% 
+  group_by(site, sp_code) %>% 
+  summarise(count = n()) %>% 
+  spread(key = sp_code, value = count)
+
+fish.site.sp[is.na(fish.site.sp)] <- 0
+
+fish.site.sp$fish_SW_diverse <- diversity(fish.site.sp[,2:56], index = "shannon")
+fish.site.sp$fish_rich <- rowSums(fish.site.sp[, 2:56] != 0)
+
+fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:58)], by = "site")
+
+dat <- merge(dat, fish.site, by = "site")
+
+# biomass community matirx #
+fishmass.site.sp <- fish.dat %>% 
+  group_by(site, sp_code) %>% 
+  summarise(mass = sum(mass_g)) %>% 
+  spread(key = sp_code, value = mass)
+
+fishmass.site.sp[is.na(fishmass.site.sp)] <- 0
+
+## Group by family counts ##
+fish.site.fam <- fish.dat %>% 
+  group_by(site, family) %>% 
+  summarise(count = n()) %>% 
+  spread(key = family, value = count)
+
+fish.site.fam[is.na(fish.site.fam)] <- 0
+
+## Group by family Mass ##
+fishmass.site.fam <- fish.dat %>% 
+  group_by(site, family) %>% 
+  summarise(mass = sum(mass_g)) %>% 
+  spread(key = family, value = mass)
+
+fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
+
+dat <- merge(dat, fishmass.site.fam, by = "site")
+```
+
+Adding quadratic transformations of date and sea otter index
+```{r quadratic}
+## Date ##
+dat$date_julian_2 <- dat$date_julian^2
+
+## Sea otter index ##
+dat$sea_otter_index_2 <- dat$sea_otter_index^2
+```
+
+## Models
+We will use a piecewise structual equation modeling approach in the piecewiseSEM package. This will be implemented the 'psem' function in the package.
+
+### Model list
+A list of models that characterize the eelgrass community with the data available. The groups of data are nutrients, sediment, eelgrass, epiphyte load, grazer load, crab biomass, fish biomass (grouped), and sea otter index.
+
+```{r mod list}
+mods <- list(
+    glm(log(dat$abvgnd_mass) ~ dat$date_julian + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass)
+),
+    glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass),
+    glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + log(dat$crab_mass) + log(dat$fish_mass),
+    glm(log(dat$crab_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + log(dat$fish_mass) + log(dat$abvgnd_mass) + log(dat$epiphmass_shootmass),
+    
+```
+
