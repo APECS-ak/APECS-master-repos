@@ -74,10 +74,32 @@ df.elev = df.elev %>%
 
 
 
+
+
 # this is here becasue I was beginning to calculate the potential percent area decrease due to sea otters and got distracted!
 aggregate(df.elev[, "beach_slope"], list(df.elev$otter_zone2), mean, na.rm = TRUE)
 aggregate(df.elev[, "edge_continuous_elev_mllw_cm"], list(df.elev$otter_zone2), mean, na.rm = TRUE)
 aggregate(df.elev[, "edge_diffuse_elev_mllw_cm"], list(df.elev$otter_zone2), mean, na.rm = TRUE)
+
+df.highotter <- df.elev[df.elev$otter_zone2=="high",]
+df.lowotter <- df.elev[df.elev$otter_zone2=="low",]
+aggregate(df.highotter[, "edge_continuous_elev_mllw_cm"], list(df.highotter$otter_zone2), mean, na.rm = TRUE)
+aggregate(df.lowotter[, "edge_continuous_elev_mllw_cm"], list(df.lowotter$otter_zone2), mean, na.rm = TRUE)
+
+sd.cont.high <- df.highotter$edge_continuous_elev_mllw_cm
+sd.cont.low <- df.lowotter$edge_continuous_elev_mllw_cm
+
+sd(df.highotter$edge_continuous_elev_mllw_cm)
+
+sd(sd.cont.high)
+sd(sd.cont.low)
+
+stat = lm(beach_slope ~ edge_continuous_elev_mllw_cm + sediment, data = df.elev) 
+stat = lm(beach_slope ~ metabolism + DIC_slope + CO2_slope:metabolism, data = low)
+anova(stat)
+summary(stat)
+
+
 
 mean.slope.all <- (0.0619955 + 0.0515073) / 2
 height.loss.cont.highotter <- (23.592092 - 3.934082)
@@ -274,6 +296,32 @@ px = ggplot(ag.join1, aes(x.y, x.x)) +
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 4) +
   facet_wrap(~Group.2.y)
+plot(px)
+```
+
+
+\PLAY
+```{r}
+str(df.elev)
+
+
+rm.high.slope <- df.elev %>% filter(beach_slope < 0.28) 
+
+
+# scatter plot
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+px = ggplot(df.elev, aes(beach_slope, shoot_density_inside_m2, color = sediment2)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #xlab("Sea otter index\n")+ylab("\nPrimary sediment class (site)") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  facet_wrap(~otter_zone2)
 plot(px)
 ```
 
