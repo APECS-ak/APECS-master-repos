@@ -278,3 +278,29 @@ plot(px)
 ```
 
 
+\PLAY
+```{r}
+str(df.elev)
+
+
+rm.high.slope <- df.elev %>% filter(beach_slope < 0.28) 
+
+
+# scatter plot
+my.formula <- y ~ x # defined formula (linear regression) for stats labels on plot
+
+px = ggplot(df.elev, aes(shoot_density_inside_m2, beach_slope, color = sediment)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #xlab("Sea otter index\n")+ylab("\nPrimary sediment class (site)") +
+  stat_poly_eq(formula = my.formula, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4) +
+  facet_wrap(~otter_zone2)
+plot(px)
+```
+
+
