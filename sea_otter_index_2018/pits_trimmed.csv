@@ -1,0 +1,391 @@
+﻿site,trans_loc,trans_bin,n_pits,sed1,sed2
+Big Clam Bay,Edge,1,0,4,7
+Big Clam Bay,Edge,2,0,4,7
+Big Clam Bay,Edge,3,0,4,7
+Big Clam Bay,Edge,4,1,4,7
+Big Clam Bay,Edge,5,2,4,7
+Big Clam Bay,Inside,1,0,4,4
+Big Clam Bay,Inside,2,0,4,4
+Big Clam Bay,Inside,3,0,4,4
+Big Clam Bay,Inside,4,0,4,4
+Big Clam Bay,Inside,5,0,4,4
+Big Clam Bay,Outside,1,0,7,4
+Big Clam Bay,Outside,2,0,7,4
+Big Clam Bay,Outside,3,1,7,4
+Big Clam Bay,Outside,4,0,7,7
+Big Clam Bay,Outside,5,0,7,4
+Big Tree Bay,Edge,1,0,4,6
+Big Tree Bay,Edge,2,2,4,6
+Big Tree Bay,Edge,3,1,4,6
+Big Tree Bay,Edge,4,1,4,6
+Big Tree Bay,Edge,5,1,4,4
+Big Tree Bay,Inside,1,2,3,3
+Big Tree Bay,Inside,2,2,3,3
+Big Tree Bay,Inside,3,0,3,3
+Big Tree Bay,Inside,4,0,3,3
+Big Tree Bay,Inside,5,0,3,2
+Big Tree Bay,Outside,1,1,4,7
+Big Tree Bay,Outside,2,0,4,7
+Big Tree Bay,Outside,3,1,4,7
+Big Tree Bay,Outside,4,2,4,7
+Big Tree Bay,Outside,5,1,4,6
+Blanquizal Bay,Edge,1,7,4,7
+Blanquizal Bay,Edge,2,2,4,7
+Blanquizal Bay,Edge,3,3,3,7
+Blanquizal Bay,Edge,4,5,4,7
+Blanquizal Bay,Edge,5,2,4,7
+Blanquizal Bay,Inside,1,0,3,3
+Blanquizal Bay,Inside,2,1,3,2
+Blanquizal Bay,Inside,3,0,3,2
+Blanquizal Bay,Inside,4,2,3,3
+Blanquizal Bay,Inside,5,2,3,3
+Blanquizal Bay,Outside,1,4,4,7
+Blanquizal Bay,Outside,2,6,4,7
+Blanquizal Bay,Outside,3,7,3,7
+Blanquizal Bay,Outside,4,4,4,7
+Blanquizal Bay,Outside,5,2,4,8
+Chusini,Edge,1,11,1,1
+Chusini,Edge,2,12,1,1
+Chusini,Edge,3,5,1,1
+Chusini,Edge,4,5,1,1
+Chusini,Edge,5,4,1,1
+Chusini,Inside,1,16,1,1
+Chusini,Inside,2,12,1,1
+Chusini,Inside,3,8,1,1
+Chusini,Inside,4,13,1,1
+Chusini,Inside,5,10,1,1
+Chusini,Outside,1,4,2,4
+Chusini,Outside,2,13,3,4
+Chusini,Outside,3,11,2,4
+Chusini,Outside,4,2,1,3
+Chusini,Outside,5,7,1,2
+Dunbar Inlet,Edge,1,1,3,7
+Dunbar Inlet,Edge,2,0,3,7
+Dunbar Inlet,Edge,3,1,3,7
+Dunbar Inlet,Edge,4,0,3,7
+Dunbar Inlet,Edge,5,0,3,7
+Dunbar Inlet,Inside,1,2,4,3
+Dunbar Inlet,Inside,2,2,4,3
+Dunbar Inlet,Inside,3,0,4,3
+Dunbar Inlet,Inside,4,1,4,3
+Dunbar Inlet,Inside,5,0,4,3
+Dunbar Inlet,Outside,1,5,3,7
+Dunbar Inlet,Outside,2,1,3,7
+Dunbar Inlet,Outside,3,4,3,7
+Dunbar Inlet,Outside,4,4,3,7
+Dunbar Inlet,Outside,5,2,3,7
+Garcia Cove,Edge,1,23,5,6
+Garcia Cove,Edge,2,16,5,6
+Garcia Cove,Edge,3,5,5,6
+Garcia Cove,Edge,4,6,5,6
+Garcia Cove,Edge,5,5,5,6
+Garcia Cove,Inside,1,7,4,5
+Garcia Cove,Inside,2,8,4,3
+Garcia Cove,Inside,3,10,4,5
+Garcia Cove,Inside,4,7,4,3
+Garcia Cove,Inside,5,10,4,3
+Garcia Cove,Outside,1,40,4,6
+Garcia Cove,Outside,2,24,4,6
+Garcia Cove,Outside,3,20,4,6
+Garcia Cove,Outside,4,23,4,6
+Garcia Cove,Outside,5,74,4,6
+Goat Mouth Inlet,Edge,1,3,3,6
+Goat Mouth Inlet,Edge,2,4,3,6
+Goat Mouth Inlet,Edge,3,1,4,6
+Goat Mouth Inlet,Edge,4,4,4,6
+Goat Mouth Inlet,Edge,5,6,3,6
+Goat Mouth Inlet,Inside,1,4,3,4
+Goat Mouth Inlet,Inside,2,5,3,4
+Goat Mouth Inlet,Inside,3,2,3,6
+Goat Mouth Inlet,Inside,4,2,3,6
+Goat Mouth Inlet,Inside,5,2,3,6
+Goat Mouth Inlet,Outside,1,1,5,7
+Goat Mouth Inlet,Outside,2,3,5,6
+Goat Mouth Inlet,Outside,3,6,5,6
+Goat Mouth Inlet,Outside,4,5,5,7
+Goat Mouth Inlet,Outside,5,4,5,7
+Guktu Cove,Edge,1,7,1,2
+Guktu Cove,Edge,2,4,1,2
+Guktu Cove,Edge,3,5,1,2
+Guktu Cove,Edge,4,4,1,2
+Guktu Cove,Edge,5,6,1,2
+Guktu Cove,Inside,1,6,1,2
+Guktu Cove,Inside,2,6,1,2
+Guktu Cove,Inside,3,4,1,2
+Guktu Cove,Inside,4,14,1,2
+Guktu Cove,Inside,5,24,1,2
+Guktu Cove,Outside,1,2,1,2
+Guktu Cove,Outside,2,1,1,2
+Guktu Cove,Outside,3,1,3,1
+Guktu Cove,Outside,4,4,1,3
+Guktu Cove,Outside,5,6,1,2
+Hauti Island,Edge,1,10,5,3
+Hauti Island,Edge,2,3,3,4
+Hauti Island,Edge,3,2,3,4
+Hauti Island,Edge,4,10,2,6
+Hauti Island,Edge,5,6,3,2
+Hauti Island,Inside,1,2,3,4
+Hauti Island,Inside,2,0,3,4
+Hauti Island,Inside,3,1,3,4
+Hauti Island,Inside,4,0,3,4
+Hauti Island,Inside,5,0,3,4
+Hauti Island,Outside,1,27,5,7
+Hauti Island,Outside,2,29,5,7
+Hauti Island,Outside,3,22,5,6
+Hauti Island,Outside,4,18,5,6
+Hauti Island,Outside,5,4,3,4
+Kaguk Cove,Edge,1,1,1,2
+Kaguk Cove,Edge,2,3,1,2
+Kaguk Cove,Edge,3,3,1,2
+Kaguk Cove,Edge,4,0,1,2
+Kaguk Cove,Edge,5,3,2,2
+Kaguk Cove,Inside,1,2,1,3
+Kaguk Cove,Inside,2,0,1,1
+Kaguk Cove,Inside,3,0,1,1
+Kaguk Cove,Inside,4,0,1,1
+Kaguk Cove,Inside,5,0,1,2
+Kaguk Cove,Outside,1,3,3,2
+Kaguk Cove,Outside,2,4,3,2
+Kaguk Cove,Outside,3,1,2,3
+Kaguk Cove,Outside,4,3,2,3
+Kaguk Cove,Outside,5,4,3,2
+Kinani,Edge,1,2,4,3
+Kinani,Edge,2,8,4,3
+Kinani,Edge,3,24,4,7
+Kinani,Edge,4,3,4,7-Aug
+Kinani,Edge,5,3,4,7-Aug
+Kinani,Inside,1,0,2,3
+Kinani,Inside,2,0,2,2
+Kinani,Inside,3,0,2,2
+Kinani,Inside,4,0,2,2
+Kinani,Inside,5,0,2,3
+Kinani,Outside,1,0,3,3
+Kinani,Outside,2,0,4,3
+Kinani,Outside,3,6,4,7
+Kinani,Outside,4,12,4,7
+Kinani,Outside,5,9,4,7-Aug
+Mushroom Island,Edge,1,2,4,7
+Mushroom Island,Edge,2,3,4,7
+Mushroom Island,Edge,3,0,4,3
+Mushroom Island,Edge,4,0,3,7
+Mushroom Island,Edge,5,1,3,7
+Mushroom Island,Inside,1,2,2,3
+Mushroom Island,Inside,2,2,2,3
+Mushroom Island,Inside,3,1,2,3
+Mushroom Island,Inside,4,2,2,3
+Mushroom Island,Inside,5,2,2,3
+Mushroom Island,Outside,1,1,4,7
+Mushroom Island,Outside,2,6,4,7
+Mushroom Island,Outside,3,0,3,7
+Mushroom Island,Outside,4,6,7,3
+Mushroom Island,Outside,5,6,7,3
+N Fish Egg Island,Edge,1,1,4,3
+N Fish Egg Island,Edge,2,3,4,3
+N Fish Egg Island,Edge,3,0,4,3
+N Fish Egg Island,Edge,4,0,3,3
+N Fish Egg Island,Edge,5,0,3,3
+N Fish Egg Island,Inside,1,4,3,3
+N Fish Egg Island,Inside,2,0,3,4
+N Fish Egg Island,Inside,3,1,3,4
+N Fish Egg Island,Inside,4,1,3,4
+N Fish Egg Island,Inside,5,0,3,4
+N Fish Egg Island,Outside,1,1,4,3
+N Fish Egg Island,Outside,2,0,4,3
+N Fish Egg Island,Outside,3,1,3,4
+N Fish Egg Island,Outside,4,0,3,4
+N Fish Egg Island,Outside,5,0,4,3
+Natzuhini Bay 1,Edge,1,3,3,2
+Natzuhini Bay 1,Edge,2,2,3,2
+Natzuhini Bay 1,Edge,3,0,3,2
+Natzuhini Bay 1,Edge,4,3,3,2
+Natzuhini Bay 1,Edge,5,3,3,2
+Natzuhini Bay 1,Inside,1,2,2,3
+Natzuhini Bay 1,Inside,2,3,2,3
+Natzuhini Bay 1,Inside,3,5,2,3
+Natzuhini Bay 1,Inside,4,3,2,3
+Natzuhini Bay 1,Inside,5,5,3,1
+Natzuhini Bay 1,Outside,1,0,3,6
+Natzuhini Bay 1,Outside,2,3,3,6
+Natzuhini Bay 1,Outside,3,4,4,4
+Natzuhini Bay 1,Outside,4,5,4,3
+Natzuhini Bay 1,Outside,5,5,4,3
+Natzuhini Bay 2,Edge,1,1,4,7
+Natzuhini Bay 2,Edge,2,4,4,7
+Natzuhini Bay 2,Edge,3,1,4,7
+Natzuhini Bay 2,Edge,4,3,4,7
+Natzuhini Bay 2,Edge,5,0,4,8
+Natzuhini Bay 2,Inside,1,2,3,7
+Natzuhini Bay 2,Inside,2,4,4,8
+Natzuhini Bay 2,Inside,3,3,4,7
+Natzuhini Bay 2,Inside,4,3,4,7
+Natzuhini Bay 2,Inside,5,4,4,8
+Natzuhini Bay 2,Outside,1,1,5,7
+Natzuhini Bay 2,Outside,2,3,5,8
+Natzuhini Bay 2,Outside,3,8,4,7
+Natzuhini Bay 2,Outside,4,8,4,7
+Natzuhini Bay 2,Outside,5,5,5,7
+North Pass,Edge,1,2,4,8
+North Pass,Edge,2,0,4,7
+North Pass,Edge,3,2,4,7
+North Pass,Edge,4,0,4,3
+North Pass,Edge,5,1,4,3
+North Pass,Inside,1,6,2,4
+North Pass,Inside,2,3,2,3
+North Pass,Inside,3,5,2,3
+North Pass,Inside,4,5,2,3
+North Pass,Inside,5,4,2,3
+North Pass,Outside,1,4,5,6
+North Pass,Outside,2,1,5,7
+North Pass,Outside,3,5,5,7
+North Pass,Outside,4,2,5,7
+North Pass,Outside,5,1,5,8
+Nossuk Bay 1,Edge,1,5,3,4
+Nossuk Bay 1,Edge,2,2,2,4
+Nossuk Bay 1,Edge,3,4,3,4
+Nossuk Bay 1,Edge,4,1,2,8
+Nossuk Bay 1,Edge,5,4,3,8
+Nossuk Bay 1,Inside,1,0,2,1
+Nossuk Bay 1,Inside,2,1,2,1
+Nossuk Bay 1,Inside,3,0,2,2
+Nossuk Bay 1,Inside,4,0,2,2
+Nossuk Bay 1,Inside,5,0,2,2
+Nossuk Bay 1,Outside,1,12,4,8
+Nossuk Bay 1,Outside,2,17,4,8
+Nossuk Bay 1,Outside,3,20,4,7
+Nossuk Bay 1,Outside,4,12,3,6
+Nossuk Bay 1,Outside,5,20,3,6
+Nossuk Bay 2,Edge,1,2,3,2
+Nossuk Bay 2,Edge,2,2,3,2
+Nossuk Bay 2,Edge,3,2,3,2
+Nossuk Bay 2,Edge,4,1,3,2
+Nossuk Bay 2,Edge,5,3,3,2
+Nossuk Bay 2,Inside,1,0,1,1
+Nossuk Bay 2,Inside,2,1,1,1
+Nossuk Bay 2,Inside,3,0,1,1
+Nossuk Bay 2,Inside,4,0,1,1
+Nossuk Bay 2,Inside,5,1,1,1
+Nossuk Bay 2,Outside,1,5,3,7
+Nossuk Bay 2,Outside,2,14,3,7
+Nossuk Bay 2,Outside,3,12,3,7
+Nossuk Bay 2,Outside,4,14,3,7
+Nossuk Bay 2,Outside,5,23,3,7
+Port Caldera,Edge,1,0,4,7
+Port Caldera,Edge,2,0,4,8
+Port Caldera,Edge,3,0,4,3
+Port Caldera,Edge,4,0,4,3
+Port Caldera,Edge,5,0,3,4
+Port Caldera,Inside,1,0,5,8
+Port Caldera,Inside,2,0,5,5
+Port Caldera,Inside,3,2,5,5
+Port Caldera,Inside,4,1,5,5
+Port Caldera,Inside,5,0,5,5
+Port Caldera,Outside,1,0,5,7
+Port Caldera,Outside,2,0,5,7
+Port Caldera,Outside,3,0,5,7
+Port Caldera,Outside,4,0,5,5
+Port Caldera,Outside,5,1,5,5
+Port Refugio,Edge,1,0,3,3
+Port Refugio,Edge,2,2,3,4
+Port Refugio,Edge,3,0,3,4
+Port Refugio,Edge,4,1,3,4
+Port Refugio,Edge,5,0,3,3
+Port Refugio,Inside,1,0,3,3
+Port Refugio,Inside,2,0,3,3
+Port Refugio,Inside,3,0,3,3
+Port Refugio,Inside,4,0,3,3
+Port Refugio,Inside,5,0,3,3
+Port Refugio,Outside,1,0,4,4
+Port Refugio,Outside,2,0,4,4
+Port Refugio,Outside,3,1,4,3
+Port Refugio,Outside,4,0,4,3
+Port Refugio,Outside,5,0,3,4
+S Fish Egg Island,Edge,1,8,4,7
+S Fish Egg Island,Edge,2,24,4,7
+S Fish Egg Island,Edge,3,7,4,4
+S Fish Egg Island,Edge,4,0,4,4
+S Fish Egg Island,Edge,5,0,4,4
+S Fish Egg Island,Inside,1,4,4,4
+S Fish Egg Island,Inside,2,3,4,4
+S Fish Egg Island,Inside,3,9,4,4
+S Fish Egg Island,Inside,4,5,4,4
+S Fish Egg Island,Inside,5,6,4,4
+S Fish Egg Island,Outside,1,0,4,7
+S Fish Egg Island,Outside,2,5,4,7
+S Fish Egg Island,Outside,3,12,4,7
+S Fish Egg Island,Outside,4,12,4,4
+S Fish Egg Island,Outside,5,0,4,4
+S Wadleigh Island,Edge,1,4,1,2
+S Wadleigh Island,Edge,2,4,1,2
+S Wadleigh Island,Edge,3,5,1,2
+S Wadleigh Island,Edge,4,4,1,1
+S Wadleigh Island,Edge,5,4,1,1
+S Wadleigh Island,Inside,1,0,1,1
+S Wadleigh Island,Inside,2,1,1,1
+S Wadleigh Island,Inside,3,3,1,1
+S Wadleigh Island,Inside,4,2,1,1
+S Wadleigh Island,Inside,5,1,1,1
+S Wadleigh Island,Outside,1,0,2,3
+S Wadleigh Island,Outside,2,0,2,3
+S Wadleigh Island,Outside,3,0,2,2
+S Wadleigh Island,Outside,4,0,2,2
+S Wadleigh Island,Outside,5,0,2,2
+Salt Lake Bay,Edge,1,3,2,8
+Salt Lake Bay,Edge,2,5,2,2
+Salt Lake Bay,Edge,3,2,2,2
+Salt Lake Bay,Edge,4,6,2,6
+Salt Lake Bay,Edge,5,2,2,5
+Salt Lake Bay,Inside,1,1,1,1
+Salt Lake Bay,Inside,2,2,1,1
+Salt Lake Bay,Inside,3,4,1,1
+Salt Lake Bay,Inside,4,3,1,1
+Salt Lake Bay,Inside,5,6,1,1
+Salt Lake Bay,Outside,1,12,5,6
+Salt Lake Bay,Outside,2,11,5,7
+Salt Lake Bay,Outside,3,12,6,8
+Salt Lake Bay,Outside,4,13,5,8
+Salt Lake Bay,Outside,5,8,5,8
+Shinaku Inlet,Edge,1,2,2,3
+Shinaku Inlet,Edge,2,2,2,3
+Shinaku Inlet,Edge,3,5,3,2
+Shinaku Inlet,Edge,4,4,2,3
+Shinaku Inlet,Edge,5,3,3,2
+Shinaku Inlet,Inside,1,0,1,1
+Shinaku Inlet,Inside,2,1,1,1
+Shinaku Inlet,Inside,3,0,1,1
+Shinaku Inlet,Inside,4,1,1,1
+Shinaku Inlet,Inside,5,0,1,1
+Shinaku Inlet,Outside,1,3,3,2
+Shinaku Inlet,Outside,2,2,3,2
+Shinaku Inlet,Outside,3,5,3,3
+Shinaku Inlet,Outside,4,4,3,4
+Shinaku Inlet,Outside,5,3,3,4
+Soda Bay,Edge,1,5,4,4
+Soda Bay,Edge,2,3,4,4
+Soda Bay,Edge,3,3,4,4
+Soda Bay,Edge,4,3,4,4
+Soda Bay,Edge,5,3,4,4
+Soda Bay,Inside,1,1,4,4
+Soda Bay,Inside,2,0,4,4
+Soda Bay,Inside,3,1,4,3
+Soda Bay,Inside,4,0,4,4
+Soda Bay,Inside,5,2,4,4
+Soda Bay,Outside,1,2,4,7
+Soda Bay,Outside,2,1,4,7
+Soda Bay,Outside,3,0,4,7
+Soda Bay,Outside,4,0,4,7
+Soda Bay,Outside,5,0,4,7
+Sukkwan Narrows,Edge,1,8,3,2
+Sukkwan Narrows,Edge,2,5,3,2
+Sukkwan Narrows,Edge,3,6,2,3
+Sukkwan Narrows,Edge,4,4,3,2
+Sukkwan Narrows,Edge,5,5,3,2
+Sukkwan Narrows,Inside,1,3,2,1
+Sukkwan Narrows,Inside,2,2,3,1
+Sukkwan Narrows,Inside,3,4,2,1
+Sukkwan Narrows,Inside,4,3,2,1
+Sukkwan Narrows,Inside,5,1,3,1
+Sukkwan Narrows,Outside,1,14,3,4
+Sukkwan Narrows,Outside,2,5,3,5
+Sukkwan Narrows,Outside,3,3,3,5
+Sukkwan Narrows,Outside,4,2,3,5
+Sukkwan Narrows,Outside,5,4,3,6

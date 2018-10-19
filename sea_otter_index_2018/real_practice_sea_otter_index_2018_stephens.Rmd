@@ -1,0 +1,164 @@
+---
+title: "SO_Index_2018_Stephens"
+author: "Tiff Stephens; adapted from Wendel Raymonds 2017 index code"
+date: "10/18/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Sea otter index
+Sea otters are hard to keep track of. Until the 2017 and 2018 field seasons, the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summaries and then combined these measures to create a sea otter impact index. 
+
+## Note for non-eelgrass site users
+This script provides the details of how to calculate the sea otter index for eelgrass sites. You may want to do this differently. You my also have to clean up the resulting data in a different way than it is done here, because of how your data is formated etc. This script should be "generalizable" though and it should not be terribly difficult to create a new version of this code that suits a slightly different set of needs.
+
+# Getting started
+In this script we will calculate the sea otter impact index from raw data to final index. This will be in contrast to relying on hard to track ArcGIS processing. The original index uses the following data that will be attributed to each site:
+
+1. Sea otter density from 2018 boat based sea otter surveys (otters/km2)
+2. The duration of sea otter occupation based in USFWS aerial surveys (years)
+3. Sea otter density derived from Tinker et al. population model estimates (otters/km2)
+4. Number of sea otter pits counted at a site (count)
+5. Proportion of sea otter cracked shells (proportion)
+
+Below, raw data is processed such that the final output is a table of sites with the corresponding values for each of these categories. Then that data can be fed into the principle components analysis that generaates the actual index.
+
+
+## Packages
+Since we will be working with spatial data we need to load a bunch of packages that deal with spatial data.
+```{r libraries}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(rgdal)
+library(rgeos)
+library(raster)
+library(gdistance)
+library(spatstat)
+library(leaflet)
+library(DT)
+library(sf)
+library(compare)
+library(corrgram)
+library(sp)
+
+theme_set(theme_classic())
+```
+
+
+
+
+# 1. Sea otter density from boat based surveys
+Two replicate surveys were conducted, a density will be calculated for each survey.
+
+## Data
+You will need data on.
+1. Sites from which sea otter surveys were centered from (points)
+2. Sea otter survey data (points with an "n sea otter" data attribute)
+3. A polygon of the water around the study area. In this case I am using a polygon of all the coastal waters of POW.
+
+\SITES
+```{r data}
+
+# import sites, with coordinates and polygone area for 2 nm buffer
+df.sites <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/sites_2018_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
+str(df.sites)
+
+# convert .csv file into spatial file
+utm8CRS <- crs("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # assign crs to object
+
+sp.sites <- SpatialPointsDataFrame(df.sites[,2:3],
+                    df.sites,    #the R object to convert
+                    proj4string = utm8CRS)   # assign a CRS 
+
+# plot spatial object to check general accuracy of site locations
+plot(sp.sites, 
+     main="Map of Plot Sites")
+
+# write spatial frame into shapefile
+writeOGR(sp.sites, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/spatial_data",
+         "sp_sites", driver="ESRI Shapefile")
+
+# READ SPATIAL FILE FOR SITES
+sp.sites <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/spatial_data", layer = "sp_sites")
+sites.eg <- subset(sp.sites)
+```
+
+\OTTERS
+```{r}
+# import otter counts as .csv file
+df.otts <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/sea_otter_counts_2018_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
+df.otts$so_count <- as.numeric(df.otts$so_count)
+
+# convert .csv file into spatial file
+utm8CRS <- crs("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # assign crs to object
+
+sp.otts <- SpatialPointsDataFrame(df.otts[,2:3],
+                    df.otts,    #the R object to convert
+                    proj4string = utm8CRS)   # assign a CRS 
+
+# plot spatial object to check general accuracy of site locations
+plot(sp.otts, 
+     main="Map of Sea Otter Count Waypoints")
+
+# write spatial frame into shapefile
+writeOGR(sp.sites, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/spatial_data",
+         "sp_otts", driver="ESRI Shapefile")
+
+# READ SPATIAL FILE FOR SITES
+sp.otts <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/spatial_data", layer = "sp_otts")
+```
+
+\H20
+```{r}
+## Prince of Wales Water Polygon
+h2o.utm <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/spatial_data", layer = "POW_water_UTM")
+h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
+```
+
+
+
+
+## Plot sites and sea otters
+Lets see what this all looks like. Note that when plotting with leaflet it helps to have the data in a lat/long progection.  
+```{r plotting everything}
+leaflet() %>% 
+  addTiles() %>% 
+  addPolygons(data = h2o.latlong, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "POW") %>% 
+  addMarkers(data = df.sites, ~longitude, ~latitude, label = ~site) %>% 
+  addCircleMarkers(data = df.otts, ~longitude, ~latitude, color = "red", stroke = FALSE, radius = 5, fillOpacity = ~(so_count/max(so_count)))
+```
+
+
+
+## Calculating survey density
+The general steps are as follows
+1. Calculate survey area centered at each survey site and bounded by 2 nm "as the otter swims". It is essential that site points intersect the water polygon!
+2. Calculate area of above survey area
+3. Calculate density by counting number of otters in each area (and each survey instance if necessary) and dividing by the survey area
+
+Now we need to clean up the data frame generated in the for loop so that it is usable. *This will differ for everyone*.
+```{r clean up data from above}
+
+# Merge with site data
+site.dat <- sites.eg@data[,c(1,2,6:9)]
+site.dat$area <- unique(d$area)
+site.dat <- merge(site.dat, ott.dat.wide, by = "site", all.x = TRUE)
+colnames(site.dat)[8] <- "n_surv1"
+colnames(site.dat)[9] <- "n_surv2"
+
+# NAs to 0
+site.dat[is.na(site.dat)] <- 0
+
+# Calculate density
+site.dat$dens_surv1 <- site.dat$n_surv1 / site.dat$area
+site.dat$dens_surv2 <- site.dat$n_surv2 / site.dat$area
+```
+
+
