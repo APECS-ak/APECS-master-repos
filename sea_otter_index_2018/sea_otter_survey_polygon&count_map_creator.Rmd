@@ -35,7 +35,7 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ### Where is your site?
 Input Lat/Long in decimal degrees below. Make sure that the site is "in the water"! Otherwise this wont work.
 ```{r site}
-site <- structure(list(id = "site", longitude = -132.994318, latitude = 55.264232), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
+site <- structure(list(id = "site", longitude = -132.842514, latitude = 55.188785), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
 xy <- site[,c(2,3)]
 
 site <- SpatialPointsDataFrame(coords = xy, data = site,
@@ -47,7 +47,7 @@ site <- spTransform(site, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0"))
 \\
 ```{r}
 # import otter counts as .csv file
-df.otts <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/sea_otter_counts_2018_stephens_2.csv", stringsAsFactors = FALSE, header = TRUE)
+df.otts <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/sea_otter_counts_2018_stephens_1.csv", stringsAsFactors = FALSE, header = TRUE)
 df.otts$so_count <- as.numeric(df.otts$so_count)
 ```
 
@@ -79,9 +79,9 @@ survey.poly.latlong <- spTransform(survey.poly, CRS("+init=epsg:4326"))
 site.latlong <- spTransform(site, CRS("+init=epsg:4326"))
 leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>% 
-  addCircleMarkers(data = site, ~longitude, ~latitude, color = "black", fillOpacity = 1, stroke = FALSE, radius = 5) %>% 
-  addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "yellow", fillOpacity = 0.5, group = "POW") %>%
-  addCircleMarkers(data = df.otts, ~longitude, ~latitude, color = "red", stroke = FALSE, radius = 2, fillOpacity = 1)
+  addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "lightseagreen", fillOpacity = 0.75, group = "POW") %>%
+  addCircleMarkers(data = site, ~longitude, ~latitude, color = "deeppink", fillOpacity = 1, stroke = FALSE, radius = 7) %>% 
+  addCircleMarkers(data = df.otts, ~longitude, ~latitude, color = "yellow", stroke = FALSE, radius = 3, fillOpacity = 1)
 
 
 a <- (2500 * length(survey.poly.utm) / 1000000) # caculate area of the polygon in sq km. 2500 becasue 50*50=2500

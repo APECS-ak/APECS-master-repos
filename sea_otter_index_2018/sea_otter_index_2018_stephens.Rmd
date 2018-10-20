@@ -339,7 +339,7 @@ ggplot(final.dat, aes(site, sea_otter_index)) +
 ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
   geom_point(size = 4) +
   scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "site", y = "sea otter impact index", col = "sea otter impact Index") +
+  labs(x = "site", y = "sea otter index", col = "SO index (mean density)") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 90))
 ```
@@ -424,7 +424,7 @@ ggplot(final.dat, aes(site, sea_otter_index)) +
 ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
   geom_point(size = 4) +
   scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "site", y = "sea otter impact index", col = "sea otter impact Index") +
+  labs(x = "site", y = "sea otter index", col = "SO index (2 densities)") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 90))
 ```
@@ -437,5 +437,5 @@ DT::datatable(final.dat, caption = "sea otter impact index")
 ## Data export
 ```{r export}
 # Data Export
-write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_2dens_stephens.csv", row.names = FALSE)
+write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_dens2_stephens.csv", row.names = FALSE)
 ```
