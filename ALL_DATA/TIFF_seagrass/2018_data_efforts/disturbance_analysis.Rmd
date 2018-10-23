@@ -291,7 +291,7 @@ colnames(df.site)
 <br>
 
 
-```{r, out.width = "50%"}
+```{r, out.width = "70%"}
 knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/soindex2.png")
 knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/soindexavg.png")
 
@@ -321,9 +321,15 @@ The index on the left uses identical input values as the index from last year, w
 
 <br><br>
 
-First, here is a schematic of what elevation data we collected in the field: 
+First, here is a schematic of what elevation data we collected in the field (along a 50-m transect): 
 
-*INSERT DIAGRAM HERE*
+
+```{r, out.width = "75%", fig.align = "center"}
+knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/intertidal_measurements_a.png")
+
+#include_graphics("images/soindex2.png")
+```
+
 
 <br><br>
 
@@ -1046,6 +1052,15 @@ plot(pz19)
 
 We can do a "back-of-the-envelope" calculation by determining the mean difference in elevation of seagrass edges between low and high sea otter regions, and then applying the slope to estimate the width of the band that sea otters might have bioturbated away. We just need to decide if we believe the patterns and then whether this "back-of-the-envelope" calculation can be streamlined in some way. 
 
+
+```{r, out.width = "70%", fig.align = "center"}
+knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/intertidal_measurements_b.png")
+
+#include_graphics("images/soindex2.png")
+```
+
+
+
 ```{r, include = FALSE}
 #colnames(df.alldat)
 df.alldat2 <- df.alldat[-c(1,2,13,21),] # sugar sand sites removed
@@ -1101,7 +1116,7 @@ area.potential.loss.m2 <- (sqrt((--49.05055^2) + ((--49.05055 / 0.0555911)^2))) 
 
 P.S. We notice that the slopes appear slightly different across the low and high zones. Using a t-test, the two groups are not significantly different (p = 0.407). Additionally, there is no compelling correlation between the slope of a beach and the mean elevation of the seagrass edge...I am not concerned about variation in slope for this study. 
 
-```{r, out.width="50%"}
+```{r, out.width="30%"}
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
@@ -1135,7 +1150,7 @@ plot(pz20)
 
 <br>
 
-I will not delve into this too deep right now because pairing it with biomass data will be stonger and more interesting, but see below. Although there are no significant relationships with seagrass shoot density and the sea otter index, there is a relatively strong positive relationship between the elevation of the continuous edge and the density of seagrass (first plot). It helps explain the almost-identifiable parabolic curve in the third plot (so index vs continuous edge density)...since a similar shape is seen with the elevation data and density positively scales with elevation. This is inconsequential for THIS study, but is a fun thing to consider for morphopetrics and 3D-structure of the bed for other studies. 
+This section will expand when we get seagrass biomass data, but see below. Although there are no significant relationships with seagrass shoot density and the sea otter index, there is a relatively strong positive relationship between the elevation of the continuous edge and the density of seagrass (first plot). It helps explain the almost-identifiable parabolic curve in the third plot (so index vs continuous edge density)...since a similar shape is seen with the elevation data and density positively scales with elevation. This is inconsequential for THIS study, but is a fun thing to consider for morphopetrics and 3D-structure of the bed for other studies. 
 
 <br>
 
@@ -1225,9 +1240,33 @@ plot(pz24)
 
 <br>
 
-Cages.
+I'm still working on this. After revisiting all cages at the very end of the summer, I learned the following:
+
+* We should be able to use the data that characterizes the number of pits dug (and their area coverage) after about two months of installment. Two months was not enough time to fully capture whether the protected seagrass can grow higher into the intertidal...I look forward to seeing these cages again next summer (if they are still there!).
+* The cages were still in great condition. Before leaving, the control plots were bolstered via placement of rebar in the corners. 
+* In 9 out of 10 sites, there were no pits within the cages. At that 10th site, one cage was installed slightly too high and an otter was able to dig a 2 pits along the (unvegetated) edge of the cage, which qualified for recording pit disturbance within the cage. So, out of 30 cages, 1 recieved 2 pits. 
+* There were pits in control plots at 8 out of 10 sites. There were 15 pits, total, spread across 13 control plots. These were close to evenly split between the vegetated and bare sides of the plots. These pits occupy 7.17% to 16.43% of the area (vegetated vs bare seds, respectively) in bioturbated plots, but only 1.19% to 6.39% across all plots within bioturbated sites. If sites without evidence of digging within the plots are included, then these percent area values fall to 0.72% and 2.0%, respectively. 
 
 <br>
+
+```{r, out.width = "50%"}
+knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/cage.png")
+
+knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/control_pit.png")
+
+#include_graphics("images/soindex2.png")
+```
+*(Left) Experimental cage at Garcia Cove. (Right) Control plot with a sizable excavation in the unvegetated side, Guktu Cove. *
+
+<br><br>
+
+Light was also measured within and outside of a cage replica in the air, below 1 m of seawater, and below 5 m of seawater. There is a detectable difference, where seagrass growing within cages should receive slightly less light, on average, compared to control plots. I doubt that this will be strong enough to inhibit expansion of the upper edge, but it could explain any differences in rates of productivity or speed of expansion (both of which we are not quantifying). 
+
+```{r, out.width = "50%", fig.align = "center"}
+knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/cage_light.png")
+
+#include_graphics("images/soindex2.png")
+```
 
 
 
