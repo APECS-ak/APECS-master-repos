@@ -341,7 +341,7 @@ ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "site", y = "sea otter index", col = "SO index (mean density)") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
 ```
 
 Final index data table
@@ -426,7 +426,7 @@ ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "site", y = "sea otter index", col = "SO index (2 densities)") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90))
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
 ```
 
 Final index data table

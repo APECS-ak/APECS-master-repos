@@ -1,0 +1,130 @@
+---
+title: "Untitled"
+author: "Tiff Stephens"
+date: "10/20/2018"
+output: html_document
+---
+
+\ZSCORE
+```{r}
+# STANDARDIZATION VIA Z-TRANSFORMATION
+# Doesn't seem to change the relationships, just re-scales them! 
+
+z <- (df.alldat$edge_diffuse_elev_mllw_cm-min(df.alldat$edge_diffuse_elev_mllw_cm))/(max(df.alldat$edge_diffuse_elev_mllw_cm)-min(df.alldat$edge_diffuse_elev_mllw_cm))
+
+z_manual <- (df.alldat$edge_diffuse_elev_mllw_cm-mean(df.alldat$edge_diffuse_elev_mllw_cm))/sd(df.alldat$edge_diffuse_elev_mllw_cm)
+
+z_scale <- scale(df.alldat$edge_diffuse_elev_mllw_cm, center = TRUE, scale = TRUE)
+
+z_manual
+
+
+# compare the z results, might help with histogram/distrubution, but relationships in scatterplot don't seem to change
+
+range(z_manual)
+skewness(z_manual)
+hist(z_manual)
+
+range(df.alldat$edge_diffuse_elev_mllw_cm)
+skewness(df.alldat$edge_diffuse_elev_mllw_cm)
+hist(df.alldat$edge_diffuse_elev_mllw_cm)
+```
+
+
+
+
+
+
+
+```{r}
+df.alldat$so_region=factor(df.alldat$so_region, levels=c("low","mid","high")) # order sites
+
+#my.formula1 <- y ~ x # defined formula (linear regression) for stats labels on plot
+#my.formula2 <- y ~ poly(x,2) # defined formula (polynomial regression) for stats labels on plot
+
+#linear.model <- lm(y ~ x)
+#log.model <- lm(log(y) ~ x)
+#exp.model <- lm(y ~ exp(x))
+
+linear.model <- (y ~ x)
+log.model <- (log(y) ~ x)
+exp.model <- (y ~ exp(x))
+
+
+p1 = ggplot(df.alldat, aes(pits_abovegrass, dens_otter1, color = pop_dens_surv_km2)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
+  #xlab("Sea otter index\n")+ylab("\nMean sediment class (site)") +
+  geom_text(aes(label=site), size=2)
+  stat_poly_eq(formula = linear.model, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p1)
+
+
+
+ttt <- log(df.alldat$edge_continuous_elev_mllw_cm + 60)
+
+fit.mod <- y~x
+
+p1c = ggplot(df.alldat, aes(pits_site_sum, ttt, color = sedall_site_avg)) +
+  geom_point(size=3) +
+  geom_smooth(method="gam", formula=y~x, size=1) +
+  #geom_smooth(method=lm, formula=y~a*log(x)+b, se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula= y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  #xlab("Sea otter index\n")+ylab("\nMean sediment class (site)") +
+  #geom_text(aes(label=site), size=2)
+  stat_poly_eq(formula = fit.mod, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = fit.mod), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p1c)
+```
+
+
+
+
+
+
+```{r}
+library(plotly)
+
+my.formula1 <- y ~ x # defined formula (linear regression) for stats labels on plot
+my.formula2 <- y ~ poly(x,2) # defined formula (polynomial regression) for stats labels on plot
+
+
+p1 = ggplot(df.all.2, aes(so_index_avg, edge_continuous_elev_corrct, color = sediment2)) +
+  geom_point(size=3) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y~a*log(x)+b, se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula= y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  #xlab("Sea otter index\n")+ylab("\nMean sediment class (site)") +
+  stat_poly_eq(formula = my.formula1, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 4, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = my.formula1), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 4)
+plot(p1)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+

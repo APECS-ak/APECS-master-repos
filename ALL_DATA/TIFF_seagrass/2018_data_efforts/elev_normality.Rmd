@@ -1,0 +1,397 @@
+---
+title: "Checking for Normality (elevations; 2018)"
+author: "Tiff Stephens"
+date: "10/22/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+
+#theme_set(theme_classic())
+#theme_set(theme_cowplot(font_size=12))
+```
+
+```{r}
+library(leaflet)
+library(htmlwidgets)
+library(htmltools)
+library(reshape)
+library(reshape2)
+library(dplyr)
+library(plyr)
+library(tidyr)
+library(ggplot2)
+library(plotly)
+library(lubridate)
+library(DT)
+library(shiny)
+library(mapview)
+library(sp)
+library(sf)
+library(knitr)
+library(cowplot)
+library(ggpmisc)
+library(DT)
+library(magick)
+library(mgcv)
+```
+
+
+\BeachSlope
+```{r}
+slopes <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/elevs_worked.csv", stringsAsFactors = FALSE, header = TRUE)
+
+slopes <- slopes[, -c(2:21, 23:29)] # remove these columns
+
+slopes <- aggregate(beach_slope ~ site, data = slopes, mean, na.rm = TRUE) # calculate mean slope per site
+```
+
+
+\OtterMetrics
+```{r}
+index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_dens2_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
+
+index <- index %>%
+  mutate(dens_otter_avg = (dens_otter1 + dens_otter2) / 2)
+
+index <- index[, -c(2:6, 12)] # remove these columns
+```
+
+
+\SedimentQualitative
+```{r}
+# import pits and sediment quality data as .csv file
+df.seds <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
+
+
+# summarise mean sediment quality within site, transects stacked in one column
+df.1 <- aggregate(sed1 ~ site + trans_loc, data = df.seds, mean, na.rm = TRUE)
+df.2 <- aggregate(sed2 ~ site + trans_loc, data = df.seds, mean, na.rm = TRUE)
+df.seds.stack <- left_join(df.1, df.2, by = c("site", "trans_loc")) # join both seds together
+
+
+# summarise sediment quality with transects in independent columns
+df.1 <- spread(df.1, key = trans_loc, value = sed1) # split into three columns
+colnames(df.1)[2] <- "sed1_edge" # change column names
+colnames(df.1)[3] <- "sed1_inside" # change column names
+colnames(df.1)[4] <- "sed1_outside" # change column names
+
+df.2 <- spread(df.2, key = trans_loc, value = sed2) # split into three columns
+colnames(df.2)[2] <- "sed2_edge" # change column names
+colnames(df.2)[3] <- "sed2_inside" # change column names
+colnames(df.2)[4] <- "sed2_outside" # change column names
+
+df.seds.trans <- left_join(df.1, df.2, by = c("site")) # join both seds together
+
+
+# get means for site
+df.seds.trans <- df.seds.trans %>%
+  mutate(sed1_site_avg = (sed1_edge + sed1_inside + sed1_outside) / 3) %>%
+  mutate(sed2_site_avg = (sed2_edge + sed2_inside + sed2_outside) / 3) %>%
+  mutate(sedall_site_avg = (sed1_edge + sed1_inside + sed1_outside + sed2_edge + sed2_inside + sed2_outside) / 6) %>%
+  mutate(sed1_abovegrass = (sed1_edge + sed1_outside) / 2) %>%
+  mutate(sed2_abovegrass = (sed2_edge + sed2_outside) / 2)
+
+
+# join other sed + site data
+sites.2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/sites_2018.csv", stringsAsFactors = FALSE, header = TRUE) # import site data
+
+df.seds.trans <- left_join(sites.2018, df.seds.trans, by = c("site")) # join both seds together
+```
+
+```{r}
+rm(df.1)
+rm(df.2)
+rm(df.seds)
+```
+
+
+\PitsExtended
+```{r}
+# import pits and sediment quality data as .csv file
+df.pits <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
+
+
+# summarise mean sediment quality within site, transects stacked in one column
+df.pits.stack <- aggregate(n_pits ~ site + trans_loc, data = df.pits, sum, na.rm = TRUE)
+
+
+# summarise sediment quality with transects in independent columns
+library(reshape)
+df.pits.trans <- spread(df.pits.stack, key = trans_loc, value = n_pits) # split into three columns
+colnames(df.pits.trans)[2] <- "pits_edge" # change column names
+colnames(df.pits.trans)[3] <- "pits_inside" # change column names
+colnames(df.pits.trans)[4] <- "pits_outside" # change column names
+
+
+# get means for site
+df.pits.trans <- df.pits.trans %>%
+  mutate(pits_site_sum = pits_edge + pits_inside + pits_outside) %>%
+  mutate(pits_abovegrass = pits_edge + pits_outside)
+```
+
+```{r}
+rm(df.pits)
+```
+
+
+\JoinSiteData
+```{r}
+# join site data by site, only
+df.site <- left_join(df.seds.trans, slopes, by = c("site")) # join 
+df.site <- left_join(df.site, index, by = c("site")) # join 
+df.site <- left_join(df.site, df.pits.trans, by = c("site")) # join 
+
+colnames(df.site)[4] <- "so_region" # change column names
+colnames(df.site)[5] <- "sed1_qual" # change column names
+colnames(df.site)[6] <- "sed2_qual" # change column names
+colnames(df.site)[28] <- "so_index" # change column names
+
+
+
+# join site data by transect location and site
+df.stacked <- left_join(df.seds.stack, df.pits.stack, by = c("site", "trans_loc")) # join 
+df.stacked <- left_join(df.stacked, df.site, by = c("site")) # join 
+
+df.stacked <- df.stacked[, -c(14:24, 34:37)] # remove these columns
+```
+
+```{r}
+rm(df.seds.stack)
+rm(df.pits.stack)
+rm(df.seds.trans)
+rm(df.pits.trans)
+rm(index)
+rm(sites.2018)
+rm(slopes)
+```
+
+```{r}
+# organize 
+df.site <- df.site[c("site","longitude","latitude","date_grass_MM.DD.YY","date_otts1_MM.DD.YY","date_otts2_MM.DD.YY","so_region","beach_slope","site_polygon_area_km2","so_index","so_duration","pop_dens_surv_km2","dens_otter1","dens_otter2","dens_otter_avg","prop_otter_shells","sed1_qual","sed2_qual","sed1_edge","sed1_inside","sed1_outside","sed2_edge","sed2_inside","sed2_outside","sed1_site_avg","sed2_site_avg","sedall_site_avg","sed1_abovegrass","sed2_abovegrass","pits_edge","pits_inside","pits_outside","pits_site_sum","pits_abovegrass")]
+
+df.stacked <- df.stacked[c("site","longitude","latitude","date_grass_MM.DD.YY","date_otts1_MM.DD.YY","date_otts2_MM.DD.YY","site_polygon_area_km2","trans_loc","so_region","beach_slope","sed1_qual","sed2_qual","sed1","sed2","n_pits","so_index","so_duration","pop_dens_surv_km2","dens_otter1","dens_otter2","dens_otter_avg","prop_otter_shells")]
+```
+
+
+
+\Elevations
+```{r}
+df.elev <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/elevs_worked.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.elev <- df.elev[, -c(2:9, 11:12, 14, 22, 24:29)] # remove these columns
+
+df.1 <- aggregate(distance_diffuse_band_cm ~ site, data = df.elev, mean, na.rm = TRUE)
+df.2 <- aggregate(fucus_upper_elev_mllw_cm ~ site, data = df.elev, mean, na.rm = TRUE)
+df.3 <- aggregate(fucus_lower_elev_mllw_cm ~ site, data = df.elev, mean, na.rm = TRUE)
+df.4 <- aggregate(fucus_mean_elev_mllw_cm ~ site, data = df.elev, mean, na.rm = TRUE)
+df.5 <- aggregate(fucus_band_height_cm ~ site, data = df.elev, mean, na.rm = TRUE)
+df.6 <- aggregate(edge_diffuse_elev_mllw_cm ~ site, data = df.elev, mean, na.rm = TRUE)
+df.7 <- aggregate(edge_continuous_elev_mllw_cm ~ site, data = df.elev, mean, na.rm = TRUE)
+df.8 <- aggregate(diffuse_band_height_cm ~ site, data = df.elev, mean, na.rm = TRUE)
+df.9 <- aggregate(area_diffuse_band_m2 ~ site, data = df.elev, mean, na.rm = TRUE)
+
+df.elev.means <- left_join(df.1, df.2, by = c("site")) # join both indices together
+df.elev.means <- left_join(df.elev.means, df.3, by = c("site"))
+df.elev.means <- left_join(df.elev.means, df.4, by = c("site"))
+df.elev.means <- left_join(df.elev.means, df.5, by = c("site"))
+df.elev.means <- left_join(df.elev.means, df.6, by = c("site"))
+df.elev.means <- left_join(df.elev.means, df.7, by = c("site"))
+df.elev.means <- left_join(df.elev.means, df.8, by = c("site"))
+df.elev.means <- left_join(df.elev.means, df.9, by = c("site"))
+```
+
+```{r}
+rm(df.1)
+rm(df.2)
+rm(df.3)
+rm(df.4)
+rm(df.5)
+rm(df.6)
+rm(df.7)
+rm(df.8)
+rm(df.9)
+rm(df.elev)
+```
+
+```{r}
+# fucus correction
+df.elev.means = df.elev.means %>% 
+  mutate(edge_diffuse_elev_corrct = edge_diffuse_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_continuous_elev_corrct = edge_continuous_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) 
+
+colnames(df.elev.means)[2] <- "diffuse_band_distance_cm" # change column names
+colnames(df.elev.means)[9] <- "diffuse_band_height_cm" # change column names
+colnames(df.elev.means)[10] <- "diffuse_band_area_m2" # change column names
+
+
+# reorganize columns
+df.elev.means <- df.elev.means[c("site","fucus_upper_elev_mllw_cm","fucus_lower_elev_mllw_cm","fucus_mean_elev_mllw_cm","fucus_band_height_cm","edge_diffuse_elev_mllw_cm","edge_continuous_elev_mllw_cm","edge_diffuse_elev_corrct","edge_continuous_elev_corrct","diffuse_band_distance_cm","diffuse_band_height_cm","diffuse_band_area_m2")]
+```
+
+
+
+\SeagrassDensity
+```{r}
+df.sgdens <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/elevs_worked.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.sgdens <- df.sgdens[, -c(2:9, 11:23)] # remove these columns
+
+
+df.10 <- aggregate(shoot_density_inside_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
+df.11 <- aggregate(shoot_density_continuous_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
+df.12 <- aggregate(shoot_density_diffuse_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
+df.13 <- aggregate(flower_density_inside_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
+df.14 <- aggregate(flower_density_continuous_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
+df.15 <- aggregate(flower_density_diffuse_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
+
+df.sgdens.means <- left_join(df.10, df.11, by = c("site"))
+df.sgdens.means <- left_join(df.sgdens.means, df.12, by = c("site"))
+df.sgdens.means <- left_join(df.sgdens.means, df.13, by = c("site"))
+df.sgdens.means <- left_join(df.sgdens.means, df.14, by = c("site"))
+df.sgdens.means <- left_join(df.sgdens.means, df.15, by = c("site"))
+```
+
+```{r}
+rm(df.10)
+rm(df.11)
+rm(df.12)
+rm(df.13)
+rm(df.14)
+rm(df.15)
+rm(df.sgdens)
+```
+
+
+
+
+
+\MERGE
+\ALLDAT
+```{r}
+df.alldat <- left_join(df.site, df.elev.means, by = c("site"))
+df.alldat <- left_join(df.alldat, df.sgdens.means, by = c("site"))
+```
+
+```{r}
+rm(df.site)
+rm(df.elev.means)
+rm(df.sgdens.means)
+```
+
+```{r export}
+# Data Export
+write.csv(df.alldat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/alldat.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<br><br><br><br><br>
+
+
+
+### **Checking normality in Fucus elevation data**
+
+3 of 4 are normally distributed; the height of the Fucus band is lightly, right-skewed. 
+
+<br>
+
+\Fucus
+```{r, include = FALSE}
+# histograms
+f1 <- hist(df.alldat$fucus_upper_elev_mllw_cm)
+f2 <- hist(df.alldat$fucus_lower_elev_mllw_cm)
+f3 <- hist(df.alldat$fucus_mean_elev_mllw_cm) 
+f4 <- hist(df.alldat$fucus_band_height_cm) # slightly right skewed
+
+cube.fucus_band_height_cm <- (df.alldat$fucus_band_height_cm)^(1/3)
+f4.cube <- hist(cube.fucus_band_height_cm)
+```
+
+```{r, out.width = "30%"}
+plot(f1, main = "Fucus upper MLLW (cm); skew = -0.200")
+plot(f2, main = "Fucus lower MLLW (cm); skew = -0.083")
+plot(f3, main = "Fucus mean MLLW (cm); skew = -0.125")
+plot(f4, main = "Fucus band height (cm); skew = +0.423")
+#plot(f4.cube)
+```
+
+
+
+<br><br><br><br>
+
+**Checking normality in seagrass elevation data and diffuse band attributes**
+
+All are right-skewed. 
+
+<br>
+
+```{r, include = FALSE}
+# histograms
+sg1 <- hist(df.alldat$edge_diffuse_elev_mllw_cm) # right skewed, low
+sg2 <- hist(df.alldat$edge_continuous_elev_mllw_cm) # right skewed
+sg3 <- hist(df.alldat$edge_diffuse_elev_corrct) # right skewed
+sg4 <- hist(df.alldat$edge_continuous_elev_corrct) # right skewed, high
+sg5 <- hist(df.alldat$diffuse_band_distance_cm) # right skewed
+sg6 <- hist(df.alldat$diffuse_band_height_cm) # right skewed, high
+sg7 <- hist(df.alldat$diffuse_band_area_m2) # right skewed
+
+cube.edge_diffuse_elev_mllw_cm <- (df.alldat$edge_diffuse_elev_mllw_cm)^(1/3)
+sg1.cube <- hist(cube.edge_diffuse_elev_mllw_cm)
+```
+
+```{r, out.width = "30%"}
+plot(sg1, main = "Diffuse edge MLLW (cm); skew = +0.423")
+#plot(sg3, main = "Diffuse edge, corrected MLLW (cm); skew = +0.824")
+
+plot(sg2, main = "Continuous edge MLLW (cm); skew = +0.666")
+#plot(sg4, main = "Continuous edge, corrected MLLW (cm); skew = +1.082")
+
+plot(sg5, main = "Diffuse band width (cm); skew = +0.740")
+plot(sg6, main = "Diffuse band height (cm); skew = +1.643")
+plot(sg7, main = "Diffuse band area (m^2); skew = +0.740")
+```
+
+
+
+
+<br><br><br><br>
+
+**Checking normality in seagrass density data**
+
+All are right-skewed. 
+
+<br>
+
+```{r, include = FALSE}
+#histograms
+d1 <- hist(df.alldat$shoot_density_inside_m2) # right skewed
+d2 <- hist(df.alldat$shoot_density_continuous_m2) # right skewed, high
+d3 <- hist(df.alldat$shoot_density_diffuse_m2) # right skewed
+d4 <- hist(df.alldat$flower_density_inside_m2) # right skewed, high
+d5 <- hist(df.alldat$flower_density_continuous_m2) # right skewed, high
+d6 <- hist(df.alldat$flower_density_diffuse_m2) # right skewed, high
+```
+
+```{r, out.width = "30%"}
+plot(d3, main = "Shoot density, diffuse edge (m^2); skew = +0.772")
+plot(d2, main = "Shoot density, continuous edge (m^2); skew = +1.259")
+plot(d1, main = "Shoot density, inside (m^2); skew = +0.594")
+
+plot(d6, main = "Flower density, diffuse edge (m^2); skew = +1.369")
+plot(d5, main = "Flower density, continuous edge (m^2); skew = +1.549")
+plot(d4, main = "Flower density, inside (m^2); skew = +1.507")
+```

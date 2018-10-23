@@ -1,0 +1,115 @@
+---
+title: "elevations_2018"
+author: "Tiff Stephens"
+date: "10/1/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubridate); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf); library(knitr); library(cowplot); library(ggpmisc); library(DT); library(plyr); library(magick)
+```
+
+```{r}
+# import RAW data
+df.elev <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/elevation_density.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+```{r}
+# view dimensions of df.elev
+dim(df.elev)
+
+# look at structure of df. elev
+glimpse(df.elev)
+
+# view summary of df.elev
+summary(df.elev)
+
+# coerce date column into date object
+df.elev$date_yyyymmdd <- as.Date(df.elev$date_yyyymmdd, "%Y/%m/%d")
+```
+
+```{r}
+# convert/calculate (1) MLLW feet to MLLW centimeters, (2) MLLW cm values for Fucus elevations, (3) MLLW cm values for seagrass elevations
+df.elev = df.elev %>% 
+  mutate(waterline_elev_mllw_cm = waterline_elev_mllw_feet_corrected * 30.48, na.rm = TRUE) %>%
+  mutate(fucus_upper_elev_mllw_cm = waterline_elev_mllw_cm + (waterline_elev_stadia_avg_cm - fucus_upper_elev_stadia_cm), na.rm = TRUE) %>%
+  mutate(fucus_lower_elev_mllw_cm = waterline_elev_mllw_cm + (waterline_elev_stadia_avg_cm - fucus_lower_elev_stadia_cm), na.rm = TRUE) %>%
+  mutate(fucus_mean_elev_mllw_cm = (fucus_upper_elev_mllw_cm +fucus_lower_elev_mllw_cm) / 2, na.rm = TRUE) %>%
+  mutate(fucus_band_height_cm = fucus_upper_elev_mllw_cm - fucus_lower_elev_mllw_cm, na.rm = TRUE) %>%
+  mutate(edge_diffuse_elev_mllw_cm = waterline_elev_mllw_cm + (waterline_elev_stadia_avg_cm - edge_diffuse_elev_stadia_cm), na.rm = TRUE) %>%
+  mutate(edge_continuous_elev_mllw_cm = waterline_elev_mllw_cm + (waterline_elev_stadia_avg_cm - edge_continuous_elev_stadia_cm), na.rm = TRUE) %>%
+  mutate(diffuse_band_height_cm = edge_diffuse_elev_mllw_cm -edge_continuous_elev_mllw_cm, na.rm = TRUE)
+
+
+# calculate beach slope and diffuse band area
+df.elev = df.elev %>%
+  mutate(beach_slope = diffuse_band_height_cm / (sqrt(((distance_diffuse_band_cm)^2)-((diffuse_band_height_cm)^2))), na.rm = TRUE) %>%
+  mutate(area_diffuse_band_m2 = ((distance_diffuse_band_cm)/100) * 50, na.rm = TRUE)
+```
+
+```{r}
+# convert all density data to meters squared
+df.elev = df.elev %>% 
+  mutate(shoot_density_inside_m2 = shoot_density_inside_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(shoot_density_continuous_m2 = shoot_density_continuous_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(shoot_density_diffuse_m2 = shoot_density_diffuse_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(flower_density_inside_m2 = flower_density_inside_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(flower_density_continuous_m2 = flower_density_continuous_0.25m2 * 4, na.rm = TRUE) %>%
+  mutate(flower_density_diffuse_m2 = flower_density_diffuse_0.25m2 * 4, na.rm = TRUE)
+
+
+colnames(df.elev)
+
+df.elev <- df.elev[, -c(2:11,13:21,23:30)] # remove these columns
+```
+
+
+\DataExport
+```{r export}
+# Data Export
+write.csv(df.elev, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_Data/TIFF_seagrass/2018_data_efforts/elevs_worked.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+\playing
+```{r}
+# this is here becasue I was beginning to calculate the potential percent area decrease due to sea otters and got distracted!
+aggregate(df.elev[, "beach_slope"], list(df.elev$otter_zone), mean, na.rm = TRUE)
+aggregate(df.elev[, "edge_continuous_elev_mllw_cm"], list(df.elev$otter_zone), mean, na.rm = TRUE)
+aggregate(df.elev[, "edge_diffuse_elev_mllw_cm"], list(df.elev$otter_zone), mean, na.rm = TRUE)
+
+df.highotter <- df.elev[df.elev$otter_zone2=="high",]
+df.lowotter <- df.elev[df.elev$otter_zone2=="low",]
+aggregate(df.highotter[, "edge_continuous_elev_mllw_cm"], list(df.highotter$otter_zone2), mean, na.rm = TRUE)
+aggregate(df.lowotter[, "edge_continuous_elev_mllw_cm"], list(df.lowotter$otter_zone2), mean, na.rm = TRUE)
+
+sd.cont.high <- df.highotter$edge_continuous_elev_mllw_cm
+sd.cont.low <- df.lowotter$edge_continuous_elev_mllw_cm
+
+sd(df.highotter$edge_continuous_elev_mllw_cm)
+
+sd(sd.cont.high)
+sd(sd.cont.low)
+
+stat = lm(beach_slope ~ edge_continuous_elev_mllw_cm + sediment, data = df.elev) 
+stat = lm(beach_slope ~ metabolism + DIC_slope + CO2_slope:metabolism, data = low)
+anova(stat)
+summary(stat)
+
+
+
+mean.slope.all <- (0.0619955 + 0.0515073) / 2
+height.loss.cont.highotter <- (23.592092 - 3.934082)
+height.loss.diff.highotter <- (11.418030 - (-5.301312))
+area.potential.loss.m2 <- (sqrt((19.65801^2) + ((19.65801 / 0.0567514)^2))) / 100
+```

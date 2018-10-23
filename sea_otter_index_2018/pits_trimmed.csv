@@ -152,8 +152,8 @@ Kaguk Cove,Outside,5,4,3,2
 Kinani,Edge,1,2,4,3
 Kinani,Edge,2,8,4,3
 Kinani,Edge,3,24,4,7
-Kinani,Edge,4,3,4,7-Aug
-Kinani,Edge,5,3,4,7-Aug
+Kinani,Edge,4,3,4,7
+Kinani,Edge,5,3,4,8
 Kinani,Inside,1,0,2,3
 Kinani,Inside,2,0,2,2
 Kinani,Inside,3,0,2,2
@@ -163,7 +163,7 @@ Kinani,Outside,1,0,3,3
 Kinani,Outside,2,0,4,3
 Kinani,Outside,3,6,4,7
 Kinani,Outside,4,12,4,7
-Kinani,Outside,5,9,4,7-Aug
+Kinani,Outside,5,9,4,7
 Mushroom Island,Edge,1,2,4,7
 Mushroom Island,Edge,2,3,4,7
 Mushroom Island,Edge,3,0,4,3
@@ -329,21 +329,21 @@ S Wadleigh Island,Outside,2,0,2,3
 S Wadleigh Island,Outside,3,0,2,2
 S Wadleigh Island,Outside,4,0,2,2
 S Wadleigh Island,Outside,5,0,2,2
-Salt Lake Bay,Edge,1,3,2,8
-Salt Lake Bay,Edge,2,5,2,2
-Salt Lake Bay,Edge,3,2,2,2
-Salt Lake Bay,Edge,4,6,2,6
-Salt Lake Bay,Edge,5,2,2,5
+Salt Lake Bay,Edge,1,8,2,8
+Salt Lake Bay,Edge,2,10,2,2
+Salt Lake Bay,Edge,3,7,2,2
+Salt Lake Bay,Edge,4,11,2,6
+Salt Lake Bay,Edge,5,7,2,5
 Salt Lake Bay,Inside,1,1,1,1
 Salt Lake Bay,Inside,2,2,1,1
 Salt Lake Bay,Inside,3,4,1,1
 Salt Lake Bay,Inside,4,3,1,1
 Salt Lake Bay,Inside,5,6,1,1
-Salt Lake Bay,Outside,1,12,5,6
-Salt Lake Bay,Outside,2,11,5,7
-Salt Lake Bay,Outside,3,12,6,8
-Salt Lake Bay,Outside,4,13,5,8
-Salt Lake Bay,Outside,5,8,5,8
+Salt Lake Bay,Outside,1,22,5,6
+Salt Lake Bay,Outside,2,21,5,7
+Salt Lake Bay,Outside,3,22,6,8
+Salt Lake Bay,Outside,4,23,5,8
+Salt Lake Bay,Outside,5,18,5,8
 Shinaku Inlet,Edge,1,2,2,3
 Shinaku Inlet,Edge,2,2,2,3
 Shinaku Inlet,Edge,3,5,3,2
