@@ -280,7 +280,7 @@ We want to take into account the number of sea otter pits at a site.
 For this you will need
 1. The sea otter pit data
 ```{r}
-pits <- read.csv("../ALL_DATA/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+pits <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 We now want to sum to the total number of pits at each site and append that to our master data
@@ -341,40 +341,22 @@ corrgram(site.dat[,10:15])
 pairs(site.dat[,10:15])
 ```
 
-Checking for normality is important. Histograms suggest that theses data should be log transformed. 
-```{r}
-# histograms
-hist(site.dat$dens_surv1)
-hist(site.dat$dens_surv2)
-hist(site.dat$n_pits)
-hist(site.dat$prop_otter_shells)
-
-# log transformation
-hist(log(site.dat$dens_surv1 + 1))
-hist(log(site.dat$dens_surv2 + 1))
-hist(log(site.dat$n_pits + 1))
-hist(log(site.dat$prop_otter_shells + 1))
-```
-Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
-
-Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
-```{r transformations}
+Standardizations. Measures will be standardized across sites to column maximum
+```{r standardizations}
 # Separate values only
 dat.redu <- site.dat[, 10:15]
 
-# log transform appropriate columns
-dat.l <- cbind(log(dat.redu[,1:2] + 1), dat.redu[,3:4], log(dat.redu[,5:6] + 1)) 
-pairs(dat.l)
-
 # Standardize to column (sea otter measure) maximum
-dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
+dat.std <- scale(dat.redu, center = FALSE, scale = apply(dat.redu, 2, max))
 ```
 
 Now we can calculate the PCA
 ```{r PCA}
 # PCA on transformed AND standarized data
-pca <- princomp(dat.std.l)
+pca <- princomp(dat.std)
 pca.summary <- summary(pca)
+pca.summary
+pca
 loadings(pca)
 biplot(pca, cex = 1)
 screeplot(pca, ylim = c(0, 0.8))
@@ -382,9 +364,6 @@ pca$scores
 
 final.dat <- cbind(site.dat, pca$scores[,1])
 colnames(final.dat)[16] <- "sea_otter_index"
-
-# Switch sign of index so positive values are associated with more otters
-final.dat$sea_otter_index <- final.dat$sea_otter_index * -1
 
 ggplot(final.dat, aes(site, sea_otter_index)) +
   geom_point(size = 4) +

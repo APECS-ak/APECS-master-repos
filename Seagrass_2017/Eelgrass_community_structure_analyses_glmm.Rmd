@@ -57,7 +57,7 @@ st.er <- function(x, na.rm = TRUE) {
 tran.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 ## Sea Otter Impact Index ##
-so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
+so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_new.csv", stringsAsFactors = FALSE, header = TRUE)
 
 ## Sediment ##
 sed.site <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -1223,7 +1223,7 @@ write.csv(adfg, "adfg_report_summaries_2017.csv", row.names = FALSE)
 ```
 
 
-#### Plots
+#### Extra Plots
 ```{r}
 pa <- ggplot(dat) +
   geom_point(aes(x = log(grazermass_shootmass), y =log(epiphmass_shootmass), size = 3))
@@ -1234,12 +1234,14 @@ pb <- ggplot(dat) +
 ```
 
 ```{r}
-ggplot(dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
+ggplot(dat, aes(reorder(place_name, sea_otter_index), sea_otter_index)) +
+  geom_point(size = 8) +
   labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
-  theme(text = element_text(size = 10), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90))
+  lims(y = c(-0.5, 1.5)) +
+  theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-![Alt](E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass community stucture/AbvBlw_pred_plots.pdf)
+
+
+

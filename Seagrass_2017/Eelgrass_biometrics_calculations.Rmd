@@ -39,7 +39,7 @@ eg.bio <- read.csv("../ALL_DATA/seagrass_biometrics_CLEAN.csv", stringsAsFactors
 eg.tran <- read.csv("../ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # Sea Otter Impact Index
-so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
+so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_new.csv", stringsAsFactors = FALSE, header = TRUE)
 
 # Nutrients
 nuts <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)

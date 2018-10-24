@@ -110,10 +110,7 @@ bio.eg.site.tl.wide <- spread(bio.eg.site.tl[, c(1,2, 4)], Site, n)
 bio.eg.site.tl.wide <- merge(bio.eg.site.tl.wide, bio.eg.site.tl[, 2:3])
 bio.eg.site.tl.wide <- unique(bio.eg.site.tl.wide)
 
-datatable(bio.eg.site.tl.wide, extensions = 'FixedColumns',
-          options = list(dom = 't', 
-                         scrollX = TRUE, 
-                         fixedColumns = list(leftColumns = 2)))
+datatable(bio.eg.site.tl.wide)
 ```
 
 ### What samples should be processed?
