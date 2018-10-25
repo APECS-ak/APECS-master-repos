@@ -291,7 +291,7 @@ colnames(df.site)
 <br>
 
 
-```{r, out.width = "70%"}
+```{r, out.width = "50%"}
 knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/soindex2.png")
 knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/soindexavg.png")
 
@@ -898,7 +898,7 @@ plot(pz12)
 
 pz13 = ggplot(df.alldat, aes(pop_dens_surv_km2, diffuse_band_area_m2, color = so_index)) +
   geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
   xlab("Sea otter population (km^2), Tinker")+ylab("Mean diffuse band area (m^2)") +

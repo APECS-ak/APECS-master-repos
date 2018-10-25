@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/432819/ec00b61c0ab54ed7a78cad918125a163
+bundleId: https://api.rpubs.com/api/v1/document/432819/ec00b61c0ab54ed7a78cad918125a163
+url: http://rpubs.com/tastephens/432819
+when: 1540434035.74712
