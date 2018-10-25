@@ -272,6 +272,9 @@ We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer
 ## Global Model ##
 mod1 <- dredge(glm(dat$abvgnd_mass ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
 
+test <- model.avg(mod1,  subset = delta < 2)
+summary(test)
+
 # AICc comp #
 mod1$delAICprop <- mod1$delta / mod1$AICc
 mod1.tbl <- filter(mod1, delta <= 2)
@@ -346,6 +349,9 @@ We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer
 ```{r model 2, echo = FALSE}
 ## Global Model ##
 mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
+
+test2 <- model.avg(mod2)
+summary(test2, subset = delta < 2)
 
 # AICc comp #
 mod2$delAICprop <- mod2$delta / mod2$AICc
@@ -425,6 +431,9 @@ dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
 mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass), link = "log"), rank = "AICc", evaluate = TRUE)
+
+test3 <- model.avg(mod3, subset = delta < 2)
+summary(test3)
 
 # AICc comp #
 mod3$delAICprop <- mod3$delta / mod3$AICc
