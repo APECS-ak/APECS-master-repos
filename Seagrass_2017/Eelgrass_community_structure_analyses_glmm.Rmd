@@ -268,47 +268,86 @@ Each model will get its own individual hypothesis and set up but will follow the
 ### Model 1 - Aboveground biomass
 We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, total N, and crab biomass may effect aboveground biomass of eelgrass.
 
+#### Model 1 Exp plots
+```{r model 1 explor plots}
+## Time ##
+ggplot(dat) +
+  geom_errorbar(aes(x = date_julian, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = date_julian, y = abvgnd_mass, col = sea_otter_index), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Sea otter index ##
+ggplot(dat) +
+  geom_errorbar(aes(x = sea_otter_index, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = sea_otter_index, y = abvgnd_mass), size = 4) +
+  geom_smooth(aes(x = sea_otter_index, y = abvgnd_mass), method = loess) +
+  labs(x = "Sea otter index", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## epiphyte load - log normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = log(epiphmass_shootmass), ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = log(epiphmass_shootmass), y = abvgnd_mass), size = 4) +
+  geom_smooth(aes(x = log(epiphmass_shootmass), y = abvgnd_mass), method = loess) +
+  labs(x = "Epiphyte Load", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## grazer load - log normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = log(grazermass_shootmass), ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = log(grazermass_shootmass), y = abvgnd_mass), size = 4) +
+  geom_smooth(aes(x = log(grazermass_shootmass), y = abvgnd_mass), method = loess) +
+  labs(x = "Grazer Load", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## crab mass - sqrt normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = sqrt(crab_mass), ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = sqrt(crab_mass), y = abvgnd_mass), size = 4) +
+  geom_smooth(aes(x = sqrt(crab_mass), y = abvgnd_mass), method = loess) +
+  labs(x = "Crab biomass", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+Checking for multicolinearity among predictors. There appear to be no multicolinearlity among predictors. Therfore avoiding issues with model averaging.
+```{r}
+pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116)])
+```
+
+### Global Model 1
+Based of above plots it seems reasonable to include the linear terms of all the predictors. In preparation for model averaging I will standardize coefs with partial standard deviations which helps account for the change in sign of predictors that are correlated with other predictors. This is not the case for these data but some review will probably loose their head if I dont bring this up.
 ```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- dredge(glm(dat$abvgnd_mass ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
-
-test <- model.avg(mod1,  subset = delta < 2)
-summary(test)
+mod1 <- dredge(glm(dat$abvgnd_mass ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod1$delAICprop <- mod1$delta / mod1$AICc
-mod1.tbl <- filter(mod1, delta <= 2)
+mod1.tbl <- filter(mod1, delta <= 4)
 mod1.tbl <- mod1.tbl[, colSums(is.na(mod1.tbl)) != nrow(mod1.tbl)]
-
 datatable(round(mod1.tbl,4))
 ```
 
 ### Best Model 1
+The best model will be assumed to be the average of all the models within 2 AICc scores of the lowest AICc model. This will use a model averaging procedure. Model averaging is being used because excluding models that are nearly as good as the lowest AICc model would be disingenuous.
 ```{r model 1 best, echo = FALSE}
 ## Best Model ##
-mod1.best <- glm(abvgnd_mass ~ date_julian  + sea_otter_index, data = dat)
-
-summary(mod1.best)
-
-# Diagnostics #
-par(mfrow = c(2, 2))
-plot(mod1.best)
-par(mfrow = c(1, 1))
-
-## Model Averaging ##
-#mod1.1 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + sea_otter_index_2 + log(epiphmass_shootmass), data = dat)
-#mod1.2 <- glm(log(abvgnd_mass) ~ date_julian + date_julian_2 + sea_otter_index + log(epiphmass_shootmass), data = dat)
-#mod1.best <- model.avg(list(mod1.1, mod1.2), fit = TRUE)
+mod1.best <- model.avg(mod1, subset = delta < 2, fit = TRUE)
+mod1.res <- summary(mod1.best)
+mod1.res$coefmat.subset
 ```
+Best model indicates that date has a strong positive effect on aboveground biomass and that sea otter index has a weak positive effect on above ground biomass. Sediment grain size also has a negative effect but is not significant.
 
 ### Model 1 Plots
 Calculate predicted values and plot
 ```{r mod 1 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
-newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
-                             sea_otter_index = rep(median(dat$sea_otter_index), 116))
-pred.1.jday <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.jday)
+newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian), length.out = 21), 
+                             sea_otter_index = rep(median(dat$sea_otter_index), 21),
+                             sed_inside_prim = rep(median(dat$sed_inside_prim), 21))
+pred.1.jday <- predict(mod1.best, backtransform = TRUE, se.fit = TRUE)
 newdata.1.jday$Predict <- pred.1.jday$fit
 newdata.1.jday$Lwr <- (pred.1.jday$fit - pred.1.jday$se.fit)
 newdata.1.jday$Lwr <- ifelse(newdata.1.jday$Lwr < 0, 0, newdata.1.jday$Lwr) # convert neg. to 0 cant have neg. biomass
@@ -346,39 +385,69 @@ p1.soi <- ggplot(newdata.1.soi) +
 ### Model 2 - Belowground biomass
 We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, total N, and crab biomass may effect aboveground biomass of eelgrass
 
+#### Model 2 Exp plots
+```{r model 2 explor plots}
+## Time ##
+ggplot(dat) +
+  geom_errorbar(aes(x = date_julian, ymin = blwgnd_mass - blwgnd_mass_se, ymax = blwgnd_mass + blwgnd_mass_se), size = 1) +
+  geom_point(aes(x = date_julian, y = blwgnd_mass, col = sea_otter_index), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Belowground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Sea otter index ##
+ggplot(dat) +
+  geom_errorbar(aes(x = sea_otter_index, ymin = blwgnd_mass - blwgnd_mass_se, ymax = blwgnd_mass + blwgnd_mass_se), size = 1) +
+  geom_point(aes(x = sea_otter_index, y = blwgnd_mass), size = 4) +
+  geom_smooth(aes(x = sea_otter_index, y = blwgnd_mass), method = loess) +
+  labs(x = "Sea otter index", y = bquote('Belowground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## epiphyte load - log normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = log(epiphmass_shootmass), ymin = blwgnd_mass - blwgnd_mass_se, ymax = blwgnd_mass + blwgnd_mass_se), size = 1) +
+  geom_point(aes(x = log(epiphmass_shootmass), y = blwgnd_mass), size = 4) +
+  geom_smooth(aes(x = log(epiphmass_shootmass), y = blwgnd_mass), method = loess) +
+  labs(x = "Epiphyte Load", y = bquote('Belowground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## grazer load - log normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = log(grazermass_shootmass), ymin = blwgnd_mass - blwgnd_mass_se, ymax = blwgnd_mass + blwgnd_mass_se), size = 1) +
+  geom_point(aes(x = log(grazermass_shootmass), y = blwgnd_mass), size = 4) +
+  geom_smooth(aes(x = log(grazermass_shootmass), y = blwgnd_mass), method = loess) +
+  labs(x = "Grazer Load", y = bquote('Belowground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## crab mass - sqrt normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = sqrt(crab_mass), ymin = blwgnd_mass - blwgnd_mass_se, ymax = blwgnd_mass + blwgnd_mass_se), size = 1) +
+  geom_point(aes(x = sqrt(crab_mass), y = blwgnd_mass), size = 4) +
+  geom_smooth(aes(x = sqrt(crab_mass), y = blwgnd_mass), method = loess) +
+  labs(x = "Crab biomass", y = bquote('Belowground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+### Global Model 2
+Based of plots we should use linear predictors only
 ```{r model 2, echo = FALSE}
 ## Global Model ##
-mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
-
-test2 <- model.avg(mod2)
-summary(test2, subset = delta < 2)
+mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod2$delAICprop <- mod2$delta / mod2$AICc
 mod2.tbl <- filter(mod2, delta <= 2)
 mod2.tbl <- mod2.tbl[, colSums(is.na(mod2.tbl)) != nrow(mod2.tbl)]
-
 datatable(round(mod2.tbl,4))
 ```
 
 ### Best Model 2
 ```{r best mod 2, echo = FALSE}
 ## Best Model ##
-mod2.best <- glm(log(blwgnd_mass) ~  date_julian_2 + log(epiphmass_shootmass), data = dat) 
-
-summary(mod2.best)
-
-# Diagnostics #
-par(mfrow = c(2, 2))
-plot(mod2.best)
-par(mfrow = c(1, 1))
-
-## Model Averaging ##
-#mod2.1 <- glm(log(blwgnd_mass) ~  date_julian + log(epiphmass_shootmass), data = dat) 
-#mod2.2 <- glm(log(blwgnd_mass) ~  date_julian, data = dat) 
-#mod2.best <- model.avg(list(mod2.1, mod2.2), fit = TRUE)
+mod2.best <- model.avg(mod2, subset = delta < 2, fit = TRUE)
+mod2.res <- summary(mod2.best)
+mod2.res$coefmat.subset
 ```
-
 
 ### Model 2 Plots
 Calculate predicted values and plot, using conditional/subset coefficients
@@ -425,40 +494,70 @@ p2.epi <- ggplot(newdata.2.epi) +
 ### Model 3 - Shoot density
 Response  - negative binomially distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
+#### Model 3 Exp plots
+```{r model 3 explor plots}
+## Time ##
+ggplot(dat) +
+  geom_errorbar(aes(x = date_julian, ymin = shoot_dens - shoot_dens_se, ymax = shoot_dens + shoot_dens_se), size = 1) +
+  geom_point(aes(x = date_julian, y = shoot_dens, col = sea_otter_index), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Shoot density' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Sea otter index ##
+ggplot(dat) +
+  geom_errorbar(aes(x = sea_otter_index, ymin = shoot_dens - shoot_dens_se, ymax = shoot_dens + shoot_dens_se), size = 1) +
+  geom_point(aes(x = sea_otter_index, y = shoot_dens), size = 4) +
+  geom_smooth(aes(x = sea_otter_index, y = shoot_dens), method = loess) +
+  labs(x = "Sea otter index", y = bquote('Shoot density' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## epiphyte load - log normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = log(epiphmass_shootmass), ymin = shoot_dens - shoot_dens_se, ymax = shoot_dens + shoot_dens_se), size = 1) +
+  geom_point(aes(x = log(epiphmass_shootmass), y = shoot_dens), size = 4) +
+  geom_smooth(aes(x = log(epiphmass_shootmass), y = shoot_dens), method = loess) +
+  labs(x = "Epiphyte Load", y = bquote('Shoot density' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## grazer load - log normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = log(grazermass_shootmass), ymin = shoot_dens - shoot_dens_se, ymax = shoot_dens + shoot_dens_se), size = 1) +
+  geom_point(aes(x = log(grazermass_shootmass), y = shoot_dens), size = 4) +
+  geom_smooth(aes(x = log(grazermass_shootmass), y = shoot_dens), method = loess) +
+  labs(x = "Grazer Load", y = bquote('Shoot density' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## crab mass - sqrt normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = sqrt(crab_mass), ymin = shoot_dens - shoot_dens_se, ymax = shoot_dens + shoot_dens_se), size = 1) +
+  geom_point(aes(x = sqrt(crab_mass), y = shoot_dens), size = 4) +
+  geom_smooth(aes(x = sqrt(crab_mass), y = shoot_dens), method = loess) +
+  labs(x = "Crab biomass", y = bquote('Shoot density' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+### Global Model 3
 ```{r model 3, echo = FALSE}
 ## Count need to integers ##
 dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
-mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass), link = "log"), rank = "AICc", evaluate = TRUE)
-
-test3 <- model.avg(mod3, subset = delta < 2)
-summary(test3)
+mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian  + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site , link = "log"), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod3$delAICprop <- mod3$delta / mod3$AICc
 mod3.tbl <- filter(mod3, delta <= 2)
 mod3.tbl <- mod3.tbl[, colSums(is.na(mod3.tbl)) != nrow(mod3.tbl)]
-
 datatable(round(mod3.tbl,4))
 ```
 
 ### Best Model 3
 ```{r model 3 best, echo = FALSE}
 ## Best Model ##
-mod3.best <- glm.nb(shoot_dens_rnd ~ date_julian_2, link = "log", data = dat)
-
-summary(mod3.best)
-
-# Diagnostics #
-par(mfrow = c(2, 2))
-plot(mod3.best)
-par(mfrow = c(1, 1))
-
-## Model Averging ##
-#mod3.1 <- glm.nb(shoot_dens_rnd ~ date_julian_2 + sea_otter_index_2, link = "log", data = dat)
-#mod3.2 <- glm.nb(shoot_dens_rnd ~ date_julian_2, link = "log", data = dat)
-#mod3.best <- model.avg(list(mod3.1, mod3.2), fit = TRUE)
+mod3.best <- model.avg(mod3, subset = delta < 2, fit = TRUE)
+mod3.res <- summary(mod3.best)
+mod3.res$coefmat.subset
 ```
 
 ### Model 3 Plots
@@ -496,36 +595,61 @@ p3.soi <- ggplot(newdata.3.soi) +
 ### Model 4 - Aboveground:Belowground Biomass
 We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
 
+#### Model 4 Exp plots
+```{r model 4 explor plots}
+## Time ##
+ggplot(dat) +
+  geom_point(aes(x = date_julian, y = (abvgnd_mass / blwgnd_mass), col = sea_otter_index), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = "Abv:Blw biomass") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Sea otter index ##
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index, y = (abvgnd_mass / blwgnd_mass)), size = 4) +
+  geom_smooth(aes(x = sea_otter_index, y = (abvgnd_mass / blwgnd_mass)), method = loess) +
+  labs(x = "Sea otter index", y = "Abv:Blw biomass") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## epiphyte load - log normal ##
+ggplot(dat) +
+  geom_point(aes(x = log(epiphmass_shootmass), y = (abvgnd_mass / blwgnd_mass)), size = 4) +
+  geom_smooth(aes(x = log(epiphmass_shootmass), y = (abvgnd_mass / blwgnd_mass)), method = loess) +
+  labs(x = "Epiphyte Load", y = "Abv:Blw biomass") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## grazer load - log normal ##
+ggplot(dat) +
+  geom_point(aes(x = log(grazermass_shootmass), y = (abvgnd_mass / blwgnd_mass)), size = 4) +
+  geom_smooth(aes(x = log(grazermass_shootmass), y = (abvgnd_mass / blwgnd_mass)), method = loess) +
+  labs(x = "Grazer Load", y = "Abv:Blw biomass") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## crab mass - sqrt normal ##
+ggplot(dat) +
+  geom_point(aes(x = sqrt(crab_mass), y = (abvgnd_mass / blwgnd_mass)), size = 4) +
+  geom_smooth(aes(x = sqrt(crab_mass), y = (abvgnd_mass / blwgnd_mass)), method = loess) +
+  labs(x = "Crab biomass", y = "Abv:Blw biomass") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+Linear predictors only 
 ```{r model 4, echo = FALSE}
 ## Global Model ##
-mod4 <- dredge(glm((dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$date_julian_2 + dat$sea_otter_index  + dat$sea_otter_index_2 + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
+mod4 <- dredge(glm((dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
                     
 # AICc comp #
 mod4$delAICprop <- mod4$delta / mod4$AICc
-mod4.tbl <- filter(mod4, delta <= 2)
+mod4.tbl <- filter(mod4, delta <= 4)
 mod4.tbl <- mod4.tbl[, colSums(is.na(mod4.tbl)) != nrow(mod4.tbl)]
-
 datatable(round(mod4.tbl,4))
 ```
 
 ### Best Model 4
 ```{r model 4 best, echo = FALSE}
 ## Best Model ##
-mod4.best <- glm((abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index, data = dat)
-
-summary(mod4.best)
-
-# Diagnostics #
-par(mfrow = c(2,2))
-plot(mod4.best)
-par(mfrow = c(1, 1))
-
-## Model Averaging ##
-#mod4.1 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass), data = dat)
-#mod4.2 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + log(grazermass_shootmass) + sed_inside_prim, data = dat)
-#mod4.3 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sea_otter_index + sed_inside_prim, data = dat)
-#mod4.4 <- glm(log(abvgnd_mass / blwgnd_mass) ~  date_julian + date_julian_2 + sed_inside_prim, data = dat)
-#mod4.best <- model.avg(list(mod4.1, mod4.2, mod4.3, mod4.4), fit = TRUE)
+mod4.best <- glm((dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index  + log(dat$grazermass_shootmass))
+mod4.res <- summary(mod4.best)
 ```
 
 ### Model 4 Plots
@@ -670,18 +794,55 @@ p5.epi <- ggplot(newdata.5.epi) +
   theme(text = element_text(size = 10), legend.position = "none")
 ```
 
+
 ### Model 6 - Epiphyte load
 We hypothesise that time (as julian day), sea otter index, sediment type, light availability,  grazer load, and crab biomass may effect epiephyte load on eelgrass.
 
+#### Model 6 Exp plots
+Note that plots are with log transformed response because that meets normality
+```{r mod 6 exp plots}
+## Time ##
+ggplot(dat) +
+  geom_errorbar(aes(x = date_julian, ymin = log(epiphmass_shootmass - epiphmass_shootmass_se), ymax = log(epiphmass_shootmass + epiphmass_shootmass_se)), size = 1) +
+  geom_point(aes(x = date_julian, y = log(epiphmass_shootmass), col = sea_otter_index), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Epiphyte load' ~(g/g))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Sea otter index ##
+ggplot(dat) +
+  geom_errorbar(aes(x = sea_otter_index, ymin = log(epiphmass_shootmass - epiphmass_shootmass_se), ymax = log(epiphmass_shootmass + epiphmass_shootmass_se)), size = 1) +
+  geom_point(aes(x = sea_otter_index, y = log(epiphmass_shootmass)), size = 4) +
+  geom_smooth(aes(x = sea_otter_index, y = log(epiphmass_shootmass)), method = loess) +
+  labs(x = "Sea otter index", y = bquote('Epiphyte load' ~(g/g))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## grazer load - log normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = log(grazermass_shootmass), ymin = log(epiphmass_shootmass - epiphmass_shootmass_se), ymax = log(epiphmass_shootmass + epiphmass_shootmass_se)), size = 1) +
+  geom_point(aes(x = log(grazermass_shootmass), y = log(epiphmass_shootmass)), size = 4) +
+  geom_smooth(aes(x = log(grazermass_shootmass), y = log(epiphmass_shootmass)), method = loess) +
+  labs(x = bquote('Grazer load' ~(g/g)), y = bquote('Epiphyte load' ~(g/g))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## crab mass - sqrt normal ##
+ggplot(dat) +
+  geom_errorbar(aes(x = sqrt(crab_mass), ymin = log(epiphmass_shootmass - epiphmass_shootmass_se), ymax = log(epiphmass_shootmass + epiphmass_shootmass_se)), size = 1) +
+  geom_point(aes(x = sqrt(crab_mass), y = log(epiphmass_shootmass)), size = 4) +
+  geom_smooth(aes(x = sqrt(crab_mass), y = log(epiphmass_shootmass)), method = loess) +
+  labs(x = "Crab mass", y = bquote('Epiphyte load' ~(g/g))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+### Global Model 6
 ```{r model 6, echo = FALSE}
 ## Global Model ##
-mod6 <- dredge(glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)), rank = "AICc", evaluate = TRUE)
+mod6 <- dredge(glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index + dat$abvgnd_mass + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod6$delAICprop <- mod6$delta / mod6$AICc
 mod6.tbl <- filter(mod6, delta <= 2)
-mod6.tbl <- mod3.tbl[, colSums(is.na(mod6.tbl)) != nrow(mod6.tbl)]
-
+mod6.tbl <- mod6.tbl[, colSums(is.na(mod6.tbl)) != nrow(mod6.tbl)]
 datatable(round(mod6.tbl,4))
 ```
 
@@ -689,20 +850,9 @@ datatable(round(mod6.tbl,4))
 Two models within 4 AIC.
 ```{r model 6 best, echo = FALSE}
 ## Best Model ##
-mod6.best <- glm(log(epiphmass_shootmass) ~ sed_inside_prim + log(grazermass_shootmass) , data = dat) 
-
-summary(mod6.best)
-
-# Diagnostics #
-par(mfrow = c(2,2))
-plot(mod6.best)
-par(mfrow = c(1, 1))
-
-## Model Averaging ##
-#mod6.1 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + light_avail + sed_inside_prim, data = dat) 
-#mod6.2 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + sed_inside_prim, data = dat) 
-#mod6.3 <- glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass), data = dat) 
-#mod6.best <- model.avg(list(mod6.1, mod6.2, mod6.3), fit = TRUE)
+mod6.best <- model.avg(mod6, subset = delta < 2, fit = TRUE)
+mod6.res <- summary(mod6.best)
+mod6.res$coefmat.subset
 ```
 
 ### Model 6 Plots
@@ -749,32 +899,21 @@ We hypothesise that time (as julian day), sea otter index, epiphyte load, log cr
 
 ```{r model 7, echo = FALSE}
 ## Global Model ##
-mod7 <- dredge(glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)) , rank = "AICc", evaluate = TRUE)
+mod7 <- dredge(glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)) , rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod7$delAICprop <- mod7$delta / mod7$AICc
 mod7.tbl <- filter(mod7, delta <= 2)
 mod7.tbl <- mod7.tbl[, colSums(is.na(mod7.tbl)) != nrow(mod7.tbl)]
-
 datatable(round(mod7.tbl,4))
 ```
 
 ### Best Model 7
 ```{r model 7 best, echo = FALSE}
 ## Best Model ##
-mod7.best <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
-
-summary(mod7.best)
-
-# Diagnostics #
-par(mfrow = c(2, 2))
-plot(mod7.best)
-par(mfrow = c(1, 1))
-
-## Model Averaging ##
-#mod7.1 <- glm(log(grazermass_shootmass) ~  log(epiphmass_shootmass), data = dat)
-#mod7.2 <- glm(log(grazermass_shootmass) ~  1, data = dat)
-#mod7.best <- model.avg(list(mod7.1, mod7.2), fit = TRUE)
+mod7.best <- model.avg(mod7, subset = delta < 2, fit = TRUE)
+mod7.res <- summary(mod7.best)
+mod7.res$coefmat.subset
 ```
 
 ### Model 7 Plots
