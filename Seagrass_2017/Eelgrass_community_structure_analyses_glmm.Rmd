@@ -143,7 +143,10 @@ fish.site.sp[is.na(fish.site.sp)] <- 0
 fish.site.sp$fish_SW_diverse <- diversity(fish.site.sp[,2:56], index = "shannon")
 fish.site.sp$fish_rich <- rowSums(fish.site.sp[, 2:56] != 0)
 
-fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:58)], by = "site")
+# Sum predators #
+fish.site.sp$fish_preds <- rowSums(fish.site.sp[, c(2, 7:9, 13, 20, 31:40, 51, 53:55)])
+
+fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:59)], by = "site")
 
 dat <- merge(dat, fish.site, by = "site")
 
@@ -172,6 +175,7 @@ fishmass.site.fam <- fish.dat %>%
 fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
 
 dat <- merge(dat, fishmass.site.fam, by = "site")
+
 ```
 
 Adding quadratic transformations of date and sea otter index
@@ -250,6 +254,17 @@ shapiro.test(sqrt(dat$crab_mass))
 ```
 Crab biomass is not normal but is corrected with sqrt tranformation
 
+Fish pred mass
+```{r fish pred biomass}
+hist(dat$fish_preds)
+shapiro.test(dat$fish_preds)
+
+range(dat$fish_preds)
+hist(log(dat$fish_preds))
+shapiro.test(log(dat$fish_preds))
+```
+Fish predator mass is not normal but log transforamtion fixes it. 
+
 ### Summary of appropriate transformations to meet normality
 Factor  | Transformation
 ------  | --------------
@@ -261,6 +276,13 @@ node2 | none
 epi load  | log
 grz load  | log
 crab  | sqrt
+
+## Checking for multicolinearity among common predictors
+Checking for multicolinearity among predictors. There appear to be no multicolinearlity among predictors. Therfore avoiding issues with model averaging.
+
+```{r}
+pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116, 125)])
+```
 
 ## Models
 Each model will get its own individual hypothesis and set up but will follow the same general framework. All models will be fit starting with a global model. That global model will be run through the `dredge` function. Models within 2 of lowes AICc will be reported and lowest AICc model will be fit for formal analysis and predicted values plots. 
@@ -309,18 +331,23 @@ ggplot(dat) +
   geom_smooth(aes(x = sqrt(crab_mass), y = abvgnd_mass), method = loess) +
   labs(x = "Crab biomass", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## fish predator mass ##
+ggplot(dat) +
+  geom_errorbar(aes(x = log(fish_preds), ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = log(fish_preds), y = abvgnd_mass), size = 4) +
+  geom_smooth(aes(x = log(fish_preds), y = abvgnd_mass), method = loess) +
+  labs(x = "Fish preds biomass", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 ```
 
-Checking for multicolinearity among predictors. There appear to be no multicolinearlity among predictors. Therfore avoiding issues with model averaging.
-```{r}
-pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116)])
-```
+
 
 ### Global Model 1
 Based of above plots it seems reasonable to include the linear terms of all the predictors. In preparation for model averaging I will standardize coefs with partial standard deviations which helps account for the change in sign of predictors that are correlated with other predictors. This is not the case for these data but some review will probably loose their head if I dont bring this up.
 ```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- dredge(glm(dat$abvgnd_mass ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod1 <- dredge(lm(dat$abvgnd_mass ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod1$delAICprop <- mod1$delta / mod1$AICc
@@ -335,7 +362,7 @@ The best model will be assumed to be the average of all the models within 2 AICc
 ## Best Model ##
 mod1.best <- model.avg(mod1, subset = delta < 2, fit = TRUE)
 mod1.res <- summary(mod1.best)
-mod1.res$coefmat.subset
+mod1.out <- mod1.res$coefmat.subset
 ```
 Best model indicates that date has a strong positive effect on aboveground biomass and that sea otter index has a weak positive effect on above ground biomass. Sediment grain size also has a negative effect but is not significant.
 
@@ -347,7 +374,7 @@ Calculate predicted values and plot
 newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian), length.out = 21), 
                              sea_otter_index = rep(median(dat$sea_otter_index), 21),
                              sed_inside_prim = rep(median(dat$sed_inside_prim), 21))
-pred.1.jday <- predict(mod1.best, backtransform = TRUE, se.fit = TRUE)
+pred.1.jday <- MuMIn:::predict.averaging(mod1.best, type = "response", backtransform = FALSE, se.fit = TRUE, full = FALSE)
 newdata.1.jday$Predict <- pred.1.jday$fit
 newdata.1.jday$Lwr <- (pred.1.jday$fit - pred.1.jday$se.fit)
 newdata.1.jday$Lwr <- ifelse(newdata.1.jday$Lwr < 0, 0, newdata.1.jday$Lwr) # convert neg. to 0 cant have neg. biomass
@@ -432,11 +459,11 @@ ggplot(dat) +
 Based of plots we should use linear predictors only
 ```{r model 2, echo = FALSE}
 ## Global Model ##
-mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod2$delAICprop <- mod2$delta / mod2$AICc
-mod2.tbl <- filter(mod2, delta <= 2)
+mod2.tbl <- filter(mod2, delta <= 4)
 mod2.tbl <- mod2.tbl[, colSums(is.na(mod2.tbl)) != nrow(mod2.tbl)]
 datatable(round(mod2.tbl,4))
 ```
@@ -446,8 +473,9 @@ datatable(round(mod2.tbl,4))
 ## Best Model ##
 mod2.best <- model.avg(mod2, subset = delta < 2, fit = TRUE)
 mod2.res <- summary(mod2.best)
-mod2.res$coefmat.subset
+mod2.out <- mod2.res$coefmat.subset
 ```
+Averaged model of top models indicate a postive effect of julian day and a negative effect of epiphyte load. Grazer load and total water N also showed negative effects but are not significant.
 
 ### Model 2 Plots
 Calculate predicted values and plot, using conditional/subset coefficients
@@ -543,11 +571,11 @@ ggplot(dat) +
 dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
-mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian  + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site , link = "log"), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian  + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site , link = "log"), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod3$delAICprop <- mod3$delta / mod3$AICc
-mod3.tbl <- filter(mod3, delta <= 2)
+mod3.tbl <- filter(mod3, delta <= 4)
 mod3.tbl <- mod3.tbl[, colSums(is.na(mod3.tbl)) != nrow(mod3.tbl)]
 datatable(round(mod3.tbl,4))
 ```
@@ -557,8 +585,9 @@ datatable(round(mod3.tbl,4))
 ## Best Model ##
 mod3.best <- model.avg(mod3, subset = delta < 2, fit = TRUE)
 mod3.res <- summary(mod3.best)
-mod3.res$coefmat.subset
+mod3.out <- mod3.res$coefmat.subset
 ```
+Averaged model results indicate a slight positive effect of time a marginal negative effect of epiphyte load. Total N also showed a negative effect but this was not significant.
 
 ### Model 3 Plots
 ```{r mod 3 plots}
@@ -636,7 +665,7 @@ ggplot(dat) +
 Linear predictors only 
 ```{r model 4, echo = FALSE}
 ## Global Model ##
-mod4 <- dredge(glm((dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod4 <- dredge(glm((dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
                     
 # AICc comp #
 mod4$delAICprop <- mod4$delta / mod4$AICc
@@ -650,19 +679,19 @@ datatable(round(mod4.tbl,4))
 ## Best Model ##
 mod4.best <- glm((dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index  + log(dat$grazermass_shootmass))
 mod4.res <- summary(mod4.best)
+mod4.out <- mod4.res$coefficients
 ```
+No model averaging nessessary. Results indicate a positve effect of julian day, sea otter index, and grazer load. Sea otter index is the most significant and largest in magnitide positive effect.
 
 ### Model 4 Plots
 Calculate predicted values and plot
 ```{r plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
-newdata.4.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian)), 
-                             date_julian_2 = (119 : 234)^2, 
-                             sea_otter_index = rep(median(dat$sea_otter_index), 116), 
-                             grazermass_shootmass = rep(median(dat$grazermass_shootmass), 116),
-                             sed_inside_prim = rep(median(dat$sed_inside_prim), 116))
-pred.4.jday <- predict(mod4.best, se.fit = TRUE, type = "response", newdata = newdata.4.jday)
+newdata.4.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian), length.out = 21),
+                             sea_otter_index = rep(median(dat$sea_otter_index), 21), 
+                             grazermass_shootmass = rep(median(dat$grazermass_shootmass), 21))
+pred.4.jday <- stats::predict(mod4.best, se.fit = TRUE, type = "response", newdata = newdata.4.jday)
 newdata.4.jday$Predict <- pred.4.jday$fit
 newdata.4.jday$Lwr <- pred.4.jday$fit - pred.4.jday$se.fit
 newdata.4.jday$Lwr <- ifelse(newdata.4.jday$Lwr < 0, 0, newdata.4.jday$Lwr) # remove neg. values
@@ -837,11 +866,11 @@ ggplot(dat) +
 ### Global Model 6
 ```{r model 6, echo = FALSE}
 ## Global Model ##
-mod6 <- dredge(glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index + dat$abvgnd_mass + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod6 <- dredge(glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index + dat$abvgnd_mass + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass) + log(dat$fish_preds)), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod6$delAICprop <- mod6$delta / mod6$AICc
-mod6.tbl <- filter(mod6, delta <= 2)
+mod6.tbl <- filter(mod6, delta <= 4)
 mod6.tbl <- mod6.tbl[, colSums(is.na(mod6.tbl)) != nrow(mod6.tbl)]
 datatable(round(mod6.tbl,4))
 ```
@@ -852,8 +881,9 @@ Two models within 4 AIC.
 ## Best Model ##
 mod6.best <- model.avg(mod6, subset = delta < 2, fit = TRUE)
 mod6.res <- summary(mod6.best)
-mod6.res$coefmat.subset
+mod6.out <- mod6.res$coefmat.subset
 ```
+Model averaging results indicate complext relationships with epiphyte load. Epiphyte load was negativley effected by sediment type, and grazer load and positivly effected by sea otter index. Light availability (pos), aboveground biomass (neg), crab mass (pos), and julian day (neg) were also included in the model but were not significat. 
 
 ### Model 6 Plots
 ```{r model 6, echo = FALSE}
@@ -899,7 +929,7 @@ We hypothesise that time (as julian day), sea otter index, epiphyte load, log cr
 
 ```{r model 7, echo = FALSE}
 ## Global Model ##
-mod7 <- dredge(glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass)) , rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod7 <- dredge(glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass) + log(dat$fish_preds)) , rank = "AICc", beta = "partial.sd", evaluate = TRUE)
 
 # AICc comp #
 mod7$delAICprop <- mod7$delta / mod7$AICc
@@ -913,8 +943,9 @@ datatable(round(mod7.tbl,4))
 ## Best Model ##
 mod7.best <- model.avg(mod7, subset = delta < 2, fit = TRUE)
 mod7.res <- summary(mod7.best)
-mod7.res$coefmat.subset
+mod7.out <- mod7.res$coefmat.subset
 ```
+Model averaging results indicate negative effect of epiphyte load and marginal positve effect of crab biomass.
 
 ### Model 7 Plots
 ```{r mod 7 plots, echo = FALSE}
@@ -942,11 +973,11 @@ We hypothesise that time (as julian day), sea otter index, grazer biomass, fish 
 
 ```{r model 8, echo = FALSE}
 ## Global Model ##
-mod8 <- dredge(glm(sqrt(dat$crab_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$abvgnd_mass + dat$shoot_dens + log(dat$epiphmass_shootmass)), rank  ="AICc", evaluate = TRUE)
+mod8 <- dredge(glm(sqrt(dat$crab_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + log(dat$fish_preds)), rank  ="AICc", evaluate = TRUE)
 
 # AICc comp #
 mod8$delAICprop <- mod8$delta / mod8$AICc
-mod8.tbl <- filter(mod8, delta <= 2)
+mod8.tbl <- filter(mod8, delta <= 4)
 mod8.tbl <- mod8.tbl[, colSums(is.na(mod8.tbl)) != nrow(mod8.tbl)]
 
 datatable(round(mod8.tbl,4))
@@ -955,15 +986,11 @@ datatable(round(mod8.tbl,4))
 ### Best Model 8
 ```{r model 8 best, echo = FALSE}
 ## Best Model ##
-mod8.best <- glm(sqrt(crab_mass) ~ sea_otter_index, data = dat)
-
-summary(mod8.best)
-
-# Diagnostics #
-par(mfrow = c(2, 2))
-plot(mod8.best)
-par(mfrow = c(1, 1))
+mod8.best <- model.avg(mod8, subset = delta < 2, fit = TRUE)
+mod8.res <- summary(mod8.best)
+mod8.out <- mod8.res$coefmat.subset
 ```
+Model averaging results indicate string negative effect of sea otter index and non significant effects of fish predators and julian day. 
 
 ### Model 8 Plots
 Calculate predicted vales and plot
@@ -983,6 +1010,29 @@ p8.soi <- ggplot(newdata.8) +
   scale_y_continuous(breaks = seq(0, 150, by = 20)) +
   theme(text = element_text(size = 10), legend.position = "none")
 ```
+
+### Model 9 - Fish predators
+We hypothesise that time (as julian day), sea otter index, grazer biomass, crab biomass, aboveground biomass, and  epiphyte mass may affect crab biomass.
+```{r model 9, echo = FALSE}
+## Global Model ##
+mod9 <- dredge(glm(log(dat$fish_preds) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + sqrt(dat$crab_mass)), rank  ="AICc", evaluate = TRUE)
+
+# AICc comp #
+mod9$delAICprop <- mod9$delta / mod8$AICc
+mod9.tbl <- filter(mod9, delta <= 4)
+mod9.tbl <- mod9.tbl[, colSums(is.na(mod9.tbl)) != nrow(mod9.tbl)]
+
+datatable(round(mod8.tbl,4))
+```
+
+### Best Model 8
+```{r model 8 best, echo = FALSE}
+## Best Model ##
+mod9.best <- model.avg(mod9, subset = delta < 2, fit = TRUE)
+mod9.res <- summary(mod9.best)
+mod9.out <- mod9.res$coefmat.subset
+```
+Model average results idicate a somewhat significant negative effect of crab biomass on fish predators.
 
 ### Fishes
 Since we only sampled fishes with one beach seine at each site we have a limited ability to draw meaningful inference about fish dynamics. However, we can at least repost our findings and demonstrate the biomass and diversity of fishes in eelgrass beds, to point out that they are likley a strong driver in the ecosystem and may be the cause of our "decoupled" trophic cascade.
@@ -1167,50 +1217,18 @@ fish.relfq.mean$mean_rel_freq <- round(fish.relfq.mean$mean_rel_freq, 4)
 
 
 ## Collating Model results
-### Extracting model results
-Not operational at the moment use sjPlot example below
-```{r model results}
-## Aboveground biomass ##
-out.1 <- data.frame(summary(mod1.best)$coefmat.subset)
-sumout.1 <- data.frame(Responce = "Aboveground",
-                       Term = rownames(out.1), 
-                       Estimate = round(exp(out.1$Estimate), 2), 
-                       CIlow = round(exp(out.1$Estimate) - (1.96 * exp(out.1$Adjusted.SE)), 2), 
-                       CIhigh = round(exp(out.1$Estimate) + (1.96 * exp(out.1$Adjusted.SE)), 2),
-                       CI = do.call(paste, c(data.frame(round(exp(out.1$Estimate) - (1.96 * exp(out.1$Adjusted.SE)), 2), round(exp(out.1$Estimate) + (1.96 * exp(out.1$Adjusted.SE)), 2)), sep = "-")),
-                       p = round(out.1$Pr...z.., 4))
+## Manual summary table
 
-## Belowground biomass ##
-out.2 <- data.frame(summary(mod2.best)$coefmat.subset)
-sumout.2 <- data.frame(Responce = "Belowground",
-                       Term = rownames(out.2), 
-                       Estimate = round(exp(out.2$Estimate), 2), 
-                       CIlow = round(exp(out.2$Estimate) - (1.96 * exp(out.2$Adjusted.SE)), 2), 
-                       CIhigh = round(exp(out.2$Estimate) + (1.96 * exp(out.2$Adjusted.SE)), 2),
-                       CI = do.call(paste, c(data.frame(round(exp(out.2$Estimate) - (1.96 * exp(out.2$Adjusted.SE)), 2), round(exp(out.2$Estimate) + (1.96 * exp(out.2$Adjusted.SE)), 2)), sep = "-")),
-                       p = round(out.2$Pr...z.., 4))
-
-## Shoot Density ##
-out.3 <- data.frame(summary(mod3.best)$coefmat.subset)
-sumout.3 <- data.frame(Responce = "Shoot Density",
-                       Term = rownames(out.3), 
-                       Estimate = round(exp(out.3$Estimate), 2), 
-                       CIlow = round(exp(out.3$Estimate) - (1.96 * exp(out.3$Adjusted.SE)), 2), 
-                       CIhigh = round(exp(out.3$Estimate) + (1.96 * exp(out.3$Adjusted.SE)), 2),
-                       CI = do.call(paste, c(data.frame(round(exp(out.3$Estimate) - (1.96 * exp(out.3$Adjusted.SE)), 2), round(exp(out.3$Estimate) + (1.96 * exp(out.3$Adjusted.SE)), 2)), sep = "-")),
-                       p = round(out.3$Pr...z.., 4))
-
-## Aboveground:belowground biomass ##
-out.4 <- data.frame(summary(mod4.best)$coefmat.subset)
-sumout.4 <- data.frame(Responce = "Abv:Blw",
-                       Term = rownames(out.4), 
-                       Estimate = round(exp(out.4$Estimate), 2), 
-                       CIlow = round(exp(out.4$Estimate) - (1.96 * exp(out.4$Adjusted.SE)), 2), 
-                       CIhigh = round(exp(out.4$Estimate) + (1.96 * exp(out.4$Adjusted.SE)), 2),
-                       CI = do.call(paste, c(data.frame(round(exp(out.4$Estimate) - (1.96 * exp(out.4$Adjusted.SE)), 2), round(exp(out.4$Estimate) + (1.96 * exp(out.4$Adjusted.SE)), 2)), sep = "-")),
-                       p = round(out.4$Pr...z.., 4))
+```{r manual summary table}
+datatable(round(mod1.out, 4))
+datatable(round(mod2.out, 4))
+datatable(round(mod3.out, 4))
+datatable(round(mod4.out, 4))
+datatable(round(mod6.out, 4))
+datatable(round(mod7.out, 4))
+datatable(round(mod8.out, 4))
+datatable(round(mod9.out, 4))
 ```
-
 
 ### Modeling results table with sjPlot
 Table to look at result from best models. This function does not work with the averaged models.
