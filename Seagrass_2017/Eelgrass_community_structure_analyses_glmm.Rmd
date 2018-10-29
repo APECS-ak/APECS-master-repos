@@ -341,13 +341,11 @@ ggplot(dat) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 ```
 
-
-
 ### Global Model 1
 Based of above plots it seems reasonable to include the linear terms of all the predictors. In preparation for model averaging I will standardize coefs with partial standard deviations which helps account for the change in sign of predictors that are correlated with other predictors. This is not the case for these data but some review will probably loose their head if I dont bring this up.
 ```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- dredge(lm(dat$abvgnd_mass ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod1 <- dredge(glm(dat$abvgnd_mass ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", evaluate = TRUE)
 
 # AICc comp #
 mod1$delAICprop <- mod1$delta / mod1$AICc
@@ -363,6 +361,7 @@ The best model will be assumed to be the average of all the models within 2 AICc
 mod1.best <- model.avg(mod1, subset = delta < 2, fit = TRUE)
 mod1.res <- summary(mod1.best)
 mod1.out <- mod1.res$coefmat.subset
+predict(mod1.best, full = F, type = "response")
 ```
 Best model indicates that date has a strong positive effect on aboveground biomass and that sea otter index has a weak positive effect on above ground biomass. Sediment grain size also has a negative effect but is not significant.
 
@@ -374,10 +373,8 @@ Calculate predicted values and plot
 newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian), length.out = 21), 
                              sea_otter_index = rep(median(dat$sea_otter_index), 21),
                              sed_inside_prim = rep(median(dat$sed_inside_prim), 21))
-pred.1.jday <- MuMIn:::predict.averaging(mod1.best, type = "response", backtransform = FALSE, se.fit = TRUE, full = FALSE)
-newdata.1.jday$Predict <- pred.1.jday$fit
+newdata.1.jday$Predict <- mod1.out[1,1] + (mod1.out[2,1] * newdata.1.jday$date_julian) + (mod1.out[3,1] * newdata.1.jday$sea_otter_index) + (mod1.out[4,1] * newdata.1.jday$sed_inside_prim)
 newdata.1.jday$Lwr <- (pred.1.jday$fit - pred.1.jday$se.fit)
-newdata.1.jday$Lwr <- ifelse(newdata.1.jday$Lwr < 0, 0, newdata.1.jday$Lwr) # convert neg. to 0 cant have neg. biomass
 newdata.1.jday$Upr <- (pred.1.jday$fit + pred.1.jday$se.fit)
 
 
