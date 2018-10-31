@@ -394,8 +394,10 @@ rm(df.elev)
 ```{r}
 # fucus correction
 df.elev.means = df.elev.means %>% 
-  mutate(edge_diffuse_elev_corrct = edge_diffuse_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) %>%
-  mutate(edge_continuous_elev_corrct = edge_continuous_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72))
+  mutate(edge_diffuse_elev_corrct_pos = edge_diffuse_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_continuous_elev_corrct_pos = edge_continuous_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_diffuse_elev_corrct_neg = edge_continuous_elev_mllw_cm * (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_continuous_elev_corrct_neg = edge_continuous_elev_mllw_cm * (fucus_mean_elev_mllw_cm/169.72))
 
 colnames(df.elev.means)[2] <- "diffuse_band_distance_cm" # change column names
 colnames(df.elev.means)[9] <- "diffuse_band_height_cm" # change column names
@@ -403,7 +405,7 @@ colnames(df.elev.means)[10] <- "diffuse_band_area_m2" # change column names
 
 
 # reorganize columns
-df.elev.means <- df.elev.means[c("site","fucus_upper_elev_mllw_cm","fucus_lower_elev_mllw_cm","fucus_mean_elev_mllw_cm","fucus_band_height_cm","edge_diffuse_elev_mllw_cm","edge_continuous_elev_mllw_cm","edge_diffuse_elev_corrct","edge_continuous_elev_corrct","diffuse_band_distance_cm","diffuse_band_height_cm","diffuse_band_area_m2")]
+df.elev.means <- df.elev.means[c("site","fucus_upper_elev_mllw_cm","fucus_lower_elev_mllw_cm","fucus_mean_elev_mllw_cm","fucus_band_height_cm","edge_diffuse_elev_mllw_cm","edge_continuous_elev_mllw_cm","edge_diffuse_elev_corrct_pos","edge_continuous_elev_corrct_pos","edge_diffuse_elev_corrct_neg","edge_continuous_elev_corrct_neg","diffuse_band_distance_cm","diffuse_band_height_cm","diffuse_band_area_m2")]
 ```
 
 
@@ -530,6 +532,9 @@ Below, we see that the mean (of upper and lower *Fucus* elevations) suggests tha
 
 
 ```{r, out.width = "50%", include = TRUE}
+#df.alldat <- df.alldat[-c(2:4, 6, 8:11, 17:18, 23:24),] # remove high sites
+#df.alldat <- df.alldat[-c(2, 13, 21, 22, 24),] # remove mid sites
+
 df.alldat$so_region1=factor(df.alldat$so_region1, levels=c("low","mid","high")) # order sites
 df.alldat$so_region2=factor(df.alldat$so_region2, levels=c("low","high")) # order sites
 
@@ -548,11 +553,11 @@ plot(pf1)
 linear.model <- (y ~ x)
 
 pf2 = ggplot(df.alldat, aes(fucus_upper_elev_mllw_cm, fucus_lower_elev_mllw_cm)) +
-  geom_point(aes(color = so_region2), size=3) +
+  geom_point(aes(color = so_region1), size=3) +
   geom_smooth(method=lm, formula=y~x, color="black", se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Fucus upper edge MLLW")+ylab("Fucus lower edge MLLW") +
+  #xlab("Fucus upper edge MLLW")+ylab("Fucus lower edge MLLW") +
   #geom_text(aes(label=site), size=2)
   stat_poly_eq(formula = linear.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
@@ -592,7 +597,9 @@ df.alldat$so_region1=factor(df.alldat$so_region1, levels=c("low","mid","high")) 
 df.alldat$so_region2=factor(df.alldat$so_region2, levels=c("low","high")) # order sites
 
 
-pz1 <- ggplot(df.alldat, aes(so_region2, edge_diffuse_elev_mllw_cm)) +
+
+
+pz1 <- ggplot(df.alldat, aes(so_region2, edge_diffuse_elev_corrct_neg)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(alpha = 0.3, width = 0.15) +
   theme(legend.position="right") +
@@ -601,11 +608,11 @@ pz1 <- ggplot(df.alldat, aes(so_region2, edge_diffuse_elev_mllw_cm)) +
   #facet_wrap(~sed1_qual)
 plot(pz1)
 
-#t.test(edge_diffuse_elev_mllw_cm ~ so_region2, paired=FALSE, data = df.alldat)
+t.test(edge_diffuse_elev_corrct_neg ~ so_region2, paired=FALSE, data = df.alldat)
 
 
 
-pz2 <- ggplot(df.alldat, aes(so_region2, edge_diffuse_elev_mllw_cm)) +
+pz2 <- ggplot(df.alldat, aes(so_region2, edge_continuous_elev_corrct)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(alpha = 0.3, width = 0.15) +
   theme(legend.position="right") +
@@ -614,7 +621,7 @@ pz2 <- ggplot(df.alldat, aes(so_region2, edge_diffuse_elev_mllw_cm)) +
   #facet_wrap(~sediment)
 plot(pz2)
 
-#t.test(edge_continuous_elev_mllw_cm ~ so_region2, paired=FALSE, data = df.alldat)
+t.test(edge_continuous_elev_mllw_cm ~ so_region2, paired=FALSE, data = df.alldat)
 ```
 
 <br>
@@ -656,12 +663,12 @@ The same table but with all *Phyllospadix* sites removed:
 
 linear.model <- (y ~ x)
 
-pz3 = ggplot(df.alldat, aes(edge_continuous_elev_corrct, edge_diffuse_elev_corrct, color = so_region2)) +
+pz3 = ggplot(df.alldat, aes(edge_continuous_elev_mllw_cm, edge_diffuse_elev_mllw_cm, color = so_region2)) +
   geom_point(size=3) + # allows for trendline on general trend
   geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Continuous edge (cm, MLLW)")+ylab("Diffuse edg elevatione (cm, MLLW)") +
+  xlab("Continuous edge (cm, MLLW)")+ylab("Diffuse edge elevatione (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
   stat_poly_eq(formula = linear.model, 
