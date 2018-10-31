@@ -194,6 +194,7 @@ dat$sea_otter_index_2 <- dat$sea_otter_index^2
 names(dat)
 pairs(dat[,c(95, 65, 101, 109, 118, 146, 21, 51)])
 pairs(dat[, c(95, 97, 65, 118)])
+pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116, 125)])
 ```
 
 ## Models
@@ -204,17 +205,18 @@ A list of models that characterize the eelgrass community with the data availabl
 
 ```{r mod list}
 mods <- list(
-    glm(log(abvgnd_mass) ~  sea_otter_index + log(epiphmass_shootmass), data = dat),
-    glm(log(epiphmass_shootmass) ~  sea_otter_index  + log(abvgnd_mass) , data = dat),
-    glm(sea_otter_index ~  log(abvgnd_mass) + log(epiphmass_shootmass) , data = dat))
+    glm(abvgnd_mass ~  log(epiphmass_shootmass), data = dat),
+    glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + Ntotal_site, data = dat),
+    glm(log(grazermass_shootmass) ~  sqrt(crab_mass), data = dat),
+    glm(sqrt(crab_mass) ~ sea_otter_index_tr, data = dat))
+
 ```
 
 ```{r}
-test <- psem(glm(log(abvgnd_mass) ~  sea_otter_index + log(epiphmass_shootmass), data = dat),
-    glm(log(epiphmass_shootmass) ~  sea_otter_index + log(abvgnd_mass) , data = dat),
-    glm(sea_otter_index ~ log(abvgnd_mass) + log(epiphmass_shootmass) , data = dat))
-
-summary(test)
+summary(psem(lm(abvgnd_mass ~  log(epiphmass_shootmass), data = dat),
+    lm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + Ntotal_site, data = dat),
+    lm(log(grazermass_shootmass) ~  sqrt(crab_mass), data = dat),
+    lm(sqrt(crab_mass) ~ sea_otter_index_tr, data = dat)))
 ```
 
 glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + sed_inside_prim + light_avail + Ntotal_site + log(crab_mass) + sqrt(fish_pred_mass), data = dat),
