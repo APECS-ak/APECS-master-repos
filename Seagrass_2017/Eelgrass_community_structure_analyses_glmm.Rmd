@@ -312,9 +312,8 @@ ggplot(dat) +
 
 ## Sea otter index ##
 ggplot(dat) +
-  geom_errorbar(aes(x = sea_otter_index, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
+  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass), size = 4, color = "green") +
   geom_point(aes(x = sea_otter_index, y = abvgnd_mass), size = 4) +
-  geom_smooth(aes(x = sea_otter_index, y = abvgnd_mass), method = loess) +
   labs(x = "Sea otter index", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
@@ -355,7 +354,7 @@ ggplot(dat) +
 Based of above plots it seems reasonable to include the linear terms of all the predictors. In preparation for model averaging I will standardize coefs with partial standard deviations which helps account for the change in sign of predictors that are correlated with other predictors. This is not the case for these data but some review will probably loose their head if I dont bring this up.
 ```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- dredge(lm(abvgnd_mass ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE, beta = "partial.sd")
+mod1 <- dredge(lm(abvgnd_mass ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE)
 
 # AICc comp #
 mod1$delAICprop <- mod1$delta / mod1$AICc
@@ -368,7 +367,7 @@ datatable(round(mod1.tbl,4))
 The best model will be assumed to be the average of all the models within 2 AICc scores of the lowest AICc model. This will use a model averaging procedure. Model averaging is being used because excluding models that are nearly as good as the lowest AICc model would be disingenuous.
 ```{r model 1 best, echo = FALSE}
 ## Best Model ##
-mod1.best <- model.avg(mod1, fit = TRUE, rank = "AICc", subset = delta < 2, beta = "partial.sd")
+mod1.best <- model.avg(mod1, fit = TRUE, rank = "AICc", subset = delta < 2)
 summary(mod1.best)
 mod1.best$coefficients
 ```
@@ -467,7 +466,7 @@ ggplot(dat) +
 Based of plots we should use linear predictors only
 ```{r model 2, echo = FALSE}
 ## Global Model ##
-mod2 <- dredge(glm(log(blwgnd_mass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE, beta = "partial.sd")
+mod2 <- dredge(glm(log(blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE)
 
 # AICc comp #
 mod2$delAICprop <- mod2$delta / mod2$AICc
@@ -532,14 +531,14 @@ Total eeglrass biomass will be taken as the sum of above and belowground eelgras
 ```{r model 1c explor plots}
 ## Time ##
 ggplot(dat) +
-  geom_point(aes(x = date_julian, y = sqrt(abvgnd_mass + blwgnd_mass), col = sea_otter_index), size = 4) +
+  geom_point(aes(x = date_julian, y = sqrt(abvgnd_mass + blwgnd_mass), col = sea_otter_index_tr), size = 4) +
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Date", y = bquote('Eelgrass mass' ~(g/m^-2))) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
 
 ## Sea otter index ##
 ggplot(dat) +
-  geom_point(aes(x = sea_otter_index, y = sqrt(abvgnd_mass + blwgnd_mass)), size = 4) +
+  geom_point(aes(x = sea_otter_index_tr, y = sqrt(abvgnd_mass + blwgnd_mass)), size = 4) +
   geom_smooth(aes(x = sea_otter_index, y = sqrt(abvgnd_mass + blwgnd_mass)), method = loess) +
   labs(x = "Sea otter index", y = bquote('Eelgrass mass' ~(g/m^-2))) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
@@ -549,7 +548,7 @@ ggplot(dat) +
 Based of plots we should use linear predictors only
 ```{r model 2, echo = FALSE}
 ## Global Model ##
-mod1t <- dredge(glm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE)
+mod1t <- dredge(glm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE)
 
 # AICc comp #
 mod1t$delAICprop <- mod1t$delta / mod1t$AICc
@@ -610,7 +609,7 @@ ggplot(dat) +
 dat$shoot_dens_rnd <- round(dat$shoot_dens, 0)
 
 ## Global Model ##
-mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian  + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site , link = "log"), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod3 <- dredge(glm.nb(dat$shoot_dens_rnd ~ dat$date_julian  + dat$sea_otter_index_tr  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site , link = "log"), rank = "AICc", evaluate = TRUE)
 
 # AICc comp #
 mod3$delAICprop <- mod3$delta / mod3$AICc
@@ -704,7 +703,7 @@ ggplot(dat) +
 Linear predictors only 
 ```{r model 4, echo = FALSE}
 ## Global Model ##
-mod4 <- dredge(glm((dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod4 <- dredge(glm((dat$abvgnd_mass / dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index_tr  + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", evaluate = TRUE)
                     
 # AICc comp #
 mod4$delAICprop <- mod4$delta / mod4$AICc
@@ -905,7 +904,7 @@ ggplot(dat) +
 ### Global Model 6
 ```{r model 6, echo = FALSE}
 ## Global Model ##
-mod6 <- dredge(glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index + dat$abvgnd_mass + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass) + log(dat$fish_preds)), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod6 <- dredge(glm(log(dat$epiphmass_shootmass) ~ dat$date_julian + dat$sea_otter_index_tr + dat$abvgnd_mass + log(dat$grazermass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass) + log(dat$fish_preds)), rank = "AICc", evaluate = TRUE)
 
 # AICc comp #
 mod6$delAICprop <- mod6$delta / mod6$AICc
@@ -968,7 +967,7 @@ We hypothesise that time (as julian day), sea otter index, epiphyte load, log cr
 
 ```{r model 7, echo = FALSE}
 ## Global Model ##
-mod7 <- dredge(glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site + sqrt(dat$crab_mass) + log(dat$fish_preds)) , rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod7 <- dredge(glm(log(dat$grazermass_shootmass) ~ dat$date_julian + dat$sea_otter_index_tr + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + dat$Ntotal_site + sqrt(dat$crab_mass) + log(dat$fish_preds)) , rank = "AICc", evaluate = TRUE)
 
 # AICc comp #
 mod7$delAICprop <- mod7$delta / mod7$AICc
@@ -1012,7 +1011,7 @@ We hypothesise that time (as julian day), sea otter index, grazer biomass, fish 
 
 ```{r model 8, echo = FALSE}
 ## Global Model ##
-mod8 <- dredge(glm(sqrt(dat$crab_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + log(dat$fish_preds)), rank  ="AICc", evaluate = TRUE)
+mod8 <- dredge(glm(sqrt(dat$crab_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$abvgnd_mass + log(dat$fish_preds)), rank  ="AICc", evaluate = TRUE)
 
 # AICc comp #
 mod8$delAICprop <- mod8$delta / mod8$AICc
@@ -1054,10 +1053,10 @@ p8.soi <- ggplot(newdata.8) +
 We hypothesise that time (as julian day), sea otter index, grazer biomass, crab biomass, aboveground biomass, and  epiphyte mass may affect crab biomass.
 ```{r model 9, echo = FALSE}
 ## Global Model ##
-mod9 <- dredge(glm(log(dat$fish_preds) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$abvgnd_mass + log(dat$epiphmass_shootmass) + sqrt(dat$crab_mass)), rank  ="AICc", evaluate = TRUE)
+mod9 <- dredge(glm(log(dat$fish_preds) ~ dat$date_julian + dat$sea_otter_index + log(dat$grazermass_shootmass) + dat$abvgnd_mass  + sqrt(dat$crab_mass)), rank  ="AICc", evaluate = TRUE)
 
 # AICc comp #
-mod9$delAICprop <- mod9$delta / mod8$AICc
+mod9$delAICprop <- mod9$delta / mod9$AICc
 mod9.tbl <- filter(mod9, delta <= 4)
 mod9.tbl <- mod9.tbl[, colSums(is.na(mod9.tbl)) != nrow(mod9.tbl)]
 
