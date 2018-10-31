@@ -207,6 +207,16 @@ shapiro.test(log(dat$blwgnd_mass))
 ```
 Belowground biomass is not normal. Log transformation fixes it
 
+Total eelgrass biomass
+```{r}
+hist(dat$abvgnd_mass + dat$blwgnd_mass)
+shapiro.test(dat$abvgnd_mass + dat$blwgnd_mass)
+
+hist(sqrt(dat$abvgnd_mass + dat$blwgnd_mass))
+shapiro.test(sqrt(dat$abvgnd_mass + dat$blwgnd_mass))
+```
+Total eelgrass biomass is non-normal. Square root fixes it. Log it too intense.
+
 Shoot density is negative binomial
 
 Aboveground:belowground biomass
@@ -345,7 +355,7 @@ ggplot(dat) +
 Based of above plots it seems reasonable to include the linear terms of all the predictors. In preparation for model averaging I will standardize coefs with partial standard deviations which helps account for the change in sign of predictors that are correlated with other predictors. This is not the case for these data but some review will probably loose their head if I dont bring this up.
 ```{r model 1, echo = FLASE}
 ## Global Model ##
-mod1 <- dredge(glm(dat$abvgnd_mass ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", evaluate = TRUE)
+mod1 <- dredge(lm(abvgnd_mass ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE, beta = "partial.sd")
 
 # AICc comp #
 mod1$delAICprop <- mod1$delta / mod1$AICc
@@ -358,10 +368,9 @@ datatable(round(mod1.tbl,4))
 The best model will be assumed to be the average of all the models within 2 AICc scores of the lowest AICc model. This will use a model averaging procedure. Model averaging is being used because excluding models that are nearly as good as the lowest AICc model would be disingenuous.
 ```{r model 1 best, echo = FALSE}
 ## Best Model ##
-mod1.best <- model.avg(mod1, subset = delta < 2, fit = TRUE)
-mod1.res <- summary(mod1.best)
-mod1.out <- mod1.res$coefmat.subset
-predict(mod1.best, full = F, type = "response")
+mod1.best <- model.avg(mod1, fit = TRUE, rank = "AICc", subset = delta < 2, beta = "partial.sd")
+summary(mod1.best)
+mod1.best$coefficients
 ```
 Best model indicates that date has a strong positive effect on aboveground biomass and that sea otter index has a weak positive effect on above ground biomass. Sediment grain size also has a negative effect but is not significant.
 
@@ -370,21 +379,23 @@ Calculate predicted values and plot
 ```{r mod 1 plots, echo = FALSE}
 ## Predicted Values ##
 # Julian Day #
-newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian), length.out = 21), 
-                             sea_otter_index = rep(median(dat$sea_otter_index), 21),
-                             sed_inside_prim = rep(median(dat$sed_inside_prim), 21))
-newdata.1.jday$Predict <- mod1.out[1,1] + (mod1.out[2,1] * newdata.1.jday$date_julian) + (mod1.out[3,1] * newdata.1.jday$sea_otter_index) + (mod1.out[4,1] * newdata.1.jday$sed_inside_prim)
-newdata.1.jday$Lwr <- (pred.1.jday$fit - pred.1.jday$se.fit)
-newdata.1.jday$Upr <- (pred.1.jday$fit + pred.1.jday$se.fit)
-
+newdata.1.jday <- data.frame(date_julian = seq(min(dat$date_julian), max(dat$date_julian), length.out = 116), 
+                             sea_otter_index = rep(median(dat$sea_otter_index), 116),
+                             sed_inside_prim = rep(median(dat$sed_inside_prim), 116))
+mod1.pred.jday <- predict(mod1.best, full = FALSE, type = "response", backtransform = FALSE, newdata = newdata.1.jday)
+newdata.1.jday$Predict <- mod1.pred.jday
+newdata.1.jday$Lwr <- (mod1.pred.jday$fit - mod1.pred.jday$se.fit)
+newdata.1.jday$Upr <- (mod1.pred.jday$fit + mod1.pred.jday$se.fit)
+newdata.1.jday$Lwr <- ifelse(newdata.1.jday$Lwr < 0, 0, newdata.1.jday$Lwr)
 
 # Sea Otter Index #
 newdata.1.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
-                            sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100))
-pred.1.soi <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.soi)
-newdata.1.soi$Predict <- pred.1.soi$fit
-newdata.1.soi$Lwr <- pred.1.soi$fit - pred.1.soi$se.fit
-newdata.1.soi$Upr <- pred.1.soi$fit + pred.1.soi$se.fit
+                            sea_otter_index = seq(min(dat$sea_otter_index), max(dat$sea_otter_index), length.out = 100),
+                            sed_inside_prim = rep(median(dat$sed_inside_prim), 100))
+mod1.pred.soi <- predict(mod1.best, se.fit = TRUE, type = "response", newdata = newdata.1.soi)
+newdata.1.soi$Predict <- mod1.pred.soi$fit
+newdata.1.soi$Lwr <- mod1.pred.soi$fit - mod1.pred.soi$se.fit
+newdata.1.soi$Upr <- mod1.pred.soi$fit + mod1.pred.soi$se.fit
 
 ## Plots ##
 # Julian Day #
@@ -393,7 +404,7 @@ p1.jday <- ggplot(newdata.1.jday) +
   geom_ribbon(aes(x = date_julian, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
   scale_x_continuous(lim = c(120, 240), breaks = seq(120, 240, by = 30)) +
-  scale_y_continuous(lim = c(0, 120), breaks = seq(0, 120, by = 20)) +
+  scale_y_continuous(lim = c(0, 130), breaks = seq(0, 140, by = 20)) +
   theme(text = element_text(size = 10), legend.position = "none")
 
 # Sea Otter Index #
@@ -401,8 +412,8 @@ p1.soi <- ggplot(newdata.1.soi) +
   geom_line(aes(x = sea_otter_index, y = Predict)) +
   geom_ribbon(aes(x = sea_otter_index, ymin = Lwr, ymax = Upr), alpha = 0.2) +
   labs(x = "", y = bquote(atop("Aboveground biomass", "+/- se" ~(g/m^2)))) +
-  scale_x_continuous(breaks = seq(-0.8, 1.2, by = 0.4)) +
-  scale_y_continuous(lim = c(0,120), breaks = seq(0, 120, by = 20)) +
+  scale_x_continuous(lim = c(-0.6, 1.3), breaks = seq(-0.6, 1.3, by = 0.2)) +
+  scale_y_continuous(lim = c(0,130), breaks = seq(0, 120, by = 20)) +
   theme(text = element_text(size = 10), legend.position = "none")
 ```
 
@@ -456,7 +467,7 @@ ggplot(dat) +
 Based of plots we should use linear predictors only
 ```{r model 2, echo = FALSE}
 ## Global Model ##
-mod2 <- dredge(glm(log(dat$blwgnd_mass) ~ dat$date_julian + dat$sea_otter_index + log(dat$epiphmass_shootmass) + log(dat$grazermass_shootmass) + sqrt(dat$crab_mass) + log(dat$fish_preds) + dat$sed_inside_prim + dat$light_avail + dat$Ntotal_site), rank = "AICc", beta = "partial.sd", evaluate = TRUE)
+mod2 <- dredge(glm(log(blwgnd_mass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE, beta = "partial.sd")
 
 # AICc comp #
 mod2$delAICprop <- mod2$delta / mod2$AICc
@@ -468,9 +479,8 @@ datatable(round(mod2.tbl,4))
 ### Best Model 2
 ```{r best mod 2, echo = FALSE}
 ## Best Model ##
-mod2.best <- model.avg(mod2, subset = delta < 2, fit = TRUE)
-mod2.res <- summary(mod2.best)
-mod2.out <- mod2.res$coefmat.subset
+mod2.best <- model.avg(mod2, fit = TRUE, rank = "AICc", subset = delta < 2)
+summary(mod2.best)
 ```
 Averaged model of top models indicate a postive effect of julian day and a negative effect of epiphyte load. Grazer load and total water N also showed negative effects but are not significant.
 
@@ -515,6 +525,38 @@ p2.epi <- ggplot(newdata.2.epi) +
   theme(text = element_text(size = 10), legend.position = "none")
 ```
 
+### Model 1t - Total eelgrass biomass
+Total eeglrass biomass will be taken as the sum of above and belowground eelgrass biomass.
+
+#### Model 1t Exp plots
+```{r model 1c explor plots}
+## Time ##
+ggplot(dat) +
+  geom_point(aes(x = date_julian, y = sqrt(abvgnd_mass + blwgnd_mass), col = sea_otter_index), size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Date", y = bquote('Eelgrass mass' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+
+## Sea otter index ##
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index, y = sqrt(abvgnd_mass + blwgnd_mass)), size = 4) +
+  geom_smooth(aes(x = sea_otter_index, y = sqrt(abvgnd_mass + blwgnd_mass)), method = loess) +
+  labs(x = "Sea otter index", y = bquote('Eelgrass mass' ~(g/m^-2))) +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
+```
+
+### Global Model 1t
+Based of plots we should use linear predictors only
+```{r model 2, echo = FALSE}
+## Global Model ##
+mod1t <- dredge(glm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE)
+
+# AICc comp #
+mod1t$delAICprop <- mod1t$delta / mod1t$AICc
+mod1t.tbl <- filter(mod1t, delta <= 4)
+mod1t.tbl <- mod1t.tbl[, colSums(is.na(mod1t.tbl)) != nrow(mod1t.tbl)]
+datatable(round(mod1t.tbl,4))
+```
 
 ### Model 3 - Shoot density
 Response  - negative binomially distributed. We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer load, sediment type, light availability, and total N may effect aboveground biomass of eelgrass.
