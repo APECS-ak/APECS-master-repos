@@ -40,6 +40,7 @@ library(DT)
 library(sf)
 library(compare)
 library(corrgram)
+library(cowplot)
 
 theme_set(theme_classic())
 ```
@@ -341,18 +342,43 @@ corrgram(site.dat[,10:15])
 pairs(site.dat[,10:15])
 ```
 
-Standardizations. Measures will be standardized across sites to column maximum
+### Assessing normality of measures
+
+Some measures are fairly skewed because of zeros and extreme values. Transforming would help control for these extreme values. Below are untransformed histograms
+```{r}
+hist(site.dat$dens_surv1)
+hist(site.dat$dens_surv2)
+hist(site.dat$n_pits)
+hist(site.dat$prop_otter_shells)
+```
+
+Transformations
+```{r}
+hist(log(site.dat$dens_surv1))
+hist(log(site.dat$dens_surv2))
+hist(log(site.dat$n_pits + 1))
+hist(asin(sqrt(site.dat$prop_otter_shells)))
+```
+
+Create transformed dataset
+```{r}
+site.dat.tr <- cbind(site.dat[, 1:9], log(site.dat[, 10:11] + 1), site.dat[, 12:13], log(site.dat[, 14] + 1), asin(sqrt(site.dat[, 15])))
+```
+
+### Standardizations. Measures will be standardized across sites to column maximum
 ```{r standardizations}
 # Separate values only
 dat.redu <- site.dat[, 10:15]
+dat.redu.tr <- site.dat.tr[, 10:15]
 
 # Standardize to column (sea otter measure) maximum
 dat.std <- scale(dat.redu, center = FALSE, scale = apply(dat.redu, 2, max))
+dat.std.tr <- scale(dat.redu.tr, center = FALSE, scale = apply(dat.redu.tr, 2, max))
 ```
 
-Now we can calculate the PCA
-```{r PCA}
-# PCA on transformed AND standarized data
+Now we can calculate the PCA - no transformation
+```{r PCA stand only}
+# PCA on standarized data
 pca <- princomp(dat.std)
 pca.summary <- summary(pca)
 pca.summary
@@ -378,17 +404,67 @@ ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea
   theme(axis.text.x = element_text(angle = 90))
 ```
 
+```{r trans and std data}
+pca.tr <- princomp(dat.std.tr)
+pca.summary.tr <- summary(pca.tr)
+pca.summary.tr
+pca.tr
+loadings(pca.tr)
+biplot(pca.tr, cex = 1)
+screeplot(pca.tr, ylim = c(0, 0.8))
+pca.tr$scores 
+
+final.dat.tr <- cbind(site.dat.tr, pca.tr$scores[,1])
+colnames(final.dat.tr)[16] <- "sea_otter_index"
+
+ggplot(final.dat.tr, aes(site, sea_otter_index)) +
+  geom_point(size = 4) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Site", y = "Sea otter index transformed (PC1)")
+
+ggplot(final.dat.tr, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Site", y = "Sea otter index transformed", col = "Sea otter impact Index") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+Compare non tranformed and transformed versions
+```{r}
+plot.ntrans <- ggplot(final.dat, aes(reorder(place_name, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+plot.trans <- ggplot(final.dat.tr, aes(reorder(place_name, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Site", y = "Sea otter index transformed", col = "Sea otter impact Index") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+plot_grid(plot.ntrans, plot.trans)
+```
+
+
 Final index data table
 ```{r}
 DT::datatable(final.dat, caption = "Sea otter impact index")
+DT::datatable(final.dat.tr, caption = "Sea otter impact index")
 ```
 
 ## Data export
 ```{r export}
+# Combine transformed and untransformed versions
+final.dat.all <- final.dat
+final.dat.all$sea_otter_index_tr <- final.dat.tr$sea_otter_index
+DT::datatable(final.dat.all, caption = "Sea otter impact index")
+
 # Data Export
-write.csv(final.dat, "../ALL_DATA/sea_otter_impact_index_new.csv", row.names = FALSE)
-
-
+write.csv(final.dat.all, "../ALL_DATA/sea_otter_impact_index_new.csv", row.names = FALSE)
 ```
 
 ## Collated Results
