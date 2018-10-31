@@ -277,7 +277,127 @@ df.index_mdens <- df.index[ -c(4, 11:15) ] # remove columns that are no longer n
 
 
 # Calculating the actual index
-Congratulaiton! You calculated and complied all the data you need to actually calculate the index
+Congratulaitons! You calculated and complied all the data you need to actually calculate the index
+
+
+
+
+
+
+\WITHbothOTTERsurveys
+## Sea otter impact index
+We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit. Correlation plots indicate that most measures are reasonably correlated with eachother.
+```{r data exploration}
+# Correlations
+corrgram(df.index_2dens[,8:13])
+pairs(df.index_2dens[,8:13])
+```
+
+Checking for normality is important. Histograms suggest that theses data should be log transformed. 
+```{r}
+# histograms
+hist(df.index_2dens$dens_otter1) # transform
+hist(df.index_2dens$dens_otter2) # transform
+hist(df.index_2dens$n_pits) # transform
+hist(df.index_2dens$prop_otter_shells) # transform
+
+# log transformation
+hist(log(df.index_2dens$dens_otter1 + 1))
+hist(log(df.index_2dens$dens_otter2 + 1))
+hist(log(df.index_2dens$n_pits + 1)) # log is good
+hist(log(df.index_2dens$prop_otter_shells + 1)) # log is meh
+
+# arcsine(sqrt) transformation
+hist(asin(sqrt(df.index_2dens$prop_otter_shells))) # this is great
+```
+Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
+
+Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
+```{r transformations}
+# Separate values only
+dat.redu <- df.index_2dens[,8:13]
+
+# log transform appropriate columns
+#dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:6] + 1)) 
+#pairs(dat.l)
+
+# no transformations
+#dat.l <- cbind(dat.redu[,1:6])
+#pairs(dat.l)
+
+# all transformations
+dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:5] + 1)) 
+dat.l <- cbind(dat.l, asin(sqrt(dat.redu[,6]))) 
+pairs(dat.l)
+
+# Standardize to column (sea otter measure) maximum
+dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
+```
+
+Now we can calculate the PCA
+```{r PCA}
+# PCA on transformed AND standarized data
+pca <- princomp(dat.std.l)
+pca.summary <- summary(pca)
+loadings(pca)
+biplot(pca, cex = 1)
+screeplot(pca, ylim = c(0, 0.8))
+pca$scores 
+
+final.dat <- cbind(df.index_2dens, pca$scores[,1])
+colnames(final.dat)[14] <- "sea_otter_index"
+
+# Switch sign of index so positive values are associated with more otters
+final.dat$sea_otter_index <- final.dat$sea_otter_index * -1
+
+ggplot(final.dat, aes(site, sea_otter_index)) +
+  geom_point(size = 4) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "site", y = "sea otter index (PC1)")
+
+ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "site", y = "sea otter index", col = "SO index (2 densities)") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
+```
+
+Final index data table
+```{r}
+DT::datatable(final.dat, caption = "sea otter impact index")
+```
+ 
+## Data export
+```{r export}
+# Data Export
+write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_stephens.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 \WITHmeanOTTERsurveys
 ## Sea otter impact index
@@ -357,85 +477,3 @@ write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_
 
 
 
-
-
-
-
-
-\WITHbothOTTERsurveys
-## Sea otter impact index
-We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit. Correlation plots indicate that most measures are reasonably correlated with eachother.
-```{r data exploration}
-# Correlations
-corrgram(df.index_2dens[,8:13])
-pairs(df.index_2dens[,8:13])
-```
-
-Checking for normality is important. Histograms suggest that theses data should be log transformed. 
-```{r}
-# histograms
-hist(df.index_2dens$dens_otter1)
-hist(df.index_2dens$dens_otter2)
-hist(df.index_2dens$n_pits)
-hist(df.index_2dens$prop_otter_shells)
-
-# log transformation
-hist(log(df.index_2dens$dens_otter1 + 1))
-hist(log(df.index_2dens$dens_otter2 + 1))
-hist(log(df.index_2dens$n_pits + 1))
-hist(log(df.index_2dens$prop_otter_shells + 1))
-```
-Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
-
-Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
-```{r transformations}
-# Separate values only
-dat.redu <- df.index_2dens[,8:13]
-
-# log transform appropriate columns
-dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:6] + 1)) 
-pairs(dat.l)
-
-# Standardize to column (sea otter measure) maximum
-dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
-```
-
-Now we can calculate the PCA
-```{r PCA}
-# PCA on transformed AND standarized data
-pca <- princomp(dat.std.l)
-pca.summary <- summary(pca)
-loadings(pca)
-biplot(pca, cex = 1)
-screeplot(pca, ylim = c(0, 0.8))
-pca$scores 
-
-final.dat <- cbind(df.index_2dens, pca$scores[,1])
-colnames(final.dat)[14] <- "sea_otter_index"
-
-# Switch sign of index so positive values are associated with more otters
-final.dat$sea_otter_index <- final.dat$sea_otter_index * -1
-
-ggplot(final.dat, aes(site, sea_otter_index)) +
-  geom_point(size = 4) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "site", y = "sea otter index (PC1)")
-
-ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "site", y = "sea otter index", col = "SO index (2 densities)") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
-```
-
-Final index data table
-```{r}
-DT::datatable(final.dat, caption = "sea otter impact index")
-```
- 
-## Data export
-```{r export}
-# Data Export
-write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_dens2_stephens.csv", row.names = FALSE)
-```

@@ -160,7 +160,7 @@ slopes <- aggregate(beach_slope ~ site, data = slopes, mean, na.rm = TRUE) # cal
 
 \OtterMetrics
 ```{r}
-index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_dens2_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
+index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
 
 index <- index %>%
   mutate(dens_otter_avg = (dens_otter1 + dens_otter2) / 2)
@@ -608,7 +608,7 @@ pz1 <- ggplot(df.alldat, aes(so_region2, edge_diffuse_elev_corrct_neg)) +
   #facet_wrap(~sed1_qual)
 plot(pz1)
 
-t.test(edge_diffuse_elev_corrct_neg ~ so_region2, paired=FALSE, data = df.alldat)
+#t.test(edge_diffuse_elev_corrct_neg ~ so_region2, paired=FALSE, data = df.alldat)
 
 
 
