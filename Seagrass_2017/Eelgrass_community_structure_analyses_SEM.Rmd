@@ -146,7 +146,10 @@ fish.site.sp[is.na(fish.site.sp)] <- 0
 fish.site.sp$fish_SW_diverse <- diversity(fish.site.sp[,2:56], index = "shannon")
 fish.site.sp$fish_rich <- rowSums(fish.site.sp[, 2:56] != 0)
 
-fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:58)], by = "site")
+# Sum predators #
+fish.site.sp$fish_preds <- rowSums(fish.site.sp[, c(2, 7:9, 13, 20, 31:40, 51, 53:55)])
+
+fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:59)], by = "site")
 
 dat <- merge(dat, fish.site, by = "site")
 
@@ -176,8 +179,6 @@ fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
 
 dat <- merge(dat, fishmass.site.fam, by = "site")
 
-## Create fish predator group ##
-dat$fish_pred_mass <- (dat$Cottidae + dat$Hexagrammidae + dat$Stichaeidae)
 ```
 
 Adding quadratic transformations of date and sea otter index
@@ -203,30 +204,21 @@ We will use a piecewise structual equation modeling approach in the piecewiseSEM
 ### Model list
 A list of models that characterize the eelgrass community with the data available. The groups of data are nutrients, sediment, eelgrass, epiphyte load, grazer load, crab biomass, fish biomass (grouped), and sea otter index.
 
-```{r mod list}
-mods <- list(
-    glm(abvgnd_mass ~  log(epiphmass_shootmass), data = dat),
-    glm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + Ntotal_site, data = dat),
-    glm(log(grazermass_shootmass) ~  sqrt(crab_mass), data = dat),
-    glm(sqrt(crab_mass) ~ sea_otter_index_tr, data = dat))
-
-```
-
 ```{r}
-summary(psem(lm(abvgnd_mass ~  log(epiphmass_shootmass), data = dat),
-    lm(log(epiphmass_shootmass) ~  log(grazermass_shootmass) + Ntotal_site, data = dat),
-    lm(log(grazermass_shootmass) ~  sqrt(crab_mass), data = dat),
-    lm(sqrt(crab_mass) ~ sea_otter_index_tr, data = dat)))
+sem.mod <- psem(
+    lm(sqrt(abvgnd_mass + blwgnd_mass) ~  date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + sed_inside_prim + light_avail + Ntotal_site, data = dat),
+    
+    lm(log(epiphmass_shootmass) ~  date_julian + sea_otter_index_tr + log(grazermass_shootmass) + sed_inside_prim + light_avail + Ntotal_site, data = dat),
+    
+    lm(log(grazermass_shootmass) ~ sea_otter_index_tr  + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat),
+    
+    lm(sqrt(crab_mass) ~  sea_otter_index_tr + log(dat$grazermass_shootmass) + sqrt(abvgnd_mass + blwgnd_mass) + log(fish_preds), data = dat),
+    
+    lm(log(fish_preds) ~  sea_otter_index_tr + log(dat$grazermass_shootmass) + sqrt(abvgnd_mass + blwgnd_mass) + sqrt(crab_mass), data = dat)
+)
+
+summary(sem.mod)
 ```
 
-glm(log(grazermass_shootmass) ~ date_julian + sea_otter_index + log(epiphmass_shootmass) + sed_inside_prim + light_avail + Ntotal_site + log(crab_mass) + sqrt(fish_pred_mass), data = dat),
-    glm(log(crab_mass) ~ date_julian + sea_otter_index + log(grazermass_shootmass) + sqrt(fish_pred_mass) + log(abvgnd_mass) + log(epiphmass_shootmass), data = dat),
-    glm(sqrt(fish_pred_mass) ~ date_julian + sea_otter_index + log(grazermass_shootmass) + log(fish_mass) + log(abvgnd_mass) + log(epiphmass_shootmass) + log(crab_mass), data = dat)
 
-```{r}
-dat <- data.frame(x1 = runif(50), y1 = runif(50), y2 = runif(50), y3 = runif(50))
-mods <- list()
-model <- psem(lm(y1 ~ x1 + y2, dat), lm(y2 ~ x1, dat), lm(y3 ~ y1, dat))
-summary(model, .progressBar = F)
-```
 
