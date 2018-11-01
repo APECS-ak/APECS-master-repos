@@ -548,13 +548,14 @@ ggplot(dat) +
 Based of plots we should use linear predictors only
 ```{r model 2, echo = FALSE}
 ## Global Model ##
-mod1t <- dredge(glm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), evaluate = TRUE)
+mod1t.step <- stepAIC(glm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), direction = "both")
 
-# AICc comp #
-mod1t$delAICprop <- mod1t$delta / mod1t$AICc
-mod1t.tbl <- filter(mod1t, delta <= 4)
-mod1t.tbl <- mod1t.tbl[, colSums(is.na(mod1t.tbl)) != nrow(mod1t.tbl)]
-datatable(round(mod1t.tbl,4))
+mod1t.dr <- dredge(lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat), rank = "BIC", evaluate = TRUE)
+
+
+mod1t.avg <- model.avg(mod1t.dr, rank = "BIC", subset = delta < 2, fit = TRUE)
+summary(mod1t.avg)
+predict(mod1t.avg, full = FALSE)
 ```
 
 ### Model 3 - Shoot density
