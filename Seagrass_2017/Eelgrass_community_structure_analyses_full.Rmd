@@ -1,0 +1,364 @@
+---
+title: "Eelgrass_community_structure_analyses_full"
+author: "Wendel Raymond"
+date: "November 1, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(vegan)
+library(nlme)
+library(lme4)
+library(MASS)
+library(lmerTest)
+library(DT)
+library(ggplot2)
+library(sjPlot)
+library(cowplot)
+library(MuMIn)
+library(AICcmodavg)
+options(na.action = "na.fail") # needed for MuMIn
+theme_set(theme_classic())
+
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+## Data
+**Response metrics**
+1. eelgrass aboveground biomass density (g / m^2^)
+2. eelgrass belowground biomass density (g / m^2^)
+3. ratio of aboveground to belowground biomass density (g / m^2^)
+4. epiphyte load (g epiphyte / g eelgrass)
+5. total grazer load (g grazers/ g eelgrass)
+6. crab biomass (g) - can also be counts
+7. fish biomass (g) - can also be counts
+
+**Explanatory factors**
+1. Sea otter index
+2. Time
+3. Sediment type (primary sediment type from the "inside" eelgrass transect)
+4. Light attenuation
+5. crab biomass (g)
+6. fish biomass (g)
+7. grazer load (g/g)
+8. epiphyte load (g/g)
+9. Total nitirgen
+
+```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
+## Transect ##
+tran.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## Sea Otter Impact Index ##
+so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_new.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Sediment ##
+sed.site <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Crab ##
+crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crab.dat$string <- as.character(crab.dat$string)
+
+## Fish ##
+fish.dat <- read.csv("../ALL_DATA/eelgrass_beach_seine_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## Fish Taxonomy ##
+fish.tax <- read.csv("../ALL_DATA/fish_taxonomy_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+
+## RAW Nutrient Data ##
+nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+### Data Prep
+Sediment data preparation. We will assign the average sediment score from the inside eelgrass bed transect to each site.
+```{r seds by site, echo=FALSE}
+seds <- sed.site %>% 
+  filter(trans_type == "Inside") %>% 
+  group_by(site) %>% 
+  summarise(sed_inside_prim = mean(sed1_no, na.rm = TRUE))
+
+dat <- merge(tran.dat, seds, by = "site")
+```
+
+Light availability calculation. Taken as the ratio of light intensity at the eelgrass canopy to the light intensity at the surface.
+```{r light avail, echo=FALSE}
+dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
+```
+
+Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
+```{r crab sites string, echo=FALSE}
+crab.site <- crab.dat %>% 
+  group_by(site) %>% 
+  summarise(crab_count = mean(count, na.rm = TRUE),
+            crab_mass = mean(mass_g, na.rm = TRUE))
+
+dat <- merge(dat, crab.site, by = "site")
+```
+
+Crab data preparation. Summarize counts and mass of cancer/rock crabs. Average by site.
+```{r rock crabs string, echo=FALSE}
+crab.rock <- crab.dat %>% 
+  filter(sp_code == "CRABDUN" | sp_code == "CRABRR" | sp_code == "CRAGRA"| sp_code == "UNRKCB") %>% 
+  group_by(site) %>% 
+    summarise(rock_count = mean(count, na.rm = TRUE),
+            rock_mass = mean(mass_g, na.rm = TRUE))
+
+dat <- merge(dat, crab.rock, by = "site")
+```
+
+Fish data preparation. 
+Append taxonomy
+```{r}
+fish.dat <- merge(fish.dat, fish.tax, by.x = "species_scientific", by.y = "scientific_name", all = TRUE)
+```
+
+This needs to be done to summarise count as mass by site across all species. Further the sum of fish predator mass will be caluclated.
+```{r fish site, echo = FALSE}
+## Full species List ##
+# prep #
+fish.site <- fish.dat %>% 
+  group_by(site) %>% 
+  summarise(fish_count = n(),
+            fish_mass = sum(mass_g))
+
+fish.site.sp <- fish.dat %>% 
+  group_by(site, sp_code) %>% 
+  summarise(count = n()) %>% 
+  spread(key = sp_code, value = count)
+
+fish.site.sp[is.na(fish.site.sp)] <- 0
+
+fish.site.sp$fish_SW_diverse <- diversity(fish.site.sp[,2:56], index = "shannon")
+fish.site.sp$fish_rich <- rowSums(fish.site.sp[, 2:56] != 0)
+
+# Sum predators #
+fish.site.sp$fish_preds <- rowSums(fish.site.sp[, c(2, 7:9, 13, 20, 31:40, 51, 53:55)])
+
+fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:59)], by = "site")
+
+dat <- merge(dat, fish.site, by = "site")
+
+# biomass community matirx #
+fishmass.site.sp <- fish.dat %>% 
+  group_by(site, sp_code) %>% 
+  summarise(mass = sum(mass_g)) %>% 
+  spread(key = sp_code, value = mass)
+
+fishmass.site.sp[is.na(fishmass.site.sp)] <- 0
+
+## Group by family counts ##
+fish.site.fam <- fish.dat %>% 
+  group_by(site, family) %>% 
+  summarise(count = n()) %>% 
+  spread(key = family, value = count)
+
+fish.site.fam[is.na(fish.site.fam)] <- 0
+
+## Group by family Mass ##
+fishmass.site.fam <- fish.dat %>% 
+  group_by(site, family) %>% 
+  summarise(mass = sum(mass_g)) %>% 
+  spread(key = family, value = mass)
+
+fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
+
+dat <- merge(dat, fishmass.site.fam, by = "site")
+```
+
+## Tests for normality
+Responses and predictors should be tested to see if they meet normality assumptions.
+
+### Response data
+Aboveground biomass
+```{r abvgrnd biomass}
+hist(dat$abvgnd_mass)
+shapiro.test(dat$abvgnd_mass)
+```
+
+Belowground biomass is not normal. Log transformation fixes it.
+```{r blwgrnd biomass}
+hist(dat$blwgnd_mass)
+shapiro.test(dat$blwgnd_mass)
+
+hist(log(dat$blwgnd_mass))
+shapiro.test(log(dat$blwgnd_mass))
+```
+
+Total eelgrass biomass is non-normal. Square root fixes it. Log it too intense.
+```{r}
+hist(dat$abvgnd_mass + dat$blwgnd_mass)
+shapiro.test(dat$abvgnd_mass + dat$blwgnd_mass)
+
+hist(sqrt(dat$abvgnd_mass + dat$blwgnd_mass))
+shapiro.test(sqrt(dat$abvgnd_mass + dat$blwgnd_mass))
+```
+
+Aboveground:belowground biomass is normal
+```{r avb:blw grnd biomass}
+hist(dat$abvgnd_mass/dat$blwgnd_mass)
+shapiro.test(dat$abvgnd_mass/dat$blwgnd_mass)
+```
+
+Epiphyte load is not normal but log transformation fixes it
+```{r epi load }
+hist(dat$epiphmass_shootmass)
+range(dat$epiphmass_shootmass)
+shapiro.test(dat$epiphmass_shootmass)
+
+hist(log(dat$epiphmass_shootmass))
+shapiro.test(log(dat$epiphmass_shootmass))
+```
+
+Grazer Load is not normal but log transformation fixes it.
+```{r grz load}
+hist(dat$grazermass_shootmass)
+range(dat$grazermass_shootmass)
+
+hist(log(dat$grazermass_shootmass))
+shapiro.test(log(dat$grazermass_shootmass))
+```
+
+Crab biomass is not normal but is corrected with sqrt tranformation
+```{r crb biomass}
+hist(dat$crab_mass)
+shapiro.test(dat$crab_mass)
+
+hist(sqrt(dat$crab_mass))
+shapiro.test(sqrt(dat$crab_mass))
+```
+
+Fish pred mass is not normal but log transforamtion fixes it. 
+```{r fish pred biomass}
+hist(dat$fish_preds)
+shapiro.test(dat$fish_preds)
+
+range(dat$fish_preds)
+hist(log(dat$fish_preds))
+shapiro.test(log(dat$fish_preds))
+```
+
+Sediment is not normal and there is not a good transformation becasue there are so many low values. I will proceed with a sqrt transformation because it appears the most normal.
+```{r}
+hist(dat$sed_inside_prim)
+shapiro.test(dat$sed_inside_prim)
+
+hist(sqrt(dat$sed_inside_prim))
+shapiro.test(sqrt(dat$sed_inside_prim))
+```
+
+Total Nitrogen is not normal and there is not a good transformation. I will proceed with no transformation
+```{r}
+hist(dat$Ntotal_site)
+shapiro.test(dat$Ntotal_site)
+
+hist(log(dat$Ntotal_site))
+shapiro.test(log(dat$Ntotal_site))
+```
+
+Light availability
+```{r}
+hist(dat$light_avail)
+shapiro.test(dat$light_avail)
+```
+
+### Summary of appropriate transformations to meet normality
+Factor  | Transformation
+------  | --------------
+Aboveground | none
+Belowground | log
+Total eelgrass mass | sqrt
+Abv:Blw | none
+epi load  | log
+grz load  | log
+crab  | sqrt
+fish predators | log
+sediment | sqrt
+Total N | none
+Light avil | none
+
+## Checking for multicolinearity among common predictors
+Checking for multicolinearity among predictors. 
+
+```{r muticol}
+pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116, 125)])
+```
+
+## Models
+General approach
+1. Pass a global model to the `dredge()` funciton. This global model will include all predictors that make biological sense given the current understanding of trophic relationships and cascades in eelgrass ecosystems. Models will be ranked using AICc, as is recommended with small sample sizes. In general interactions will not be evaluated unless there is a seriously good biological reason.
+
+2. Models within a delta AICc of <= 2 will be evaluated and interpreted on their effects on the response. 
+
+3. Interpretation will focus primarily on the presnese of a factor in a model and their consistance of inclusion and sign in top models. P-values will serve a secondary role in evaluating factors, as the goal is to enucidate the ecological relationships amoung eelgrass community constiuents.
+
+### Model 1 - Total eelgrass biomass
+
+Global model will include julian day, sea otter index, epiphyte load, grazer load, crab biomass, fish predator biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
+```{r mod1 global}
+mod1 <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
+```
+
+Dredge and filter models
+```{r mod1 dr}
+## Dredge ##
+mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE)
+mod1.dr
+
+## Filter top models ##
+mod1.dr.top <- mod1.dr %>% 
+  filter(delta <= 2)
+
+mod1.dr.top <- mod1.dr.top[,colSums(is.na(mod1.dr.top)) < nrow(mod1.dr.top)] # remove columns with 0s
+datatable(round(mod1.dr.top, 4))
+```
+
+Fit top models and view summary.
+```{r fit top mod1}
+## Model fits ##
+mod1a <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass), data = dat)
+mod1b <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian , data = dat)
+mod1c <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr, data = dat)
+mod1d <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + log(epiphmass_shootmass), data = dat)
+
+## Model summary ##
+summary(mod1a)
+summary(mod1b)
+summary(mod1c)
+summary(mod1d)
+```
+
+### Model 2 - epiphyte load
+
+Global model will include julian day, sea otter index, grazer load, crab biomass, fish predator biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
+```{r mod2 global}
+mod2 <- lm(log(epiphmass_shootmass) ~ date_julian + sea_otter_index_tr + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
+```
+
+Dredge and filter models
+```{r mod2 dr}
+## Dredge ##
+mod2.dr <- dredge(mod2, rank = "AICc", evaluate = TRUE)
+mod2.dr
+
+## Filter top models ##
+mod2.dr.top <- mod2.dr %>% 
+  filter(delta <= 2)
+
+mod2.dr.top <- mod2.dr.top[,colSums(is.na(mod2.dr.top)) < nrow(mod2.dr.top)] # remove columns with 0s
+datatable(round(mod2.dr.top, 4))
+```
+
+Fit top models and view summary.
+```{r fit top mod2}
+## Model fits ##
+mod2a <- lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_inside_prim), data = dat)
+
+## Model summary ##
+summary(mod2a)
+```
