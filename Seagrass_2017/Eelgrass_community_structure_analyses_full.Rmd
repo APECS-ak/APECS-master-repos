@@ -362,3 +362,25 @@ mod2a <- lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_insi
 ## Model summary ##
 summary(mod2a)
 ```
+
+### Model 3 - grazer load
+
+Global model will include julian day, sea otter index, epiphyte load, crab biomass, fish predator biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
+
+```{r mod3 global}
+mod3 <- lm(log(grazermass_shootmass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
+```
+
+Dredge and filter models
+```{r mod3 dr}
+## Dredge ##
+mod3.dr <- dredge(mod3, rank = "AICc", evaluate = TRUE)
+mod3.dr
+
+## Filter top models ##
+mod3.dr.top <- mod3.dr %>% 
+  filter(delta <= 2)
+
+mod3.dr.top <- mod3.dr.top[,colSums(is.na(mod3.dr.top)) < nrow(mod3.dr.top)] # remove columns with 0s
+datatable(round(mod3.dr.top, 4))
+```
