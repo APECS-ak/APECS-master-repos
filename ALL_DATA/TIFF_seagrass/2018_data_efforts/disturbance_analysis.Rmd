@@ -710,7 +710,7 @@ plot(pz4)
 
 
 
-pz5 = ggplot(df.alldat, aes(so_index, edge_continuous_elev_mllw_cm)) +
+pz5 = ggplot(df.alldat, aes(so_index, edge_diffuse_elev_mllw_cm)) +
   geom_point(size=3) + # allows for trendline on general trend
   geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
