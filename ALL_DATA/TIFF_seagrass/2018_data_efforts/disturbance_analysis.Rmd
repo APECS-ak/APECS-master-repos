@@ -730,15 +730,10 @@ plot(pz5)
 <br>
 
 ```{r, out.width="50%"}
-
-plot(pz3)
-
-
-
 df.alldat = df.alldat %>% 
   mutate(edge_mean_elev_mllw_cm = (edge_diffuse_elev_mllw_cm + edge_continuous_elev_mllw_cm) /2)
 
-pz6 = ggplot(df.alldat, aes(so_index, edge_mean_elev_mllw_cm)) +
+pz6 = ggplot(df.alldat, aes(so_index, edge_mean_elev_mllw_cm, color = sed2_qual)) +
   geom_point(size=3) + # allows for trendline on general trend
   geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
@@ -778,18 +773,16 @@ plot(pz6)
 
 
 
-pz7 = ggplot(df.alldat, aes(so_index, diffuse_band_area_m2)) +
+pz7 = ggplot(df.alldat, aes(dens_otter_avg, diffuse_band_area_m2)) +
   geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea Otter Index")+ylab("Continuous edge elevation (cm, MLLW)") +
+  #geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
+  #xlab("Sea Otter Index")+ylab("Continuous edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
+  stat_poly_eq(formula = linear.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
+  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(pz7)
