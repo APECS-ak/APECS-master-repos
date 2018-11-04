@@ -1,0 +1,87 @@
+---
+title: "sediment_deepcores"
+author: "Tiff Stephens"
+date: "11/4/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubridate); library(ggplot2); library(DT); library(leaflet); library(htmlwidgets); library(htmltools); library(shiny); library(mapview); library(sp); library(sf); library(knitr); library(cowplot); library(ggpmisc); library(DT); library(plyr); library(magick)
+
+theme_set(theme_classic())
+```
+
+```{r}
+# read clean file from archive folder
+df.deep <- read.csv("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/2017/sediment_matter_2017/sediment_matter_2017_CLEANDATA.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.deep30 <- read.csv("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_sediment/depth_30cm.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+```{r}
+dbd <- aggregate(dry_bulk_density ~ site_name, data = df.deep30, mean, na.rm = TRUE) # calculate mean dry bulk density per site
+
+omtot <- aggregate(organic_dw_g ~ site_name, data = df.deep30, sum, na.rm = TRUE) # calculate mean dry bulk density per site
+
+omperc <- aggregate(organic_dw_percent ~ site_name, data = df.deep30, mean, na.rm = TRUE) # calculate mean dry bulk density per site
+
+omdens <- aggregate(organic_density ~ site_name, data = df.deep30, mean, na.rm = TRUE) # calculate mean dry bulk density per site
+```
+
+```{r}
+soindex <- read.csv("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_sediment/sea_otter_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+
+soindex = soindex %>% 
+  mutate(densityavg_km2_2017 = (density1_km2_2017 + density2_km2_2017) / 2)
+```
+
+```{r}
+df.deepsum <- left_join(dbd, omtot, by = c("site_name")) # join
+df.deepsum <- left_join(df.deepsum, omperc, by = c("site_name")) # join
+df.deepsum <- left_join(df.deepsum, omdens, by = c("site_name")) # join
+df.deepsum <- left_join(df.deepsum, soindex, by = c("site_name")) # join
+
+df.deepsum <- df.deepsum[, -c(6:9)] # remove these columns
+df.deepsum <- df.deepsum[-c(4), ] # remove this outlier site
+
+rm(dbd)
+rm(df.deep30)
+rm(omdens)
+rm(omperc)
+rm(omtot)
+rm(soindex)
+```
+
+
+
+
+```{r}
+linear.model <- (y ~ x)
+poly.model <- y ~ poly(x,2)
+
+p1 = ggplot(df.deepsum, aes(so_index, organic_density)) +
+  geom_point(size=3) + # allows for trendline on general trend
+  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
+  #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
+  #geom_text(aes(label=site), size=2)
+  stat_poly_eq(formula = poly.model, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
+plot(p1)
+```
+
+
+
+
