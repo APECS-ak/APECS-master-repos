@@ -307,7 +307,7 @@ mod1 <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + 
 Dredge and filter models
 ```{r mod1 dr}
 ## Dredge ##
-mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE)
+mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE, beta = "sd")
 mod1.dr
 
 ## Filter top models ##
@@ -374,7 +374,7 @@ mod3 <- lm(log(grazermass_shootmass) ~ date_julian + sea_otter_index_tr + log(ep
 Dredge and filter models
 ```{r mod3 dr}
 ## Dredge ##
-mod3.dr <- dredge(mod3, rank = "AICc", evaluate = TRUE)
+mod3.dr <- dredge(mod3, rank = "AICc", evaluate = TRUE, beta = "sd")
 mod3.dr
 
 ## Filter top models ##
@@ -384,3 +384,13 @@ mod3.dr.top <- mod3.dr %>%
 mod3.dr.top <- mod3.dr.top[,colSums(is.na(mod3.dr.top)) < nrow(mod3.dr.top)] # remove columns with 0s
 datatable(round(mod3.dr.top, 4))
 ```
+
+Fit top models and review summary
+```{r fit top mod3}
+## Fit ##
+mod3a <- lm(log(grazermass_shootmass) ~ log(epiphmass_shootmass), data = dat)
+
+## Summary ##
+summary(mod3a)
+```
+
