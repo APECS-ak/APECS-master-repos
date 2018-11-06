@@ -306,6 +306,7 @@ We hypothesise that time (as julian day), sea otter index, epiphyte load, grazer
 ggplot(dat) +
   geom_errorbar(aes(x = date_julian, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), size = 1) +
   geom_point(aes(x = date_julian, y = abvgnd_mass, col = sea_otter_index), size = 4) +
+  geom_smooth(aes(x = date_julian, y = abvgnd_mass), method = lm) +
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "Date", y = bquote('Aboveground mass +/- se' ~(g/m^-2))) +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2), legend.position = "none")
@@ -1489,9 +1490,9 @@ pb <- ggplot(dat) +
 ```{r}
 ggplot(dat, aes(reorder(place_name, sea_otter_index), sea_otter_index)) +
   geom_point(size = 8) +
-  labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
-  lims(y = c(-0.5, 1.5)) +
-  theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
+  labs(x = "Site", y = "PC1", col = "Sea otter impact Index") +
+  lims(y = c(-0.6, 1.5)) +
+  theme(text = element_text(size = 25), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
