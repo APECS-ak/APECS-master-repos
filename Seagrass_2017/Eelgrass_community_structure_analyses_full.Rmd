@@ -307,7 +307,7 @@ mod1 <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + 
 Dredge and filter models
 ```{r mod1 dr}
 ## Dredge ##
-mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE, beta = "sd")
+mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE)
 mod1.dr
 
 ## Filter top models ##
@@ -331,6 +331,52 @@ summary(mod1a)
 summary(mod1b)
 summary(mod1c)
 summary(mod1d)
+```
+
+Predicted values. Note that values will need to be squared becasue the model was fitted with the sqrt of total eelgrass mass.
+```{r mod1 pred values}
+## New data with median values ##
+# Epiphyte load #
+newdat.mod1.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100), 
+                              sea_otter_index_tr = rep(median(dat$sea_otter_index_tr), 100),
+                              epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
+
+# Sea otter index #
+newdat.mod1.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100), 
+                              sea_otter_index_tr = seq(min(dat$sea_otter_index_tr), max(dat$sea_otter_index_tr), length.out = 100),
+                              epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 100))
+
+## Prediciton ##
+# Epiphyte Load #
+pred.mod1.epi <- predict(mod1a, type = "response", se.fit = TRUE, newdata = newdat.mod1.epi)
+newdat.mod1.epi$pred <- (pred.mod1.epi$fit)^2
+newdat.mod1.epi$lwr <- (pred.mod1.epi$fit - pred.mod1.epi$se.fit)^2
+newdat.mod1.epi$upr <- (pred.mod1.epi$fit + pred.mod1.epi$se.fit)^2
+
+# Sea otter index #
+pred.mod1.soi <- predict(mod1a, type = "response", se.fit = TRUE, newdata = newdat.mod1.soi)
+newdat.mod1.soi$pred <- (pred.mod1.soi$fit)^2
+newdat.mod1.soi$lwr <- (pred.mod1.soi$fit - pred.mod1.soi$se.fit)^2
+newdat.mod1.soi$upr <- (pred.mod1.soi$fit + pred.mod1.soi$se.fit)^2
+```
+
+Predicted values plots.
+```{r mod1 pred plots}
+## Epiphyte load ##
+ggplot(newdat.mod1.epi) +
+  geom_line(aes(x = epiphmass_shootmass, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = epiphmass_shootmass, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Epiphyte load", y = bquote(atop("Eelgrass biomass","+/- se" ~(g/m^2)))) +
+  scale_y_continuous(limits = c(0, 120), breaks = seq(0, 120, by = 20)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+
+## Sea otter index ##
+ggplot(newdat.mod1.soi) +
+  geom_line(aes(x = sea_otter_index_tr, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = sea_otter_index_tr, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Sea otter index", y = bquote(atop("Eelgrass biomass","+/- se" ~(g/m^2)))) +
+  scale_y_continuous(limits = c(0, 130), breaks = seq(0, 130, by = 20)) +
+  theme(text = element_text(size = 25), legend.position = "none")
 ```
 
 ### Model 2 - epiphyte load
@@ -363,6 +409,45 @@ mod2a <- lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_insi
 summary(mod2a)
 ```
 
+Predicted values. Note that values will need to be exp becasue the model was fitted with the log of grazerload.
+```{r mod2 pred values}
+## New data with median values ##
+newdat.mod2.grz <- data.frame(grazermass_shootmass = seq(min(dat$grazermass_shootmass), max(dat$grazermass_shootmass), length.out = 100), sed_inside_prim = rep(median(dat$sed_inside_prim), 100))
+
+newdat.mod2.sed <- data.frame(grazermass_shootmass = rep(median(dat$grazermass_shootmass, 100)), 
+                              sed_inside_prim = seq(min(dat$sed_inside_prim), max(dat$sed_inside_prim), length.out = 100))
+
+## Prediciton ##
+pred.mod2.grz <- predict(mod2a, type = "response", se.fit = TRUE, newdata = newdat.mod2.grz)
+newdat.mod2.grz$pred <- exp(pred.mod2.grz$fit)
+newdat.mod2.grz$lwr <- exp(pred.mod2.grz$fit - pred.mod2.grz$se.fit)
+newdat.mod2.grz$upr <- exp(pred.mod2.grz$fit + pred.mod2.grz$se.fit)
+
+pred.mod2.sed <- predict(mod2a, type = "response", se.fit = TRUE, newdata = newdat.mod2.sed)
+newdat.mod2.sed$pred <- exp(pred.mod2.sed$fit)
+newdat.mod2.sed$lwr <- exp(pred.mod2.sed$fit - pred.mod2.sed$se.fit)
+newdat.mod2.sed$upr <- exp(pred.mod2.sed$fit + pred.mod2.sed$se.fit)
+```
+
+Predicted values plots.
+```{r mod2 pred plots}
+## Grazer load ##
+ggplot(newdat.mod2.grz) +
+  geom_line(aes(x = grazermass_shootmass, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = grazermass_shootmass, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Grazer load (g/g)", y = bquote(atop("Epiphyte load", " +/- se (g/g)"))) +
+  scale_y_continuous(limits = c(0, 0.15), breaks = seq(0, 0.15, by = 0.025)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+
+## Sediment ##
+ggplot(newdat.mod2.sed) +
+  geom_line(aes(x = sed_inside_prim, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = sed_inside_prim, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Mean sediment grain size score", y = "Epiphyte load +/- se (g/g)") +
+  scale_y_continuous(limits = c(0, 0.075), breaks = seq(0, 0.1, by = 0.025)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+```
+
 ### Model 3 - grazer load
 
 Global model will include julian day, sea otter index, epiphyte load, crab biomass, fish predator biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
@@ -392,5 +477,133 @@ mod3a <- lm(log(grazermass_shootmass) ~ log(epiphmass_shootmass), data = dat)
 
 ## Summary ##
 summary(mod3a)
+```
+
+Predicted values. Note that values will need to be exp becasue the model was fitted with the log of grazerload.
+```{r mod3 pred values}
+## New data with median values ##
+newdat.mod3.epi <- data.frame(epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
+
+## Prediciton ##
+pred.mod3.epi <- predict(mod3a, type = "response", se.fit = TRUE, newdata = newdat.mod3.epi)
+newdat.mod3.epi$pred <- exp(pred.mod3.epi$fit)
+newdat.mod3.epi$lwr <- exp(pred.mod3.epi$fit - pred.mod3.epi$se.fit)
+newdat.mod3.epi$upr <- exp(pred.mod3.epi$fit + pred.mod3.epi$se.fit)
+```
+
+Predicted values plots.
+```{r mod3 pred plots}
+ggplot(newdat.mod3.epi) +
+  geom_line(aes(x = epiphmass_shootmass, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = epiphmass_shootmass, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Epiphyte load (g/g)", y = "Grazer load +/- se (g/g)") +
+  scale_y_continuous(limits = c(0, 0.1), breaks = seq(0, 0.1, by = 0.025)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+```
+
+### Model 4 - Crab biomass
+
+Global model will include julian day, sea otter index, grazer load, epiphyte load, total eelgrass biomass, fish predator biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
+
+```{r mod4 global}
+mod4 <- lm(sqrt(crab_mass) ~ date_julian + sea_otter_index_tr + +log(grazermass_shootmass) + log(epiphmass_shootmass) + log(fish_preds) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
+```
+
+Dredge and filter models
+```{r mod4 dr}
+## Dredge ##
+mod4.dr <- dredge(mod4, rank = "AICc", evaluate = TRUE)
+mod4.dr
+
+## Filter top models ##
+mod4.dr.top <- mod4.dr %>% 
+  filter(delta <= 2)
+
+mod4.dr.top <- mod4.dr.top[,colSums(is.na(mod4.dr.top)) < nrow(mod4.dr.top)] # remove columns with 0s
+datatable(round(mod4.dr.top, 4))
+```
+
+Fit top models and review summary
+```{r fit top mod4}
+## Fit ##
+mod4a <- lm(sqrt(crab_mass) ~ sea_otter_index_tr, data = dat)
+
+## Summary ##
+summary(mod4a)
+```
+
+Predicted values. Note that values will need to be squared becasue the model was fitted with the sqrt of crab biomass.
+```{r mod4 pred values}
+## New data with median values ##
+newdat.mod4.soi <- data.frame(sea_otter_index_tr = seq(min(dat$sea_otter_index_tr), max(dat$sea_otter_index_tr), length.out = 100))
+
+## Prediciton ##
+pred.mod4.soi <- predict(mod4a, type = "response", se.fit = TRUE, newdata = newdat.mod4.soi)
+newdat.mod4.soi$pred <- (pred.mod4.soi$fit)^2
+newdat.mod4.soi$lwr <- (pred.mod4.soi$fit - pred.mod4.soi$se.fit)^2
+newdat.mod4.soi$upr <- (pred.mod4.soi$fit + pred.mod4.soi$se.fit)^2
+```
+
+Predicted values plots.
+```{r mod4 pred plots}
+ggplot(newdat.mod4.soi) +
+  geom_line(aes(x = sea_otter_index_tr, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = sea_otter_index_tr, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Sea otter index", y = "Crab biomass +/- se (g)") +
+  scale_y_continuous(limits = c(0, 150), breaks = seq(0, 150, by = 25)) +
+  theme(text = element_text(size = 20), legend.position = "none")
+```
+
+### Model 5 - Fish predators
+
+Global model will include julian day, sea otter index, grazer load, epiphyte load, total eelgrass biomass, crab biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
+
+```{r mod5 global}
+mod5 <- lm(log(fish_preds) ~ date_julian + sea_otter_index_tr + +log(grazermass_shootmass) + log(epiphmass_shootmass) + sqrt(crab_mass)  + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
+```
+
+Dredge and filter models
+```{r mod5 dr}
+## Dredge ##
+mod5.dr <- dredge(mod5, rank = "AICc", evaluate = TRUE)
+mod5.dr
+
+## Filter top models ##
+mod5.dr.top <- mod5.dr %>% 
+  filter(delta <= 2)
+
+mod5.dr.top <- mod4.dr.top[,colSums(is.na(mod5.dr.top)) < nrow(mod5.dr.top)] # remove columns with 0s
+datatable(round(mod5.dr.top, 4))
+```
+
+Fit top models and review summary
+```{r fit top mod5}
+## Fit ##
+mod5a <- lm(log(fish_preds) ~ sqrt(sed_inside_prim), data = dat)
+
+## Summary ##
+summary(mod5a)
+```
+
+Predict values. Note that values will have to be exp to account for log transformation.
+```{r mod5 pred values}
+## New data with median values ##
+newdat.mod5.sed <- data.frame(sed_inside_prim = seq(min(dat$sed_inside_prim), max(dat$sed_inside_prim), length.out = 100))
+
+## Prediction ##
+pred.mod5.sed <- predict(mod5a, type = "response", se.fit = TRUE, newdata = newdat.mod5.sed)
+newdat.mod5.sed$pred <- exp(pred.mod5.sed$fit)
+newdat.mod5.sed$lwr <- exp(pred.mod5.sed$fit - pred.mod5.sed$se.fit)
+newdat.mod5.sed$upr <- exp(pred.mod5.sed$fit + pred.mod5.sed$se.fit)
+```
+
+Predicted values plot
+```{r mod5 pred plot}
+ggplot(newdat.mod5.sed) +
+  geom_line(aes(x = sed_inside_prim, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = sed_inside_prim, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Mean sediment grain size score", y = bquote(atop("Benthic fish predator biomass", " +/- se (g)"))) +
+  scale_y_continuous(limits = c(0, 230), breaks = seq(0, 230, by = 50)) +
+  theme(text = element_text(size = 25), legend.position = "none")
 ```
 
