@@ -346,6 +346,11 @@ newdat.mod1.soi <- data.frame(date_julian = rep(median(dat$date_julian), 100),
                               sea_otter_index_tr = seq(min(dat$sea_otter_index_tr), max(dat$sea_otter_index_tr), length.out = 100),
                               epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 100))
 
+# Julian day #
+newdat.mod1.jday <- data.frame(date_julian = seq(min(dat$date_julian ), max(dat$date_julian ), length.out = 100), 
+                              sea_otter_index_tr = rep(median(dat$sea_otter_index_tr), 100),
+                              epiphmass_shootmass = rep(median(dat$epiphmass_shootmass), 100))
+
 ## Prediciton ##
 # Epiphyte Load #
 pred.mod1.epi <- predict(mod1a, type = "response", se.fit = TRUE, newdata = newdat.mod1.epi)
@@ -358,6 +363,12 @@ pred.mod1.soi <- predict(mod1a, type = "response", se.fit = TRUE, newdata = newd
 newdat.mod1.soi$pred <- (pred.mod1.soi$fit)^2
 newdat.mod1.soi$lwr <- (pred.mod1.soi$fit - pred.mod1.soi$se.fit)^2
 newdat.mod1.soi$upr <- (pred.mod1.soi$fit + pred.mod1.soi$se.fit)^2
+
+# Julian day #
+pred.mod1.jday <- predict(mod1a, type = "response", se.fit = TRUE, newdata = newdat.mod1.jday)
+newdat.mod1.jday$pred <- (pred.mod1.jday$fit)^2
+newdat.mod1.jday$lwr <- (pred.mod1.jday$fit - pred.mod1.jday$se.fit)^2
+newdat.mod1.jday$upr <- (pred.mod1.jday$fit + pred.mod1.jday$se.fit)^2
 ```
 
 Predicted values plots.
@@ -376,6 +387,15 @@ ggplot(newdat.mod1.soi) +
   geom_ribbon(aes(x = sea_otter_index_tr, ymin = lwr, ymax = upr), alpha = 0.2) +
   labs(x = "Sea otter index", y = bquote(atop("Eelgrass biomass","+/- se" ~(g/m^2)))) +
   scale_y_continuous(limits = c(0, 130), breaks = seq(0, 130, by = 20)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+
+## Julian Day ##
+ggplot(newdat.mod1.jday) +
+  geom_line(aes(x = date_julian, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = date_julian, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Julian Day", y = bquote(atop("Eelgrass biomass","+/- se" ~(g/m^2)))) +
+  scale_y_continuous(limits = c(0, 160), breaks = seq(0, 160, by = 20)) +
+  scale_x_continuous(limits = c(119, 240), breaks = seq(120, 240, by = 20)) +
   theme(text = element_text(size = 25), legend.position = "none")
 ```
 
@@ -605,5 +625,23 @@ ggplot(newdat.mod5.sed) +
   labs(x = "Mean sediment grain size score", y = bquote(atop("Benthic fish predator biomass", " +/- se (g)"))) +
   scale_y_continuous(limits = c(0, 230), breaks = seq(0, 230, by = 50)) +
   theme(text = element_text(size = 25), legend.position = "none")
+```
+
+## Useful Plots
+Plots of other data that are helpful to look at/show people so they calm down.
+```{r ex plots}
+## Total nitrogen ##
+ggplot(dat) +
+  geom_col(aes(x = site, y = Ntotal_site)) +
+  geom_errorbar(aes(x = site, ymin = Ntotal_site - Ntotal_site_se, ymax = Ntotal_site + Ntotal_site_se), width = 0) +
+  theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+## time and eelgrass ##
+ggplot(dat) +
+  geom_point(aes(x = date_julian, y = (abvgnd_mass + blwgnd_mass)), size = 5) +
+  labs(x = "Julian Day", y = bquote("Eelgrass biomass" ~(g/m^2))) +
+  theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
