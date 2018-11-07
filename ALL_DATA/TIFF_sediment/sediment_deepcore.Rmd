@@ -17,6 +17,11 @@ library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubrid
 theme_set(theme_classic())
 ```
 
+
+
+
+\2017 
+\data
 ```{r}
 # read clean file from archive folder
 df.deep <- read.csv("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/2017/sediment_matter_2017/sediment_matter_2017_CLEANDATA.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -58,9 +63,6 @@ rm(omtot)
 rm(soindex)
 ```
 
-
-
-
 ```{r}
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
@@ -82,6 +84,17 @@ p1 = ggplot(df.deepsum, aes(so_index, organic_density)) +
 plot(p1)
 ```
 
+
+
+
+
+
+
+\2018
+\data
+```{r}
+
+```
 
 
 
