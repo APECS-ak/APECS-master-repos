@@ -397,6 +397,13 @@ ggplot(newdat.mod1.jday) +
   scale_y_continuous(limits = c(0, 160), breaks = seq(0, 160, by = 20)) +
   scale_x_continuous(limits = c(119, 240), breaks = seq(120, 240, by = 20)) +
   theme(text = element_text(size = 25), legend.position = "none")
+
+ggplot(dat) +
+  geom_point(aes(x = grazermass_shootmass, y = (abvgnd_mass + blwgnd_mass)), size = 4) +
+  geom_errorbar(aes(x = grazermass_shootmass, ymin = (abvgnd_mass + blwgnd_mass) - (abvgnd_mass_se + blwgnd_mass_se), ymax = (abvgnd_mass + blwgnd_mass) + (abvgnd_mass_se + blwgnd_mass_se), width = 0)) +
+  labs(x = "Grazer load", y = bquote(atop("Eelgrass biomass","+/- se" ~(g/m^2)))) +
+  scale_y_continuous(limits = c(0, 250), breaks = seq(0, 250, by = 50)) +
+  theme(text = element_text(size = 25), legend.position = "none")
 ```
 
 ### Model 2 - epiphyte load
@@ -479,7 +486,7 @@ mod3 <- lm(log(grazermass_shootmass) ~ date_julian + sea_otter_index_tr + log(ep
 Dredge and filter models
 ```{r mod3 dr}
 ## Dredge ##
-mod3.dr <- dredge(mod3, rank = "AICc", evaluate = TRUE, beta = "sd")
+mod3.dr <- dredge(mod3, rank = "AICc", evaluate = TRUE)
 mod3.dr
 
 ## Filter top models ##
@@ -495,8 +502,10 @@ Fit top models and review summary
 ## Fit ##
 mod3a <- lm(log(grazermass_shootmass) ~ log(epiphmass_shootmass), data = dat)
 
+mod3d <- lm(log(grazermass_shootmass) ~ log(epiphmass_shootmass) + log(fish_preds) + sqrt(crab_mass), data = dat)
+
 ## Summary ##
-summary(mod3a)
+summary(mod3d)
 ```
 
 Predicted values. Note that values will need to be exp becasue the model was fitted with the log of grazerload.
@@ -504,11 +513,20 @@ Predicted values. Note that values will need to be exp becasue the model was fit
 ## New data with median values ##
 newdat.mod3.epi <- data.frame(epiphmass_shootmass = seq(min(dat$epiphmass_shootmass), max(dat$epiphmass_shootmass), length.out = 100))
 
+newdat.mod3.crb <- data.frame(epiphmass_shootmass  = rep(median(dat$epiphmass_shootmass), 100),
+                              fish_preds = rep(median(dat$fish_preds), 100),
+                              crab_mass = seq(min(dat$crab_mass), max(dat$crab_mass), length.out = 100))
+
 ## Prediciton ##
 pred.mod3.epi <- predict(mod3a, type = "response", se.fit = TRUE, newdata = newdat.mod3.epi)
 newdat.mod3.epi$pred <- exp(pred.mod3.epi$fit)
 newdat.mod3.epi$lwr <- exp(pred.mod3.epi$fit - pred.mod3.epi$se.fit)
 newdat.mod3.epi$upr <- exp(pred.mod3.epi$fit + pred.mod3.epi$se.fit)
+
+pred.mod3.crb <- predict(mod3d, type = "response", se.fit = TRUE, newdata = newdat.mod3.crb)
+newdat.mod3.crb$pred <- exp(pred.mod3.crb$fit)
+newdat.mod3.crb$lwr <- exp(pred.mod3.crb$fit - pred.mod3.crb$se.fit)
+newdat.mod3.crb$upr <- exp(pred.mod3.crb$fit + pred.mod3.crb$se.fit)
 ```
 
 Predicted values plots.
@@ -518,6 +536,35 @@ ggplot(newdat.mod3.epi) +
   geom_ribbon(aes(x = epiphmass_shootmass, ymin = lwr, ymax = upr), alpha = 0.2) +
   labs(x = "Epiphyte load (g/g)", y = "Grazer load +/- se (g/g)") +
   scale_y_continuous(limits = c(0, 0.1), breaks = seq(0, 0.1, by = 0.025)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+
+ggplot(newdat.mod3.crb) +
+  geom_line(aes(x = crab_mass, y = pred), lwd = 1) +
+  geom_ribbon(aes(x = crab_mass, ymin = lwr, ymax = upr), alpha = 0.2) +
+  labs(x = "Crab mass", y = "Grazer load +/- se (g/g)") +
+  scale_y_continuous(limits = c(0, 0.1), breaks = seq(0, 0.1, by = 0.025)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+
+ggplot(dat) +
+  geom_point(aes(x = crab_mass, y = grazermass_shootmass), size = 4) +
+  geom_errorbar(aes(x = crab_mass, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), width = 1) +
+  labs(x = "Crab mass", y = "Grazer load +/- se (g/g)") +
+  scale_y_continuous(limits = c(0, 0.25), breaks = seq(0, 0.25, by = 0.125)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+
+ggplot(dat) +
+  geom_point(aes(x = fish_preds, y = grazermass_shootmass), size = 4) +
+  geom_errorbar(aes(x = fish_preds, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), width = 1) +
+  labs(x = "Benthic fish predators", y = "Grazer load +/- se (g/g)") +
+  scale_y_continuous(limits = c(0, 0.25), breaks = seq(0, 0.25, by = 0.125)) +
+  theme(text = element_text(size = 25), legend.position = "none")
+
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index, y = grazermass_shootmass), size = 4) +
+  geom_errorbar(aes(x = sea_otter_index, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), width = 0) +
+  labs(x = "Sea otter index", y = "Grazer load +/- se (g/g)") +
+  scale_y_continuous(limits = c(0, 0.25), breaks = seq(0, 0.25, by = 0.125)) +
+  scale_x_continuous(limits = c(-0.6, 1.5), breaks = seq(-0.5, 1.5, by = 0.5)) +
   theme(text = element_text(size = 25), legend.position = "none")
 ```
 
