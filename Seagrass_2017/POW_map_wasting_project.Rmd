@@ -1,0 +1,46 @@
+---
+title: "POW_map_wasting_project"
+author: "Wendel Raymond"
+date: "November 11, 2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r libraries, warning=FALSE, message=FALSE, echo=FALSE, error=FALSE}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(sp)
+library(rgdal)
+library(rgeos)
+library(raster)
+library(gdistance)
+library(spatstat)
+library(leaflet)
+library(DT)
+library(sf)
+```
+
+```{r data, echo=FALSE}
+shore <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "POW Shoreline")
+shore <- spTransform(shore, CRS("+proj=longlat +datum=WGS84"))
+
+shore.egc <- as.SpatialLines.SLDF(subset(shore, ZOS == "C"))
+shore.egp <- as.SpatialLines.SLDF(subset(shore, ZOS == "P"))
+
+sites <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "Otter_Survey_Sites_2017_All_UTM")
+sites.eg <- subset(sites, site_type %in% "Eelgrass")
+```
+
+
+```{r map, echo=FALSE}
+leaflet() %>% 
+  addProviderTiles(providers$Esri.WorldImagery) %>% 
+  setView(lng = -133.2, lat = 55.5, zoom = 8) %>%
+  addMarkers(data = sites.eg, ~longitude, ~latitude, label = ~site) %>% 
+  addPolylines(data = shore.egp, color = "lightgreen", fill = NA, opacity = 1, group = "Patchy eelgrass") %>%
+  addPolylines(data = shore.egc, color ="darkgreen", fill = NA, opacity = 1, group = "Continuous eelgrass")
+```
+
+
