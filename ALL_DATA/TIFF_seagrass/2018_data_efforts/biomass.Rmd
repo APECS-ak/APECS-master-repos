@@ -55,28 +55,107 @@ library(mgcv)
 
 
 ```{r}
-sgmass <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/biomass_aggregate.csv", stringsAsFactors = FALSE, header = TRUE)
+df.bmass <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/biomass_seagrass.csv", stringsAsFactors = FALSE, header = TRUE)
 
-sgmass <- sgmass %>%
-  mutate(leaf.rhizome = leaf / rhizome)
+
+### WITH REPLICATES
+df.bmass <- df.bmass %>%
+  mutate(leaf_dw_g = leaf_tissue_beaker_g - leaf_beaker_g) %>%
+  mutate(rhizome_dw_g = rhizome_tissue_beaker_g - rhizome_beaker_g) %>%
+  mutate(leaf.rhizome = leaf_dw_g / rhizome_dw_g)
+
+df.bmass = df.bmass %>% 
+  select(-leaf_beaker_g, -leaf_tissue_beaker_g, -rhizome_beaker_g, -rhizome_tissue_beaker_g)
+
+
+### AGGREGATE
+leaf.agg <- aggregate(leaf_dw_g ~ site + date_MM.DD.YY, data = df.bmass, mean, na.rm = TRUE)
+rhizome.agg <- aggregate(rhizome_dw_g ~ site, data = df.bmass, mean, na.rm = TRUE)
+leaf.rhizome.agg <- aggregate(leaf.rhizome ~ site, data = df.bmass, mean, na.rm = TRUE)
+
+df.bmass.agg <- left_join(leaf.agg, rhizome.agg, by = "site") 
+df.bmass.agg <- left_join(df.bmass.agg, leaf.rhizome.agg, by = "site") 
+
+rm(leaf.agg)
+rm(rhizome.agg)
+rm(leaf.rhizome.agg)
 ```
+
+```{r}
+# what data class is the date column? 
+str(df.bmass$date_MM.DD.YY)
+
+# convert "date" from chr to a Date class and specify current date format
+df.bmass$date_MM.DD.YY <- as.Date(df.bmass$date_MM.DD.YY, "%m/%d/%y")
+
+# convert with yday into a new column "julian"
+df.bmass$date_julian <- yday(df.bmass$date_MM.DD.YY)  
+
+# make sure it worked all the way through. 
+head(df.bmass$date_julian)
+tail(df.bmass$date_julian)
+
+
+
+
+
+# what data class is the date column? 
+str(df.bmass.agg$date_MM.DD.YY)
+
+# convert "date" from chr to a Date class and specify current date format
+df.bmass.agg$date_MM.DD.YY <- as.Date(df.bmass.agg$date_MM.DD.YY, "%m/%d/%y")
+
+# convert with yday into a new column "julian"
+df.bmass.agg$date_julian <- yday(df.bmass.agg$date_MM.DD.YY)  
+
+# make sure it worked all the way through. 
+head(df.bmass.agg$date_julian)
+tail(df.bmass.agg$date_julian)
+```
+
+```{r}
+index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
+
+index <- index[, -c(4:7)] # remove these columns
+```
+
+
+
+```{r}
+df.bmass.all <- left_join(df.bmass.agg, index, by = "site") 
+```
+
+
+
+
+
 
 ```{r}
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
-pz4 = ggplot(sgmass, aes(sea_otter_index, leaf)) +
+p = ggplot(df.bmass.all, aes(date_julian, leaf_dw_g, color = date_julian)) +
+  geom_point(size=3) 
+  #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
+  #geom_text(aes(label=site), size=2)
+plot(p)
+
+
+
+
+pz4 = ggplot(df.bmass.all, aes(sea_otter_index, leaf.rhizome)) +
   geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
+  #geom_text(aes(label=site), size=2)
+  stat_poly_eq(formula = linear.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
+  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(pz4)

@@ -539,7 +539,7 @@ df.alldat$so_region1=factor(df.alldat$so_region1, levels=c("low","mid","high")) 
 df.alldat$so_region2=factor(df.alldat$so_region2, levels=c("low","high")) # order sites
 
 
-pf1 <- ggplot(df.alldat, aes(so_region2, fucus_mean_elev_mllw_cm)) +
+pf1 <- ggplot(df.alldat, aes(so_region2, fucus_mean_elev_mllw_cm, color = so_region2)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(alpha = 0.3, width = 0.15) +
   theme(legend.position="right") +
