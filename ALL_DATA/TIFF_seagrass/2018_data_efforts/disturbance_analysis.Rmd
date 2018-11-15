@@ -760,7 +760,7 @@ linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
 
-pz6 <- ggplot(df.alldat, aes(so_region2, diffuse_band_area_m2)) +
+pz6 <- ggplot(df.alldat, aes(so_region2, diffuse_band_height_m2)) +
   geom_boxplot(outlier.shape = NA) +
   geom_jitter(alpha = 0.3, width = 0.15) +
   theme(legend.position="right") +
@@ -773,16 +773,16 @@ plot(pz6)
 
 
 
-pz7 = ggplot(df.alldat, aes(dens_otter_avg, diffuse_band_area_m2)) +
+pz7 = ggplot(df.alldat, aes(so_index, diffuse_band_distance_cm, color = sed2_qual)) +
   geom_point(size=3) + # allows for trendline on general trend
   #geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index")+ylab("Continuous edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
+  stat_poly_eq(formula = poly.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
+  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(pz7)
