@@ -307,7 +307,7 @@ mod1 <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + 
 Dredge and filter models
 ```{r mod1 dr}
 ## Dredge ##
-mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE)
+mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd")
 mod1.dr
 
 ## Filter top models ##
@@ -416,7 +416,7 @@ mod2 <- lm(log(epiphmass_shootmass) ~ date_julian + sea_otter_index_tr + log(gra
 Dredge and filter models
 ```{r mod2 dr}
 ## Dredge ##
-mod2.dr <- dredge(mod2, rank = "AICc", evaluate = TRUE)
+mod2.dr <- dredge(mod2, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd")
 mod2.dr
 
 ## Filter top models ##
@@ -486,7 +486,7 @@ mod3 <- lm(log(grazermass_shootmass) ~ date_julian + sea_otter_index_tr + log(ep
 Dredge and filter models
 ```{r mod3 dr}
 ## Dredge ##
-mod3.dr <- dredge(mod3, rank = "AICc", evaluate = TRUE)
+mod3.dr <- dredge(mod3, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd")
 mod3.dr
 
 ## Filter top models ##
@@ -579,7 +579,7 @@ mod4 <- lm(sqrt(crab_mass) ~ date_julian + sea_otter_index_tr + +log(grazermass_
 Dredge and filter models
 ```{r mod4 dr}
 ## Dredge ##
-mod4.dr <- dredge(mod4, rank = "AICc", evaluate = TRUE)
+mod4.dr <- dredge(mod4, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd")
 mod4.dr
 
 ## Filter top models ##
@@ -632,14 +632,14 @@ mod5 <- lm(log(fish_preds) ~ date_julian + sea_otter_index_tr + +log(grazermass_
 Dredge and filter models
 ```{r mod5 dr}
 ## Dredge ##
-mod5.dr <- dredge(mod5, rank = "AICc", evaluate = TRUE)
+mod5.dr <- dredge(mod5, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd")
 mod5.dr
 
 ## Filter top models ##
 mod5.dr.top <- mod5.dr %>% 
   filter(delta <= 2)
 
-mod5.dr.top <- mod4.dr.top[,colSums(is.na(mod5.dr.top)) < nrow(mod5.dr.top)] # remove columns with 0s
+mod5.dr.top <- mod5.dr.top[,colSums(is.na(mod5.dr.top)) < nrow(mod5.dr.top)] # remove columns with 0s
 datatable(round(mod5.dr.top, 4))
 ```
 
