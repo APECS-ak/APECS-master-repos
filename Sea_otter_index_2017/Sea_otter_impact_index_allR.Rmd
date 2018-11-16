@@ -345,6 +345,13 @@ pairs(site.dat[,10:15])
 ### Assessing normality of measures
 
 Some measures are fairly skewed because of zeros and extreme values. Transforming would help control for these extreme values. Below are untransformed histograms
+
+read in if you don't want to re-run all of the above
+```{r read already caculated}
+site.dat <- read.csv( "../ALL_DATA/sea_otter_impact_index_new.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+
 ```{r}
 hist(site.dat$dens_surv1)
 hist(site.dat$dens_surv2)
