@@ -41,10 +41,13 @@ omdens <- aggregate(organic_density ~ site_name, data = df.deep30, mean, na.rm =
 
 ```{r}
 soindex <- read.csv("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_sediment/sea_otter_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+```
 
+```{r}
 soindex = soindex %>% 
   mutate(densityavg_km2_2017 = (density1_km2_2017 + density2_km2_2017) / 2)
 ```
+
 
 ```{r}
 df.deepsum <- left_join(dbd, omtot, by = c("site_name")) # join
@@ -67,7 +70,7 @@ rm(soindex)
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
-p1 = ggplot(df.deepsum, aes(so_index, organic_density)) +
+p1 = ggplot(df.deepsum, aes(so_index, organic_dw_percent)) +
   geom_point(size=3) + # allows for trendline on general trend
   geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +

@@ -7,12 +7,17 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
+theme_set(theme_classic())
 ```
 
 ```{r}
 library(dplyr)
 library(plyr)
 library(tidyr)
+library(lubridate)
+library(ggplot2)
+library(ggpmisc)
 ```
 
 
@@ -163,7 +168,7 @@ str(df.bmass$date_MM.DD.YY)
 df.bmass$date_MM.DD.YY <- as.Date(df.bmass$date_MM.DD.YY, "%m/%d/%y")
 
 # convert with yday into a new column "julian"
-df.bmass$date_julian <- yday(df.bmass$date_MM.DD.YY)  
+df.bmass$date_julian <- yday(df.bmass$date_MM.DD.YY)
 
 # make sure it worked all the way through. 
 head(df.bmass$date_julian)
@@ -280,22 +285,26 @@ rm(total.agg)
 
 \plot
 ```{r}
-df.bmass.all.2 <- df.bmass.all[-c(2),] # remove these columns
-df.all.2 <- df.all[-c(2),] # remove these columns
+df.all$so_region1=factor(df.all$so_region1, levels=c("low","mid","high")) # order sites
+df.all$so_region2=factor(df.all$so_region2, levels=c("low","high")) # order sites
+
+
+#df.bmass.all.2 <- df.bmass.all[-c(2),] # remove these columns
+#df.all.2 <- df.all[-c(2),] # remove these columns
 
 
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
 
-t.test(tot.carb.surface ~ transect, paired=FALSE, data = df.all)
+t.test(leaf_dw_g_m2 ~ so_region2, paired=FALSE, data = df.all)
 t.test(tot_biomass_dw_g_m2 ~ sed2, paired=FALSE, data = df.all)
 
 
-pz4 = ggplot(df.all, aes(sea_otter_index, organic_carbon_percent, color = sed2)) +
+pz4 = ggplot(df.all, aes(so_region2, leaf_dw_g_m2, color = sed2)) +
   geom_point(size=3) + # allows for trendline on general trend
   #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula= y~x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
@@ -305,8 +314,8 @@ pz4 = ggplot(df.all, aes(sea_otter_index, organic_carbon_percent, color = sed2))
                label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
   stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5) +
-  facet_wrap(~transect)
+                  label.x.npc = 'left', label.y.npc = 'top', size = 5) 
+  #facet_wrap(~transect)
 plot(pz4)
 
   #facet_wrap(~sed1_qual)

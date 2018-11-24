@@ -621,7 +621,7 @@ pz2 <- ggplot(df.alldat, aes(so_region2, edge_continuous_elev_corrct)) +
   #facet_wrap(~sediment)
 plot(pz2)
 
-t.test(edge_continuous_elev_mllw_cm ~ so_region2, paired=FALSE, data = df.alldat)
+#t.test(edge_continuous_elev_mllw_cm ~ so_region2, paired=FALSE, data = df.alldat)
 ```
 
 <br>
@@ -670,7 +670,7 @@ pz3 = ggplot(df.alldat, aes(edge_continuous_elev_mllw_cm, edge_diffuse_elev_mllw
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
   xlab("Continuous edge (cm, MLLW)")+ylab("Diffuse edge elevatione (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
+  geom_text(aes(label=site), size=2)
   stat_poly_eq(formula = linear.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'bottom', size = 5, parse = TRUE) +
@@ -1006,8 +1006,8 @@ plot(pz17)
 5. **Sediments:** The sites that had "sugar sand", or fine + semi-compacted sand throughout much of the site seemed to have a markedly higher seagrass edge (mean = +51.4 cm MLLW). The edge elevations at muddy and sandy sites (mud: -14.7; sand: -19.0 cm MLLW) appear to be similar across sites. 
 
 ```{r, out.width="25%"}
-df.alldat$sed1_qual=factor(df.alldat$sed1_qual, levels=c("mud","sugar","sand")) # order sites
-df.alldat$sed1_qua2=factor(df.alldat$sed2_qual, levels=c("mud","sugar","sand")) # order sites
+df.alldat$sed1_qual=factor(df.alldat$sed1_qual, levels=c("mud","sugar","sand")) # order
+df.alldat$sed1_qua2=factor(df.alldat$sed2_qual, levels=c("mud","sugar","sand")) # order
 
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
