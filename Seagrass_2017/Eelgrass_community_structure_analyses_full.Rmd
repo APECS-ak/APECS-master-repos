@@ -307,7 +307,7 @@ mod1 <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + 
 Dredge and filter models
 ```{r mod1 dr}
 ## Dredge ##
-mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd")
+mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd", ct.args = )
 mod1.dr
 
 ## Filter top models ##
@@ -318,19 +318,13 @@ mod1.dr.top <- mod1.dr.top[,colSums(is.na(mod1.dr.top)) < nrow(mod1.dr.top)] # r
 datatable(round(mod1.dr.top, 4))
 ```
 
-Fit top models and view summary.
-```{r fit top mod1}
-## Model fits ##
-mod1a <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass), data = dat)
-mod1b <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian , data = dat)
-mod1c <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr, data = dat)
-mod1d <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + log(epiphmass_shootmass), data = dat)
+Extract coefficents errors from top models.
+```{r coefs top mod1}
+mod1.list <- coefTable(mod1.dr)[1:4]
 
-## Model summary ##
-summary(mod1a)
-summary(mod1b)
-summary(mod1c)
-summary(mod1d)
+t <- data.frame(mod1.list[[1]])
+t <- cbind(row.names(t), t)
+t$rank <- 1
 ```
 
 Predicted values. Note that values will need to be squared becasue the model was fitted with the sqrt of total eelgrass mass.
@@ -686,8 +680,8 @@ ggplot(dat) +
 
 ## time and eelgrass ##
 ggplot(dat) +
-  geom_point(aes(x = date_julian, y = (abvgnd_mass + blwgnd_mass)), size = 5) +
-  labs(x = "Julian Day", y = bquote("Eelgrass biomass" ~(g/m^2))) +
+  geom_point(aes(x = date_julian, y = Cottidae), size = 5) +
+  labs(x = "sea otter index", y = "fish preds") +
   theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
