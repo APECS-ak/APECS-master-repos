@@ -307,7 +307,7 @@ mod1 <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + 
 Dredge and filter models
 ```{r mod1 dr}
 ## Dredge ##
-mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd", ct.args = )
+mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE, extra = "adjR^2", beta = "sd")
 mod1.dr
 
 ## Filter top models ##
@@ -322,10 +322,32 @@ Extract coefficents errors from top models.
 ```{r coefs top mod1}
 mod1.list <- coefTable(mod1.dr)[1:4]
 
-t <- data.frame(mod1.list[[1]])
-t <- cbind(row.names(t), t)
-t$rank <- 1
+mod1.coefs <- data.frame()
+for(i in 1:4){
+  q <- data.frame(mod1.list[[i]])
+  r <- cbind(row.names(q), q)
+  r$rank <- i
+  r$model <- 1
+  mod1.coefs <- rbind(mod1.coefs, r)
+}
+
+colnames(mod1.coefs) <- c("factor", "estimate", "se", "df", "rank", "model")
+mod1.coefs$lwr <- mod1.coefs$estimate - (1.96 * mod1.coefs$se)
+mod1.coefs$upr <- mod1.coefs$estimate + (1.96 * mod1.coefs$se)
+mod1.coefs <- filter(mod1.coefs, factor != "(Intercept)")
 ```
+
+Plotting coefficients by model
+```{r plots coefs}
+ggplot(mod1.coefs, aes(color = factor)) +
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_point(aes(rank, estimate), size = 3, position = position_dodge(width = 1/2)) +
+  geom_errorbar(aes(rank, ymin = lwr, ymax = upr), width = 0, position = position_dodge(width = 1/2)) +
+  coord_flip() + 
+  scale_y_continuous(limits = c(-1, 1.07), breaks = seq(-1, 1.07, by = 0.50)) +
+  labs(x = "Model Rank", y = " Coefficient Value +/- CI")
+```
+
 
 Predicted values. Note that values will need to be squared becasue the model was fitted with the sqrt of total eelgrass mass.
 ```{r mod1 pred values}
