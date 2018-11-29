@@ -27,7 +27,8 @@ library(sf)
 
 ```{r load data}
 ## Prince of Wales Water Polygon ##
-h2o.utm <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "POW_water_UTM")
+h2o.utm <- readOGR("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "POW_water_UTM")
+#h2o.utm <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "POW_water_UTM")
 h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
@@ -35,7 +36,7 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ### Where is your site?
 Input Lat/Long in decimal degrees below. Make sure that the site is "in the water"! Otherwise this wont work.
 ```{r site}
-site <- structure(list(id = "site", longitude = -132.842514, latitude = 55.188785), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
+site <- structure(list(id = "site", longitude = -133.044890, latitude = 55.415907), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
 xy <- site[,c(2,3)]
 
 site <- SpatialPointsDataFrame(coords = xy, data = site,
@@ -47,8 +48,9 @@ site <- spTransform(site, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0"))
 \\
 ```{r}
 # import otter counts as .csv file
-df.otts <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/sea_otter_counts_2018_stephens_1.csv", stringsAsFactors = FALSE, header = TRUE)
-df.otts$so_count <- as.numeric(df.otts$so_count)
+
+#df.otts <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/sea_otter_counts_2018_stephens_1.csv", stringsAsFactors = FALSE, header = TRUE)
+#df.otts$so_count <- as.numeric(df.otts$so_count)
 ```
 
 
@@ -56,7 +58,7 @@ df.otts$so_count <- as.numeric(df.otts$so_count)
 ### Make the polygon
 Some spatial math happens here. Its scary.
 ```{r}
-buff <- gBuffer(site, byid = TRUE, width = 3704, quadsegs = 10) # create buffer
+buff <- gBuffer(site, byid = TRUE, width = 92600, quadsegs = 10) # create buffer
 buff <- spTransform(buff, CRS("+init=epsg:4326")) # transform buffer
 buff.water <- gIntersection(h2o.latlong, buff, byid = TRUE) # clip the buffer area by water so we only have water area left
 buff.water <- spTransform(buff.water, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")) # change projection back to UTM
@@ -80,8 +82,8 @@ site.latlong <- spTransform(site, CRS("+init=epsg:4326"))
 leaflet() %>% 
   addProviderTiles(providers$Esri.WorldImagery) %>% 
   addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "lightseagreen", fillOpacity = 0.75, group = "POW") %>%
-  addCircleMarkers(data = site, ~longitude, ~latitude, color = "deeppink", fillOpacity = 1, stroke = FALSE, radius = 7) %>% 
-  addCircleMarkers(data = df.otts, ~longitude, ~latitude, color = "yellow", stroke = FALSE, radius = 3, fillOpacity = 1)
+  addCircleMarkers(data = site, ~longitude, ~latitude, color = "deeppink", fillOpacity = 1, stroke = FALSE, radius = 7) #%>% 
+  #addCircleMarkers(data = df.otts, ~longitude, ~latitude, color = "yellow", stroke = FALSE, radius = 3, fillOpacity = 1)
 
 
 a <- (2500 * length(survey.poly.utm) / 1000000) # caculate area of the polygon in sq km. 2500 becasue 50*50=2500

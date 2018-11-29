@@ -337,3 +337,15 @@ pz4 = ggplot(df.all, aes(sea_otter_index, diffuse_band_distance_cm)) +
 plot(pz4)
 ```
 
+
+
+
+
+```{r}
+```{r}
+write.csv(df.all, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_sediment/summary_2018_matter.csv", row.names = TRUE)
+```
+
+
+```
+

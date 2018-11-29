@@ -209,7 +209,11 @@ rm(total.agg)
 
 \plot
 ```{r}
-df.bmass.all.2 <- df.bmass.all[-c(2),] # remove these columns
+df.bmass.all.2 <- df.bmass.all[c(6,8,10,17,22,2,5,9,11,20),] # remove these columns
+
+df.bmass.all$so_region1=factor(df.bmass.all$so_region1, levels=c("low","mid","high")) # order sites
+df.bmass.all$so_region2=factor(df.bmass.all$so_region2, levels=c("low","high")) # order sites
+
 
 
 linear.model <- (y ~ x)
@@ -225,11 +229,10 @@ plot(p)
 
 
 
-pz4 = ggplot(df.bmass.all, aes(sea_otter_index, diffuse_band_height_cm)) +
+pz4 = ggplot(df.bmass.all, aes(pop_dens_surv_km2, leaf_dw_g_m2, color = sed2)) +
   geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
@@ -243,21 +246,46 @@ plot(pz4)
 
 
 
-pz4 = ggplot(df.bmass.all.2, aes(sea_otter_index, diffuse_band_distance_cm, color = sed2)) +
+
+
+pz4 = ggplot(df.bmass.all, aes(date_julian, leaf_dw_g_m2)) +
   geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
+  stat_poly_eq(formula = linear.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
+  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(pz4)
 ```
 
+
+```{r}
+aov<- aov(df.bmass.all$leaf_dw_g_m2 ~ df.bmass.all$pop_dens_surv_km2)
+summary(aov) # here I see results for my ANOVA test
+```
+
+
+
+```{r}
+p2 = ggplot(df.bmass.all, aes(pop_dens_surv_km2, leaf_dw_g_m2)) +
+  stat_summary(fun.y=mean, geom="bar", position="dodge") +
+  stat_summary(fun.data=mean_se, geom="errorbar", position=position_dodge(width=0.90), width=0.1)
+  #labs(y="Blade RGR (mm/d)", title="Blade Elongation")+
+plot(p2)
+```
+
+
+```{r}
+p04 <- ggplot(df.bmass.all, aes(pop_dens_surv_km2, leaf_dw_g_m2, color = pop_dens_surv_km2)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="none")
+plot(p04)
+```
 

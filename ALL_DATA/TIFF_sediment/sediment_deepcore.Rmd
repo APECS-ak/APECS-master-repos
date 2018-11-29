@@ -41,12 +41,11 @@ omdens <- aggregate(organic_density ~ site_name, data = df.deep30, mean, na.rm =
 
 ```{r}
 soindex <- read.csv("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_sediment/sea_otter_index_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+
+soindex = soindex %>% 
+  mutate(otter_densityavg_km2_2017 = (density1_km2_2017 + density2_km2_2017) / 2)
 ```
 
-```{r}
-soindex = soindex %>% 
-  mutate(densityavg_km2_2017 = (density1_km2_2017 + density2_km2_2017) / 2)
-```
 
 
 ```{r}
@@ -70,18 +69,17 @@ rm(soindex)
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
-p1 = ggplot(df.deepsum, aes(so_index, organic_dw_percent)) +
+p1 = ggplot(df.deepsum, aes(dry_bulk_density, organic_dw_g, color = so_index)) +
   geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula=(y~x), se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
+  geom_text(aes(label=site_name), size=2) +
+  stat_poly_eq(formula = linear.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
+  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(p1)
@@ -93,10 +91,10 @@ plot(p1)
 
 
 
-\2018
+\2017
 \data
 ```{r}
-
+write.csv(df.deepsum, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_sediment/2017_matter_summary.csv", row.names = TRUE)
 ```
 
 
