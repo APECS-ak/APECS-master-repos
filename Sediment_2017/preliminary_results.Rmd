@@ -2,8 +2,11 @@
 title: "Preliminary sedimentary OM and IM results"
 author: "Tiff Stephens"
 date: "26 Jan 2018"
-output: html_document
-editor_options: 
+output:
+  html_document: default
+  pdf_document: default
+editor_options:
+  chunk_output_type: console
 chunk_output_type: console
 ---
 
@@ -19,13 +22,10 @@ theme_set(theme_classic())
 
 
 
-
-
 ### 1. Import cleaned .csv file and look at dataframe.
 ```{r, echo = FALSE, include = FALSE}
 # read clean file from github
-df.core <- read.csv("https://raw.githubusercontent.com/APECS-ak/APECS-master-repos/master/ALL_DATA/core_matter_2017_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
-
+df.core <- read.csv("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/2017/sediment_matter_2017/sediment_matter_2017_CLEANDATA.csv", stringsAsFactors = FALSE, header = TRUE)
 # check 
 str(df.core)
 ```
@@ -35,13 +35,13 @@ str(df.core)
 
 
 ### 2. Remove excess columns and calcuate other factors of interest.
-```{r, echo = FALSE, include = FALSE}
+```{r eval=FALSE, include=FALSE}
 # remove pan, crucible, and sediment combo weights not necessary here
 df.core = df.core %>% 
   select(-pan_weight, -pan_sed_ww_pre_60C, -pan_sed_dw_post_60C, -pan_sed_dw_pre_450C, -pan_sed_dw_post450C, -crucible_weight, -crucible_sed_dw_pre_950C, -crucible_sed_dw_post_950C)
 ```
 
-```{r, echo = FALSE, include = FALSE}
+```{r eval=FALSE, include=FALSE}
 df.core = df.core %>% 
   mutate(om_percent_dw = (om_dw / sed_dw_pre_450C) * 100, na.rm = TRUE) %>%
   mutate(im_percent_dw = (im_dw / sed_dw_pre_950C) * 100, na.rm = TRUE) %>%
@@ -51,12 +51,12 @@ df.core = df.core %>%
   mutate(porewater_volume_cm3 = sed_ww_pre_60C - sed_dw_post_60C, na.rm = TRUE)
 ```
 
-```{r, echo = FALSE, include = FALSE}
+```{r eval=FALSE, include=FALSE}
 df.core = df.core %>% 
   select(-sed_ww_pre_60C, -sed_dw_post_60C, -sed_dw_pre_450C, -sed_dw_post_450C, -sed_dw_pre_950C, -sed_dw_post_950C, -na.rm)
 ```
 
-```{r}
+```{r eval=FALSE, include=FALSE}
 # add site numbers so can be used as factors later
 newsitenames <- mapvalues(df.core$site, from = c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07"), to = c("1","2","3","4","5","6","7","2","3","4","5","6","7","8","1","2","3","4","5","6","7"))
 
@@ -67,7 +67,7 @@ df.core <- left_join(df.core, df.newsitenames, by = "X")
 names(df.core)[names(df.core) == 'newsitenames'] <- 'site_n' # rename site columns
 ```
 
-```{r, echo = FALSE, include = FALSE}
+```{r eval=FALSE, include=FALSE}
 # TEMPORARILY remove these rows...clear mistake in data collection or data entry.
 df.core <- df.core[-c(52,195,206,276,365,403,470,481,482,484,513,515,516),]
 ```
@@ -80,13 +80,13 @@ df.core <- df.core[-c(52,195,206,276,365,403,470,481,482,484,513,515,516),]
 ```{r, echo = FALSE}
 # new data frame for all cores
 locations_all = df.core %>%
-  distinct(df.core, latitude, longitude, site) %>%
+  distinct(df.core, latitude_N, longitude_E, site_name) %>%
   drop_na()
 
 # map "locations_all"
 leaflet(locations_all) %>%
   addTiles() %>%
-  addMarkers(~longitude, ~latitude, popup = ~site, label = ~site)
+  addMarkers(~longitude_E, ~latitude_N, popup = ~site_name, label = ~site_name)
 ```
 <br><br><br><br><br>
 
@@ -99,45 +99,67 @@ leaflet(locations_all) %>%
 
 
 
+```{r}
+df.core = df.core[-c(195, 276, 365, 403, 470, 482, 484, 513, 515, 516),] # rows that seem really high or low
+
+df.core_noL06 = df.core[-c(1:30),] # remove L06 (for now) because organic matter is off the scale
+
+
+```
 
 ### 4. Plotting by site and region
 <br>
 
-#### Below, the depth profile for organic matter (right) and inorganic mater (left) from each site is roughly plotted to compare the overall matter content. You will notice that site L06 is way different than the rest
-```{r, fig.height = 30, fig.width = 8, echo = FALSE, warning = FALSE}
-df.core$site=factor(df.core$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order sites
 
-df.core$otter_region=factor(df.core$otter_region, levels=c("Low","Mid","High")) # order zones
+```{r, fig.height = 30, fig.width = 8, echo = FALSE, warning = FALSE}
+#df.core$site=factor(df.core$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order sites
+
+#df.core$otter_region=factor(df.core$otter_region, levels=c("Low","Mid","High")) # order zones
 
 
 # plot organic matter
-plot_om_all = ggplot(df.core, aes(layer_depth, om_density)) +
+plot_om_all = ggplot(df.core_noL06, aes(layer_depth_cm, organic_dw_percent)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
   scale_x_reverse() +
   xlab("Core Depth (cm)") +
-  ylab("Organic Matter (g cm^3)") +
+  ylab("Organic Matter (% dry weight)") +
   #scale_x_continuous(position = "top") +
   #scale_y_continuous(position = "left") +
-  facet_wrap(~site, ncol = 1)
+  facet_wrap(~site_name, ncol = 1)
 
 # plot inorganic matter
-plot_im_all = ggplot(df.core, aes(layer_depth, im_density)) +
+plot_im_all = ggplot(df.core_noL06, aes(layer_depth_cm, inorganic_dw_percent)) +
   stat_summary(fun.y=mean, geom="point")+
   stat_summary(fun.data=mean_se, geom="errorbar", width=0.5) +
   coord_flip() +
   scale_x_reverse() +
   xlab("Core Depth (cm)") +
-  ylab("Organic Matter (g cm^3)") +
+  ylab("Inorganic Matter (% dry weight)") +
   #scale_x_continuous(position = "top") +
   #scale_y_continuous(position = "left") +
-  facet_wrap(~site, ncol = 1)
+  facet_wrap(~site_name, ncol = 1)
 
 # organize om and im side-by-side
 plot_grid(plot_om_all, plot_im_all, align = "hv", ncol = 2)
 ```
 <br><br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #### The core from L06 was loaded with chunky woody debris; in general, this site had a lot of woody debris at the surface of the sediment (see notes). The data are real but an outlier compared to the other sites. Here are two images of the sliced core from site L06:
 ```{r, include = FALSE}
@@ -152,19 +174,14 @@ include_graphics(img2_path)
 <br>
 
 
+
+
+
 #### For the sake of looking at regional patterns, I've removed Site L06 for further analysis. 
 ```{r}
 df.core_noL06 = df.core[-c(1:30),] # remove L06 (for now) because organic matter is off the scale
 ```
 <br><br><br><br><br><br><br><br>
-
-
-
-
-
-
-
-
 
 
 
@@ -176,13 +193,13 @@ df.core_noL06 = df.core[-c(1:30),] # remove L06 (for now) because organic matter
 
 ### Organic matter
 ```{r, fig.height = 10, fig.width = 8, echo = FALSE, warning = FALSE}
-df.core_noL06$site=factor(df.core_noL06$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order zones
+#df.core_noL06$site=factor(df.core_noL06$site, levels=c("2017_L_01","2017_L_02","2017_L_03","2017_L_04","2017_L_05","2017_L_06","2017_L_07","2017_M_02","2017_M_03","2017_M_04","2017_M_05","2017_M_06","2017_M_07","2017_M_08","2017_H_01","2017_H_02","2017_H_03","2017_H_04","2017_H_05","2017_H_06","2017_H_07")) # order zones
 
-df.core_noL06$otter_region=factor(df.core_noL06$otter_region, levels=c("Low","Mid","High")) # order zones
+#df.core_noL06$otter_region=factor(df.core_noL06$otter_region, levels=c("Low","Mid","High")) # order zones
 
 
 
-hlinedat_om <- ddply(df.core_noL06, "otter_region", summarize, regionmean_om = mean(om_density, na.rm = TRUE))
+#hlinedat_om <- ddply(df.core_noL06, "otter_region", summarize, regionmean_om = mean(om_density, na.rm = TRUE))
 
 # plot organic matter with sites
 plot_oma = ggplot(df.core_noL06, aes(layer_depth, om_density, color = site_n)) +
@@ -892,6 +909,36 @@ cppt2 <- plot_grid(pt4, pt5, pt6, labels=c('OM', 'IM', 'OM:IM'), align = 'h', nc
 plot_grid(title.pt2, cppt2, ncol=1, rel_heights=c(0.1, 1))
 ```
 <br><br><br><br><br><br><br><br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

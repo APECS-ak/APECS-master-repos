@@ -69,7 +69,7 @@ rm(soindex)
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
-p1 = ggplot(df.deepsum, aes(dry_bulk_density, organic_dw_g, color = so_index)) +
+p1 = ggplot(df.deepsum, aes(so_index, organic_dw_percent, color = so_index)) +
   geom_point(size=3) + # allows for trendline on general trend
   #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   geom_smooth(method=lm, formula=(y~x), se=FALSE, fullrange=FALSE) +

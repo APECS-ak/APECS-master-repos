@@ -84,8 +84,8 @@ df.matter <- df.matter[, -c(7, 8, 10, 11)] # remove these columns
 ```{r}
 dbd.agg <- aggregate(dry_bulk_density ~ site + transect, data = df.matter, mean, na.rm = TRUE)
 org.g.agg <- aggregate(organic_dw_g ~ site + transect, data = df.matter, mean, na.rm = TRUE)
-#org.p.agg <- aggregate(organic_dw_percent ~ site + transect, data = df.matter, mean, na.rm = TRUE)
-#org.d.agg <- aggregate(organic_density ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+org.p.agg <- aggregate(organic_dw_percent ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+org.d.agg <- aggregate(organic_density ~ site + transect, data = df.matter, mean, na.rm = TRUE)
 #carb.g.agg <- aggregate(organic_carbon_g ~ site + transect, data = df.matter, mean, na.rm = TRUE)
 carb.p.agg <- aggregate(organic_carbon_percent ~ site + transect, data = df.matter, mean, na.rm = TRUE)
 carb.m.agg <- aggregate(tot.carb.surface ~ site + transect, data = df.matter, mean, na.rm = TRUE)
@@ -94,6 +94,9 @@ carb.m.agg <- aggregate(tot.carb.surface ~ site + transect, data = df.matter, me
 df.carbon <- inner_join(x = dbd.agg, y = carb.p.agg)
 df.carbon <- inner_join(x = df.carbon, y = org.g.agg)
 df.carbon <- inner_join(x = df.carbon, y = carb.m.agg)
+df.carbon <- inner_join(x = df.carbon, y = org.p.agg)
+df.carbon <- inner_join(x = df.carbon, y = org.d.agg)
+
 ```
 
 
@@ -300,15 +303,38 @@ poly.model <- y ~ poly(x,2)
 t.test(leaf_dw_g_m2 ~ so_region2, paired=FALSE, data = df.all)
 t.test(tot_biomass_dw_g_m2 ~ sed2, paired=FALSE, data = df.all)
 
+df.all$site <- factor(df.all$site, levels = df.all$site[order(df.all$sea_otter_index)])
 
-pz4 = ggplot(df.all, aes(so_region2, leaf_dw_g_m2, color = sed2)) +
-  geom_point(size=3) + # allows for trendline on general trend
+pz4 = ggplot(df.all, aes(x = sea_otter_index, y = organic_dw_percent, color = sed2)) +
+  geom_point(size = 3) + # allows for trendline on general trend
   #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   geom_smooth(method=lm, formula= y~x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
+  #geom_text(aes(label=transect), size=2) +
+  facet_wrap(~transect) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
+  stat_poly_eq(formula = linear.model, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
+                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                  label.x.npc = 'left', label.y.npc = 'top', size = 5) 
+plot(pz4)
+
+
+
+
+pz4 = ggplot(df.all, aes(x = reorder(site, sea_otter_index), y = organic_dw_percent, color = transect)) +
+  geom_point(size = 3) + # allows for trendline on general trend
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula= y~x, se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
+  #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
+  #geom_text(aes(label=transect), size=2) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
   stat_poly_eq(formula = linear.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
@@ -316,24 +342,6 @@ pz4 = ggplot(df.all, aes(so_region2, leaf_dw_g_m2, color = sed2)) +
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 5) 
   #facet_wrap(~transect)
-plot(pz4)
-
-  #facet_wrap(~sed1_qual)
-
-pz4 = ggplot(df.all, aes(sea_otter_index, diffuse_band_distance_cm)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(pz4)
 ```
 
