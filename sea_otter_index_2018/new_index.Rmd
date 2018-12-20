@@ -1,0 +1,31 @@
+---
+title: "Investigating the build of an index"
+author: "Tiff Stephens"
+date: "12/18/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The purpose of this document is to describe the path to building an index and, ultimately, select the proper index. 
+
+
+
+
+Notes:
+
+
+
+
+
+
+
+
+
+
+
+
+
+

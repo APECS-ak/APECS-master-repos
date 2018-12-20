@@ -326,8 +326,11 @@ dat.redu <- df.index_2dens[,8:13]
 #pairs(dat.l)
 
 # all transformations
-dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:5] + 1)) 
-dat.l <- cbind(dat.l, asin(sqrt(dat.redu[,6]))) 
+dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:5] + 1))
+dat.l <- cbind(dat.l, asin(sqrt(dat.redu[,6])))
+
+colnames(dat.l)[6] <- "prop_so_shells" # change column names
+
 pairs(dat.l)
 
 # Standardize to column (sea otter measure) maximum
@@ -383,6 +386,22 @@ write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_
 
 
 
+```{r}
+library(lavaan)
+
+str(dat.std.l)
+
+
+#model specification
+visual.model <- 'visual =~ so_duration + pop_dens_surv_km2 + dens_otter1 + dens_otter2 + n_pits + prop_so_shells'
+
+#model analysis
+visual.fit <- cfa(model = visual.model,
+                  data = dat.std.l)
+
+
+summary(visual.fit, standardize = TRUE, fit.measures = TRUE)
+```
 
 
 
