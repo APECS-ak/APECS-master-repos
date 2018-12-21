@@ -160,19 +160,14 @@ slopes <- aggregate(beach_slope ~ site, data = slopes, mean, na.rm = TRUE) # cal
 
 \OtterMetrics
 ```{r}
-index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
-
-index <- index %>%
-  mutate(dens_otter_avg = (dens_otter1 + dens_otter2) / 2)
-
-index <- index[, -c(2:6, 12)] # remove these columns
+index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/so_index_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 
 \SedimentQualitative
 ```{r}
 # import pits and sediment quality data as .csv file
-df.seds <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
+df.seds <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
 
 
 # summarise mean sediment quality within site, transects stacked in one column
@@ -220,7 +215,7 @@ rm(df.seds)
 \PitsExtended
 ```{r}
 # import pits and sediment quality data as .csv file
-df.pits <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
+df.pits <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
 
 
 # summarise mean sediment quality within site, transects stacked in one column
@@ -274,13 +269,14 @@ rm(df.pits.trans)
 rm(index)
 rm(sites.2018)
 rm(slopes)
+rm(df.stacked)
 ```
 
 ```{r}
 # organize 
-df.site <- df.site[c("site","longitude","latitude","date_grass_MM.DD.YY","date_otts1_MM.DD.YY","date_otts2_MM.DD.YY","so_region1","so_region2","beach_slope","site_polygon_area_km2","so_index","so_duration","pop_dens_surv_km2","dens_otter1","dens_otter2","dens_otter_avg","prop_otter_shells","sed1_qual","sed2_qual","sed1_edge","sed1_inside","sed1_outside","sed2_edge","sed2_inside","sed2_outside","sed1_site_avg","sed2_site_avg","sedall_site_avg","sed1_abovegrass","sed2_abovegrass","pits_edge","pits_inside","pits_outside","pits_site_sum","pits_abovegrass")]
+#df.site <- df.site[c("site","longitude","latitude","date_grass_MM.DD.YY","date_otts1_MM.DD.YY","date_otts2_MM.DD.YY","so_region1","so_region2","beach_slope","site_polygon_area_km2","so_index","so_duration","pop_dens_surv_km2","dens_otter1","dens_otter2","dens_otter_avg","prop_otter_shells","sed1_qual","sed2_qual","sed1_edge","sed1_inside","sed1_outside","sed2_edge","sed2_inside","sed2_outside","sed1_site_avg","sed2_site_avg","sedall_site_avg","sed1_abovegrass","sed2_abovegrass","pits_edge","pits_inside","pits_outside","pits_site_sum","pits_abovegrass")]
 
-colnames(df.site)
+#colnames(df.site)
 ```
 
 <br><br>
@@ -408,6 +404,24 @@ colnames(df.elev.means)[10] <- "diffuse_band_area_m2" # change column names
 df.elev.means <- df.elev.means[c("site","fucus_upper_elev_mllw_cm","fucus_lower_elev_mllw_cm","fucus_mean_elev_mllw_cm","fucus_band_height_cm","edge_diffuse_elev_mllw_cm","edge_continuous_elev_mllw_cm","edge_diffuse_elev_corrct_pos","edge_continuous_elev_corrct_pos","edge_diffuse_elev_corrct_neg","edge_continuous_elev_corrct_neg","diffuse_band_distance_cm","diffuse_band_height_cm","diffuse_band_area_m2")]
 ```
 
+
+\FucusCorrection
+```{r}
+# fucus correction
+df.elev.means = df.elev.means %>% 
+  mutate(edge_diffuse_elev_corrct_pos = edge_diffuse_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_continuous_elev_corrct_pos = edge_continuous_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_diffuse_elev_corrct_neg = edge_diffuse_elev_mllw_cm * (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_continuous_elev_corrct_neg = edge_continuous_elev_mllw_cm * (fucus_mean_elev_mllw_cm/169.72))
+
+colnames(df.elev.means)[2] <- "diffuse_band_distance_cm" # change column names
+colnames(df.elev.means)[9] <- "diffuse_band_height_cm" # change column names
+colnames(df.elev.means)[10] <- "diffuse_band_area_m2" # change column names
+
+
+# reorganize columns
+#df.elev.means <- df.elev.means[c("site","fucus_upper_elev_mllw_cm","fucus_lower_elev_mllw_cm","fucus_mean_elev_mllw_cm","fucus_band_height_cm","edge_diffuse_elev_mllw_cm","edge_continuous_elev_mllw_cm","edge_diffuse_elev_corrct_pos","edge_continuous_elev_corrct_pos","edge_diffuse_elev_corrct_neg","edge_continuous_elev_corrct_neg","diffuse_band_distance_cm","diffuse_band_height_cm","diffuse_band_area_m2")]
+```
 
 
 \SeagrassDensity
@@ -692,30 +706,32 @@ plot(pz3)
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
-pz4 = ggplot(df.alldat, aes(so_index, edge_diffuse_elev_mllw_cm)) +
+pz4 = ggplot(df.alldat, aes(shell_prop_otter, edge_continuous_elev_mllw_cm)) +
   geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
+  stat_poly_eq(formula = linear.model, 
                aes(label = paste(..rr.label.., sep = "~~~")), 
                label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
+  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(pz4)
 
 
+df.alldat <- df.alldat[-c(6),] # port refugio removed
 
-pz5 = ggplot(df.alldat, aes(so_index, edge_diffuse_elev_mllw_cm)) +
+pz5 = ggplot(df.alldat, aes(pits_all, edge_continuous_elev_mllw_cm)) +
   geom_point(size=3) + # allows for trendline on general trend
   geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea Otter Index")+ylab("Continuous edge elevation (cm, MLLW)") +
+  #xlab("Sea Otter Index")+ylab("Continuous edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
   stat_poly_eq(formula = poly.model, 

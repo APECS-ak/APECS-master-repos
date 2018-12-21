@@ -12,11 +12,6 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 
-# Sea otter index
-Sea otters are hard to keep track of. Until the 2017 and 2018 field seasons, the most reliable measure of sea otters in the Prince of Wales Island region were the USFWS aerial surveys. These data provided densities and time since occupation of sea otters. However the most recent survey was done in 2011. In an effort to add more resolution to how we think about sea otters we collected a variety of sea otter impact measures over the 2017 field season. This script summaries and then combined these measures to create a sea otter impact index. 
-
-## Note for non-eelgrass site users
-This script provides the details of how to calculate the sea otter index for eelgrass sites. You may want to do this differently. You my also have to clean up the resulting data in a different way than it is done here, because of how your data is formated etc. This script should be "generalizable" though and it should not be terribly difficult to create a new version of this code that suits a slightly different set of needs.
 
 # Getting started
 In this script we will calculate the sea otter impact index from raw data to final index. This will be in contrast to relying on hard to track ArcGIS processing. The original index uses the following data that will be attributed to each site:
@@ -51,31 +46,21 @@ library(sp)
 theme_set(theme_classic())
 ```
 
-
-
-
-# 1. Sea otter density from boat based surveys
-Two replicate surveys were conducted, a density will be calculated for each survey.
-
-## Data
-You will need data on.
-1. Sites from which sea otter surveys were centered from (points)
-2. Sea otter survey data (points with an "n sea otter" data attribute)
-3. A polygon of the water around the study area. In this case I am using a polygon of all the coastal waters of POW.
-
 \Sites
 ```{r data}
 # import sites as .csv file
-df.sites <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/sites_2018_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
+df.sites <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/sites_2018_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
 str(df.sites)
 ```
 
 \OtterCount
 ```{r}
 # import otter counts as .csv file
-df.otts <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/sea_otter_counts_2018_stephens_all.csv", stringsAsFactors = FALSE, header = TRUE)
+df.otts <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/sea_otter_counts_2018_stephens_all.csv", stringsAsFactors = FALSE, header = TRUE)
 #str(df.otts)
 #df.otts$so_count <- as.numeric(df.otts$so_count)
+
+df.otts <- df.otts[ -c(8, 9) ] # remove empty columns
 
 
 # calculate total otters per site (within 2 nm buffer)
@@ -107,6 +92,8 @@ df.otts = df.otts %>%
   mutate (dense_otter_avg = (dens_otter1 + dens_otter2) / 2)
 
 rm(df.otts.sums) # remove uneccesary df
+
+df.otts <- df.otts[ -c(5) ] # remove unneccessary columns
 ```
 
 Lets view the final table.
@@ -119,98 +106,14 @@ DT::datatable(df.otts, caption = "Sea otter survey data")
 
 
 
-
-# 2. Duration of sea otter occupation
-Now we need to assign a duration of sea otter occupation from USFWS surveys. What we are going to do is assign each site a sea otter duration based on if that site intersected the 2003 or 2010 sea otter distribution.
-
-## Data
-You will need data on. Note that what polygons you need will depend on you area of interest. This is for POW.
-1. Sites from which sea otter surveys were centered from (points) - you should already have this from above
-2. 2003 sea otter distrubution polygon
-3. 2010 sea otter distribution polygon
-
-```{r}
-## USFWS polygons ##
-# 2003 Sea Otters
-#sd2003 <- readOGR(dsn = "../ALL_DATA/spatial_data", layer="Sea_Otter_disp_2003") 
-
-# 2010 Sea Otters
-#sd2010 <- readOGR(dsn = "../ALL_DATA/spatial_data", layer="Sea_Otter_disp_2010") 
-```
-
-Let take a look
-```{r}
-#leaflet() %>% 
-  #addTiles() %>% 
-  #addPolygons(data = sd2010, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "2003") %>% 
-  #addPolygons(data = sd2003, stroke = NA, fillColor = "orange", fillOpacity = 0.8, group = "2010") %>% 
-  #addMarkers(data = df.sites, ~longitude, ~latitude, label = ~site)
-```
-
-Assign year to site.
-```{r}
-
-# convert .csv file into spatial file
-#utm8CRS <- crs("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs") # assign crs to object
-
-#sp.sites <- SpatialPointsDataFrame(df.sites[,2:3],
-                    #df.sites,    #the R object to convert
-                    #proj4string = utm8CRS)   # assign a CRS 
-
-
-
-# 2003
-#sd2003.utm <- spTransform(sd2003, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
-#disp.03 <- sp.sites[sd2003.utm,]
-#disp.03 <- disp.03@data
-
-# 2010
-#sd2010.utm <- spTransform(sd2010, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
-#disp.10 <- sp.sites[sd2010.utm,]
-#disp.10 <- disp.10@data
-
-# Compare
-#comp <- intersect(disp.03$site, disp.10$site)
-
-
-######### THIS WASN'T WORKING correctly, so Tiff manually entered years into .csv file based on map
-# Append to master data
-#df.sites$sea_otter_duration <- ifelse(match(df.sites$site, comp), 14)
-#df.sites$sea_otter_duration[is.na(df.sites$sea_otter_duration)] <- 7
-```
-
-Lets view the final table
-```{r}
-#DT::datatable(site.dat)
-```
-
-
-
-
-
-
-# 3. Sea otter density from Tinker et. al
-Like with the sea otter duration data we need to assign the modeled sea otter population density to each site.
-
-You will need data on. Note that what polygons you need will depend on you area of interest. This is for POW.
-1. Sites from which sea otter surveys were centered from (points) - you should already have this from above
-2. The population area polygons from Tim
-3. Table of population densities for each Subpop
-
-```{r}
-### THIS ALSO DIDN'T WORK, values were manually filled in based on the map data. 
-```
-
-
-
 ```{r}
 # import pits and sediment quality data as .csv file
-df.pits <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
+df.pits <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
 str(df.pits)
 
-# calculate total otters per site (within 2 nm buffer)
+# calculate total pits per site
 df.pits.stack <- aggregate(n_pits ~ site + trans_loc, data = df.pits, sum, na.rm = TRUE)
-df.pits.tot <- aggregate(n_pits ~ site, data = df.pits, sum, na.rm = TRUE)
+#df.pits.tot <- aggregate(n_pits ~ site, data = df.pits, sum, na.rm = TRUE)
 
 library(reshape)
 df.pits.trans <- spread(df.pits.stack, key = trans_loc, value = n_pits) # split count surveys into three columns
@@ -218,10 +121,23 @@ colnames(df.pits.trans)[2] <- "pits_edge" # change column names
 colnames(df.pits.trans)[3] <- "pits_inside" # change column names
 colnames(df.pits.trans)[4] <- "pits_outside" # change column names
 
+df.pits.trans = df.pits.trans %>% 
+  mutate(pits_all_outside = pits_edge + pits_outside) %>%
+  mutate(pits_all = pits_edge + pits_outside + pits_inside)
+
+df.pits.trans <- df.pits.trans[ -c(2, 3, 4) ] # remove unneccessary columns
+
 
 
 ### For the SO Index, we will use the site totals; join here
-df.index <- left_join(df.otts, df.pits.tot, by = c("site"))
+df.index <- left_join(df.otts, df.pits.trans, by = c("site"))
+
+
+rm(df.pits)
+rm(df.pits.trans)
+rm(df.pits.stack)
+rm(df.sites)
+rm(df.otts)
 ```
 
 
@@ -234,7 +150,7 @@ You will need
 1. Sea otter clam data
 ```{r}
 # import pits and sediment quality data as .csv file
-df.shells <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/clamshells_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
+df.shells <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/clamshells_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
 str(df.shells)
 ```
 
@@ -255,20 +171,36 @@ colnames(df.shells.split)[5] <- "death_whole" # change column names
 
 
 # Proportion of shells that where sea otter cracked by site
-prop.shell <- df.shells.split %>%
+df.shells <- df.shells.split %>%
   mutate(prop_otter_shells = death_otter / (death_crab + death_drill + death_otter + death_whole))
 
-prop.shell <- prop.shell[ -c(2:5) ] # remove columns that are no longer necessary
+df.shells <- df.shells[ -c(2, 3, 5) ] # remove columns that are no longer necessary
+colnames(df.shells)[2] <- "shell_n_otter" # change column names
+colnames(df.shells)[3] <- "shell_prop_otter" # change column names
 
 # join proportion otter shells to index df
-df.index <- left_join(df.index, prop.shell, by = c("site"))
+df.index <- left_join(df.index, df.shells, by = c("site"))
+
+rm(df.shells)
+rm(df.shells.split)
 ```
 
+
+
+
 ```{r}
-# Remove columns that are not needed in the final index calculation
-df.index_2dens <- df.index[ -c(4, 11:13, 16) ] # remove columns that are no longer necessary, this one keeps both otter surveys and removes the mean
-df.index_mdens <- df.index[ -c(4, 11:15) ] # remove columns that are no longer necessary, this one removes both otter surveys and keeps the mean
+# rename things
+colnames(df.index)[7] <- "site_water_area" # change column names
+colnames(df.index)[10] <- "so_pop_1" # change column names
+colnames(df.index)[11] <- "so_pop_2" # change column names
+colnames(df.index)[15] <- "so_dens_1" # change column names
+colnames(df.index)[16] <- "so_dens_2" # change column names
+colnames(df.index)[17] <- "so_dens_avg" # change column names
 ```
+
+
+
+
 
 
 
@@ -284,53 +216,40 @@ Congratulaitons! You calculated and complied all the data you need to actually c
 
 
 
-\WITHbothOTTERsurveys
+\meanOTTERsurveys
 ## Sea otter impact index
 We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit. Correlation plots indicate that most measures are reasonably correlated with eachother.
 ```{r data exploration}
 # Correlations
-corrgram(df.index_2dens[,8:13])
-pairs(df.index_2dens[,8:13])
+df.index <- df.index[ -c(9,11,12,13,14,15,16,18) ] # remove columns that are no longer necessary
+
+corrgram(df.index[, 8:13])
+pairs(df.index[,8:13])
 ```
 
 Checking for normality is important. Histograms suggest that theses data should be log transformed. 
 ```{r}
 # histograms
-hist(df.index_2dens$dens_otter1) # transform
-hist(df.index_2dens$dens_otter2) # transform
-hist(df.index_2dens$n_pits) # transform
-hist(df.index_2dens$prop_otter_shells) # transform
+hist(df.index$so_dens_avg)
+hist(df.index$pits_all)
+hist(df.index$shell_n_otter)
+hist(df.index$shell_prop_otter)
 
 # log transformation
-hist(log(df.index_2dens$dens_otter1 + 1))
-hist(log(df.index_2dens$dens_otter2 + 1))
-hist(log(df.index_2dens$n_pits + 1)) # log is good
-hist(log(df.index_2dens$prop_otter_shells + 1)) # log is meh
-
-# arcsine(sqrt) transformation
-hist(asin(sqrt(df.index_2dens$prop_otter_shells))) # this is great
+hist(log(df.index$so_dens_avg + 1))
+hist(log(df.index$pits_all + 1))
+hist(log(df.index$shell_n_otter + 1))
+hist(log(df.index$shell_prop_otter + 1))
 ```
 Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
 
 Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
 ```{r transformations}
 # Separate values only
-dat.redu <- df.index_2dens[,8:13]
+dat.redu <- df.index[,8:13]
 
 # log transform appropriate columns
-#dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:6] + 1)) 
-#pairs(dat.l)
-
-# no transformations
-#dat.l <- cbind(dat.redu[,1:6])
-#pairs(dat.l)
-
-# all transformations
-dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:5] + 1))
-dat.l <- cbind(dat.l, asin(sqrt(dat.redu[,6])))
-
-colnames(dat.l)[6] <- "prop_so_shells" # change column names
-
+dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:6] + 1)) 
 pairs(dat.l)
 
 # Standardize to column (sea otter measure) maximum
@@ -346,136 +265,38 @@ loadings(pca)
 biplot(pca, cex = 1)
 screeplot(pca, ylim = c(0, 0.8))
 pca$scores 
+df.pcascores <-pca$scores 
 
-final.dat <- cbind(df.index_2dens, pca$scores[,1])
-colnames(final.dat)[14] <- "sea_otter_index"
+final.dat <- cbind(df.index, pca$scores[,1:2])
+colnames(final.dat)[14] <- "so_index_pc1"
+colnames(final.dat)[15] <- "so_index_pc2"
+
 
 # Switch sign of index so positive values are associated with more otters
-final.dat$sea_otter_index <- final.dat$sea_otter_index * -1
+final.dat$so_index_pc1 <- final.dat$so_index_pc1 * -1
+final.dat$so_index_pc2 <- final.dat$so_index_pc2 * -1
 
-ggplot(final.dat, aes(site, sea_otter_index)) +
+
+# plots for pc1
+ggplot(final.dat, aes(site, so_index_pc1)) +
   geom_point(size = 4) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "site", y = "sea otter index (PC1)")
 
-ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
+ggplot(final.dat, aes(reorder(site, so_index_pc1), so_index_pc1, col = so_index_pc1)) +
   geom_point(size = 4) +
   scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "site", y = "sea otter index", col = "SO index (2 densities)") +
+  labs(x = "site", y = "sea otter index", col = "SO index (mean density)") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
-```
 
-Final index data table
-```{r}
-DT::datatable(final.dat, caption = "sea otter impact index")
-```
- 
-## Data export
-```{r export}
-# Data Export
-write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_stephens.csv", row.names = FALSE)
-```
-
-
-
-
-
-
-
-
-
-
-```{r}
-library(lavaan)
-
-str(dat.std.l)
-
-
-#model specification
-visual.model <- 'visual =~ so_duration + pop_dens_surv_km2 + dens_otter1 + dens_otter2 + n_pits + prop_so_shells'
-
-#model analysis
-visual.fit <- cfa(model = visual.model,
-                  data = dat.std.l)
-
-
-summary(visual.fit, standardize = TRUE, fit.measures = TRUE)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\WITHmeanOTTERsurveys
-## Sea otter impact index
-We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit. Correlation plots indicate that most measures are reasonably correlated with eachother.
-```{r data exploration}
-# Correlations
-corrgram(df.index_mdens[,8:12])
-pairs(df.index_mdens[,8:12])
-```
-
-Checking for normality is important. Histograms suggest that theses data should be log transformed. 
-```{r}
-# histograms
-hist(df.index_mdens$dens_otter_avg)
-hist(df.index_mdens$n_pits)
-hist(df.index_mdens$prop_otter_shells)
-
-# log transformation
-hist(log(df.index_mdens$dens_otter_avg + 1))
-hist(log(df.index_mdens$n_pits + 1))
-hist(log(df.index_mdens$prop_otter_shells + 1))
-```
-Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
-
-Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
-```{r transformations}
-# Separate values only
-dat.redu <- df.index_mdens[,8:12]
-
-# log transform appropriate columns
-dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,3:5] + 1)) 
-pairs(dat.l)
-
-# Standardize to column (sea otter measure) maximum
-dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
-```
-
-Now we can calculate the PCA
-```{r PCA}
-# PCA on transformed AND standarized data
-pca <- princomp(dat.std.l)
-pca.summary <- summary(pca)
-loadings(pca)
-biplot(pca, cex = 1)
-screeplot(pca, ylim = c(0, 0.8))
-pca$scores 
-
-final.dat <- cbind(df.index_mdens, pca$scores[,1])
-colnames(final.dat)[13] <- "sea_otter_index"
-
-# Switch sign of index so positive values are associated with more otters
-final.dat$sea_otter_index <- final.dat$sea_otter_index * -1
-
-ggplot(final.dat, aes(site, sea_otter_index)) +
+# plots for pc2
+ggplot(final.dat, aes(site, so_index_pc2)) +
   geom_point(size = 4) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(x = "site", y = "sea otter index (PC1)")
 
-ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
+ggplot(final.dat, aes(reorder(site, so_index_pc2), so_index_pc2, col = so_index_pc2)) +
   geom_point(size = 4) +
   scale_color_gradient(low = "blue", high = "red") +
   labs(x = "site", y = "sea otter index", col = "SO index (mean density)") +
@@ -491,7 +312,7 @@ DT::datatable(final.dat, caption = "sea otter impact index")
 ## Data export
 ```{r export}
 # Data Export
-write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_mdens_stephens.csv", row.names = FALSE)
+write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/so_index_stephens.csv", row.names = FALSE)
 ```
 
 
