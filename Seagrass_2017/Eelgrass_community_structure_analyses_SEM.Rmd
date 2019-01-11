@@ -181,13 +181,10 @@ dat <- merge(dat, fishmass.site.fam, by = "site")
 
 ```
 
-Adding quadratic transformations of date and sea otter index
+Adding total eelgrass mass
 ```{r quadratic}
 ## Date ##
-dat$date_julian_2 <- dat$date_julian^2
-
-## Sea otter index ##
-dat$sea_otter_index_2 <- dat$sea_otter_index^2
+dat$eelgrass_total_mass <- (dat$abvgnd_mass + dat$blwgnd_mass)
 ```
 
 ## Correlation exploration
@@ -206,18 +203,14 @@ A list of models that characterize the eelgrass community with the data availabl
 
 ```{r}
 sem.mod <- psem(
-    lm(sqrt(abvgnd_mass + blwgnd_mass) ~  date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + sed_inside_prim + light_avail + Ntotal_site, data = dat),
-    
-    lm(log(epiphmass_shootmass) ~  date_julian + sea_otter_index_tr + log(grazermass_shootmass) + sed_inside_prim + light_avail + Ntotal_site, data = dat),
-    
-    lm(log(grazermass_shootmass) ~ sea_otter_index_tr  + sqrt(crab_mass) + log(fish_preds) + sed_inside_prim + light_avail + Ntotal_site, data = dat),
-    
-    lm(sqrt(crab_mass) ~  sea_otter_index_tr + log(dat$grazermass_shootmass) + sqrt(abvgnd_mass + blwgnd_mass) + log(fish_preds), data = dat),
-    
-    lm(log(fish_preds) ~  sea_otter_index_tr + log(dat$grazermass_shootmass) + sqrt(abvgnd_mass + blwgnd_mass) + sqrt(crab_mass), data = dat)
+    lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + Ntotal_site + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sea_otter_index_tr, data = dat),
+    lm(log(epiphmass_shootmass) ~ Ntotal_site + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sea_otter_index_tr, data = dat),
+    lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds) + sea_otter_index_tr, data = dat),
+    lm(sqrt(crab_mass) ~ log(fish_preds) + sea_otter_index_tr, data = dat)
 )
 
 summary(sem.mod)
+coefs(sem.mod, standardize = "scale")
 ```
 
 
