@@ -351,6 +351,10 @@ ggplot(mod1.coefs, aes(color = factor)) +
 
 Predicted values. Note that values will need to be squared becasue the model was fitted with the sqrt of total eelgrass mass.
 ```{r mod1 pred values}
+## Best Model ##
+mod1a <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass), data = dat)
+summary(mod1a)
+
 ## New data with median values ##
 # Epiphyte load #
 newdat.mod1.epi <- data.frame(date_julian = rep(median(dat$date_julian), 100), 
@@ -478,7 +482,7 @@ Predicted values plots.
 ggplot(newdat.mod2.grz) +
   geom_line(aes(x = grazermass_shootmass, y = pred), lwd = 1) +
   geom_ribbon(aes(x = grazermass_shootmass, ymin = lwr, ymax = upr), alpha = 0.2) +
-  labs(x = "Grazer load (g/g)", y = bquote(atop("Epiphyte load", " +/- se (g/g)"))) +
+  labs(x = "Grazer load (g/g)", y = "Epiphyte load +/- se (g/g)") +
   scale_y_continuous(limits = c(0, 0.15), breaks = seq(0, 0.15, by = 0.025)) +
   theme(text = element_text(size = 25), legend.position = "none")
 
@@ -703,6 +707,13 @@ ggplot(dat) +
 ## time and eelgrass ##
 ggplot(dat) +
   geom_point(aes(x = date_julian, y = Cottidae), size = 5) +
+  labs(x = "sea otter index", y = "fish preds") +
+  theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+## Grazer load and soi ##
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index_tr, y = grazermass_shootmass), size = 5) +
   labs(x = "sea otter index", y = "fish preds") +
   theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
