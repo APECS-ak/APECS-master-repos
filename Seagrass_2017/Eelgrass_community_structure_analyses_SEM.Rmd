@@ -198,6 +198,38 @@ pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116, 125)])
 ## Models
 We will use a piecewise structual equation modeling approach in the piecewiseSEM package. This will be implemented the 'psem' function in the package.
 
+
+```{r}
+mod1 <- psem(
+  lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + Ntotal_site, data = dat),
+  
+  lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + Ntotal_site, data = dat)
+)
+
+# Get the basis set
+basisSet(mod1)
+
+# Conduct d-sep tests
+(mod1.dsep <- dSep(mod1))
+
+# Compute Fisher's C
+(C <- -2 * sum(log(mod1.dsep$P.Value)))
+
+1 - pchisq(C, 2*nrow(keeley.dsep))
+
+# Get Fisher's C
+fisherC(mod1)
+
+# Summary
+summary(mod1)
+
+par(mfrow = c(2, 2))
+
+plot(mod1)
+```
+
+
+
 ### Model list
 A list of models that characterize the eelgrass community with the data available. The groups of data are nutrients, sediment, eelgrass, epiphyte load, grazer load, crab biomass, fish biomass (grouped), and sea otter index.
 
