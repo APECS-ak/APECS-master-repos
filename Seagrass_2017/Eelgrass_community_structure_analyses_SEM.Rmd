@@ -201,9 +201,24 @@ We will use a piecewise structual equation modeling approach in the piecewiseSEM
 
 ```{r}
 mod1 <- psem(
-  lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + Ntotal_site, data = dat),
+  lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail + log(grazermass_shootmass) + sea_otter_index_tr, data = dat),
   
-  lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + Ntotal_site, data = dat)
+  lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat),
+  
+  lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds), data = dat),
+  
+  lm(sqrt(crab_mass) ~ log(fish_preds) + sea_otter_index_tr, data = dat)
+)
+
+mod2 <- psem(
+    lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + log(grazermass_shootmass) + sea_otter_index_tr, data = dat),
+  
+  lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_inside_prim), data = dat),
+  
+  lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds), data = dat),
+  
+  lm(sqrt(crab_mass) ~ log(fish_preds) + sea_otter_index_tr, data = dat)
+  
 )
 
 # Get the basis set
@@ -222,6 +237,9 @@ fisherC(mod1)
 
 # Summary
 summary(mod1)
+summary(mod2)
+
+AIC(mod1)[1]; AIC(mod2)[1]
 
 par(mfrow = c(2, 2))
 
