@@ -465,18 +465,59 @@ plot.trans <- ggplot(final.dat.tr, aes(reorder(place_name, sea_otter_index), sea
 plot_grid(plot.ntrans, plot.trans)
 ```
 
+### Calculate without clam shell data
+Transformed data EXCLUDING clam shell data
+```{r}
+site.dat.noshell.tr <- cbind(site.dat[, 1:9], log(site.dat[, 10:11] + 1), site.dat[, 12:13], log(site.dat[, 14] + 1))
+```
+
+Standardize data EXCLUDING clam shell data
+```{r}
+dat.redu.noshell.tr <- site.dat.noshell.tr[, 10:14]
+dat.std.noshell.tr <- scale(dat.redu.noshell.tr, center = FALSE, scale = apply(dat.redu.noshell.tr, 2, max))
+```
+
+PCA calculation with EXCLUDING clam shell data
+```{r}
+pca.ns.tr <- princomp(dat.std.noshell.tr)
+pca.summary.ns.tr <- summary(pca.ns.tr)
+pca.summary.ns.tr
+pca.ns.tr
+loadings(pca.ns.tr)
+biplot(pca.ns.tr, cex = 1)
+screeplot(pca.ns.tr, ylim = c(0, 0.8))
+pca.ns.tr$scores 
+
+final.dat.noshell.tr <- cbind(site.dat.noshell.tr, pca.ns.tr$scores[,1])
+colnames(final.dat.noshell.tr)[15] <- "sea_otter_index_tr_ns"
+
+ggplot(final.dat.noshell.tr, aes(site, sea_otter_index_tr_ns)) +
+  geom_point(size = 4) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(x = "Site", y = "Sea otter index transformed (PC1)")
+
+ggplot(final.dat.noshell.tr, aes(reorder(site, sea_otter_index_tr_ns), sea_otter_index_tr_ns, col = sea_otter_index_tr_ns)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Site", y = "Sea otter index transformed", col = "Sea otter impact Index") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+
 
 Final index data table
 ```{r}
 DT::datatable(final.dat, caption = "Sea otter impact index")
 DT::datatable(final.dat.tr, caption = "Sea otter impact index")
+DT::datatable(final.dat.noshell.tr, caption = "Sea otter impact index")
 ```
 
 ## Data export
 ```{r export}
 # Combine transformed and untransformed versions
-final.dat.all <- final.dat
+final.dat.all <- final.dat[, 1:17]
 final.dat.all$sea_otter_index_tr <- final.dat.tr$sea_otter_index
+final.dat.all$sea_otter_index_tr_ns <- final.dat.noshell.tr$sea_otter_index_tr_ns
 DT::datatable(final.dat.all, caption = "Sea otter impact index")
 
 # Data Export
