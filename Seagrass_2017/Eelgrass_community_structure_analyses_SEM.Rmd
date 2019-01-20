@@ -10,7 +10,7 @@ editor_options:
 # An SEM approach to eelgrass communities in southeast Alaska
 As an alternative to using only limear models we may also be able to describe the eelgrass community structure with strutual equation modeling (SEM). This will follow the apprach and package developed by [Lefcheck](https://jonlefcheck.net/2014/07/06/piecewise-structural-equation-modeling-in-ecological-research/). All of the pre data processing will follow that same as the glm models in other scripts.
 
-```{r libraries}
+```{r libraries, echo=FALSE, message=FALSE, warning=FALSE}
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -83,7 +83,7 @@ nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE
 ### Data Prep
 
 Sediment data preparation. Average by site.
-```{r seds by site}
+```{r seds by site, echo=FALSE, message=FALSE, warning=FALSE}
 seds <- sed.site %>% 
   filter(trans_type == "Inside") %>% 
   group_by(site) %>% 
@@ -93,12 +93,12 @@ dat <- merge(tran.dat, seds, by = "site")
 ```
 
 Light availability calculation
-```{r light avail}
+```{r light avail, echo=FALSE, message=FALSE, warning=FALSE}
 dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
 ```
 
 Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
-```{r crab sites string, echo=FALSE}
+```{r crab sites string, echo=FALSE, message=FALSE, warning=FALSE}
 crab.site <- crab.dat %>% 
   group_by(site) %>% 
   summarise(crab_count = mean(count, na.rm = TRUE),
@@ -182,24 +182,34 @@ dat <- merge(dat, fishmass.site.fam, by = "site")
 ```
 
 Adding total eelgrass mass
-```{r quadratic}
+```{r quadratic, echo = FALSE}
 ## Date ##
 dat$eelgrass_total_mass <- (dat$abvgnd_mass + dat$blwgnd_mass)
-```
-
-## Correlation exploration
-```{r}
-names(dat)
-pairs(dat[,c(95, 65, 101, 109, 118, 146, 21, 51)])
-pairs(dat[, c(95, 97, 65, 118)])
-pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116, 125)])
 ```
 
 ## Models
 We will use a piecewise structual equation modeling approach in the piecewiseSEM package. This will be implemented the 'psem' function in the package.
 
+### The Meta Model
+Starting from the theroetical prospective, we are studing the relationships, and by extension patterns of abundance, between predators, herbivors, plants, and the environment.
+![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Meta_model_1.png)
 
-```{r}
+We can further refine this model to include apex predators.
+![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Meta_model_2.png)
+
+### Conceptual model for sea otters in eelgrass ecosystems
+Moving from the theroetical to the real world we can apply the above models to sea otters and eelgrass ecosystems. We can now build conceptual models for the relationships among species/functional groups. These models are developled from therory but also from obervational and experimental literature.
+
+**Model 1**
+![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Model_1.png)
+
+**Model 2**
+![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Model_2.png)
+
+**Model 3**
+![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Model_3.png)
+
+```{r model 1}
 mod1 <- psem(
   lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail + log(grazermass_shootmass) + sea_otter_index_tr, data = dat),
   
@@ -221,32 +231,12 @@ mod2 <- psem(
   
 )
 
-# Get the basis set
-basisSet(mod1)
-
-# Conduct d-sep tests
-(mod1.dsep <- dSep(mod1))
-
-# Compute Fisher's C
-(C <- -2 * sum(log(mod1.dsep$P.Value)))
-
-1 - pchisq(C, 2*nrow(keeley.dsep))
-
-# Get Fisher's C
-fisherC(mod1)
-
 # Summary
 summary(mod1)
 summary(mod2)
 
 AIC(mod1)[1]; AIC(mod2)[1]
-
-par(mfrow = c(2, 2))
-
-plot(mod1)
 ```
-
-
 
 ### Model list
 A list of models that characterize the eelgrass community with the data available. The groups of data are nutrients, sediment, eelgrass, epiphyte load, grazer load, crab biomass, fish biomass (grouped), and sea otter index.
