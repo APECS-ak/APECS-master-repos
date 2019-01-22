@@ -66,6 +66,9 @@ so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsA
 ## Sediment ##
 sed.site <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
+## Clams ##
+clam.dat <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
 ## Crab ##
 crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 crab.dat$string <- as.character(crab.dat$string)
@@ -96,6 +99,8 @@ Light availability calculation
 ```{r light avail, echo=FALSE, message=FALSE, warning=FALSE}
 dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
 ```
+
+Clam data preparation. We will take the mean biomass of all clams across all thress transects in each of the 4 bins in a transect. 
 
 Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
 ```{r crab sites string, echo=FALSE, message=FALSE, warning=FALSE}
