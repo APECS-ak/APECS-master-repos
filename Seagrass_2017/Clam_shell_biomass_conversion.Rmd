@@ -1,0 +1,26 @@
+---
+title: "Clam_shell_biomass_conversion"
+author: "Wendel Raymond"
+date: "January 21, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r libraries}
+library(dplyr)
+```
+
+
+# Clam shells as biomass data
+The shell data that we collected to assess sea otter impact may also be useful to describe the loss of biomass potential relationships with eelgrass and other species. To use the data though, we need to convert shells lengths to biomass using conversion factors.
+
+## Data
+```{r data}
+## Clam shell data ##
+clam.dat <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Conversion Factors ##
+clam.conv <- 
+```
+
