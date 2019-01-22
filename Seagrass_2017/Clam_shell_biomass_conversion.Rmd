@@ -21,6 +21,39 @@ The shell data that we collected to assess sea otter impact may also be useful t
 clam.dat <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 ## Conversion Factors ##
-clam.conv <- 
+clam.conv <- read.csv("../ALL_DATA/clam_length_weight_conversions.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+## Conversion data
+There may be multiple parameter estimates for a single species. In that case we will take the mean of those parameters to use in analysis.
+```{r param prep}
+conv <- clam.conv %>% 
+  group_by(sp_code) %>% 
+  summarise(a = mean(a), b = mean(b))
+```
+
+## Calculate biomass
+Using the parameters above we will calculate biomass of clams based off shell size. **NOTE** that CLAMHI lengths will need to be converted to cm because we could only obtain a conversion for cm. All other species will work with mm shell lengths.
+
+Mass will be calculated using the formula $W(g) = a*L^{b}$
+```{r calc biomass}
+## Convert CLAMHI to cm ##
+clam.dat$width_mm <- ifelse(clam.dat$sp_code == "CALMHI", clam.dat$width_mm / 10, clam.dat$width_mm)
+
+## Calculate Biomass ##
+clam.dat <- merge(clam.dat, conv, by = "sp_code")
+
+clam.dat$mass_g <- (clam.dat$a * clam.dat$width_mm ^ clam.dat$b)
+```
+
+## Clean up and export
+Now lets remove the a and b columns and export a derived dataset
+```{r clean and ex}
+## Clean up ##
+clam.final <- cbind(clam.dat[, 1:11], clam.dat[, 16], clam.dat[, 12:13])
+colnames(clam.final)[12] <- "mass_g"
+
+## Export ##
+write.csv(clam.final, "../ALL_DATA/seagrass_clam_shells_2017_derived.csv", row.names = FALSE)
 ```
 
