@@ -67,7 +67,7 @@ so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsA
 sed.site <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 ## Clams ##
-clam.dat <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+clam.dat <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
 
 ## Crab ##
 crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
@@ -84,7 +84,6 @@ nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE
 ```
 
 ### Data Prep
-
 Sediment data preparation. Average by site.
 ```{r seds by site, echo=FALSE, message=FALSE, warning=FALSE}
 seds <- sed.site %>% 
@@ -100,7 +99,17 @@ Light availability calculation
 dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
 ```
 
-Clam data preparation. We will take the mean biomass of all clams across all thress transects in each of the 4 bins in a transect. 
+Clam data preparation. Data were collected across three transects measuring 100 X 2 meters for a total survey area of 600 square meters. We will average the clam biomass per square meter across the three transects.
+```{r clam mass}
+clam <- clam.dat %>% 
+  group_by(Site, Transect) %>% 
+  summarise(mass_g_m2 = sum(mass_g)/200) %>% 
+  group_by(Site) %>% 
+  summarise(clam_mass = mean(mass_g_m2))
+
+dat <- merge(dat, clam, by.x = "site", by.y = "Site")
+```
+
 
 Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
 ```{r crab sites string, echo=FALSE, message=FALSE, warning=FALSE}
@@ -195,68 +204,24 @@ dat$eelgrass_total_mass <- (dat$abvgnd_mass + dat$blwgnd_mass)
 ## Models
 We will use a piecewise structual equation modeling approach in the piecewiseSEM package. This will be implemented the 'psem' function in the package.
 
-### The Meta Model
-Starting from the theroetical prospective, we are studing the relationships, and by extension patterns of abundance, between predators, herbivors, plants, and the environment.
-![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Meta_model_1.png)
-
-We can further refine this model to include apex predators.
-![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Meta_model_2.png)
-
-### Conceptual model for sea otters in eelgrass ecosystems
-Moving from the theroetical to the real world we can apply the above models to sea otters and eelgrass ecosystems. We can now build conceptual models for the relationships among species/functional groups. These models are developled from therory but also from obervational and experimental literature.
-
-**Model 1**
-![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Model_1.png)
-
-**Model 2**
-![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Model_2.png)
-
-**Model 3**
-![](E:/wraymond2/My Documents/Graduate School/piecewiseSEM/Model_3.png)
-
 ```{r model 1}
 mod1 <- psem(
-  lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail + log(grazermass_shootmass) + sea_otter_index_tr, data = dat),
+  lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + log(clam_mass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat),
   
   lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat),
   
   lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds), data = dat),
   
-  lm(sqrt(crab_mass) ~ log(fish_preds) + sea_otter_index_tr, data = dat)
-)
+  lm(sqrt(crab_mass) ~ log(fish_preds) + sea_otter_index_tr_ns, data = dat),
+  
+  lm(log(clam_mass) ~ sqrt(crab_mass) + sea_otter_index_tr_ns, data = dat)
 
-mod2 <- psem(
-    lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + log(grazermass_shootmass) + sea_otter_index_tr, data = dat),
-  
-  lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_inside_prim), data = dat),
-  
-  lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds), data = dat),
-  
-  lm(sqrt(crab_mass) ~ log(fish_preds) + sea_otter_index_tr, data = dat)
-  
 )
 
 # Summary
 summary(mod1)
-summary(mod2)
 
-AIC(mod1)[1]; AIC(mod2)[1]
 ```
 
 ### Model list
 A list of models that characterize the eelgrass community with the data available. The groups of data are nutrients, sediment, eelgrass, epiphyte load, grazer load, crab biomass, fish biomass (grouped), and sea otter index.
-
-```{r}
-sem.mod <- psem(
-    lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + Ntotal_site + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sea_otter_index_tr, data = dat),
-    lm(log(epiphmass_shootmass) ~ Ntotal_site + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sea_otter_index_tr, data = dat),
-    lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds) + sea_otter_index_tr, data = dat),
-    lm(sqrt(crab_mass) ~ log(fish_preds) + sea_otter_index_tr, data = dat)
-)
-
-summary(sem.mod)
-coefs(sem.mod, standardize = "scale")
-```
-
-
-
