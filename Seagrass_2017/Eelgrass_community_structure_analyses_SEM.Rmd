@@ -160,8 +160,8 @@ fish.site.sp[is.na(fish.site.sp)] <- 0
 fish.site.sp$fish_SW_diverse <- diversity(fish.site.sp[,2:56], index = "shannon")
 fish.site.sp$fish_rich <- rowSums(fish.site.sp[, 2:56] != 0)
 
-# Sum predators #
-fish.site.sp$fish_preds <- rowSums(fish.site.sp[, c(2, 7:9, 13, 20, 31:40, 51, 53:55)])
+# Sum predators # NOW INCLUDES SHINER PERCH #
+fish.site.sp$fish_preds <- rowSums(fish.site.sp[, c(2, 7:9, 13, 14, 20, 31:40, 51, 53:55)])
 
 fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:59)], by = "site")
 
@@ -210,11 +210,7 @@ mod1 <- psem(
   
   lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat),
   
-  lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds), data = dat),
-  
-  lm(sqrt(crab_mass) ~ log(fish_preds) + sea_otter_index_tr_ns, data = dat),
-  
-  lm(log(clam_mass) ~ sqrt(crab_mass) + sea_otter_index_tr_ns, data = dat)
+  lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds), data = dat)
 
 )
 
