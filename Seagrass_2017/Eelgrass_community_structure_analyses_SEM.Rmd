@@ -85,7 +85,7 @@ nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE
 
 ### Data Prep
 Sediment data preparation. Average by site.
-```{r seds by site, echo=FALSE, message=FALSE, warning=FALSE}
+```{r seds by site, echo=FALSE, results = hide}
 seds <- sed.site %>% 
   filter(trans_type == "Inside") %>% 
   group_by(site) %>% 
@@ -100,7 +100,7 @@ dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensi
 ```
 
 Clam data preparation. Data were collected across three transects measuring 100 X 2 meters for a total survey area of 600 square meters. We will average the clam biomass per square meter across the three transects.
-```{r clam mass}
+```{r clam mass, }
 clam <- clam.dat %>% 
   group_by(Site, Transect) %>% 
   summarise(mass_g_m2 = sum(mass_g)/200) %>% 
@@ -201,23 +201,145 @@ Adding total eelgrass mass
 dat$eelgrass_total_mass <- (dat$abvgnd_mass + dat$blwgnd_mass)
 ```
 
-## Models
-We will use a piecewise structual equation modeling approach in the piecewiseSEM package. This will be implemented the 'psem' function in the package.
+## Analytical Approach
+Analysis will follow four major steps.
 
-```{r model 1}
-mod1 <- psem(
-  lm(sqrt(eelgrass_total_mass) ~ log(epiphmass_shootmass) + log(clam_mass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat),
-  
-  lm(log(epiphmass_shootmass) ~ log(grazermass_shootmass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat),
-  
-  lm(log(grazermass_shootmass) ~ sqrt(crab_mass) + log(fish_preds), data = dat)
+1. Define a conceptual model that shows all biologically defenseable paths among variables. 
+2. Reduce the possible varibles to ones that actually seem important for describing the relationship among variables.
+3. Adjust the conceptual model to incule only those varibles which were deemed important from above.
+4. Fit SEM
 
-)
+For our analysis we will first define our exogenous and endogenous variables. 
 
-# Summary
-summary(mod1)
+*Exogenous* - varibles that only have paths going away from them
+1. Sea otters
+2. Nutrients
+3. Light availability
+4. Sediment
+5. Time - kinda, but we will deal with that later
 
+*Endogenous* - variables that have paths coming to them and potentially going away from them
+1. Crabs
+2. Fish
+3. Clams
+4. Grazers
+5. Epiphytes
+6. Eelgrass
+
+### 1. Conceptual model
+![](Figures/sem_conceptual_model_full.png)
+
+### 2. Variable reduction
+While all the path defined in the above conceptual model are biologically justifiable, they may not be present or important in our data. We will use the `dredge` function to identify variables that have meaningful predictive power for our endogenous varibles of interest. But before we do that we need to assess varibles for normality. 
+
+#### Addressing normality
+Total eelgrass biomass is non-normal. Square root fixes it.
+```{r total eg mass, echo=FALSE, results = hide}
+hist(dat$eelgrass_total_mass, breaks = 20)
+shapiro.test(dat$eelgrass_total_mass)
+
+hist(sqrt(dat$eelgrass_total_mass))
+shapiro.test(sqrt(dat$eelgrass_total_mass))
 ```
 
-### Model list
-A list of models that characterize the eelgrass community with the data available. The groups of data are nutrients, sediment, eelgrass, epiphyte load, grazer load, crab biomass, fish biomass (grouped), and sea otter index.
+Epiphyte load is not normal but log transformation fixes it
+```{r epi load, echo=FALSE, results = hide }
+hist(dat$epiphmass_shootmass)
+range(dat$epiphmass_shootmass)
+shapiro.test(dat$epiphmass_shootmass)
+
+hist(log(dat$epiphmass_shootmass))
+shapiro.test(log(dat$epiphmass_shootmass))
+```
+
+Grazer Load is not normal but log transformation fixes it.
+```{r grz load, echo=FALSE, results = hide}
+hist(dat$grazermass_shootmass)
+range(dat$grazermass_shootmass)
+
+hist(log(dat$grazermass_shootmass))
+shapiro.test(log(dat$grazermass_shootmass))
+```
+
+Crab biomass is not normal but is corrected with sqrt tranformation
+```{r crb biomass, echo=FALSE, results = hide}
+hist(dat$crab_mass)
+shapiro.test(dat$crab_mass)
+
+hist(sqrt(dat$crab_mass))
+shapiro.test(sqrt(dat$crab_mass))
+```
+
+Fish mass is not normal but log transforamtion fixes it. 
+```{r fish pred biomass, echo=FALSE, results = hide}
+hist(dat$fish_mass)
+shapiro.test(dat$fish_mass)
+
+hist(log(dat$fish_mass))
+shapiro.test(log(dat$fish_mass))
+```
+
+Clam mass is not normal but sqrt tranformation fixes it.
+```{r clam norm, echo=FALSE, results = hide}
+hist(dat$clam_mass)
+shapiro.test(dat$clam_mass)
+
+hist(sqrt(dat$clam_mass))
+shapiro.test(sqrt(dat$clam_mass))
+```
+
+Sediment is not normal and there is not a good transformation becasue there are so many low values. I will proceed without transformations.
+```{r, echo=FALSE, results = hide}
+hist(dat$sed_inside_prim)
+shapiro.test(dat$sed_inside_prim)
+```
+
+Total Nitrogen is not normal and there is not a good transformation. I will proceed with no transformation
+```{r, echo=FALSE, results = hide}
+hist(dat$Ntotal_site)
+shapiro.test(dat$Ntotal_site)
+
+hist(log(dat$Ntotal_site))
+shapiro.test(log(dat$Ntotal_site))
+```
+
+Light availability
+```{r, echo=FALSE, results = hide}
+hist(dat$light_avail)
+shapiro.test(dat$light_avail)
+```
+
+Factor  | Transformation
+------  | --------------
+Total eelgrass mass | sqrt
+Abv:Blw | none
+epi load  | log
+grz load  | log
+crab  | sqrt
+fish  | log
+clam  | sqrt
+sediment | none
+Total N | none
+Light avil | none
+
+#### Fitting dredge models
+Using the `dredge` function from the MuMIn package we can determine what variables are the most important for describing a certain response. What `drege` does is takes what some would call a "global" to "saturated" model and fits all possible combinations of variables and calcualates and AICc score for that model. We can then use this list of ranked models to determine what variables are important and or correlated with a response of interest. Note that we will only test variables with direct paths (as specified in the conceptual diagram) to a response of interest.
+
+##### Eelgrass
+```{r dredge eg}
+## Model ##
+eg <- lm(sqrt(eelgrass_total_mass) ~ date_julian + log(epiphmass_shootmass) + sqrt(clam_mass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
+
+## dredge ##
+eg.dr <- dredge(eg, rank = "AICc", evaluate = TRUE, extra = "adjR^2")
+eg.dr
+
+## Filter top models ##
+eg.dr.top <- eg.dr %>% 
+  filter(delta <= 4)
+
+## Clean up ##
+eg.dr.top <- eg.dr.top[,colSums(is.na(eg.dr.top)) < nrow(eg.dr.top)] # remove columns with 0s
+datatable(round(eg.dr.top, 4))
+```
+
