@@ -157,6 +157,9 @@ df.shells <- df.shells %>%
 
 # split column so that each death is its own column
 df.shells.split <- spread(df.shells, key = death_estimate, value = n_shells) # split counts into three columns
+
+
+
 df.shells.split[is.na(df.shells.split)] <- 0 # convert all NA into 0
 colnames(df.shells.split)[2] <- "death_crab" # change column names
 colnames(df.shells.split)[3] <- "death_drill" # change column names

@@ -223,7 +223,7 @@ rm(df.seds)
 df.pits <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
 
 
-# summarise mean sediment quality within site, transects stacked in one column
+# summarise total sediment quality within site, transects stacked in one column
 df.pits.stack <- aggregate(n_pits ~ site + trans_loc, data = df.pits, sum, na.rm = TRUE)
 
 
@@ -648,7 +648,6 @@ The same table but with all noticebly high-growing seagrass sites removed:
     High        | -14.21                        | -36.06                      | 0.037
     Difference  | 13.17                         | 21.84                       | n/a
     
-<br>
 
 The same table but with all *Phyllospadix* sites removed:
 
