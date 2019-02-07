@@ -27,7 +27,7 @@ library(sf)
 
 ```{r load data}
 ## Prince of Wales Water Polygon ##
-h2o.utm <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "POW_water_UTM")
+h2o.utm <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "POW_water_UTM")
 h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
@@ -35,7 +35,7 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ### Where is your site?
 Input Lat/Long in decimal degrees below. Make sure that the site is "in the water"! Otherwise this wont work.
 ```{r site}
-site <- structure(list(id = "site", longitude = -132.899774, latitude = 55.192876), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
+site <- structure(list(id = "site", longitude = -133.0011, latitude = 55.344914), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
 xy <- site[,c(2,3)]
 
 site <- SpatialPointsDataFrame(coords = xy, data = site,
@@ -63,6 +63,8 @@ sa[values(sa) > 3700] <- NA # Convert cost rasters > 3700 to NA, now the raster 
 survey.poly <- rasterToPolygons(sa, dissolve = TRUE) # covert raster to polygon
 survey.poly.utm <- spTransform(survey.poly, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs")) # define projection
 survey.poly.latlong <- spTransform(survey.poly, CRS("+init=epsg:4326"))
+
+a <- (2500 * length(survey.poly.utm) / 1000000) # caculate area of the polygon in sq km. 2500 becasue 50*50=2500 #calculate area
 ```
 
 ### Whats it look like?
@@ -72,6 +74,15 @@ leaflet() %>%
   addProviderTiles(providers$Esri.WorldImagery) %>% 
   addCircleMarkers(data = site, ~longitude, ~latitude, color = "black", fillOpacity = 1, stroke = FALSE, radius = 5) %>% 
   addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "yellow", fillOpacity = 0.5, group = "POW")
+
+
+
+
+library(rgeos)
+gArea(a)
+
+
+
 
 #leaflet() %>% 
   #addTiles(owi.usgs.gov/blog/basemaps) %>% 

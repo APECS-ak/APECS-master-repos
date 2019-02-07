@@ -36,7 +36,7 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ### Where is your site?
 Input Lat/Long in decimal degrees below. Make sure that the site is "in the water"! Otherwise this wont work.
 ```{r site}
-site <- structure(list(id = "site", longitude = -133.044890, latitude = 55.415907), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
+site <- structure(list(id = "site", longitude = -133.171, latitude = 55.80692), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
 xy <- site[,c(2,3)]
 
 site <- SpatialPointsDataFrame(coords = xy, data = site,

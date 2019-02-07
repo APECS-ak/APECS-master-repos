@@ -23,8 +23,8 @@ df.counts2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_D
 
 
 ```{r}
-df.counts2017 <- df.counts2017[,-c(2)] # remove 
-df.counts2018 <- df.counts2018[,-c(2, 7)] # remove
+#df.counts2017 <- df.counts2017[,-c(2)] # remove 
+#df.counts2018 <- df.counts2018[,-c(7)] # remove
 ```
 
 
@@ -32,6 +32,9 @@ df.counts2018 <- df.counts2018[,-c(2, 7)] # remove
 ```{r}
 library(Stack)
 df.otts.all <- Stack(df.counts2017,df.counts2018)
+
+as.character(df.otts.all$date_yyyy.mm.dd)
+str(df.otts.all)
 ```
 
 
