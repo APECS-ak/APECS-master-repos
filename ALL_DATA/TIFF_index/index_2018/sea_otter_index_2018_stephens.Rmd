@@ -32,12 +32,22 @@ library(sp)
 theme_set(theme_classic())
 ```
 
+
+
+
+
+
 \Sites
 ```{r data}
 # import sites as .csv file
 df.sites <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/sites_2018_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
 str(df.sites)
 ```
+
+
+
+
+
 
 \OtterCount
 ```{r}
@@ -100,12 +110,15 @@ DT::datatable(df.otts, caption = "Sea otter survey data")
 
 
 
+
+
+
 ```{r}
 # import pits and sediment quality data as .csv file
 df.pits <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
 str(df.pits)
 
-# calculate total pits per site
+# calculate total pits per site per transect
 df.pits.stack <- aggregate(n_pits ~ site + trans_loc, data = df.pits, sum, na.rm = TRUE)
 #df.pits.tot <- aggregate(n_pits ~ site, data = df.pits, sum, na.rm = TRUE)
 
@@ -133,6 +146,10 @@ rm(df.pits.stack)
 rm(df.sites)
 rm(df.otts)
 ```
+
+
+
+
 
 
 
@@ -190,31 +207,12 @@ rm(df.shells.split)
 
 
 
+
+
+
+
 # Calculating the actual index
 Congratulaitons! You calculated and complied all the data you need to actually calculate the index
-```{r}
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-
-
-pz4 = ggplot(df.index, aes(site_water_area_km2, so_dens_avg)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  geom_smooth(method=lm, formula=y~x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz4)
-```
-
 
 
 \soi
@@ -224,8 +222,8 @@ We will be using a principle components analysis to create the sea otter impact 
 ```{r data exploration}
 # Correlations
 
-corrgram(df.index[, c(6,8,15,17,19)]) # so_duration_1, so_tinker_km2_1, so_dens_avg, pits_all, shells_prop_otter
-pairs(df.index[, c(6,8,15,17,19)])
+corrgram(df.index[, c(7,8,15,17,18,19)])
+pairs(df.index[, c(7,8,15,17,18,19)])
 ```
 
 Checking for normality is important. Histograms suggest that theses data should be log transformed. 
@@ -233,11 +231,13 @@ Checking for normality is important. Histograms suggest that theses data should 
 # histograms
 hist(df.index$so_dens_avg)
 hist(df.index$pits_all)
+hist(df.index$shells_n_otter)
 hist(df.index$shells_prop_otter)
 
 # log transformation
 hist(log(df.index$so_dens_avg + 1))
 hist(log(df.index$pits_all + 1))
+hist(log(df.index$shells_n_otter + 1))
 hist(log(df.index$shells_prop_otter + 1))
 ```
 Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
@@ -245,10 +245,10 @@ Histograms indicate that the data are right skewed. Log transformation helps thi
 Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
 ```{r transformations}
 # Separate values only
-dat.redu <- df.index[,c(6,8,15,17,19)]
+dat.redu <- df.index[,c(7,8,15,17,18,19)]
 
 # log transform appropriate columns
-dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,c(3:5)] + 1)) 
+dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,c(3:6)] + 1)) 
 pairs(dat.l)
 
 # Standardize to column (sea otter measure) maximum
@@ -311,7 +311,7 @@ DT::datatable(final.dat, caption = "sea otter impact index")
 ## Data export
 ```{r export}
 # Data Export
-write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_1.csv", row.names = FALSE)
+write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_2.csv", row.names = FALSE)
 ```
 
 
