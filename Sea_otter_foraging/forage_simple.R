@@ -1,12 +1,14 @@
 ####### ANOVA for foraging data #####
 
 library(ggplot2)
+require(stats)
+setwd("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging")
 
 ###  DATA  ###
 s.prop <- read.csv("s_prop.csv") # import a file with the male/female proportions
 
 age.prop <- read.csv("age_prop.csv")
-all.prop <- read.csv("all_prop.csv")
+all.prop <- read.csv("all_prop.csv") # issue with this one, gave a warning
 year.prop <- read.csv("year_prop.csv")
 
 # stack the "all" data
@@ -21,6 +23,8 @@ str(s.prop)
 str(age.prop)
 str(year.prop)
 
+#sort the data
+all<- sort(all$prop, decreasing = T, na.last= T) # this didn't work, made the graph not show up
 
 # ALL #
 ggplot(data = all) +
@@ -48,4 +52,6 @@ ggplot(data = year.prop) +
     mapping= aes(x = species, y = prop, fill = area),
     position = "dodge"
   )
+
+
 
