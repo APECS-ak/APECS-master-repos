@@ -5,12 +5,13 @@ library(lattice)
 require(stats)
 library(tidyverse)
 library(plyr)
+library(scales)
 setwd("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging")
 
 ###  DATA  ###
 s.prop <- read.csv("s_prop.csv") # import a file with the male/female proportions
 age.prop <- read.csv("age_prop.csv")
-all.prop <- read.csv("all_prop.csv") # issue with this one, gave a warning
+all.prop <- read.csv("all_prop.csv")
 year.prop <- read.csv("year_prop.csv")
 otter.prop<- read.csv("otter_by_prop.csv")
 otter.gram<- read.csv("otter_by_gram.csv", row.names=1)
@@ -19,10 +20,8 @@ ott.raw <- read.csv("2018_Foraging_data_RAW.csv")
 s.gram<- read_csv("sex_table.csv")
 prey <- read.csv("Prey_Class.csv")
 sex.prey <- read.csv("sex_prey.csv")
+compare.prop <- read.csv("compare.csv")
 
-# stack the "all" data
-all <- stack(all.prop)
-names(all) <- c("prop", "species")
 
 # to make the classes order in the way I want
 as.factor()
@@ -46,14 +45,20 @@ ott.raw$PreyCat <- ifelse(ott.raw$PreyItem == "APC" | ott.raw$PreyItem == "CUC" 
                    "Mussel", ifelse(ott.raw$PreyItem == "PIO" | ott.raw$PreyItem == "EVT" | 
                    ott.raw$PreyItem == "PES", "Star", "")))))))
 
+ott.raw$Occupation <- NA
+ott.raw$Occupation <- ifelse(ott.raw$YEAR == "1975", "40 years", ifelse(ott.raw$YEAR == "1988", "30 years",
+                      ifelse(ott.raw$YEAR == "1994", "15 years", ifelse(ott.raw$YEAR == "2003", "15 years", 
+                      ifelse(ott.raw$YEAR == "2010", "8 years","")))))
+                             
+                               
 # checking the data frame
-is.data.frame(all) # will say if this is a dataframe, should say TRUE
+is.data.frame(all.prop) # will say if this is a dataframe, should say TRUE
 dim(s.prop)
-names(s.gram)
+names(all.prop)
 str(s.prop)
 str(age.prop)
 str(year.prop)
-head(otter.gram) 
+head(ott.raw) 
 
 
 #sort the data (using dplyr)
@@ -62,36 +67,60 @@ age.prop<-arrange(age.prop, desc(prop))
 s.prop<-arrange(s.prop, desc(prop))
 year.prop<-arrange(year.prop, desc(prop))
 
-# ALL BAR GRAPH # -- I can't figure out how to sort largest to smallest
-ggplot(data = all) +
+# ALL Proportions BAR GRAPH #
+ggplot(data = all.prop) +
   theme_classic() +
-  geom_col( 
-    mapping= aes(x = species, y = prop)
-  )
+  geom_col(mapping= aes(x = species, y = prop), fill="#0072B2") +
+  scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel", "star", 
+                            "chiton", "abalone", "worm")) +
+  geom_errorbar(aes(x= species, ymin=prop-sd, ymax=prop+sd), width=.2) +
+  scale_y_continuous(labels = percent, breaks=c(0,.1,.2,.3,.4,.5,.6,.7)) +
+  labs(x= "", y= "Proportion of diet in biomass") +
+  theme(axis.text.y = element_text(size=12),
+      axis.text.x = element_text(size=14, angle=45, hjust=1),
+      axis.title.y=element_text(size=12))
   
 # AGE BAR GRAPH #
-ggplot(data = age.prop) +
-  theme_classic() +
-  geom_col( 
-    mapping= aes(x = species, y = prop, fill = age),
-    position = "dodge"
-  )
+#ggplot(data = age.prop) +
+#  geom_col(mapping= aes(x = species, y = prop, fill = age),
+#    position = "dodge")
+
 
 # SEX #
 ggplot(data = s.prop) + 
   theme_classic() +
-  geom_col( 
-    mapping= aes(x = species, y = prop, fill = sex),
-    position = "dodge"
-  )
+  geom_col(mapping= aes(x = species, y = prop, fill = sex),
+    position = "dodge") +
+  scale_y_continuous(labels = percent, breaks=c(0,.1,.2,.3,.4,.5,.6,.7)) +
+  scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel", "star", 
+                              "chiton", "abalone", "worm")) +
+  labs(x= "", y= "Proportion of diet in biomass") +
+  theme(axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=14, angle=45, hjust=1), 
+        axis.title.y = element_text(size = 12))
+
+
+# Comparing Nicole and Zac #
+dodge <- position_dodge(width=0.9)
+ggplot(data = compare.prop, aes(x = species, y = prop, fill = year)) + 
+  theme_classic() + 
+  geom_col(position = "dodge") +
+  geom_errorbar(aes(x= species, ymin=prop-sd, ymax=prop+sd), 
+                position = position_dodge(0.9), width=.4) +
+  scale_y_continuous(labels = percent, breaks=c(0,.1,.2,.3,.4,.5,.6,.7)) +
+  scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel", "star", 
+                            "chiton", "abalone", "worm", "fish", "barnacle", "cephalopod")) +
+  labs(x= "", y= "Proportion of diet in biomass") +
+  scale_fill_manual(values=c("#999999", "#0072B2")) +
+  theme(axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=14, angle=45, hjust=1), 
+        axis.title.y = element_text(size = 12))
 
 # YEAR # The area list isn't working because it is a number...
-ggplot(data = year.prop) +
-  theme_classic() +
-  geom_col( 
-    mapping= aes(x = species, y = prop, fill = area),
-    position = "dodge"
-  )
+#ggplot(data = year.prop) +
+#  theme_classic() +
+#  geom_col(mapping= aes(x = species, y = prop, fill = area),
+#    position = "dodge")
 
 # graph for Clam size vs year
 ggplot(data= filter(ott.raw, PreyCat=="Clam")) +
@@ -101,15 +130,38 @@ ggplot(data= filter(ott.raw, PreyCat=="Clam")) +
 # graph for SAG size vs region
 ggplot(data= filter(ott.raw, PreyCat=="Clam")) +
   theme_classic() + 
-  geom_point(mapping = aes(x= Size, y= Region),
+  geom_point(mapping = aes(y= Size, x= Region),
              position = "jitter")
+# graphing clam density at different sizes for occupation time. 
+# scale_fill_brewer(palette="Spectral")
+# scale_color_manual(values=c("#999999", "#E69F00", "#56B4E9", "#009E73"))
+# add in adjust = 5 to geom_density to make a smooth histogram
+ggplot(data= filter(ott.raw, PreyCat=="Clam")) +
+  theme_classic() + 
+  geom_density(mapping = aes(x= Size, color = Occupation)) +
+  scale_y_continuous(labels = percent, breaks=c(0,.05, .1, .15)) +
+  scale_fill_brewer(palette="Set1") +
+  labs(x= "Clam size", y= "Percent frequency") +
+  theme(axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=12))
 
+ggplot(data= filter(ott.raw, PreyItem=="SAG")) +
+  theme_classic() + 
+  geom_density(mapping = aes(x= Size, color = Occupation), adjust= 5)
 
 # graph showing Clam size by "where"
 ggplot(data= filter(ott.raw, PreyCat == "Clam" & where == "KC"| where =="OW")) +
   theme_classic() +
   geom_point(mapping = aes(x= where, y= Size),
              position = "jitter")
+
+ggplot(data= filter(ott.raw, PreyCat == "Clam" & where == "KC"| where =="OW")) +
+  theme_classic() +
+  geom_freqpoly(mapping = aes(x= Size, color = where), bins = 3)
+
+ggplot(data= filter(ott.raw, PreyCat == "Clam" & where == "KC"| where =="OW")) +
+  theme_classic() +
+  geom_violin(mapping = aes(y= Size, x = where), scale= "area")
 
 ggplot(data= filter(ott.raw, PreyItem!="UNK")) +
   theme_classic() +
