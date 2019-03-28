@@ -72,7 +72,7 @@ ggplot(data = all.prop) +
   theme_classic() +
   geom_col(mapping= aes(x = species, y = prop), fill="#0072B2") +
   scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel", "star", 
-                            "chiton", "abalone", "worm")) +
+                            "chiton", "abalone")) +
   geom_errorbar(aes(x= species, ymin=prop-sd, ymax=prop+sd), width=.2) +
   scale_y_continuous(labels = percent, breaks=c(0,.1,.2,.3,.4,.5,.6,.7)) +
   labs(x= "", y= "Proportion of diet in biomass") +
@@ -93,7 +93,7 @@ ggplot(data = s.prop) +
     position = "dodge") +
   scale_y_continuous(labels = percent, breaks=c(0,.1,.2,.3,.4,.5,.6,.7)) +
   scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel", "star", 
-                              "chiton", "abalone", "worm")) +
+                              "chiton", "abalone")) +
   labs(x= "", y= "Proportion of diet in biomass") +
   theme(axis.text.y = element_text(size=12),
         axis.text.x = element_text(size=14, angle=45, hjust=1), 
@@ -109,7 +109,7 @@ ggplot(data = compare.prop, aes(x = species, y = prop, fill = year)) +
                 position = position_dodge(0.9), width=.4) +
   scale_y_continuous(labels = percent, breaks=c(0,.1,.2,.3,.4,.5,.6,.7)) +
   scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel", "star", 
-                            "chiton", "abalone", "worm", "fish", "barnacle", "cephalopod")) +
+                            "chiton", "abalone")) +
   labs(x= "", y= "Proportion of diet in biomass") +
   scale_fill_manual(values=c("#999999", "#0072B2")) +
   theme(axis.text.y = element_text(size=12),
