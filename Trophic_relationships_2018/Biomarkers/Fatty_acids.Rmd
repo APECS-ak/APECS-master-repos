@@ -1,0 +1,23 @@
+---
+title: "Fatty_acid_extracting_log"
+author: "Wendel Raymond"
+date: "March 13, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r}
+library(dplyr)
+```
+
+```{r}
+dat <- read.csv("C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/Biomarker_collections_2018_processing_selection.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+```{r}
+t <-dat %>%
+  filter(FA_Actual > 0) %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(Samples = n())
+```
+
