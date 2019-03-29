@@ -208,3 +208,13 @@ ggplot(ott.pc, aes(PC1, PC2, color=factor(Sex))) +
 
 
 
+### Chi Sq for years by clams
+
+clam <- filter(ott.raw, PreyCat=="Clam")
+
+chisq.test(ott.raw$Size, ott.raw$Occupation, simulate.p.value = TRUE)
+
+chisq.test(ott.raw$PreySz, ott.raw$Occupation)
+
+hist(clam$Size)
+plot(clam$where)
