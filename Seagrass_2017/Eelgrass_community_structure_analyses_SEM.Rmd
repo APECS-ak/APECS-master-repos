@@ -221,125 +221,197 @@ For our analysis we will first define our exogenous and endogenous variables.
 *Endogenous* - variables that have paths coming to them and potentially going away from them
 1. Crabs
 2. Fish
-3. Clams
-4. Grazers
-5. Epiphytes
-6. Eelgrass
+3. Grazers
+4. Epiphytes
+5. Eelgrass
 
 ### 1. Conceptual model
-![](Figures/sem_conceptual_model_full.png)
+Diagram represents all reasonable direct biological paths among the eelgrass associated community. Note that clam data are omitted. Upon futher thought it was determined that thoes data are just too different from the rest of the data. They represent dead clams not alive ones, and we have no way to tell how old they are.
 
-### 2. Variable reduction
-While all the path defined in the above conceptual model are biologically justifiable, they may not be present or important in our data. We will use the `dredge` function to identify variables that have meaningful predictive power for our endogenous varibles of interest. But before we do that we need to assess varibles for normality. 
+![](../Images/Raymond_SEM_Full_v1.png)
 
-#### Addressing normality
-Total eelgrass biomass is non-normal. Square root fixes it.
-```{r total eg mass, echo=FALSE, results = hide}
-hist(dat$eelgrass_total_mass, breaks = 20)
-shapiro.test(dat$eelgrass_total_mass)
 
-hist(sqrt(dat$eelgrass_total_mass))
-shapiro.test(sqrt(dat$eelgrass_total_mass))
+### 2. Suitable data and variable reduction
+Following the rule of thumb that any responce of one of the component models should have 5 >= N/5 predictors, we will evaluate potential component models. For our data set we have N = 21 so 21/5 = 4.2, so any componenet model should have no more than 4 predictors. Looking at the conceptual model no endogenous variables have more than 4 paths going towards them, indicating that we have aduaquate data to fit all the pahts.
+
+### 3. Addressing normality and temporal trends
+To meet normality assumptions we will evaluate the data distribution and normality of for exogeneous and endogenous varibles.
+
+#### Exogeneous data normality
+Sea otter index. Is somewhat non-normal in its distribution, however tranforming these data (PC1 values) does not make sense. We will proceed with values untransformed.
+```{r soi norm, echo = FALSE}
+hist(dat$sea_otter_index_tr, breaks = 10)
 ```
 
-Epiphyte load is not normal but log transformation fixes it
-```{r epi load, echo=FALSE, results = hide }
-hist(dat$epiphmass_shootmass)
-range(dat$epiphmass_shootmass)
-shapiro.test(dat$epiphmass_shootmass)
-
-hist(log(dat$epiphmass_shootmass))
-shapiro.test(log(dat$epiphmass_shootmass))
-```
-
-Grazer Load is not normal but log transformation fixes it.
-```{r grz load, echo=FALSE, results = hide}
-hist(dat$grazermass_shootmass)
-range(dat$grazermass_shootmass)
-
-hist(log(dat$grazermass_shootmass))
-shapiro.test(log(dat$grazermass_shootmass))
-```
-
-Crab biomass is not normal but is corrected with sqrt tranformation
-```{r crb biomass, echo=FALSE, results = hide}
-hist(dat$crab_mass)
-shapiro.test(dat$crab_mass)
-
-hist(sqrt(dat$crab_mass))
-shapiro.test(sqrt(dat$crab_mass))
-```
-
-Fish mass is not normal but log transforamtion fixes it. 
-```{r fish pred biomass, echo=FALSE, results = hide}
-hist(dat$fish_mass)
-shapiro.test(dat$fish_mass)
-
-hist(log(dat$fish_mass))
-shapiro.test(log(dat$fish_mass))
-```
-
-Clam mass is not normal but sqrt tranformation fixes it.
-```{r clam norm, echo=FALSE, results = hide}
-hist(dat$clam_mass)
-shapiro.test(dat$clam_mass)
-
-hist(sqrt(dat$clam_mass))
-shapiro.test(sqrt(dat$clam_mass))
-```
-
-Sediment is not normal and there is not a good transformation becasue there are so many low values. I will proceed without transformations.
-```{r, echo=FALSE, results = hide}
-hist(dat$sed_inside_prim)
-shapiro.test(dat$sed_inside_prim)
-```
-
-Total Nitrogen is not normal and there is not a good transformation. I will proceed with no transformation
-```{r, echo=FALSE, results = hide}
-hist(dat$Ntotal_site)
+Nutrients. Is somewhat non-normal. Transformations do not improve it much. These data are just really variable. We will proceed with values untransformed.
+```{r nuts norm, echo = FALSE}
+hist(dat$Ntotal_site, breaks = 10)
 shapiro.test(dat$Ntotal_site)
-
-hist(log(dat$Ntotal_site))
-shapiro.test(log(dat$Ntotal_site))
 ```
 
-Light availability
-```{r, echo=FALSE, results = hide}
-hist(dat$light_avail)
+Light availability. Is reasoinably normal. We will proceed with values untransformed.
+```{r light norm, echo = FALSE}
+hist(dat$light_avail, breaks = 10)
 shapiro.test(dat$light_avail)
 ```
 
-Factor  | Transformation
-------  | --------------
-Total eelgrass mass | sqrt
-Abv:Blw | none
-epi load  | log
-grz load  | log
-crab  | sqrt
-fish  | log
-clam  | sqrt
-sediment | none
-Total N | none
-Light avil | none
-
-#### Fitting dredge models
-Using the `dredge` function from the MuMIn package we can determine what variables are the most important for describing a certain response. What `drege` does is takes what some would call a "global" to "saturated" model and fits all possible combinations of variables and calcualates and AICc score for that model. We can then use this list of ranked models to determine what variables are important and or correlated with a response of interest. Note that we will only test variables with direct paths (as specified in the conceptual diagram) to a response of interest.
-
-##### Eelgrass
-```{r dredge eg}
-## Model ##
-eg <- lm(sqrt(eelgrass_total_mass) ~ date_julian + log(epiphmass_shootmass) + sqrt(clam_mass) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
-
-## dredge ##
-eg.dr <- dredge(eg, rank = "AICc", evaluate = TRUE, extra = "adjR^2")
-eg.dr
-
-## Filter top models ##
-eg.dr.top <- eg.dr %>% 
-  filter(delta <= 4)
-
-## Clean up ##
-eg.dr.top <- eg.dr.top[,colSums(is.na(eg.dr.top)) < nrow(eg.dr.top)] # remove columns with 0s
-datatable(round(eg.dr.top, 4))
+Semdiment size. Is non-normal. This is driven by a lot of low values. We will proceed with values untransformed.
+```{r seds norm, echo = FALSE}
+hist(dat$sed_inside_prim, breaks = 10)
+shapiro.test(dat$sed_inside_prim)
 ```
 
+#### Endogenous data normality
+Aboveground eeglrass biomass. Is slightly reasonably normal. We will proceed with values untransformed.
+```{r abveg norm, echo = FALSE}
+hist(dat$abvgnd_mass, breaks = 10)
+shapiro.test(dat$abvgnd_mass)
+```
+
+Epiphyte load. Is non-normal. We will proceed with a *log transformation of epiphyte load*.
+```{r epi norm, echo = FALSE}
+hist(dat$epiphmass_shootmass, breaks = 10)
+hist(log(dat$epiphmass_shootmass), breaks = 10)
+shapiro.test(log(dat$epiphmass_shootmass))
+```
+
+Grazer load. Is non-normal. We will proceed with a *log transformation of grazer load*.
+```{r grz norm, echo = FALSE}
+hist(dat$grazermass_shootmass, breaks = 10)
+hist(log(dat$grazermass_shootmass), breaks = 10)
+shapiro.test(log(dat$grazermass_shootmass))
+```
+
+Fish total mass. Is non-normal. We will proceed with a *log transformation of fish biomass*.
+```{r fish norm, echo = FALSE}
+hist(dat$fish_mass, breaks = 10)
+hist(log(dat$fish_mass), breaks = 10)
+shapiro.test(log(dat$fish_mass))
+```
+
+Crab total mass. Is non-normal. We will procees with a *square root transfromation of crab biomass*.
+```{r crab norm, echo = FALSE}
+hist(dat$crab_mass, breaks = 10)
+hist(log(dat$crab_mass), breaks = 10)
+hist(sqrt(dat$crab_mass), breaks = 10)
+shapiro.test(log(dat$crab_mass))
+shapiro.test(sqrt(dat$crab_mass))
+```
+
+#### Temporal change
+Due to our sampling regime we need to assess if time has a string signal with any of out data.
+```{r time cor, echo = FLASE}
+pairs(dat[,c(4,21,52,97,103,111,117,118,121,125)])
+```
+
+Eelgrass aboveground biomass has a strong temporal signal. *Eelgrass aboveground biomass will be de-trended*.
+```{r abv mass time, echo = FALSE}
+## Assess temporal trend ##
+plot(dat$date_julian, dat$abvgnd_mass)
+tmod1 <- lm(dat$abvgnd_mass ~ dat$date_julian)
+summary(tmod1)
+
+## De-trend ##
+resid.abv <- residuals(tmod1)
+dat$abvgnd_mass_dt <- resid.abv
+plot(dat$date_julian, dat$abvgnd_mass_dt)
+```
+
+Epiphyte load has a significant negative relationships with epiphyte load. *epiphyte load will be de-trended*.
+```{r epi time, echo = FALSE}
+## Assess temporal trend ##
+plot(dat$date_julian, log(dat$epiphmass_shootmass))
+tmod2 <- lm(log(dat$epiphmass_shootmass) ~ dat$date_julian)
+summary(tmod2)
+
+## De-trend ##
+resid.epi <- residuals(tmod2)
+dat$epiphmass_shootmass_dt <- resid.epi
+plot(dat$date_julian, log(dat$epiphmass_shootmass_dt))
+```
+
+Grazer load looks like it may have a temporal signal but its turns out that its not significant and has a low R-sq value.
+```{r grz time, echo = false}
+plot(dat$date_julian, log(dat$grazermass_shootmass))
+tmod3 <- lm(log(dat$grazermass_shootmass) ~ dat$date_julian)
+summary(tmod3)
+```
+
+Crabmass
+```{r}
+plot(dat$date_julian, sqrt(dat$crab_mass))
+```
+
+### 4. Set of structural equations
+#### Final variable set for full model
+*Exogeneous*
+1. Sea otters
+2. Total water nitrogen
+3. Light availability
+4. Sediment 
+
+*Endogeneous*
+1. Eelgrass (as abovegound biomass - de-trended with respect to julian day)
+2. Epiphytes (as epiphte load - log trasformed and de-trended with respect to julian day)
+3. Grazers (as grazer load - log transformed)
+4. Fish (as total fish biomass - log tranformed)
+5. Crabs (as total crab biomass - square-root transformed)
+
+#### Simplified data
+To simplify the analysis work space I will create a new data frame with all the data I am going to use in its final form. So tranfromed and de-trended where appropriate.
+```{r dat redu}
+dat.redu <- dat[,1:6]
+dat.redu$abvgnd_mass_dt <- dat$abvgnd_mass_dt
+dat.redu$epiphmass_shootmass_ln_dt <- dat$epiphmass_shootmass_dt
+dat.redu$grazermass_shoot_ln <- log(dat$grazermass_shootmass)
+dat.redu$fish_mass_ln <- log(dat$fish_mass)
+dat.redu$crab_mass_sq <- sqrt(dat$crab_mass)
+dat.redu$sea_otter_index_tr <- dat$sea_otter_index_tr
+dat.redu$sed_inside_prim <- dat$sed_inside_prim
+dat.redu$Ntotal_site <- dat$Ntotal_site
+dat.redu$light_avail <- dat$light_avail
+```
+
+
+#### Full SEM
+```{r full sem,}
+sem.full <- psem(
+  lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
+
+  lm(fish_mass_ln ~ sea_otter_index_tr + abvgnd_mass_dt + sed_inside_prim, data = dat.redu),
+
+  lm(grazermass_shoot_ln ~ crab_mass_sq + fish_mass_ln, data = dat.redu),
+  
+  lm(epiphmass_shootmass_ln_dt ~ grazermass_shoot_ln + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu),
+  
+  lm(abvgnd_mass_dt ~ epiphmass_shootmass_ln_dt + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu)
+
+)
+
+sem.full <- psem(
+
+  lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
+
+  lm(fish_mass_ln ~ sea_otter_index_tr + crab_mass_sq + abvgnd_mass_dt + sed_inside_prim, data = dat.redu),
+
+  lm(grazermass_shoot_ln ~ crab_mass_sq + fish_mass_ln, data = dat.redu),
+  
+  lm(epiphmass_shootmass_ln_dt ~ grazermass_shoot_ln + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu),
+  
+  lm(abvgnd_mass_dt ~ epiphmass_shootmass_ln_dt + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu)
+
+)
+```
+
+### 5. Model diagnostics
+Below we will run through model diagnostics.
+
+#### Basis Set
+```{r basis diag, echo=FLASE}
+basisSet(sem.full)
+```
+
+
+
+
+### 6. Model refinement
