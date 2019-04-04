@@ -1,0 +1,13 @@
+Factor,Description
+sample_no,Sample number for plant measured
+bed_no,Bed number from which plant was sampled
+date_MM.DD.YY,"Date of sampling expressed as month, day, and year (MM.DD.YY)"
+latitude_decimal_degrees,"Latitude of bed, in decimal degrees"
+longitude_decimal_degrees,"Longitude of bed, in decimal degrees"
+stipe_length_m,"Stipe length, in meters"
+subbulb_diameter_cm,"Subbulb diameter, in centimeters"
+bulb_diameter_cm,"Bulb diameter, in centimeters"
+stipe_weight_kg,Stipe weight in kilograms
+blade_length_m,Blade length in meters
+blade_weight_kg,Blade weight in kilograms
+erosion,"Level of erosion: none, light, moderate, heavy"

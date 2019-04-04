@@ -1,0 +1,10 @@
+Factor,Description
+sample_no,Sample number for plant measured
+bed_no,Bed number from which plant was sampled
+date_MM.DD.YY,"Date of sampling expressed as month, day, and year (MM.DD.YY)"
+latitude_decimal_degrees,"Latitude of bed, in decimal degrees"
+longitude_decimal_degrees,"Longitude of bed, in decimal degrees"
+weight_kg,"Weight of the stipe and blades, in kilograms"
+length_m,"Stipe length from the tip to the end, in meters"
+growing_tip,Presence of a growing tip: yes or no
+erosion,"Level of erosion: none, light, moderate, heavy"

@@ -169,7 +169,7 @@ index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF
 \SedimentQualitative
 ```{r}
 # import pits and sediment quality data as .csv file
-df.seds <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
+df.seds <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/pits_trimmed.csv", stringsAsFactors = FALSE, header = TRUE)
 
 
 # summarise mean sediment quality within site, transects stacked in one column
@@ -273,7 +273,6 @@ df.all <- df.all[, -c(15,16,17,29,30)] # remove these columns
 
 ```{r}
 rm(df.seds.stack)
-rm(df.pits.stack)
 rm(df.seds.trans)
 rm(df.pits.trans)
 rm(index)
@@ -479,9 +478,6 @@ df.all <- left_join(df.all, df.sgdens.means, by = c("site"))
 colnames(df.all)
 colnames(df.all)[2] <- "longitude" # change column names
 colnames(df.all)[3] <- "latitude" # change column names
-
-
-df.sgdens <- df.sgdens[, -c(2:12)] # remove these columns
 ```
 
 ```{r}
@@ -706,12 +702,12 @@ plot(pz3)
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
-pz4 = ggplot(df.all, aes(so_index_pc1, edge_diffuse_elev_corrct_neg, color = sed2_qual)) +
+pz4 = ggplot(df.all, aes(shells_prop_otter, edge_continuous_elev_corrct_neg)) +
   geom_point(size=3) + # allows for trendline on general trend
   geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #xlab("Sea Otter Index (PC1)")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
   stat_poly_eq(formula = poly.model, 
@@ -728,11 +724,11 @@ plot(pz4)
 #df.all <- df.all[-c(20),] 
 color = sed2_qual
 
-pz5 = ggplot(df.all, aes(so_index_pc2, edge_continuous_elev_corrct_neg, color = sed2_qual)) +
+pz5 = ggplot(df.all, aes(shells_n_otter, edge_continuous_elev_corrct_neg)) +
   geom_point(size=3) + # allows for trendline on general trend
   #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
-  xlab("Sea Otter Index")+ylab("Continuous edge elevation (cm, MLLW)") +
+  #xlab("Sea Otter Index (PC2)")+ylab("Continuous edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
   stat_poly_eq(formula = linear.model,

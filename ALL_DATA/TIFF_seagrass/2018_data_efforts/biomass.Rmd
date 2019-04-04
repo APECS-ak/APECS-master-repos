@@ -232,19 +232,19 @@ rhizome_dw_g_m2
 tot_biomass_dw_g_m2
 leaf.rhizome
 
-pz4 = ggplot(df.bmass.all, aes(so_index_pc2, leaf_dw_g_m2)) +
+pz4 = ggplot(df.bmass.all, aes(so_index_pc2, shoot_density_inside_m2)) +
   geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index (PC2)")+ylab("Total biomass (g per m^2, DW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  geom_text(aes(label=site), size=2) 
-  #stat_poly_eq(formula = linear.model, 
-               #aes(label = paste(..rr.label.., sep = "~~~")), 
-               #label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  #stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  #aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  #label.x.npc = 'left', label.y.npc = 'top', size = 5)
+  geom_text(aes(label=site), size=2) +
+  stat_poly_eq(formula = linear.model, 
+               aes(label = paste(..rr.label.., sep = "~~~")), 
+               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
+  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
+                aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
+                label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(pz4)
 
 
