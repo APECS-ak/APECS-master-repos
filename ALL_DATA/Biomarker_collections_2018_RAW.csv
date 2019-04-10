@@ -115,21 +115,21 @@ Collection_Date,Site,Place_name,Sea_otter_region,Latitude,Longitude,Biomarker_ID
 7/15/2018,2018_H_03,Nossuk Bay,High,55.706493,-133.341566,B_168,Fucus,Fucus sp.,FUCUS,,,,,,,,,,,,,,,,1,
 7/15/2018,2018_H_03,Nossuk Bay,High,55.706493,-133.341566,B_169,Fucus,Fucus sp.,FUCUS,,,,,,,,,,,,,,,,1,
 7/15/2018,2018_H_03,Nossuk Bay,High,55.706493,-133.341566,B_170,Fucus,Fucus sp.,FUCUS,,,,,,,,,,,,,,,,1,
-7/24/2018,,Middle Island,,,,B_211,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
-7/24/2018,,North Pass,,,,B_215,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
-7/24/2018,,Sukkwan,,,,B_219,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
-7/24/2018,,South Pass,,,,B_220,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
-7/24/2018,,Sentinal Island,,,,B_221,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
-7/25/2018,,Inner Fish Egg,,,,B_222,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,South Fish Egg,,,,B_223,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,Parida Reef,,,,B_224,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,Blanquizal,,,,B_225,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,Nossuk Anchorage,,,,B_227,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,Karheen Passage,,,,B_234,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,Tuxekan Narrows,,,,B_235,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,Nossuk Bay Point,,,,B_236,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,Outside Salt Lake Bay,,,,B_237,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
-7/25/2018,,Garcia Bay,,,,B_238,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/24/2018,,Middle Island,,55.227565,-132.846907,B_211,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
+7/24/2018,,North Pass,,55.22581,-132.914743,B_215,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
+7/24/2018,,Sukkwan,,55.191531,-132.855816,B_219,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
+7/24/2018,,South Pass,,55.166267,-132.915787,B_220,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
+7/24/2018,,Sentinal Island,,55.178098,-133.009364,B_221,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,,reflectance measured
+7/25/2018,,Inner Fish Egg,,55.483447,-133.156271,B_222,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,South Fish Egg,,55.480232,-133.184794,B_223,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,Parida Reef,,55.508299,-133.24421,B_224,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,Blanquizal,,55.623874,-133.402649,B_225,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,Nossuk Anchorage,,55.742185,-133.348757,B_227,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,Karheen Passage,,55.778954,-133.309154,B_234,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,Tuxekan Narrows,,55.754406,-133.33555,B_235,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,Nossuk Bay Point,,55.736991,-133.384971,B_236,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,Outside Salt Lake Bay,,55.682091,-133.400818,B_237,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
+7/25/2018,,Garcia Bay,,55.555683,-133.429965,B_238,Giant Kelp,Macrocystis pyrifera,GIAKLP,,,,,,,,,,,,,,,,1,reflectance measured
 7/13/2018,2018_L_03,Sukkwan,Low,55.189095,-132.84324,B_091,Helmet crab,Telmessus cheiragonus,CRBHEL,37,,,,,,,,,,,,,,M,1,
 7/13/2018,2018_L_03,Sukkwan,Low,55.189095,-132.84324,B_092,Helmet crab,Telmessus cheiragonus,CRBHEL,42,,,,,,,,,,,,,,M,1,
 7/13/2018,2018_L_03,Sukkwan,Low,55.189095,-132.84324,B_093,Helmet crab,Telmessus cheiragonus,CRBHEL,37,,,,,,,,,,,,,,M,1,
