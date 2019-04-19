@@ -536,3 +536,23 @@ final.dat.redu <- final.dat.redu[order(final.dat.redu$sea_otter_index, decreasin
 write.csv(final.dat.redu, "../Seagrass_2017/Eelgrass_structure_MS_results/Sea_otter_index_results.csv", row.names = FALSE)
 ```
 
+## Using nmds instead
+```{r}
+library(vegan)
+dist <- vegdist(dat.std.tr, method = "bray")
+t <- metaMDS(dist, k = 2)
+
+plot(t)
+nmds1 <- t$points[,1]
+plot(nmds1)
+
+site.dat$nmds <- nmds1 * -1
+
+ggplot(site.dat, aes(reorder(place_name, nmds), nmds, col = nmds)) +
+  geom_point(size = 4) +
+  scale_color_gradient(low = "blue", high = "red") +
+  labs(x = "Site", y = "Sea otter impact Index", col = "NMDS1") +
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
