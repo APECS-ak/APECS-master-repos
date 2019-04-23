@@ -103,12 +103,24 @@ site.tran <- eg.tran %>%
             diatom_cover = mean(diatom_cover_0.25msq, na.rm = TRUE),
             diatom_cover_se = st.er(diatom_cover_0.25msq, na.rm = TRUE),
             eelgrass_shoot_dens = mean(eelgrass_shoots_msq, na.rm = TRUE),
-            eelgrass_shoot_dens_se = st.er(eelgrass_shoot_dens, na.rm = TRUE),
+            eelgrass_shoot_dens_se = st.er(eelgrass_shoots_msq, na.rm = TRUE),
             flowering_shoot_dens = mean(flowering_shoots_msq, na.rm = TRUE),
             flowering_shoot_dens_se = st.er(flowering_shoots_msq, na.rm = TRUE),
-            sed_prime = mean(primary_sediment),
-            sed_prime_se = st.er(primary_sediment),
-            sed_second  = mean(secondary_sediment),
-            sed_second_se = st.er(secondary_sediment))
+            sed_prime = mean(primary_sediment_score),
+            sed_prime_se = st.er(primary_sediment_score),
+            sed_second  = mean(secondary_sediment_score),
+            sed_second_se = st.er(secondary_sediment_score))
+```
+
+## Combine
+Combine summarized data
+```{r comb}
+dat <- merge(unique(eg.tran[,c(1:9, 11)]), site.tran, by = "site")
+dat <- merge(dat, site.bio, by = "site")
+```
+
+## Export
+```{r export}
+write.csv(dat, "../ALL_DATA/Eelgrass_biometrics_derived.csv", row.names = FALSE)
 ```
 
