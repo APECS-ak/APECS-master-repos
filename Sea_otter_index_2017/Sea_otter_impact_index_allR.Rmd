@@ -539,8 +539,9 @@ write.csv(final.dat.redu, "../Seagrass_2017/Eelgrass_structure_MS_results/Sea_ot
 ## Using nmds instead
 ```{r}
 library(vegan)
-dist <- vegdist(dat.std.tr, method = "bray")
+dist <- vegdist(dat.std.tr[,c(1,2,5,6)], method = "bray")
 t <- metaMDS(dist, k = 2)
+tc <- cmdscale(dist, k = 2, eig = TRUE)
 
 plot(t)
 nmds1 <- t$points[,1]
@@ -554,5 +555,12 @@ ggplot(site.dat, aes(reorder(place_name, nmds), nmds, col = nmds)) +
   labs(x = "Site", y = "Sea otter impact Index", col = "NMDS1") +
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+plot(log(site.dat$dens_surv1), site.dat$nmds)
+plot(log(site.dat$dens_surv2), site.dat$nmds)
+plot(site.dat$sea_otter_duration, site.dat$nmds)
+plot(site.dat$pop_mod_dens, site.dat$nmds)
+plot(log(site.dat$n_pits), site.dat$nmds)
+plot(asin(sqrt(site.dat$prop_otter_shells)), site.dat$nmds)
 ```
 
