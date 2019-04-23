@@ -94,5 +94,21 @@ site.bio <- eg.bio %>%
             all_crust_mass_se = st.er((idotea_mass + caprellid_mass + amphipod_mass), na.rm = TRUE),
             all_gast_mass = mean((limpet_mass + gastropod_mass), na.rm = TRUE),
             all_gast_mass_se = st.er((limpet_mass + gastropod_mass), na.rm = TRUE))
+
+## Transect ##
+site.tran <- eg.tran %>% 
+  group_by(site) %>% 
+  summarise(macro_cover = mean(macroalgae_cover_0.25msq, na.rm = TRUE),
+            macro_cover_se = st.er(macroalgae_cover_0.25msq, na.rm = TRUE),
+            diatom_cover = mean(diatom_cover_0.25msq, na.rm = TRUE),
+            diatom_cover_se = st.er(diatom_cover_0.25msq, na.rm = TRUE),
+            eelgrass_shoot_dens = mean(eelgrass_shoots_msq, na.rm = TRUE),
+            eelgrass_shoot_dens_se = st.er(eelgrass_shoot_dens, na.rm = TRUE),
+            flowering_shoot_dens = mean(flowering_shoots_msq, na.rm = TRUE),
+            flowering_shoot_dens_se = st.er(flowering_shoots_msq, na.rm = TRUE),
+            sed_prime = mean(primary_sediment),
+            sed_prime_se = st.er(primary_sediment),
+            sed_second  = mean(secondary_sediment),
+            sed_second_se = st.er(secondary_sediment))
 ```
 
