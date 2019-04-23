@@ -29,6 +29,70 @@ st.er <- function(x, na.rm = TRUE) {
 ## Data to import
 We want to combine a few sets of data here so that we can run meaning full analyses. These are site characterization data, eelgrass transect data, eelgrass biometrics data, sea otter index data, and site nutirent data.
 ```{r}
-eg <- read.csv("../../ALL_DATA/Eelgrass_biometrics_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+eg.bio <- read.csv("../ALL_DATA/Eelgrass_biometrics_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+
+eg.tran <- read.csv("../ALL_DATA/Eelgrass_transect_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+## Calculations
+Subtracting out foil weights to get clean dry weights
+```{r calcs}
+### Biometrics ###
+## Shoot mass ##
+eg.bio$shoot_mass <- eg.bio$shoot_dw_foil_mass_g - eg.bio$shoot_foil_mass_g
+
+## Epiphyte mass ##
+eg.bio$epi_mass <- eg.bio$pad_dw_mass_g - eg.bio$pad_pre_mass_g
+
+# Idotea mass ##
+eg.bio$idotea_mass <- eg.bio$idotea_dw_foil_mass_g - eg.bio$idotea_foil_mass_g
+
+## Limpet mass ##
+eg.bio$limpet_mass <- eg.bio$limpet_dw_foil_mass_g - eg.bio$limpet_foil_mass_g
+
+## Caprellid mass ##
+eg.bio$caprellid_mass <- eg.bio$caprellid_dw_foil_mass_g - eg.bio$caprellid_foil_mass_g
+
+## Amphipod mass ##
+eg.bio$amphipod_mass <- eg.bio$amphipod_dw_foil_mass_g - eg.bio$amphipod_foil_mass_g
+
+## Gastropod mass ##
+eg.bio$gastropod_mass <- eg.bio$gastropod_dw_foil_mass_g - eg.bio$gastropod_foil_mass_g
+
+## Convert NA to 0 ##
+eg.bio[is.na(eg.bio)] <- 0
+
+### Area/Transect ###
+## Eeglrass shoots m2 ##
+eg.tran$eelgrass_shoots_msq <- eg.tran$eelgrass_shoots_0.25msq * 4
+
+## Eelgrass flowering shoots m2 ##
+eg.tran$flowering_shoots_msq <- eg.tran$flowering_shoots_0.25msq * 4
+```
+
+## Summarize by site
+Caculate mean values of above for each site.
+```{r site sum}
+### Biometrics ###
+site.bio <- eg.bio %>% 
+  group_by(site) %>% 
+  summarise(eg_shoot_mass = mean(shoot_mass),
+            eg_shoot_mass_se = st.er(shoot_mass, na.rm = TRUE),
+            epiph_mass = mean(epi_mass),
+            epiph_mass_se = st.er(epi_mass, na.rm = TRUE),
+            ido_mass = mean(idotea_mass, na.rm = TRUE),
+            ido_mass_se = st.er(idotea_mass, na.rm = TRUE),
+            limp_mass = mean(limpet_mass, na.rm = TRUE),
+            limp_mass_se = st.er(limpet_mass, na.rm = TRUE),
+            capr_mass = mean(caprellid_mass, na.rm = TRUE),
+            capr_mass_se = st.er(caprellid_mass, na.rm = TRUE),
+            amph_mass = mean(amphipod_mass, na.rm = TRUE),
+            amph_mass_se = st.er(amphipod_mass, na.rm = TRUE),
+            gast_mass = mean(gastropod_mass, na.rm = TRUE),
+            gast_mass_se = st.er(gastropod_mass, na.rm = TRUE),
+            all_crust_mass = mean((idotea_mass + caprellid_mass + amphipod_mass), na.rm = TRUE),
+            all_crust_mass_se = st.er((idotea_mass + caprellid_mass + amphipod_mass), na.rm = TRUE),
+            all_gast_mass = mean((limpet_mass + gastropod_mass), na.rm = TRUE),
+            all_gast_mass_se = st.er((limpet_mass + gastropod_mass), na.rm = TRUE))
 ```
 
