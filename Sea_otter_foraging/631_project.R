@@ -12,9 +12,9 @@ library(plyr)
 library(scales)
 
 #load files
-otter.gram<- read.csv("Otter_gram.csv", row.names=1)
-ott.sum <- read.csv("otter_summary.csv", row.names=1)
-ott.raw <- read.csv("2018_Foraging_data_RAW.csv")
+otter.gram<- read.csv("Visual/SOFA/Otter_gram.csv", row.names=1)
+ott.sum <- read.csv("Visual/SOFA/otter_summary.csv", row.names=1)
+ott.raw <- read.csv("Visual/2018_Foraging_data_RAW.csv")
 
 #stack otter.gram
 stack.gram <- stack(otter.gram)
