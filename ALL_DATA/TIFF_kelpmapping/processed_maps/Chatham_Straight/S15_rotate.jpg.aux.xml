@@ -1,0 +1,134 @@
+<PAMDataset>
+  <SRS>PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",GEOGCS["GCS_WGS_1984",DATUM["WGS_1984",SPHEROID["WGS_84",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],UNIT["Meter",1.0],AUTHORITY["EPSG","3857"]]</SRS>
+  <Metadata domain="IMAGE_STRUCTURE">
+    <MDI key="COMPRESSION">JPEG</MDI>
+    <MDI key="INTERLEAVE">PIXEL</MDI>
+    <MDI key="SOURCE_COLOR_SPACE">YCbCr</MDI>
+  </Metadata>
+  <Metadata domain="xml:ESRI" format="xml">
+    <GeodataXform xsi:type="typens:PolynomialXform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:typens="http://www.esri.com/schemas/ArcGIS/10.5">
+      <PolynomialOrder>1</PolynomialOrder>
+      <SpatialReference xsi:type="typens:ProjectedCoordinateSystem">
+        <WKT>PROJCS["WGS_1984_Web_Mercator_Auxiliary_Sphere",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Mercator_Auxiliary_Sphere"],PARAMETER["False_Easting",0.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",0.0],PARAMETER["Standard_Parallel_1",0.0],PARAMETER["Auxiliary_Sphere_Type",0.0],UNIT["Meter",1.0],AUTHORITY["EPSG",3857]]</WKT>
+        <XOrigin>-20037700</XOrigin>
+        <YOrigin>-30241100</YOrigin>
+        <XYScale>148923141.92838538</XYScale>
+        <ZOrigin>-100000</ZOrigin>
+        <ZScale>10000</ZScale>
+        <MOrigin>-100000</MOrigin>
+        <MScale>10000</MScale>
+        <XYTolerance>0.001</XYTolerance>
+        <ZTolerance>0.001</ZTolerance>
+        <MTolerance>0.001</MTolerance>
+        <HighPrecision>true</HighPrecision>
+        <WKID>102100</WKID>
+        <LatestWKID>3857</LatestWKID>
+      </SpatialReference>
+      <SourceGCPs xsi:type="typens:ArrayOfDouble">
+        <Double>1722.1148148148786</Double>
+        <Double>-2646.5888888888876</Double>
+        <Double>462.27037037035916</Double>
+        <Double>-3552.5444444444729</Double>
+        <Double>81.374896385717875</Double>
+        <Double>-2680.4189571528696</Double>
+        <Double>1131.5006206777507</Double>
+        <Double>-2046.7588827334694</Double>
+        <Double>2886.739958962914</Double>
+        <Double>-2832.3283761542407</Double>
+        <Double>1679.8401698390462</Double>
+        <Double>-2186.1092182759894</Double>
+        <Double>1786.3926303353928</Double>
+        <Double>-1388.5272399333189</Double>
+        <Double>487.65176980203978</Double>
+        <Double>-1578.2791918448056</Double>
+        <Double>1969.6899176345014</Double>
+        <Double>-3892.3831104625715</Double>
+        <Double>2172.9399727071132</Double>
+        <Double>-4397.8106936961412</Double>
+        <Double>2044.564683133628</Double>
+        <Double>-4153.4598309117719</Double>
+        <Double>2920.1426595580106</Double>
+        <Double>-3721.1598178996937</Double>
+        <Double>1851.1143468677337</Double>
+        <Double>-3756.7164388722158</Double>
+        <Double>3048.1236301301087</Double>
+        <Double>-4314.9807956066797</Double>
+        <Double>2079.7771956360948</Double>
+        <Double>-4169.726330218371</Double>
+        <Double>1993.1696207000568</Double>
+        <Double>-3989.8186224856181</Double>
+        <Double>1944.360575900605</Double>
+        <Double>-3581.1142724340316</Double>
+        <Double>1870.4711480990927</Double>
+        <Double>-3215.8924327665591</Double>
+        <Double>2798.7293560660573</Double>
+        <Double>-3441.3092635109788</Double>
+        <Double>1795.4992339424525</Double>
+        <Double>-991.07929051679093</Double>
+        <Double>1878.6049048313316</Double>
+        <Double>-3822.0762927659671</Double>
+        <Double>1919.1577993358505</Double>
+        <Double>-3839.7595689577283</Double>
+        <Double>1933.0658239411823</Double>
+        <Double>-3860.7923829624197</Double>
+        <Double>1870.8069253134345</Double>
+        <Double>-3794.6028932916815</Double>
+        <Double>2003.7073523400268</Double>
+        <Double>-4012.3383998360368</Double>
+      </SourceGCPs>
+      <TargetGCPs xsi:type="typens:ArrayOfDouble">
+        <Double>-15023068.576881539</Double>
+        <Double>7927261.1445747726</Double>
+        <Double>-15052569.677550441</Double>
+        <Double>7904374.6404684056</Double>
+        <Double>-15062888.448187992</Double>
+        <Double>7927658.0203685239</Double>
+        <Double>-15035504.018419104</Double>
+        <Double>7941019.5054248422</Double>
+        <Double>-14995807.619581826</Double>
+        <Double>7922092.9397939174</Double>
+        <Double>-15023361.383022718</Double>
+        <Double>7937311.8035649974</Double>
+        <Double>-15020622.940045837</Double>
+        <Double>7956494.1335963523</Double>
+        <Double>-15051255.477478884</Double>
+        <Double>7953223.7116909195</Double>
+        <Double>-15017125.923108617</Double>
+        <Double>7897184.8496131115</Double>
+        <Double>-15012596.786551217</Double>
+        <Double>7884752.4594481094</Double>
+        <Double>-15015613.042583728</Double>
+        <Double>7890784.9715131344</Double>
+        <Double>-14995451.752261154</Double>
+        <Double>7900548.1160394251</Double>
+        <Double>-15019581.800521258</Double>
+        <Double>7900111.5526662972</Double>
+        <Double>-14992554.558966797</Double>
+        <Double>7886220.8998850044</Double>
+        <Double>-15014819.290996263</Double>
+        <Double>7890388.0957193961</Double>
+        <Double>-15016605.232068146</Double>
+        <Double>7894674.354291914</Double>
+        <Double>-15017756.171870032</Double>
+        <Double>7904516.8739769533</Double>
+        <Double>-15019026.174410036</Double>
+        <Double>7912890.9532251125</Double>
+        <Double>-14997912.382182451</Double>
+        <Double>7907612.5051682163</Double>
+        <Double>-15019978.676315051</Double>
+        <Double>7967262.9369690875</Double>
+        <Double>-15019092.320375696</Double>
+        <Double>7898815.0917400699</Double>
+        <Double>-15018166.276856942</Double>
+        <Double>7898285.9240150675</Double>
+        <Double>-15017584.19235944</Double>
+        <Double>7897730.2979038153</Double>
+        <Double>-15019224.612306947</Double>
+        <Double>7899423.6346238218</Double>
+        <Double>-15016049.605956934</Double>
+        <Double>7893999.6654425506</Double>
+      </TargetGCPs>
+      <Name />
+    </GeodataXform>
+  </Metadata>
+</PAMDataset>
