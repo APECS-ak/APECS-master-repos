@@ -1,0 +1,235 @@
+---
+title: "Untitled"
+author: "Tiff Stephens"
+date: "11/13/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(dplyr)
+library(plyr)
+library(tidyr)
+library(lubridate)
+library(ggplot2)
+library(ggpmisc)
+
+theme_set(theme_classic())
+```
+
+
+
+```{r}
+df.matter <- read.csv("~/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_sediment/sediment_prelim.csv", stringsAsFactors = FALSE, header = TRUE)
+
+
+df.matter <- df.matter[-c(12),] #too high and too low
+#df.matter <- df.matter[-c(12,87),] #too high and too low
+
+```
+
+
+
+
+```{r}
+# calculate dry bulk density (DBD)
+df.matter = df.matter %>% 
+  mutate(sed_ww_pre_60C = bag_sed_ww_g - bag_weight_g) %>% # not needed for DBD but a good factor to have for later ww:dw conversions
+  mutate(sed_dw_post_60C = bag_sed_dw_g - bag_weight_g) %>%
+  mutate(dry_bulk_density = sed_dw_post_60C / sample_volume_cm3)
+
+
+
+
+# calculate organic matter (OM)
+df.matter = df.matter %>% 
+  mutate(sed_dw_pre_450C = pan_sed_dw_pre_450C_g - pan_weight_g) %>%
+  mutate(sed_dw_post_450C = pan_sed_dw_post_450C_g - pan_weight_g) %>%
+  mutate(organic_dw_g = sed_dw_pre_450C - sed_dw_post_450C)
+
+
+  
+
+# calculate inorganic matter (IM)
+#df.matter = df.matter %>%   
+  #mutate(sed_dw_pre_950C = crucible_sed_dw_pre_950C - crucible_weight, na.rm = TRUE) %>%
+  #mutate(sed_dw_post_950C = crucible_sed_dw_post_950C - crucible_weight, na.rm = TRUE) %>%
+  #mutate(inorganic_dw_g = sed_dw_pre_950C - sed_dw_post_950C)
+```
+
+
+
+```{r}
+# calculate other important data
+df.matter = df.matter %>% 
+  mutate(organic_dw_percent = (organic_dw_g / sed_dw_pre_450C) * 100) %>%
+  #mutate(inorganic_dw_percent = (inorganic_dw_g / sed_dw_pre_950C) * 100, na.rm = TRUE) %>%
+  mutate(organic_density = organic_dw_g * dry_bulk_density) %>%
+  #mutate(inorganic_density = inorganic_dw_g * dry_bulk_density, na.rm = TRUE)
+  mutate(organic_carbon_percent = (0.3134 * organic_dw_percent) - 0.1149) %>%
+  mutate(organic_carbon_g_155cm3 = (organic_carbon_percent / 100) * sed_dw_post_60C) %>%
+  mutate(organic_carbon_g_cm3 = organic_carbon_g_155cm3 / 115)
+  #mutate(sed_dw_surface_m_g = sed_dw_pre_450C * 2608.695652) %>%
+  #mutate(om.sed = organic_dw_g /sed_dw_pre_450C) %>%
+  #mutate(tot.om.surface = om.sed * sed_dw_surface_m_g) %>%
+  #mutate(tot.carb.surface = tot.om.surface * (organic_carbon_percent /100))
+
+
+#df.matter <- df.matter[, -c(7:15,17,18)] # remove these columns
+```
+
+
+```{r}
+dbd.agg <- aggregate(dry_bulk_density ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+org.g.agg <- aggregate(organic_dw_g ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+org.p.agg <- aggregate(organic_dw_percent ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+org.d.agg <- aggregate(organic_density ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+carb.g.agg <- aggregate(organic_carbon_g_155cm3 ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+carb.p.agg <- aggregate(organic_carbon_percent ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+carb.cm.agg <- aggregate(organic_carbon_g_cm3 ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+#carb.m.agg <- aggregate(tot.carb.surface ~ site + transect, data = df.matter, mean, na.rm = TRUE)
+
+
+df.carbon <- inner_join(x = dbd.agg, y = org.g.agg)
+df.carbon <- inner_join(x = df.carbon, y = org.p.agg)
+df.carbon <- inner_join(x = df.carbon, y = org.d.agg)
+df.carbon <- inner_join(x = df.carbon, y = carb.g.agg)
+df.carbon <- inner_join(x = df.carbon, y = carb.p.agg)
+df.carbon <- inner_join(x = df.carbon, y = carb.cm.agg)
+```
+
+
+```{r}
+rm(dbd.agg)
+rm(org.g.agg)
+rm(org.p.agg)
+rm(org.d.agg)
+rm(carb.g.agg)
+rm(carb.p.agg)
+```
+
+
+
+```{r}
+df.carbon2 <- df.carbon[, -c(3:8)] # remove these columns
+df.organic_carbon_g_cm3 <- spread(df.carbon2, key = transect, value = organic_carbon_g_cm3)
+
+df.organic_carbon_g_cm3 = df.organic_carbon_g_cm3 %>% 
+  mutate(organic_cm3_diff = abs(inside - outside))
+```
+
+
+```{r}
+index.2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_princomp.csv", stringsAsFactors = FALSE, header = TRUE) # import site data
+
+df.all <- left_join(index.2018, df.carbon, by = c("site"))
+df.orgc <- left_join(index.2018, df.organic_carbon_g_cm3, by = c("site"))
+```
+
+```{r}
+rm(df.matter)
+rm(index.2018)
+```
+
+
+
+
+```{r}
+df.all$so_region <- factor(df.all$so_region, levels=c("low","mid","high"))
+
+p = ggplot(df.all, aes(so_region, organic_carbon_g_cm3, fill = transect)) +
+  stat_summary(fun.y=mean, geom="bar", position="dodge") +
+  stat_summary(fun.data=mean_se, geom="errorbar", position=position_dodge(width=0.90), width=0.1)
+  #labs(y="Blade RGR (mm/d)", title="Blade Elongation")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  facet_wrap(~independent, scales = "free")
+plot(p)
+
+
+#subset
+inside = subset(df.all, transect == "inside")
+outside= subset(df.all, transect == "outside")
+
+aov <- aov(organic_carbon_g_cm3 ~ so_region, data = inside)
+summary(aov)
+TukeyHSD(aov)
+
+
+cgcm3.agg <- aggregate(organic_carbon_g_cm3 ~ so_region, data = outside, mean, na.rm = TRUE)
+cper.agg <- aggregate(organic_carbon_percent ~ so_region, data = df.all, mean, na.rm = TRUE)
+
+```
+
+
+
+
+
+```{r}
+#df.all <- df.all[-c(8,9,39,40,16,17,20,21),] #low values
+
+linear.model <- (y ~ x)
+poly.model <- y ~ poly(x,2)
+
+p1 = ggplot(df.all, aes(so_index_pc1, (organic_carbon_g_cm3), color = transect)) +
+  geom_point(size=3) + # allows for trendline on general trend
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
+  #facet_wrap(~transect) +
+  #xlab("Sea Otter Index (PC1)")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
+  geom_text(aes(label=site), size=2) +
+  stat_poly_eq(formula = linear.model,
+        label.x = "right",
+        label.y = "top",
+        parse = TRUE) +
+  stat_fit_glance(method = "lm", 
+        method.args = list(formula = linear.model),
+        label.x = "left",
+        label.y = "top",
+        aes(label = paste("italic(P)*\"-value = \"*", 
+        signif(..p.value.., digits = 4), sep = "")),
+        parse = TRUE)
+plot(p1)
+
+
+
+
+
+
+
+
+taus <- 1:7/10
+qreg_fit <- rq(organic_c_diff ~ so_index_pc1, data=df.orgc, tau = taus)
+summary(qreg_fit, se = "boot")
+
+
+p1 = ggplot(df.orgc, aes(so_index_pc1, organic_cm3_diff)) +
+  geom_point(size=3) + # allows for trendline on general trend
+  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
+  #geom_quantile(quantiles = 0.70)
+  #facet_wrap(~transect) +
+  #xlab("Sea Otter Index (PC1)")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
+  geom_text(aes(label=site), size=2) +
+  stat_poly_eq(formula = poly.model,
+        label.x = "right",
+        label.y = "top",
+        parse = TRUE) +
+  stat_fit_glance(method = "lm", 
+        method.args = list(formula = poly.model),
+        label.x = "left",
+        label.y = "top",
+        aes(label = paste("italic(P)*\"-value = \"*", 
+        signif(..p.value.., digits = 4), sep = "")),
+        parse = TRUE)
+plot(p1)
+```
+
+
+

@@ -3,12 +3,12 @@ title: "Untitled"
 author: "Tiff Stephens"
 date: "11/13/2018"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-
-theme_set(theme_classic())
 ```
 
 ```{r}
@@ -18,6 +18,8 @@ library(tidyr)
 library(lubridate)
 library(ggplot2)
 library(ggpmisc)
+
+theme_set(theme_classic())
 ```
 
 
@@ -104,256 +106,13 @@ df.carbon <- inner_join(x = df.carbon, y = org.d.agg)
 
 
 
-
-
-
-
-
-
-
-
-
-\sites
 ```{r}
-sites.2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/sites_2018.csv", stringsAsFactors = FALSE, header = TRUE) # import site data
+sites.2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/alldat.csv", stringsAsFactors = FALSE, header = TRUE) # import site data
 
-sites.2018 <- sites.2018[, -c(8:10)] # remove these columns
-```
-
-
-\index
-```{r}
-index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/sea_otter_index_2018/so_index_stephens.csv", stringsAsFactors = FALSE, header = TRUE)
-
-index <- index[, -c(4:7)] # remove these columns
-```
-
-
-\biomass
-```{r}
-df.bmass <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/biomass_seagrass.csv", stringsAsFactors = FALSE, header = TRUE)
-
-
-### WITH REPLICATES
-df.bmass <- df.bmass %>%
-  mutate(leaf_dw_g_m2 = (leaf_tissue_beaker_g - leaf_beaker_g) * 4) %>%
-  mutate(rhizome_dw_g_m2 = (rhizome_tissue_beaker_g - rhizome_beaker_g) * 4) %>%
-  mutate(leaf.rhizome = leaf_dw_g_m2 / rhizome_dw_g_m2) %>%
-  mutate(tot_biomass_dw_g_m2 = leaf_dw_g_m2 + rhizome_dw_g_m2)
-
-df.bmass = df.bmass %>% 
-  select(-leaf_beaker_g, -leaf_tissue_beaker_g, -rhizome_beaker_g, -rhizome_tissue_beaker_g)
-
-
-### AGGREGATE
-leaf.agg <- aggregate(leaf_dw_g_m2 ~ site + date_MM.DD.YY, data = df.bmass, mean, na.rm = TRUE)
-rhizome.agg <- aggregate(rhizome_dw_g_m2 ~ site, data = df.bmass, mean, na.rm = TRUE)
-leaf.rhizome.agg <- aggregate(leaf.rhizome ~ site, data = df.bmass, mean, na.rm = TRUE)
-total.agg <- aggregate(tot_biomass_dw_g_m2 ~ site, data = df.bmass, mean, na.rm = TRUE)
-
-
-df.bmass.agg <- left_join(leaf.agg, rhizome.agg, by = "site") 
-df.bmass.agg <- left_join(df.bmass.agg, leaf.rhizome.agg, by = "site") 
-df.bmass.agg <- left_join(df.bmass.agg, total.agg, by = "site") 
-
-rm(leaf.agg)
-rm(rhizome.agg)
-rm(leaf.rhizome.agg)
-```
-
-```{r}
-##### FOR NON-AGGREGATE DATA
-
-# what data class is the date column? 
-str(df.bmass$date_MM.DD.YY)
-
-# convert "date" from chr to a Date class and specify current date format
-df.bmass$date_MM.DD.YY <- as.Date(df.bmass$date_MM.DD.YY, "%m/%d/%y")
-
-# convert with yday into a new column "julian"
-df.bmass$date_julian <- yday(df.bmass$date_MM.DD.YY)
-
-# make sure it worked all the way through. 
-head(df.bmass$date_julian)
-tail(df.bmass$date_julian)
-
-
-
-##### FOR AGGREGATE DATA
-
-# what data class is the date column? 
-str(df.bmass.agg$date_MM.DD.YY)
-
-# convert "date" from chr to a Date class and specify current date format
-df.bmass.agg$date_MM.DD.YY <- as.Date(df.bmass.agg$date_MM.DD.YY, "%m/%d/%y")
-
-# convert with yday into a new column "julian"
-df.bmass.agg$date_julian <- yday(df.bmass.agg$date_MM.DD.YY)  
-
-# make sure it worked all the way through. 
-head(df.bmass.agg$date_julian)
-tail(df.bmass.agg$date_julian)
-```
-
-
-
-\join1
-```{r}
-df.all <- inner_join(x = sites.2018, y = index)
-df.all <- inner_join(x = df.all, y = df.bmass.agg)
-df.all <- inner_join(x = df.all, y = df.carbon)
-
-#df.all <- left_join(sites.2018, index, by = "site") 
-#df.all <- left_join(df.all, df.bmass.agg, by = "site") 
-#df.all <- left_join(df.all, df.carbon, by = "site") 
 ```
 
 
 
 
 
-\density
-```{r}
-df.sgdens <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/elevs_worked.csv", stringsAsFactors = FALSE, header = TRUE)
-
-df.sgdens <- df.sgdens[, -c(3:9, 12)] # remove these columns
-
-df.08 <- aggregate(diffuse_band_height_cm ~ site, data = df.sgdens, mean, na.rm = TRUE)
-df.09 <- aggregate(beach_slope ~ site, data = df.sgdens, mean, na.rm = TRUE)
-df.10 <- aggregate(shoot_density_inside_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
-df.11 <- aggregate(shoot_density_continuous_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
-df.12 <- aggregate(shoot_density_diffuse_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
-df.13 <- aggregate(flower_density_inside_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
-df.14 <- aggregate(flower_density_continuous_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
-df.15 <- aggregate(flower_density_diffuse_m2 ~ site, data = df.sgdens, mean, na.rm = TRUE)
-
-df.sgdens.means <- left_join(df.08, df.09, by = c("site"))
-df.sgdens.means <- left_join(df.sgdens.means, df.10, by = c("site"))
-df.sgdens.means <- left_join(df.sgdens.means, df.11, by = c("site"))
-df.sgdens.means <- left_join(df.sgdens.means, df.12, by = c("site"))
-df.sgdens.means <- left_join(df.sgdens.means, df.13, by = c("site"))
-df.sgdens.means <- left_join(df.sgdens.means, df.14, by = c("site"))
-df.sgdens.means <- left_join(df.sgdens.means, df.15, by = c("site"))
-```
-
-```{r}
-rm(df.08)
-rm(df.09)
-rm(df.10)
-rm(df.11)
-rm(df.12)
-rm(df.13)
-rm(df.14)
-rm(df.15)
-```
-
-
-
-
-\join1
-```{r}
-df.all <- inner_join(x = df.all, y = df.sgdens.means)
-
-#df.all <- left_join(df.all, df.sgdens.means, by = "site") 
-```
-
-```{r}
-rm(dbd.agg)
-rm(org.d.agg)
-rm(org.g.agg)
-rm(org.p.agg)
-rm(sites.2018)
-
-rm(df.bmass)
-rm(df.bmass.agg)
-rm(df.sgdens)
-rm(df.sgdens.means)
-rm(index)
-rm(total.agg)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\plot
-```{r}
-df.all$so_region1=factor(df.all$so_region1, levels=c("low","mid","high")) # order sites
-df.all$so_region2=factor(df.all$so_region2, levels=c("low","high")) # order sites
-
-
-#df.bmass.all.2 <- df.bmass.all[-c(2),] # remove these columns
-#df.all.2 <- df.all[-c(2),] # remove these columns
-
-
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-
-
-t.test(leaf_dw_g_m2 ~ so_region2, paired=FALSE, data = df.all)
-t.test(tot_biomass_dw_g_m2 ~ sed2, paired=FALSE, data = df.all)
-
-df.all$site <- factor(df.all$site, levels = df.all$site[order(df.all$sea_otter_index)])
-
-pz4 = ggplot(df.all, aes(x = sea_otter_index, y = organic_dw_percent, color = sed2)) +
-  geom_point(size = 3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  geom_smooth(method=lm, formula= y~x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=transect), size=2) +
-  facet_wrap(~transect) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5) 
-plot(pz4)
-
-
-
-
-pz4 = ggplot(df.all, aes(x = reorder(site, sea_otter_index), y = organic_dw_percent, color = transect)) +
-  geom_point(size = 3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  geom_smooth(method=lm, formula= y~x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=transect), size=2) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5) 
-  #facet_wrap(~transect)
-plot(pz4)
-```
-
-
-
-
-
-```{r}
-```{r}
-write.csv(df.all, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_sediment/summary_2018_matter.csv", row.names = TRUE)
-```
-
-
-```
 

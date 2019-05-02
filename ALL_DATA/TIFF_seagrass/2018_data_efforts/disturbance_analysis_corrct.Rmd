@@ -160,7 +160,7 @@ slopes <- aggregate(beach_slope ~ site, data = slopes, mean, na.rm = TRUE) # cal
 
 \OtterMetrics
 ```{r}
-index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_1.csv", stringsAsFactors = FALSE, header = TRUE)
+index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_prcomp.csv", stringsAsFactors = FALSE, header = TRUE)
 
 #index <- index[, -c(2:6, 12)] # remove these columns
 ```
@@ -488,7 +488,7 @@ rm(df.sgdens.means)
 
 ```{r export}
 # Data Export
-write.csv(df.alldat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/alldat.csv", row.names = FALSE)
+write.csv(df.all, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/alldat.csv", row.names = FALSE)
 ```
 
 
@@ -702,7 +702,7 @@ plot(pz3)
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
-pz4 = ggplot(df.all, aes(shells_prop_otter, edge_continuous_elev_corrct_neg)) +
+pz4 = ggplot(df.all, aes(so_index_pc1, edge_continuous_elev_corrct_neg)) +
   geom_point(size=3) + # allows for trendline on general trend
   geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
@@ -724,7 +724,7 @@ plot(pz4)
 #df.all <- df.all[-c(20),] 
 color = sed2_qual
 
-pz5 = ggplot(df.all, aes(shells_n_otter, edge_continuous_elev_corrct_neg)) +
+pz5 = ggplot(df.all, aes(so_index_pc1, edge_continuous_elev_corrct_neg, color = sed1_qual)) +
   geom_point(size=3) + # allows for trendline on general trend
   #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
   geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
@@ -738,6 +738,11 @@ pz5 = ggplot(df.all, aes(shells_n_otter, edge_continuous_elev_corrct_neg)) +
                   aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
                   label.x.npc = 'left', label.y.npc = 'top', size = 5)
 plot(pz5)
+
+
+edge_continuous_elev_corrct_neg
+shoot_density_continuous_m2
+color = sed1_qual
 ```
 
 <br>

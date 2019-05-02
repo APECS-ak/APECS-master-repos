@@ -64,7 +64,7 @@ sites.2018 <- sites.2018[, -c(8:10)] # remove these columns
 
 \index
 ```{r}
-index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_1.csv", stringsAsFactors = FALSE, header = TRUE)
+index <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_princomp.csv", stringsAsFactors = FALSE, header = TRUE)
 
 index <- index[, -c(2:5)] # remove these columns
 ```
@@ -201,6 +201,13 @@ rm(total.agg)
 ```
 
 
+```{r}
+df.elev <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/alldat.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.elev <- df.elev[, -c(2:30,34:40,43:48)] # remove these columns
+
+df.bmass.all <- left_join(df.bmass.all, df.elev, by = "site") 
+```
 
 
 
@@ -231,21 +238,33 @@ leaf_dw_g_m2
 rhizome_dw_g_m2
 tot_biomass_dw_g_m2
 leaf.rhizome
+shoot_density_inside_m2
+edge_continuous_elev_corrct_neg
+shoot_density_inside_m2
 
-pz4 = ggplot(df.bmass.all, aes(so_index_pc2, shoot_density_inside_m2)) +
+linear.model <- (y ~ x)
+poly.model <- y ~ poly(x,2)
+
+p1 = ggplot(df.bmass.all, aes(so_index_pc1, leaf.rhizome)) +
   geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
   #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index (PC2)")+ylab("Total biomass (g per m^2, DW)") +
+  geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
+  #facet_wrap(~transect) +
+  #xlab("Sea Otter Index (PC1)")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   geom_text(aes(label=site), size=2) +
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz4)
+  stat_poly_eq(formula = linear.model,
+        label.x = "right",
+        label.y = "top",
+        parse = TRUE) +
+  stat_fit_glance(method = "lm", 
+        method.args = list(formula = linear.model),
+        label.x = "left",
+        label.y = "top",
+        aes(label = paste("italic(P)*\"-value = \"*", 
+        signif(..p.value.., digits = 4), sep = "")),
+        parse = TRUE)
+plot(p1)
 
 
 
@@ -254,16 +273,10 @@ plot(pz4)
 pz4 = ggplot(df.bmass.all, aes(date_julian, leaf_dw_g_m2)) +
   geom_point(size=3) + # allows for trendline on general trend
   #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) +
+  geom_smooth(method=lm, formula= y ~ x, se=FALSE, fullrange=FALSE) 
   #xlab("Sea Otter Index")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
+  geom_text(aes(label=site), size=2)
 plot(pz4)
 ```
 

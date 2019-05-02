@@ -169,8 +169,10 @@ The data will need to be summed by site and then converted to a proportion and a
 ```{r}
 # calculate shell count per death per site
 df.shells <- df.shells %>%
-    group_by(site, death_estimate) %>% 
-    summarise(n_shells = n())
+    group_by(site, death_estimate) %>%
+    tally()
+colnames(df.shells)[3] <- "n_shells" # change column names
+
 
 # split column so that each death is its own column
 df.shells.split <- spread(df.shells, key = death_estimate, value = n_shells) # split counts into three columns
@@ -252,13 +254,13 @@ dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,c(3:6)] + 1))
 pairs(dat.l)
 
 # Standardize to column (sea otter measure) maximum
-dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
+dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max)) #why to max and not mean?
 ```
 
 Now we can calculate the PCA
 ```{r PCA}
 # PCA on transformed AND standarized data
-pca <- princomp(dat.std.l, scale. = T)
+pca <- princomp(dat.std.l, scale. = T) #using covariance matrix
 pca.summary <- summary(pca)
 loadings(pca)
 biplot(pca, cex = 1) # display
@@ -289,124 +291,7 @@ ggplot(final.dat, aes(reorder(site, so_index_pc1), so_index_pc1, col = so_index_
   theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
 
-# plots for pc2
-ggplot(final.dat, aes(site, so_index_pc2)) +
-  geom_point(size = 4) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "site", y = "sea otter index (PC1)")
 
-ggplot(final.dat, aes(reorder(site, so_index_pc2), so_index_pc2, col = so_index_pc2)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "site", y = "SO index PC2", col = "SO index (mean density)") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
-```
-
-Final index data table
-```{r}
-DT::datatable(final.dat, caption = "sea otter impact index")
-```
-
-## Data export
-```{r export}
-# Data Export
-write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_2.csv", row.names = FALSE)
-```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\soi
-\2
-## Sea otter impact index
-We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit. Correlation plots indicate that most measures are reasonably correlated with eachother.
-```{r data exploration}
-# Correlations
-
-corrgram(df.index[, c(6,8,15,17,18,19)]) # so_duration_1, so_tinker_km2_1, so_dens_avg, pits_all, shells_n_otter shells_prop_otter
-pairs(df.index[, c(6,8,15,17,18,19)])
-```
-
-Checking for normality is important. Histograms suggest that theses data should be log transformed. 
-```{r}
-# histograms
-hist(df.index$so_dens_avg)
-hist(df.index$pits_all)
-hist(df.index$shells_n_otter)
-hist(df.index$shells_prop_otter)
-
-# log transformation
-hist(log(df.index$so_dens_avg + 1))
-hist(log(df.index$pits_all + 1))
-hist(log(df.index$shells_n_otter + 1))
-hist(log(df.index$shells_prop_otter + 1))
-```
-Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
-
-Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
-```{r transformations}
-# Separate values only
-dat.redu <- df.index[,c(6,8,15,17,18,19)]
-
-# log transform appropriate columns
-dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,c(3:6)] + 1)) 
-pairs(dat.l)
-
-# Standardize to column (sea otter measure) maximum
-dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
-```
-
-Now we can calculate the PCA
-```{r PCA}
-# PCA on transformed AND standarized data
-pca <- princomp(dat.std.l)
-summary(pca, standardized = TRUE, fit.measures = TRUE)
-loadings(pca)
-biplot(pca, cex = 1) # display
-screeplot(pca, ylim = c(0, 0.8))
-pca$scores 
-df.pcascores <-pca$scores 
-
-final.dat <- cbind(df.index, pca$scores[,1:2])
-colnames(final.dat)[20] <- "so_index_pc1"
-colnames(final.dat)[21] <- "so_index_pc2"
-
-
-# Switch sign of index so positive values are associated with more otters
-final.dat$so_index_pc1 <- final.dat$so_index_pc1 * -1
-final.dat$so_index_pc2 <- final.dat$so_index_pc2 * -1
-
-
-# plots for pc1
-ggplot(final.dat, aes(site, so_index_pc1)) +
-  geom_point(size = 4) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "site", y = "sea otter index (PC1)")
-
-ggplot(final.dat, aes(reorder(site, so_index_pc1), so_index_pc1, col = so_index_pc1)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "site", y = "SO index PC1", col = "SO index (mean density)") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
 
 # plots for pc2
 ggplot(final.dat, aes(site, so_index_pc2)) +
@@ -430,167 +315,6 @@ DT::datatable(final.dat, caption = "sea otter impact index")
 ## Data export
 ```{r export}
 # Data Export
-write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_2.csv", row.names = FALSE)
+write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_princomp.csv", row.names = FALSE)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-\soi
-\3
-## Sea otter impact index
-We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit. Correlation plots indicate that most measures are reasonably correlated with eachother.
-```{r data exploration}
-# Correlations
-
-corrgram(df.index[, c(6,8,15,17,18)]) # so_duration_1, so_tinker_km2_1, so_dens_avg, pits_all, shells_n_otter shells_prop_otter
-pairs(df.index[, c(6,8,15,17,18)])
-```
-
-Checking for normality is important. Histograms suggest that theses data should be log transformed. 
-```{r}
-# histograms
-hist(df.index$so_dens_avg)
-hist(df.index$pits_all)
-hist(df.index$shells_n_otter)
-
-# log transformation
-hist(log(df.index$so_dens_avg + 1))
-hist(log(df.index$pits_all + 1))
-hist(log(df.index$shells_n_otter + 1))
-```
-Histograms indicate that the data are right skewed. Log transformation helps this somewhat.
-
-Given the distributions of the data we will log transform the heavily skewed data to meet (or better attempt to) assumptions of normality.
-```{r transformations}
-# Separate values only
-dat.redu <- df.index[,c(6,8,15,17,18)]
-
-# log transform appropriate columns
-dat.l <- cbind(dat.redu[,1:2], log(dat.redu[,c(3:5)] + 1)) 
-pairs(dat.l)
-
-# Standardize to column (sea otter measure) maximum
-dat.std.l <- scale(dat.l, center = FALSE, scale = apply(dat.l, 2, max))
-```
-
-Now we can calculate the PCA
-```{r PCA}
-# PCA on transformed AND standarized data
-pca <- princomp(dat.std.l)
-summary(pca, standardized = TRUE, fit.measures = TRUE)
-loadings(pca)
-biplot(pca, cex = 1) # display
-screeplot(pca, ylim = c(0, 0.8))
-pca$scores 
-df.pcascores <-pca$scores 
-
-final.dat <- cbind(df.index, pca$scores[,1:2])
-colnames(final.dat)[20] <- "so_index_pc1"
-colnames(final.dat)[21] <- "so_index_pc2"
-
-
-# Switch sign of index so positive values are associated with more otters
-final.dat$so_index_pc1 <- final.dat$so_index_pc1 * -1
-final.dat$so_index_pc2 <- final.dat$so_index_pc2 * -1
-
-
-# plots for pc1
-ggplot(final.dat, aes(site, so_index_pc1)) +
-  geom_point(size = 4) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "site", y = "sea otter index (PC1)")
-
-ggplot(final.dat, aes(reorder(site, so_index_pc1), so_index_pc1, col = so_index_pc1)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "site", y = "SO index PC1", col = "SO index (mean density)") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
-
-# plots for pc2
-ggplot(final.dat, aes(site, so_index_pc2)) +
-  geom_point(size = 4) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "site", y = "sea otter index (PC1)")
-
-ggplot(final.dat, aes(reorder(site, so_index_pc2), so_index_pc2, col = so_index_pc2)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "site", y = "SO index PC2", col = "SO index (mean density)") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0))
-```
-
-Final index data table
-```{r}
-DT::datatable(final.dat, caption = "sea otter impact index")
-```
-
-## Data export
-```{r export}
-# Data Export
-write.csv(final.dat, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_3.csv", row.names = FALSE)
-```
-
-
-
-
-
-
-
-
-
-
-
-\\\\\\\\\\\\
-```{r}
-df.soi1 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_1.csv", stringsAsFactors = FALSE, header = TRUE)
-
-df.soi2 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_2.csv", stringsAsFactors = FALSE, header = TRUE)
-
-df.soi3 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/soi_3.csv", stringsAsFactors = FALSE, header = TRUE)
-
-
-
-colnames(df.soi1)[20] <- "soi1_pc1"
-colnames(df.soi1)[21] <- "soi1_pc2"
-
-df.soi2 <- df.soi2[ -c(2:19) ] # remove columns that are no longer necessary
-colnames(df.soi2)[2] <- "soi2_pc1"
-colnames(df.soi2)[3] <- "soi2_pc2"
-
-df.soi3 <- df.soi3[ -c(2:19) ] # remove columns that are no longer necessary
-colnames(df.soi3)[2] <- "soi3_pc1"
-colnames(df.soi3)[3] <- "soi3_pc2"
-
-
-
-
-# join proportion otter shells to index df
-df.index <- left_join(df.soi1, df.soi2, by = c("site"))
-df.index <- left_join(df.index, df.soi3, by = c("site"))
-```
-
-## Data export
-```{r export}
-# Data Export
-write.csv(df.index, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_index/index_2018/so_index_stephens.csv", row.names = FALSE)
-```
-
 
