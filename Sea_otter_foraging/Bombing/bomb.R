@@ -8,5 +8,6 @@ setwd("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging")
 
 
 #load files
-bomb <- read.csv("Bombing/bomb.csv")
+bomb.test <- read.csv("Bombing/bomb_test.csv")
 summary <- read.csv("Bombing/summary.csv")
+
