@@ -1,0 +1,139 @@
+---
+title: "Eelgrass_crab_calculations_2018"
+author: "Wendel Raymond"
+date: "April 24, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r libraries, echo = FALSE}
+library(dplyr)
+library(tidyr)
+library(vegan)
+library(ggplot2)
+
+theme_set(theme_classic())
+```
+
+```{r functions, echo = FALSE}
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+# Crab pot calculations
+From the raw data this script will export a file summarized by site ready for analysis. The goal will be to summaries this data at the site level. Summaries will occur in a few different ways to prep the data for different types on analysis. There are X files generated here. Simple summaries...(fill in more here as appropriate)
+
+## Data import
+All we need is the crab data and the crab length weight conversions. This can be merged with other data that already has been summarized in other scripts. The merging can either happen here or in other scripts depending on the purpose.
+
+Crab data was collected by setting three string of three pots each at each one of our sites. Each string consisted of a traditional crab pot, a shrimp pot, and a minnow pot.
+
+```{r data}
+crab <- read.csv("../../ALL_DATA/Crab_pots_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+crabLW <- read.csv("../../ALL_DATA/crab_length_weight_conversion_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+## Cleaning up dat columns
+Since setting and retrieving crab pots did not happen at the same time as the eelgrass transect there should be a separate date for the crab pots
+
+```{r converting to julian day}
+crab$date_set <- as.Date(crab$date_set, format = "%m/%d/%Y")
+crab$date_set_juliean <- format(crab$date_set, "%j")
+crab$date_pulled <- as.Date(crab$date_pulled , format = "%m/%d/%Y")
+crab$date_pulled_julian <- format(crab$date_pulled, "%j")
+```
+
+## Calculations
+The first thing to do is to add the length - weight conversions to the staring data frame so that we can convert carapace widths the biomass. This will be done by adding the species specific coefficients to the data frame. Note the this conversion is to what is considered sea otter edible biomass. Also note that fish are recorded in this data that might be useful, but from this point on we are going to remove all fishes. 
+
+```{r crabs only}
+crab <- crab %>% 
+  filter(taxon == "Decapoda")
+```
+
+Now we will add length weight conversion coefficients
+```{r adding length to weight conversion}
+crab <- merge(crab, crabLW, by = "sp_code") # this also removes the sea star at the same time which is nice
+colnames(crab)[14] <- "taxon"
+```
+
+Calculate mass
+```{r calcualte mass}
+crab$mass_g <- (crab$a_mean * (crab$carapace_width_mm)^crab$b_mean)
+range(crab$mass_g, na.rm = TRUE)
+
+# Some example plots
+ggplot(crab, aes(mass_g)) +
+  geom_histogram()
+
+ggplot(crab, aes(mass_g)) +
+  geom_histogram() +
+  facet_wrap(~place_name)
+
+ggplot(crab, aes(mass_g)) +
+  geom_histogram() +
+  facet_wrap(~sp_code)
+```
+
+### Summary calculations
+Generally we want to summaries by site. This will pool pot type and string.
+
+#### Mass, counts, species
+Summaries by site and species
+```{r crab site and species}
+crab.site.sp <- crab %>% 
+  filter(taxon.x == "Decapoda") %>% # make sure we only have crabs
+  group_by(site, sp_code) %>% 
+  summarise(total_crab_sp = n(),
+            width = mean(carapace_width_mm), 
+            width_se = st.er(carapace_width_mm),
+            mass = mean(mass_g),
+            mass_se = st.er(mass_g))
+```
+
+Summaries by site only
+```{r crab site summary}
+crab.site <- crab %>% 
+  filter(taxon.x == "Decapoda") %>% # make sure we only have crabs
+  group_by(site) %>% 
+  summarise(unique(place_name),
+            unique(date_set),
+            unique(date_pulled),
+            unique(date_set_juliean),
+            unique(date_pulled_julian),
+            unique(time_soak_hr),
+            total_crab = n(),
+            crab_width = mean(carapace_width_mm), 
+            crab_width_se = st.er(carapace_width_mm),
+            crab_mass = mean(mass_g),
+            crab_mass_se = st.er(mass_g))
+
+# clean up column names
+colnames(crab.site)[1:7] <- c("site", "place_name", "date_set", "date_pulled", "date_set_julian", "date_pulled_julian", "time_soak_hr")
+
+```
+
+#### Diversity calculations
+To calculate diversity we have to do a bit of data manipulation in order for the functions to run. For each site we will calculate Shannon-wiener and Simpson diversity.
+```{r diversity calculations}
+crab.site.sp.wide <- spread(crab.site.sp[, 1:3], key = sp_code, value = total_crab_sp)
+crab.site.sp.wide[is.na(crab.site.sp.wide)] <- 0
+
+crab.site.sp.wide$shan_diverse <- diversity(crab.site.sp.wide[2:4], index = "shannon")
+crab.site.sp.wide$simp_diverse <- diversity(crab.site.sp.wide[2:4], index = "simpson")
+```
+
+Now we can append it to the rest of the data
+```{r append diversity to site}
+crab.site <- merge(crab.site, crab.site.sp.wide[, c(1, 5:6)], by = "site")
+```
+
+## Export simple summaries
+Exporting simple site level summaries of total crabs, width, mass, and diversity. This file can then be loaded in elsewhere for analysis.
+```{r export simple summaries}
+write.csv(crab.site, "../../ALL_DATA/crab_simple_site_2018_derived_simple.csv", row.names = FALSE)
+```

@@ -717,5 +717,15 @@ ggplot(dat) +
   labs(x = "sea otter index", y = "fish preds") +
   theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+## Crab Mass by site ##
+ggplot(dat) +
+  geom_col(aes(x = place_name, y = crab_mass)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggplot(dat) +
+  geom_col(aes(x = place_name, y = rock_mass)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
 ```
 
