@@ -19,9 +19,6 @@ ott.raw <- read.csv("Visual/2018_Foraging_data_RAW.csv")
 stack.gram <- stack(otter.gram)
 names(stack.gram) <- c("gram", "species")
 
-#combine files
-otter <- cbind(otter.gram, Ageclass = ott.sum$Ageclass, Sex = ott.sum$Sex, Area = ott.sum$Area)
-
 # plot hist of all the grams/min
 ggplot(data=stack.gram, aes(x=gram)) + 
   geom_histogram(binwidth = 1) +
@@ -57,7 +54,7 @@ plot(ott.sum$Sex, main = "Sex")
 plot(ott.sum$Ageclass, main = "Age")
 plot(ott.sum$Area, main = "Locations (year)")
 hist(ott.sum$success_rt,  main = "Histogram of Sucess rate", xlab= "", ylab= "")
-
+par(mfrow= c(1,1))
 #combine files
 otter <- cbind(otter.gram.tf, Ageclass = ott.sum$Ageclass, Sex = ott.sum$Sex, Area = ott.sum$Area, 
                Season = ott.sum$Season)
@@ -71,7 +68,7 @@ library(MASS)
 otter.bray <- vegdist(otter.gram.tf, method = "bray")
 round(otter.bray,2)
 
-#betadispr
+#betadispr with Area
 (disp <- betadisper(otter.bray, otter$Area))
 PCoA.d <- dist(disp$vectors[,1:10])
 plot(otter.bray, PCoA.d); cor(otter.bray, PCoA.d)
@@ -79,6 +76,34 @@ anova(disp)
 TukeyHSD(disp)
 plot(disp) 
 plot(disp, c(2,3))
+#betadispr with Sex (including unknown)
+(disp <- betadisper(otter.bray, otter$Sex))
+PCoA.d <- dist(disp$vectors[,1:10])
+plot(otter.bray, PCoA.d); cor(otter.bray, PCoA.d)
+anova(disp)
+TukeyHSD(disp)
+plot(disp) 
+plot(disp, c(2,3))
+#betadispr with Ageclass
+(disp <- betadisper(otter.bray, otter$Ageclass))
+PCoA.d <- dist(disp$vectors[,1:10])
+plot(otter.bray, PCoA.d); cor(otter.bray, PCoA.d)
+anova(disp)
+TukeyHSD(disp)
+plot(disp) 
+plot(disp, c(2,3))
+#betadispr with Season
+(disp <- betadisper(otter.bray, otter$Season))
+PCoA.d <- dist(disp$vectors[,1:10])
+plot(otter.bray, PCoA.d); cor(otter.bray, PCoA.d)
+anova(disp)
+TukeyHSD(disp)
+plot(disp) 
+plot(disp, c(2,3))
+
+# All of these metrics were not significant, which is good! But season is really close to 0.05
+
+
 # MDS - can use 2D because is simpler
 otter.nmds <- isoMDS(otter.bray, k=2) 
 #type I PERMANOVA
@@ -110,7 +135,7 @@ round(otter.bray2,2)
 # MDS - can use 2D because is simpler
 otter2.nmds <- isoMDS(otter.bray2, k=2) 
 #type I PERMANOVA
-adonis2(otter.bray2 ~ Sex + Area + Site, data=ott.sum, perm=9999)
+slim.perm<-adonis2(otter.bray2 ~ Sex + Area + Site, data=ott.sum, perm=9999)
 # type III PERMANOVA
 adonis2(otter.bray2 ~ Sex + Ageclass + Area + Site, data=ott.sum, by="margin", perm=9999)
 adonis2(otter.bray2 ~ Sex + Area, data=ott.sum, by="margin", perm=9999)
@@ -119,9 +144,69 @@ ott2.mds<-metaMDS(ott.slim, k=2, try=20, autotransform = FALSE)
 ott2.mds$stress
 stressplot(ott2.mds)
 ordiplot(ott2.mds, display=c("sites", "species"), type="t", cex=1)
-plot(ott2.mds$points, col=as.numeric(ott.sum$Area), pch=16, cex=2, asp=1)
-plot(ott2.mds$points, col=as.numeric(ott.sum$Sex), pch=16, cex=2, asp=1)
-plot(ott2.mds$points, col=as.numeric(ott.sum$Site), pch=16, cex=2, asp=1)
+plot(ott2.mds$points, col=as.numeric(otter.slim$Area), pch=16, cex=2, asp=1)
+plot(ott2.mds$points, col=as.numeric(otter.slim$Sex), pch=16, cex=2, asp=1)
+plot(ott2.mds$points, col=as.numeric(otter.slim$Season), pch=16, cex=2, asp=1)
+plot(ott2.mds$points, col=as.numeric(otter.slim$Site), pch=16, cex=2, asp=1) # not helpful
+
+
+# make ordination plot in ggplot for Areas
+
+#first make a data frame of the scores
+area.scores <- as.data.frame(scores(ott2.mds))
+# create a column of site names, from the rownames of data.scores
+area.scores$otter <- rownames(area.scores)  
+area.scores <- cbind(area.scores, Area = otter.slim$Area, Site = otter.slim$Site)
+head(area.scores)
+
+#Using the scores function from vegan to extract the species scores and convert to a data.frame
+species2.scores <- as.data.frame(scores(ott2.mds, "species"))  
+# create a column of species, from the rownames of species.scores
+species2.scores$species <- rownames(species2.scores)  
+head(species2.scores)
+
+ggplot() + 
+  geom_text(data=species2.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
+  geom_point(data=area.scores,aes(x=NMDS1,y=NMDS2,shape=Area,colour=Area),size=3) + # add the point markers
+  scale_colour_manual(values=c("OHTHREE" = "#E69F00", "TEN" = "#56B4E9", "EIGHTYEIGHT" = "#999999")) +
+  coord_equal() + 
+  theme_bw() +
+  theme(axis.text.x = element_blank(),  # remove x-axis text
+        axis.text.y = element_blank(), # remove y-axis text
+        axis.ticks = element_blank(),  # remove axis ticks
+        axis.title.x = element_text(size=18), # remove x-axis labels
+        axis.title.y = element_text(size=18), # remove y-axis labels
+        panel.background = element_blank(), 
+        panel.grid.major = element_blank(),  #remove major-grid labels
+        panel.grid.minor = element_blank(),  #remove minor-grid labels
+        plot.background = element_blank())
+
+#placing a hull for sex
+area.88 <- area.scores[area.scores$Area == "EIGHTYEIGHT", ][chull(area.scores[area.scores$Area == 
+                                                                   "EIGHTYEIGHT", c("NMDS1", "NMDS2")]), ]  # hull values for 1988
+area.03 <- area.scores[area.scores$Area == "OHTHREE", ][chull(area.scores[area.scores$Area == 
+                                                                   "OHTHREE", c("NMDS1", "NMDS2")]), ]  # hull values for 2003
+area.10 <- area.scores[area.scores$Area == "TEN", ][chull(area.scores[area.scores$Area == 
+                                                                         "TEN", c("NMDS1", "NMDS2")]), ]  # hull values for 2010
+
+hull2.data <- rbind(area.88, area.03, area.10)  #combine grp.a and grp.b
+hull2.data
+ggplot() + 
+  geom_polygon(data=hull2.data,aes(x=NMDS1,y=NMDS2,fill=Area,group=Area),alpha=0.30) + 
+  geom_text(data=species2.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
+  geom_point(data=area.scores,aes(x=NMDS1,y=NMDS2,shape=Area,colour=Area),size=4) + # add the point markers
+  scale_colour_manual(values=c("OHTHREE" = "#E69F00", "TEN" = "#56B4E9", "EIGHTYEIGHT" = "#999999")) +
+  coord_equal() +
+  theme_bw() + 
+  theme(axis.text.x = element_blank(),  # remove x-axis text
+        axis.text.y = element_blank(), # remove y-axis text
+        axis.ticks = element_blank(),  # remove axis ticks
+        axis.title.x = element_text(size=18), # remove x-axis labels
+        axis.title.y = element_text(size=18), # remove y-axis labels
+        panel.background = element_blank(), 
+        panel.grid.major = element_blank(),  #remove major-grid labels
+        panel.grid.minor = element_blank(),  #remove minor-grid labels
+        plot.background = element_blank())
 
 #####################################################################################################
 #Now run with ONLY known sex!
@@ -137,7 +222,7 @@ round(otter.bray3,2)
 # MDS - can use 2D because is simpler
 otter3.nmds <- isoMDS(otter.bray3, k=2) 
 #type I PERMANOVA
-adonis2(otter.bray3 ~ Sex + Area + Site, data=otter.sex, perm=9999)
+sex.perm<-adonis2(otter.bray3 ~ Sex + Area + Site, data=otter.sex, perm=9999)
 # type III PERMANOVA
 adonis2(otter.bray3 ~ Sex + Ageclass + Area + Site, data=otter.sex, by="margin", perm=9999)
 adonis2(otter.bray3 ~ Sex + Area, data=otter.sex, by="margin", perm=9999)
@@ -146,6 +231,63 @@ ott3.mds<-metaMDS(ott.sex, k=2, try=20, autotransform = FALSE)
 ott3.mds$stress
 stressplot(ott3.mds)
 ordiplot(ott3.mds, display=c("sites", "species"), type="t", cex=1)
-plot(ott3.mds$points, col=as.numeric(ott.sum$Area), pch=16, cex=2, asp=1)
-plot(ott3.mds$points, col=as.numeric(ott.sum$Sex), pch=16, cex=2, asp=1)
-plot(ott3.mds$points, col=as.numeric(ott.sum$Site), pch=16, cex=2, asp=1)
+plot(ott3.mds$points, col=as.numeric(otter.sex$Area), pch=16, cex=2, asp=1)
+plot(ott3.mds$points, col=as.numeric(otter.sex$Sex), pch=16, cex=2, asp=1)
+plot(ott3.mds$points, col=as.numeric(otter.sex$Site), pch=16, cex=2, asp=1)
+
+# make ordination plot in ggplot
+
+#first make a data frame of the scores
+data.scores <- as.data.frame(scores(ott3.mds))
+# create a column of site names, from the rownames of data.scores
+data.scores$otter <- rownames(data.scores)  
+data.scores <- cbind(data.scores, Ageclass = otter.sex$Ageclass, Sex = otter.sex$Sex, 
+                     Area = otter.sex$Area, Site = otter.sex$Site)
+head(data.scores)
+
+#Using the scores function from vegan to extract the species scores and convert to a data.frame
+species.scores <- as.data.frame(scores(ott3.mds, "species"))  
+# create a column of species, from the rownames of species.scores
+species.scores$species <- rownames(species.scores)  
+head(species.scores)
+
+ggplot() + 
+  geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
+  geom_point(data=data.scores,aes(x=NMDS1,y=NMDS2,shape=Sex,colour=Sex),size=3) + # add the point markers
+  scale_colour_manual(values=c("F" = "red", "M" = "blue")) +
+  coord_equal() +
+  theme_bw() +
+  theme(axis.text.x = element_blank(),  # remove x-axis text
+      axis.text.y = element_blank(), # remove y-axis text
+      axis.ticks = element_blank(),  # remove axis ticks
+      axis.title.x = element_text(size=18), # remove x-axis labels
+      axis.title.y = element_text(size=18), # remove y-axis labels
+      panel.background = element_blank(), 
+      panel.grid.major = element_blank(),  #remove major-grid labels
+      panel.grid.minor = element_blank(),  #remove minor-grid labels
+      plot.background = element_blank())
+
+#placing a hull for sex
+sex.f <- data.scores[data.scores$Sex == "F", ][chull(data.scores[data.scores$Sex == 
+                                                                   "F", c("NMDS1", "NMDS2")]), ]  # hull values for female
+sex.m <- data.scores[data.scores$Sex == "M", ][chull(data.scores[data.scores$Sex == 
+                                                                   "M", c("NMDS1", "NMDS2")]), ]  # hull values for male
+
+hull.data <- rbind(sex.f, sex.m)  #combine grp.a and grp.b
+hull.data
+ggplot() + 
+  geom_polygon(data=hull.data,aes(x=NMDS1,y=NMDS2,fill=Sex,group=Sex),alpha=0.30) + # add the convex hulls
+  geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
+  geom_point(data=data.scores,aes(x=NMDS1,y=NMDS2,shape=Sex,colour=Sex),size=4) + # add the point markers
+  scale_colour_manual(values=c("F" = "red", "M" = "blue")) +
+  coord_equal() +
+  theme_bw() + 
+  theme(axis.text.x = element_blank(),  # remove x-axis text
+        axis.text.y = element_blank(), # remove y-axis text
+        axis.ticks = element_blank(),  # remove axis ticks
+        axis.title.x = element_text(size=18), # remove x-axis labels
+        axis.title.y = element_text(size=18), # remove y-axis labels
+        panel.background = element_blank(), 
+        panel.grid.major = element_blank(),  #remove major-grid labels
+        panel.grid.minor = element_blank(),  #remove minor-grid labels
+        plot.background = element_blank())
