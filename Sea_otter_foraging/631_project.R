@@ -28,6 +28,11 @@ hist(otter.gram$clam)
 hist(otter.gram$crab)
 
 
+# rename areas
+ott.sum$Area<-recode_factor(ott.sum$Area, "EIGHTYEIGHT"=">30 years", 
+                            "OHTHREE"=">15 years", "TEN"="> 8 years", .ordered = FALSE)
+#recode_factor(.x, ..., .default = NULL, .missing = NULL,.ordered = FALSE)
+
 ### Standardize to species maximum: - Don't think this will be useful in the end
 #MAX <- apply(otter.gram,2,max)    # Maximum values in each column
 #gram.std <- scale(otter.gram, center=F, scale = MAX)
@@ -43,10 +48,13 @@ hist(otter.gram$crab)
 stack.gram.tf <- stack(otter.gram.tf)
 names(stack.gram.tf) <- c("gram", "species")
 
+stack.gram.tf[stack.gram.tf==0]<-NA
+
 # plot hist of all the grams/min transformed
 ggplot(data=stack.gram.tf, aes(x=gram)) + 
   geom_histogram(binwidth = .2) +
-  facet_wrap(vars(species))
+  facet_wrap(vars(species)) +
+  theme_bw()
 
 # info from ott.sum
 par(mfrow= c(2,2))
@@ -104,13 +112,14 @@ plot(disp, c(2,3))
 # All of these metrics were not significant, which is good! But season is really close to 0.05
 
 
-# MDS - can use 2D because is simpler
+# NMDS - can use 2D because is simpler
 otter.nmds <- isoMDS(otter.bray, k=2) 
 #type I PERMANOVA
-adonis2(otter.bray ~ Sex + Season + Area + Site, data=ott.sum, perm=9999)
-adonis2(otter.bray ~ Sex + Area + Site, data=ott.sum, perm=9999)
+adonis(otter.bray ~ Season + Ageclass + Sex + Area + Site, data=ott.sum, perm=999) 
+adonis(otter.bray ~ Sex + Area + Site + Sex:Area, data=ott.sum, perm=999)
+adonis(otter.bray ~ Sex + Area + Site, data=ott.sum, perm=999) # best model, only explains 19%
 # type III PERMANOVA
-adonis2(otter.bray ~ Sex + Ageclass + Season + Area + Site, data=ott.sum, by="margin", perm=9999)
+adonis2(otter.bray ~ Sex + Ageclass + Season + Area + Site, data=ott.sum, by="margin", perm=999)
 adonis2(otter.bray ~ Sex + Area + Site, data=ott.sum, by="margin", perm=999)
 
 ott.mds<-metaMDS(otter.gram.tf, k=2, try=20, autotransform = FALSE)
@@ -135,12 +144,13 @@ round(otter.bray2,2)
 # MDS - can use 2D because is simpler
 otter2.nmds <- isoMDS(otter.bray2, k=2) 
 #type I PERMANOVA
-slim.perm<-adonis2(otter.bray2 ~ Sex + Area + Site, data=ott.sum, perm=9999)
+slim.perm<-adonis(otter.bray2 ~ Sex + Area + Site, data=ott.sum, perm=999) # best model (others not sig)
+slim.perm
 # type III PERMANOVA
-adonis2(otter.bray2 ~ Sex + Ageclass + Area + Site, data=ott.sum, by="margin", perm=9999)
+adonis2(otter.bray2 ~ Sex + Ageclass + Area + Site, data=ott.sum, by="margin", perm=999)
 adonis2(otter.bray2 ~ Sex + Area, data=ott.sum, by="margin", perm=9999)
 
-ott2.mds<-metaMDS(ott.slim, k=2, try=20, autotransform = FALSE)
+ott2.mds<-metaMDS(ott.slim, k=2, try=500, autotransform = FALSE)
 ott2.mds$stress
 stressplot(ott2.mds)
 ordiplot(ott2.mds, display=c("sites", "species"), type="t", cex=1)
@@ -149,6 +159,7 @@ plot(ott2.mds$points, col=as.numeric(otter.slim$Sex), pch=16, cex=2, asp=1)
 plot(ott2.mds$points, col=as.numeric(otter.slim$Season), pch=16, cex=2, asp=1)
 plot(ott2.mds$points, col=as.numeric(otter.slim$Site), pch=16, cex=2, asp=1) # not helpful
 
+(vec.slim <- envfit(ott2.mds$points, ott.slim, perm=1000))
 
 # make ordination plot in ggplot for Areas
 
@@ -168,7 +179,7 @@ head(species2.scores)
 ggplot() + 
   geom_text(data=species2.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
   geom_point(data=area.scores,aes(x=NMDS1,y=NMDS2,shape=Area,colour=Area),size=3) + # add the point markers
-  scale_colour_manual(values=c("OHTHREE" = "#E69F00", "TEN" = "#56B4E9", "EIGHTYEIGHT" = "#999999")) +
+  scale_colour_manual(values=c(">15 years" = "#E69F00", "> 8 years" = "#56B4E9", ">30 years" = "#999999")) +
   coord_equal() + 
   theme_bw() +
   theme(axis.text.x = element_blank(),  # remove x-axis text
@@ -181,21 +192,23 @@ ggplot() +
         panel.grid.minor = element_blank(),  #remove minor-grid labels
         plot.background = element_blank())
 
-#placing a hull for sex
-area.88 <- area.scores[area.scores$Area == "EIGHTYEIGHT", ][chull(area.scores[area.scores$Area == 
-                                                                   "EIGHTYEIGHT", c("NMDS1", "NMDS2")]), ]  # hull values for 1988
-area.03 <- area.scores[area.scores$Area == "OHTHREE", ][chull(area.scores[area.scores$Area == 
-                                                                   "OHTHREE", c("NMDS1", "NMDS2")]), ]  # hull values for 2003
-area.10 <- area.scores[area.scores$Area == "TEN", ][chull(area.scores[area.scores$Area == 
-                                                                         "TEN", c("NMDS1", "NMDS2")]), ]  # hull values for 2010
+
+#placing a hull for area
+area.88 <- area.scores[area.scores$Area == ">30 years", ][chull(area.scores[area.scores$Area == 
+                                                                   ">30 years", c("NMDS1", "NMDS2")]), ]  # hull values for 1988
+area.03 <- area.scores[area.scores$Area == ">15 years", ][chull(area.scores[area.scores$Area == 
+                                                                   ">15 years", c("NMDS1", "NMDS2")]), ]  # hull values for 2003
+area.10 <- area.scores[area.scores$Area == "> 8 years", ][chull(area.scores[area.scores$Area == 
+                                                                         "> 8 years", c("NMDS1", "NMDS2")]), ]  # hull values for 2010
 
 hull2.data <- rbind(area.88, area.03, area.10)  #combine grp.a and grp.b
 hull2.data
 ggplot() + 
   geom_polygon(data=hull2.data,aes(x=NMDS1,y=NMDS2,fill=Area,group=Area),alpha=0.30) + 
+  scale_fill_manual(values=c(">15 years" = "#E69F00", "> 8 years" = "#56B4E9", ">30 years" = "#999999")) +
   geom_text(data=species2.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
   geom_point(data=area.scores,aes(x=NMDS1,y=NMDS2,shape=Area,colour=Area),size=4) + # add the point markers
-  scale_colour_manual(values=c("OHTHREE" = "#E69F00", "TEN" = "#56B4E9", "EIGHTYEIGHT" = "#999999")) +
+  scale_colour_manual(values=c(">15 years" = "#E69F00", "> 8 years" = "#56B4E9", ">30 years" = "#999999")) +
   coord_equal() +
   theme_bw() + 
   theme(axis.text.x = element_blank(),  # remove x-axis text
