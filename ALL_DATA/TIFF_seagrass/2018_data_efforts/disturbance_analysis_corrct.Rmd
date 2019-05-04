@@ -698,516 +698,80 @@ plot(pz3)
 
 <br>
 
+
+
+```{r}
+density <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/two_year_density.csv", stringsAsFactors = FALSE, header = TRUE)
+colnames(density)[1] <- "site" # change column names
+
+
+df.all <- left_join(df.all, density, by = c("site"))
+head(df.all)
+```
+
 ```{r, out.width="50%"}
+write.csv(df.shelldeath, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Clamshell forensics [2017,2018]/seagrass_shelldeath_all_CLEANDATA.csv", row.names = TRUE)
+
 linear.model <- (y ~ x)
 poly.model <- y ~ poly(x,2)
 
-pz4 = ggplot(df.all, aes(so_index_pc1, edge_continuous_elev_corrct_neg)) +
+df.all = df.all %>% 
+  mutate(pit_shelln1 = pits_site_sum * shells_n_otter) %>%
+  mutate(pit_shelln2 = (pits_site_sum / shells_n_otter) * shells_n_otter) %>%
+  mutate(hmm = pit_shellprop * shells_n_otter)
+
+dens_2yr_avg
+edge_continuous_elev_corrct_pos
+shoot_density_continuous_m2
+pits_site_sum
+pit_shelln
+
+pz4 = ggplot(df.all, aes((pits_site_sum/2), shells_n_otter, color = so_region1)) +
   geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE, fullrange = TRUE) +
   #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
   #xlab("Sea Otter Index (PC1)")+ylab("Diffuse edge elevation (cm, MLLW)") +
   #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
   #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed", size = 0.5) +
+  stat_poly_eq(formula = linear.model,
+        label.x = "right",
+        label.y = "top",
+        parse = TRUE) +
+  stat_fit_glance(method = "lm", 
+        method.args = list(formula = linear.model),
+        label.x = "left",
+        label.y = "top",
+        aes(label = paste("italic(P)*\"-value = \"*", 
+        signif(..p.value.., digits = 4), sep = "")),
+        parse = TRUE)
 plot(pz4)
 
 
 
 
-#df.all <- df.all[-c(20),] 
-color = sed2_qual
-
-pz5 = ggplot(df.all, aes(so_index_pc1, edge_continuous_elev_corrct_neg, color = sed1_qual)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index (PC2)")+ylab("Continuous edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model,
-               aes(label = paste(..rr.label.., sep = "~~~")),
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz5)
 
 
-edge_continuous_elev_corrct_neg
-shoot_density_continuous_m2
-color = sed1_qual
+
+
+
+p04 <- ggplot(df.all, aes(sed2_qual, edge_continuous_elev_corrct_neg)) +
+  geom_boxplot(aes(fill = so_region2)) +
+  geom_point(aes(y = edge_continuous_elev_corrct_neg, group = so_region2), position = position_dodge(width=0.75)) +
+  #geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="right")
+plot(p04)
 ```
 
 <br>
 
 
 
-<br><br><br>
 
-2. Looking at area of the diffuse band: There appears to be no difference in the mean widths of the diffuse growth band, compared as binary categories (low and high sea otters) or against the sea otter gradient. There is a hint of intermediate disturbance in the latter, but the p-value is high with a low r^2 value.
 
-```{r, out.width="50%"}
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
 
 
-pz6 <- ggplot(df.all, aes(so_region2, diffuse_band_area_m2)) +
-  geom_boxplot(outlier.shape = NA) +
-  geom_jitter(alpha = 0.3, width = 0.15) +
-  theme(legend.position="right") +
-  #theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
-  xlab("Sea otter region")+ylab("Diffuse band area (m^2)")
-  #facet_wrap(~sed1_qual)
-plot(pz6)
-
-#t.test(diffuse_band_area_m2 ~ so_region2, paired=FALSE, data = df.alldat)
-```
-
-
-
-
-
-
-<br><br><br><br><br>
-
-#### How about direct interactions with specific independent variables?  
-
-
-1. **Sea otter densities derived from boat surveys:** There are no apparent relationships when directly comparing the mean seagrass edge elevation and the mean sea otter densities within a 2 nm swimming radius. Note how the sea otter index values fall across the spread of the scatterplots. 
-
-```{r, out.width="25%"}
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-
-
-pz8 = ggplot(df.all, aes(dens_otter1, edge_diffuse_elev_corrct_neg, color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=(y ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index")+ylab("Continuous edge (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz8)
-
-pz9 = ggplot(df.all, aes(dens_otter2, edge_diffuse_elev_corrct_neg, color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=(y ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index")+ylab("Continuous edge (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz9)
-
-pz10 = ggplot(df.all, aes(dens_otter1, edge_continuous_elev_corrct_neg, color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=(y ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index")+ylab("Continuous edge (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz10)
-
-pz11 = ggplot(df.all, aes(dens_otter2, edge_continuous_elev_corrct_neg, color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=(y ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  #xlab("Sea Otter Index")+ylab("Continuous edge (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz11)
-```
-
-
-<br>
-
-2. **Tinker population density model:** This component of the sea otter index appears to be an important component in the model. 
-
-```{r, out.width="25%"}
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-
-
-pz12 = ggplot(df.alldat, aes(pop_dens_surv_km2, edge_mean_elev_corrct_neg, color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea otter population (km^2), Tinker")+ylab("Mean edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz12)
-
-pz13 = ggplot(df.alldat, aes(pop_dens_surv_km2, diffuse_band_area_m2, color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea otter population (km^2), Tinker")+ylab("Mean diffuse band area (m^2)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz13)
-```
-
-
-<br>
-
-3. **Number of sea otter pits:** In the left plot, are the untransformed data fit with a polynomial curve -- I haven't figured out how to plot an extinction curve (or get the model statistics), yet. The plot on the right show the same data but with the dependent variable ("mean edge elevation") log-transformed. The stats are similar enough. 
-
-```{r, out.width="25%"}
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-exp.model <- y ~ exp(x)
-
-
-pz14 = ggplot(df.all, aes(log(pits_site_sum), edge_continuous_elev_mllw_cm, color = sed2_qual)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula = (y ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=y ~ y ~ exp(x), se=FALSE, fullrange=FALSE) +
-  xlab("Bioturbated Pits (total site)")+ylab("Mean edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz14)
-
-range(edge_mean_elev_corrct_neg)
-pz15 = ggplot(df.alldat, aes(pits_site_sum, log(edge_mean_elev_corrct_neg + 65), color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Bioturbated Pits (total site)")+ylab("log(Mean edge elevation + 62) (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz15)
-```
-
-
-<br>
-
-4. **Sea otter cracked shells:** The relationship with the log-transformed data (right) is weaker.
-
-```{r, out.width="25%"}
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-
-pz16 = ggplot(df.alldat, aes(prop_otter_shells, edge_continuous_elev_corrct_neg, color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Proportion sea otter-cracked shells")+ylab("Mean edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz16)
-
-
-pz17 = ggplot(df.alldat, aes(prop_otter_shells, log(edge_continuous_elev_corrct_neg + 63), color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ x, se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Proportion sea otter-cracked shells")+ylab("log(Mean edge elevation + 62) (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'bottom', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'bottom', size = 5)
-plot(pz17)
-```
-
-
-<br>
-
-5. **Sediments:** The sites that had "sugar sand", or fine + semi-compacted sand throughout much of the site seemed to have a markedly higher seagrass edge (mean = +51.4 cm MLLW). The edge elevations at muddy and sandy sites (mud: -14.7; sand: -19.0 cm MLLW) appear to be similar across sites. 
-
-```{r, out.width="25%"}
-df.alldat$sed1_qual=factor(df.alldat$sed1_qual, levels=c("mud","sugar","sand")) # order sites
-df.alldat$sed1_qua2=factor(df.alldat$sed2_qual, levels=c("mud","sugar","sand")) # order sites
-
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-
-pz18 = ggplot(df.alldat, aes(sed1_qual, edge_mean_elev_corrct_neg, color = so_region1)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Proportion sea otter-cracked shells")+ylab("Mean edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz18)
-
-
-pz19 = ggplot(df.alldat, aes(sed2_site_avg, log(edge_mean_elev_corrct_neg + 62), color = so_index)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Proportion sea otter-cracked shells")+ylab("log(Mean edge elevation + 62) (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'bottom', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'bottom', size = 5)
-plot(pz19)
-```
-
-<br><br><br>
-
-#### Can we estimate area seagrass gained and/or lost due to intermediate and high sea otter occupation?
-
-We can do a "back-of-the-envelope" calculation by determining the mean difference in elevation of seagrass edges between low and high sea otter regions, and then applying the slope to estimate the width of the band that sea otters might have bioturbated away. We just need to decide if we believe the patterns and then whether this "back-of-the-envelope" calculation can be streamlined in some way. 
-
-
-```{r, out.width = "70%", fig.align = "center"}
-knitr::include_graphics(path = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/images/intertidal_measurements_b.png")
-
-#include_graphics("images/soindex2.png")
-```
-
-
-
-```{r, include = FALSE}
-#colnames(df.alldat)
-df.alldat2 <- df.alldat[-c(1,2,13,21),] # sugar sand sites removed
-df.alldat2 <- df.alldat[-c(1,2,3,7,13,21),] # Phyllospadix sites removed
-df.alldat2 <- df.alldat[c(8,11,10,23,4,6,3,18),] # only high 8
-df.alldat2 <- df.alldat[c(20,12,15,16,1,7,14,26),] # only low 8
-df.alldat2 <- df.alldat[c(9,24,2,21,25,22,13,5),] # only mid 8
-
-
-mean(df.alldat2$edge_continuous_elev_corrct_neg)
-
-aggregate(edge_continuous_elev_corrct_neg ~ so_region2, data = df.alldat2, mean, na.rm = TRUE)
-
-((-4.576136) - (-31.668298)) # all sites
-(-14.25136) - (-38.83448) # sugar sites gone
-(-11.03032) - (-39.43372) # phyllo sites removed
-(-21.10385) - (-41.6508) # low and high 8
-#((17.46082) + (-11.70330)) /2 # only mid 8
-
-(-21.10385) - (8.890867) # bottom and mid
-(-41.6508) - (8.890867) # high and mid
-
-(-14.65573) - (51.43639) # mud and sugar
-(-14.65573) - (-18.95584) # mud and sand
-(-18.95584) - (51.43639) # sand and sugar
-
-
-
-aggregate(beach_slope ~ so_region2, data = df.alldat2, mean, na.rm = TRUE)
-#t.test(beach_slope ~ so_region2, data = df.alldat)
-
-(((0.05017882) + (0.06100338)) / 2) # all sites
-(((0.05468788) + (0.06350331)) / 2) # sugar sites gone
-(((0.05468612) + (0.06408589)) / 2) # phyllo sites removed
-(((0.05761882) + (0.05879443)) / 2) # low and high 8
-(((0.04025883) + (0.06542130)) / 2) # only mid 8
-
-
-
-area.potential.loss.m2 <- (sqrt((50.54167^2) + ((50.54167 / 0.0555911)^2))) / 100
-```
-
-
-
-1. **Intermediate disturbance:** Taking the mean beach slope and the mean difference in elevation of the edges at low and mid sea otter index values, we can estimate that *intermediate bioturbation may increase the upper extent of the bed by a mean of **4.3 m^2** seagrass per m shoreline* of appropriate habitat. Why is this? If this is a real effect (I'm not totally convinced ATM), then my best guess for the driver of this pattern is an interaction with clams...where in the absence of sea otters, larger clams and seagrass rhizomes clash and prevent seagrass from growing higher in the intertidal. This competition may be relieved by intermediate foraging along the edge and outside the bed, thus resulting in an increase in edge elevation. The reason that I'm not yet totally convinced by this apparent effect is because of variation in site attributes that seem to align clump in the intermediate sites (e.g. sugar sand and "odd sites"). 
-
-
-2. **Persistant disturbance:** For sites with values in the highest third of the sea otter index (estimated here as an appropriate breaking point for when bioturbation forcing exceeds intermediate), the data suggest a *potential reduction of **8.0 m^2** seagrass per m shoreline, when transitioning from intermediate to persistant sea otterness*. Grouping the 8 lowest and 8 highest index values and "low" and "high" otter sites suggests that *high sea otter sites have **3.7 m^2** of seagrass less per m shoreline compared to sites with minimal sea otter influence*. The lower mean edge elevation, here, is likely from direct removal during high disturbance and not from competition with clams as hypothesized above. 
-
-
-<br>
-
-P.S. We notice that the slopes appear slightly different across the low and high zones. Using a t-test, the two groups are not significantly different (p = 0.407). Additionally, there is no compelling correlation between the slope of a beach and the mean elevation of the seagrass edge...I am not concerned about variation in slope for this study. 
-
-```{r, out.width="30%"}
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-
-pz20 = ggplot(df.alldat, aes(beach_slope, edge_mean_elev_corrct_neg)) +
-  geom_point(aes(color = so_region2), size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ x, color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=y ~ x, color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Beach Slope")+ylab("Mean edge elevation (cm, MLLW)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz20)
-```
-
-
-
-
-
-<br><br><br><br><br>
-
----
-
-### **Looking at *Zostera* densities **
-
-<br>
-
-This section will expand when we get seagrass biomass data, but see below. Although there are no significant relationships with seagrass shoot density and the sea otter index, there is a relatively strong positive relationship between the elevation of the continuous edge and the density of seagrass (first plot). It helps explain the almost-identifiable parabolic curve in the third plot (so index vs continuous edge density)...since a similar shape is seen with the elevation data and density positively scales with elevation. This is inconsequential for THIS study, but is a fun thing to consider for morphopetrics and 3D-structure of the bed for other studies. 
-
-<br>
-
-```{r, out.width="25%"}
-linear.model <- (y ~ x)
-poly.model <- y ~ poly(x,2)
-
-pz21 = ggplot(df.alldat, aes(edge_continuous_elev_corrct_neg, shoot_density_continuous_m2)) +
-  geom_point(aes(color = so_region2), size=3) + # allows for trendline on general trend
-  geom_smooth(method=lm, formula=y ~ x, color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=y ~ x, color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Continuous edge elevation (cm, MLLW)")+ylab("Shoot density, continuous edge (shoots per m^2)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = linear.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = linear.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz21)
-
-pz22 = ggplot(df.alldat, aes(so_index, shoot_density_diffuse_m2)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=y ~ x, color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea otter index")+ylab("Shoot density, diffuse edge (shoots per m^2)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz22)
-
-pz23 = ggplot(df.alldat, aes(so_index, shoot_density_continuous_m2)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=y ~ x, color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea otter index")+ylab("Shoot density, continuous edge (shoots per m^2)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz23)
-
-pz24 = ggplot(df.alldat, aes(so_index, shoot_density_inside_m2)) +
-  geom_point(size=3) + # allows for trendline on general trend
-  #geom_smooth(method=lm, formula=y ~ poly(x,2), color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=y ~ x, color = "black", se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula=(log(y+60) ~ x), se=FALSE, fullrange=FALSE) +
-  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
-  xlab("Sea otter index")+ylab("Shoot density, inside bed (shoots per m^2)") +
-  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
-  #geom_text(aes(label=site), size=2)
-  stat_poly_eq(formula = poly.model, 
-               aes(label = paste(..rr.label.., sep = "~~~")), 
-               label.x.npc = 'right', label.y.npc = 'top', size = 5, parse = TRUE) +
-  stat_fit_glance(method = 'lm', method.args = list(formula = poly.model), geom = 'text',
-                  aes(label = paste("P-value = ", signif(..p.value.., digits = 3), sep = "")),
-                  label.x.npc = 'left', label.y.npc = 'top', size = 5)
-plot(pz24)
-```
 
 
 

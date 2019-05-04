@@ -16,21 +16,20 @@ This Rmd file is for cleaning the RAW discrete sediment data for each seagrass s
 
 
 
+
+First, import the RAW data and clean for 2017 and 2018:
 ```{r}
-df.pitsed_2017 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/seagrass_pit_sediment_2017&2018/seagrass_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+pitsed_2017 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Pits and sediment [2017,2018]/seagrass_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
-df.pitsed_2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/seagrass_pit_sediment_2017&2018/seagrass_pit_sediment_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+pitsed_2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Pits and sediment [2017,2018]/seagrass_pit_sediment_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
-
-
 
 Join both datasets!
 ```{r}
-df.pitsed_all <- rbind(df.pitsed_2017, df.pitsed_2018)
+df.pitsed_all <- rbind(pitsed_2017, pitsed_2018)
 ```
 
 
-First, import the RAW data and clean for 2017:
 ```{r}
 # check out the overall structure of the dataframe
 str(df.pitsed_all)
@@ -43,19 +42,18 @@ df.pitsed_all <- df.pitsed_all %>%
   mutate(sed_avg_no = (sed1_no + sed2_no) / 2) # find mean qualitative sediment (using numbers)
 
 # change count per area to density
-colnames(df.pitsed_all)[18] <- "pit_density_m2" # change column names
+colnames(df.pitsed_all)[19] <- "pit_density_m2" # change column names
 
 
 
 colnames (df.pitsed_all)
 
 # reorganize 
-df.pitsed_all <- df.pitsed_all[c("site_code","site_name","latitude_N","longitude_E","year","date_MMDDYY","date_YYYYMMDD","trans_loc","bin_no","bin_area_m2","pit_count_bin","pit_density_m2","sed1_type","sed2_type","sed1_no","sed2_no","sed_avg_no","field_collector","notes")]
+df.pitsed_all <- df.pitsed_all[c("site_name","site_code","latitude_N","longitude_E","so_region","year","date_mm.dd.yyyy","date_yyyy.mm.dd","trans_loc","bin_no","bin_area_m2","pit_count_bin","pit_density_m2","sed1_type","sed2_type","sed1_no","sed2_no","sed_avg_no","field_collector","notes")]
+```
 
-
-
-
+```{r}
 # create clean masterfile for 2017
-write.csv(df.pitsed_all, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/seagrass_pit_sediment_2017&2018/seagrass_pit_sediment_all_CLEAN.csv", row.names = FALSE)
+write.csv(df.pitsed_all, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Pits and sediment [2017,2018]/seagrass_pit_sediment_all_CLEAN.csv", row.names = FALSE)
 ```
 
