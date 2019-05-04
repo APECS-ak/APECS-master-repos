@@ -19,6 +19,8 @@ ott.raw <- read.csv("Visual/2018_Foraging_data_RAW.csv")
 stack.gram <- stack(otter.gram)
 names(stack.gram) <- c("gram", "species")
 
+stack.gram[stack.gram==0]<-NA
+
 # plot hist of all the grams/min
 ggplot(data=stack.gram, aes(x=gram)) + 
   geom_histogram(binwidth = 1) +
@@ -144,22 +146,27 @@ round(otter.bray2,2)
 # MDS - can use 2D because is simpler
 otter2.nmds <- isoMDS(otter.bray2, k=2) 
 #type I PERMANOVA
+adonis(otter.bray2 ~ Sex + Area + Site + Sex:Area, data=ott.sum, perm=999)
 slim.perm<-adonis(otter.bray2 ~ Sex + Area + Site, data=ott.sum, perm=999) # best model (others not sig)
 slim.perm
 # type III PERMANOVA
-adonis2(otter.bray2 ~ Sex + Ageclass + Area + Site, data=ott.sum, by="margin", perm=999)
-adonis2(otter.bray2 ~ Sex + Area, data=ott.sum, by="margin", perm=9999)
+#adonis2(otter.bray2 ~ Sex + Ageclass + Area + Site, data=ott.sum, by="margin", perm=999)
+#adonis2(otter.bray2 ~ Sex + Area, data=ott.sum, by="margin", perm=9999)
 
-ott2.mds<-metaMDS(ott.slim, k=2, try=500, autotransform = FALSE)
+ott2.mds<-metaMDS(ott.slim, k=2, try=50, autotransform = FALSE)
 ott2.mds$stress
 stressplot(ott2.mds)
-ordiplot(ott2.mds, display=c("sites", "species"), type="t", cex=1)
-plot(ott2.mds$points, col=as.numeric(otter.slim$Area), pch=16, cex=2, asp=1)
-plot(ott2.mds$points, col=as.numeric(otter.slim$Sex), pch=16, cex=2, asp=1)
-plot(ott2.mds$points, col=as.numeric(otter.slim$Season), pch=16, cex=2, asp=1)
-plot(ott2.mds$points, col=as.numeric(otter.slim$Site), pch=16, cex=2, asp=1) # not helpful
+#ordiplot(ott2.mds, display=c("sites", "species"), type="t", cex=1)
+#plot(ott2.mds$points, col=as.numeric(otter.slim$Area), pch=16, cex=2, asp=1)
+#plot(ott2.mds$points, col=as.numeric(otter.slim$Sex), pch=16, cex=2, asp=1)
+#plot(ott2.mds$points, col=as.numeric(otter.slim$Season), pch=16, cex=2, asp=1)
+#plot(ott2.mds$points, col=as.numeric(otter.slim$Site), pch=16, cex=2, asp=1) # not helpful
 
-(vec.slim <- envfit(ott2.mds$points, ott.slim, perm=1000))
+(vec.slim <- envfit(ott2.mds$points, ott.slim, perm=1000))# circular because no env data
+(sim.area <- simper(otter.gram.tf>0, otter.slim$Area, perm=999))
+summary(sim.area)
+(sim.sex <- simper(otter.gram.tf>0, otter.slim$Sex, perm=999))
+summary(sim.sex)
 
 # make ordination plot in ggplot for Areas
 
@@ -206,9 +213,9 @@ hull2.data
 ggplot() + 
   geom_polygon(data=hull2.data,aes(x=NMDS1,y=NMDS2,fill=Area,group=Area),alpha=0.30) + 
   scale_fill_manual(values=c(">15 years" = "#E69F00", "> 8 years" = "#56B4E9", ">30 years" = "#999999")) +
-  geom_text(data=species2.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
   geom_point(data=area.scores,aes(x=NMDS1,y=NMDS2,shape=Area,colour=Area),size=4) + # add the point markers
   scale_colour_manual(values=c(">15 years" = "#E69F00", "> 8 years" = "#56B4E9", ">30 years" = "#999999")) +
+  geom_text(data=species2.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
   coord_equal() +
   theme_bw() + 
   theme(axis.text.x = element_blank(),  # remove x-axis text
@@ -243,10 +250,10 @@ adonis2(otter.bray3 ~ Sex + Area, data=otter.sex, by="margin", perm=9999)
 ott3.mds<-metaMDS(ott.sex, k=2, try=20, autotransform = FALSE)
 ott3.mds$stress
 stressplot(ott3.mds)
-ordiplot(ott3.mds, display=c("sites", "species"), type="t", cex=1)
-plot(ott3.mds$points, col=as.numeric(otter.sex$Area), pch=16, cex=2, asp=1)
-plot(ott3.mds$points, col=as.numeric(otter.sex$Sex), pch=16, cex=2, asp=1)
-plot(ott3.mds$points, col=as.numeric(otter.sex$Site), pch=16, cex=2, asp=1)
+#ordiplot(ott3.mds, display=c("sites", "species"), type="t", cex=1)
+#plot(ott3.mds$points, col=as.numeric(otter.sex$Area), pch=16, cex=2, asp=1)
+#plot(ott3.mds$points, col=as.numeric(otter.sex$Sex), pch=16, cex=2, asp=1)
+#plot(ott3.mds$points, col=as.numeric(otter.sex$Site), pch=16, cex=2, asp=1)
 
 # make ordination plot in ggplot
 
@@ -290,9 +297,10 @@ hull.data <- rbind(sex.f, sex.m)  #combine grp.a and grp.b
 hull.data
 ggplot() + 
   geom_polygon(data=hull.data,aes(x=NMDS1,y=NMDS2,fill=Sex,group=Sex),alpha=0.30) + # add the convex hulls
-  geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
   geom_point(data=data.scores,aes(x=NMDS1,y=NMDS2,shape=Sex,colour=Sex),size=4) + # add the point markers
   scale_colour_manual(values=c("F" = "red", "M" = "blue")) +
+  scale_fill_manual(values=c("F" = "red", "M" = "blue")) +
+  geom_text(data=species.scores,aes(x=NMDS1,y=NMDS2,label=species),alpha=0.5) +  # add the species labels
   coord_equal() +
   theme_bw() + 
   theme(axis.text.x = element_blank(),  # remove x-axis text
