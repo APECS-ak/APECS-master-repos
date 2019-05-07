@@ -165,7 +165,7 @@ stressplot(ott2.mds)
 (vec.slim <- envfit(ott2.mds$points, ott.slim, perm=1000))# circular because no env data
 (sim.area <- simper(otter.gram.tf>0, otter.slim$Area, perm=999))
 summary(sim.area)
-(sim.sex <- simper(otter.gram.tf>0, otter.slim$Sex, perm=999))
+(sim.sex <- simper(otter.gram.tf>0, otter.sex$Sex))
 summary(sim.sex)
 
 # make ordination plot in ggplot for Areas
