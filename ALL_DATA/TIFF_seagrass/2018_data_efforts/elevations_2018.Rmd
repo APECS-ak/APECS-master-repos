@@ -17,7 +17,7 @@ library(dplyr); library(tidyr); library(plyr); library(reshape2); library(lubrid
 
 ```{r}
 # import RAW data
-df.elev <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/elevation_density.csv", stringsAsFactors = FALSE, header = TRUE)
+df.elev <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/elevation_density2.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 ```{r}

@@ -1,0 +1,128 @@
+---
+title: "Untitled"
+author: "Tiff Stephens"
+date: "5/3/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+df.pitsed <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Pits and sediment [2017,2018]/seagrass_pit_sediment_all_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+```{r}
+df.pitsed <- aggregate(pit_density_m2 ~ site_name + so_region + year, data = df.pitsed, mean, na.rm = TRUE)
+```
+
+
+
+
+
+
+
+
+
+```{r}
+df.shells <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Clamshell forensics [2017,2018]/seagrass_shelldeath_all_CLEANDATA.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.shells <- df.shells[,-c(1)]
+```
+
+```{r}
+df.shells <- df.shells %>%
+    group_by(site_name, so_region, year, trans_area_m2, death_estimate) %>%
+    tally()
+colnames(df.shells)[6] <- "n_shells" # change column names
+
+
+
+# split column so that each death is its own column
+df.shells.split <- spread(df.shells, key = death_estimate, value = n_shells) # split counts into three columns
+
+
+df.shells.split[is.na(df.shells.split)] <- 0 # convert all NA into 0
+colnames(df.shells.split)[5] <- "death_crab" # change column names
+colnames(df.shells.split)[6] <- "death_drill" # change column names
+colnames(df.shells.split)[7] <- "death_otter" # change column names
+colnames(df.shells.split)[8] <- "death_whole" # change column names
+
+
+# Proportion of shells that where sea otter cracked by site
+df.shells <- df.shells.split %>%
+  mutate(prop_otter_shells = death_otter / (death_crab + death_drill + death_otter + death_whole))
+
+rm(df.shells.split)
+
+df.shells <- df.shells[ -c(5, 6, 8) ] # remove columns that are no longer necessary
+colnames(df.shells)[5] <- "shells_n_otter" # change column names
+colnames(df.shells)[6] <- "shells_prop_otter" # change column names
+
+df.shells <- df.shells %>%
+  mutate(shells_n_otter_m2 = shells_n_otter / trans_area_m2)
+
+df.shells <- df.shells[,-c(4,5)]
+```
+
+```{r}
+df.all <- left_join(df.shells, df.pitsed, by = c("site_name","year"))
+df.all <- df.all[,-c(6)]
+colnames(df.all)[2] <- "so_region" # change column names
+
+df.all <- df.all %>%
+  mutate(pit_shelln = pit_density_m2 * shells_n_otter_m2)
+```
+
+```{r}
+write.csv(df.all, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_explore/pitshell_explore_CLEAN.csv", row.names = TRUE)
+```
+
+
+
+
+```{r}
+df.all$year <- as.factor(df.all$year)
+df.all$so_region <- so_region(df.all$so_region, levels=c("Low","Mid","High"))
+
+
+
+linear.model <- (y ~ x)
+poly.model <- y ~ poly(x,2)
+
+p = ggplot(df.all, aes(pit_density_m2, shells_n_otter_m2, color = year)) +
+  geom_point(size=3) + # allows for trendline on general trend
+  #geom_smooth(method=lm, formula=y ~ poly(x,2), se=FALSE, fullrange=FALSE) +
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE, fullrange = TRUE) +
+  #geom_smooth(method=lm, formula = -(log(y) ~ x), se=FALSE, fullrange=FALSE) +
+  #xlab("Sea Otter Index (PC1)")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
+  geom_text(aes(label=site_name), size=2)
+  geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed", size = 0.5) +
+  #facet_wrap(~year) +
+  stat_poly_eq(formula = linear.model,
+        label.x = "right",
+        label.y = "top",
+        parse = TRUE) +
+  stat_fit_glance(method = "lm", 
+        method.args = list(formula = linear.model),
+        label.x = "left",
+        label.y = "top",
+        aes(label = paste("italic(P)*\"-value = \"*", 
+        signif(..p.value.., digits = 4), sep = "")),
+        parse = TRUE)
+plot(p)
+```
+
+```{r}
+p04 <- ggplot(df.all, aes(year, rel_dist, color = so_region)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="none")
+plot(p04)
+```
+

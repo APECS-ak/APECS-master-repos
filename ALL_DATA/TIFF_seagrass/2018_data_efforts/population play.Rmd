@@ -1,0 +1,60 @@
+---
+title: "Untitled"
+author: "Tiff Stephens"
+date: "5/3/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+counts <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Sea otter counts [2017,2018]/sea_otter_counts_2017&2018_CLEANDATA.csv", stringsAsFactors = FALSE, header = TRUE)
+
+count.agg <- aggregate(n_otter ~ site_name + year + replicate, data = counts, sum, na.rm = TRUE)
+
+df.count <- spread(count.agg, key = replicate, value = n_otter)
+
+colnames(df.count)[3] <- "count_1" # change column names
+colnames(df.count)[4] <- "count_2" # change column names
+
+
+df.count = df.count %>% 
+  mutate(count_avg = (count_1 + count_2) / 2)
+
+df.count <- df.count[,-c(3,4)] #remove individual counts
+
+df.count <- spread(df.count, key = year, value = count_avg)
+
+colnames(df.count)[2] <- "count_2017" # change column names
+colnames(df.count)[3] <- "count_2018" # change column names
+```
+
+```{r}
+sites <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Sea otter counts [2017,2018]/otter_count_siteinfo.csv", stringsAsFactors = FALSE, header = TRUE)
+
+sites <- sites[,-c(2,3,4,6)] #remove 
+
+df.all <- left_join(sites, df.count, by = c("site_name"))
+
+df.all = df.all %>% 
+  mutate(dens_2017 = count_2017 / site_water_area_km2) %>% 
+  mutate(dens_2018 = count_2018 / site_water_area_km2) %>% 
+  rowwise() %>% 
+  mutate(dens_2yr_avg = mean(c(dens_2017,dens_2018), na.rm=T))
+```
+
+```{r export}
+# Data Export
+write.csv(df.all, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/TIFF_seagrass/2018_data_efforts/two_year_density.csv", row.names = FALSE)
+```
+
+
+
+
+
+
+

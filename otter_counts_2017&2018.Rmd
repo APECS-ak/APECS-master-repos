@@ -1,0 +1,47 @@
+---
+title: "Untitled"
+author: "Tiff Stephens"
+date: "1/31/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+# import sites as .csv files
+
+df.counts2017 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/2018/sea_otter_counts/otter_gps_2017.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.counts2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/2018/sea_otter_counts/otter_gps_2018.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+
+
+```{r}
+#df.counts2017 <- df.counts2017[,-c(2)] # remove 
+#df.counts2018 <- df.counts2018[,-c(7)] # remove
+```
+
+
+
+```{r}
+library(Stack)
+df.otts.all <- Stack(df.counts2017,df.counts2018)
+
+as.character(df.otts.all$date_yyyy.mm.dd)
+str(df.otts.all)
+```
+
+
+
+
+```{r}
+# Data Export
+write.csv(df.otts.all, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/2018/sea_otter_counts/otter_counts_2017&2018.csv", row.names = FALSE)
+```
+

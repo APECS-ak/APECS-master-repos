@@ -1,0 +1,11 @@
+Factor,Description
+bed_no,Kelp bed number that was sampled
+date_MM.DD.YY,"Date of sampling expressed as month, day, and year (MM.DD.YY)"
+species,"Latin name of species in the bed; Macrocystis = Macrocystis pyrifera, Nereocystis = Nereocystis luetkeana"
+boat_track,Denotes if a track was obtained around the perimeter of the kelp bed (Yes or No)
+drone ,Denotes if images were obtained from a drone flight over the kelp bed (Yes or No)
+drone_launch_time_AKDT,"Time the drone was launched and flown over the kelp bed, in Alaska Daylight Savings Time"
+time_UTC,"Time the GPS location was obtained, in UTC"
+latitude_decimal_degrees,"Latitude of the kelp bed, in decimal degrees"
+longitude_decimal_degrees,"Longitude of the kelp bed, in decimal degrees"
+density,"Density of the kelp bed extimated according to the proportion of water surface covered by kelp, categorized as 1 (0-20%), 2 (20-40%), 3 (40-60%), 4 (60-80%), 5 (80-100%)"

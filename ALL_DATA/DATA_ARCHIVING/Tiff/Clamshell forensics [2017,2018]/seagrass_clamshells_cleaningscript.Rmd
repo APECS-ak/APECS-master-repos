@@ -1,0 +1,54 @@
+---
+title: "seagrass_clamshells_2017"
+author: "Tiff Stephens"
+date: "3/20/2018"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+library(dplyr)
+library(plyr)
+library(tidyr)
+```
+
+
+
+```{r}
+# upload required RAW dataframes
+shells.2017 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Clamshell forensics [2017,2018]/seagrass_shelldeath_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+shells.2018 <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Clamshell forensics [2017,2018]/seagrass_shelldeath_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.shelldeath <- rbind(shells.2017, shells.2018)
+
+
+
+coord <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/POW_sites_seagrass.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.shelldeath <- left_join(coord, df.shelldeath, by = c("site_name"))
+
+df.shelldeath <- df.shelldeath[,-c(6,7,8,9)] #remove duplicate columns
+colnames(df.shelldeath)[2] <- "site_code" # change column names
+colnames(df.shelldeath)[10] <- "trans_loc" # change column names
+colnames(df.shelldeath)[11] <- "trans_area_m2" # change column names
+
+# reorganize 
+df.shelldeath <- df.shelldeath[c("site_name","site_code","latitude_N","longitude_E","so_region","year","date_mm.dd.yyyy","date_yyyy.mm.dd","site_water_area_km2","trans_loc","trans_area_m2","species_common","species_scientific","species_code","death_estimate","width_mm","notes","measurers")]
+```
+
+```{r}
+# print final, cleaned .csv file
+write.csv(df.shelldeath, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Clamshell forensics [2017,2018]/seagrass_shelldeath_all_CLEANDATA.csv", row.names = TRUE)
+
+# print supporting DFs as .csv files to go with .Rmd file on KNB
+#write.csv(df.shells, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/seagrass_clamshells_2017/df.shelldeath_RAW.csv", row.names = TRUE)
+#write.csv(df.coor, "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/seagrass_clamshells_2017/df.coor_RAW.csv", row.names = TRUE)
+```
+

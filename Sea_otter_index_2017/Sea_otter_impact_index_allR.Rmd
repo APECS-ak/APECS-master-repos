@@ -54,16 +54,28 @@ You will need data on.
 3. A polygon of the water around the study area. In this case I am using a polygon of all the coastal waters of POW.
 ```{r data}
 ## Sites ##
-sites <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "Otter_Survey_Sites_2017_All_UTM")
+sites <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "Otter_Survey_Sites_2017_All_UTM")
 sites.eg <- subset(sites, site_type %in% "Eelgrass")
 
 ## Sea otters that where observed ##
-otts <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "Otter_Survey_All_10Jan18_UTM")
+otts <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "Otter_Survey_All_10Jan18_UTM")
 otts@data$n_otters <- as.numeric(as.character(otts@data$n_otters)) # data is imported as a factor
 
 ## Prince of Wales Water Polygon
-h2o.utm <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "POW_water_UTM")
+h2o.utm <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "POW_water_UTM")
 h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
+```
+
+
+```{r}
+ # converting sea otter data from spatial file to dataframe and .csv
+require(rgdal)
+df.otts <- readOGR(dsn="/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer="Otter_Survey_All_10Jan18_UTM")
+df.otts <- as(df.otts, "data.frame")
+
+
+# Data Export
+write.csv(df.otts, "/Users/tiff/Desktop/R Studio/APECS-master-repos/Sea_otter_index_2017/otter_gps_2017.csv", row.names = FALSE)
 ```
 
 ## Plot sites and sea otters
