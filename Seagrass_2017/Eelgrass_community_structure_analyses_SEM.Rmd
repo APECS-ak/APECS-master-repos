@@ -61,13 +61,10 @@ st.er <- function(x, na.rm = TRUE) {
 tran.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 ## Sea Otter Impact Index ##
-so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_2017_new.csv", stringsAsFactors = FALSE, header = TRUE)
+so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_new.csv", stringsAsFactors = FALSE, header = TRUE)
 
 ## Sediment ##
 sed.site <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
-
-## Clams ##
-clam.dat <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_derived.csv", stringsAsFactors = FALSE, header = TRUE)
 
 ## Crab ##
 crab.dat <- read.csv("../All_DATA/eelgrass_crab_pot_derived.csv", header = TRUE, stringsAsFactors = FALSE)
@@ -249,7 +246,7 @@ hist(dat$Ntotal_site, breaks = 10)
 shapiro.test(dat$Ntotal_site)
 ```
 
-Light availability. Is reasoinably normal. We will proceed with values untransformed.
+Light availability. Is reasonably normal. We will proceed with values untransformed.
 ```{r light norm, echo = FALSE}
 hist(dat$light_avail, breaks = 10)
 shapiro.test(dat$light_avail)
@@ -377,22 +374,6 @@ dat.redu$light_avail <- dat$light_avail
 ```{r full sem,}
 sem.full <- psem(
   lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
-
-  lm(fish_mass_ln ~ sea_otter_index_tr + abvgnd_mass_dt + sed_inside_prim, data = dat.redu),
-
-  lm(grazermass_shoot_ln ~ crab_mass_sq + fish_mass_ln, data = dat.redu),
-  
-  lm(epiphmass_shootmass_ln_dt ~ grazermass_shoot_ln + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu),
-  
-  lm(abvgnd_mass_dt ~ epiphmass_shootmass_ln_dt + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu)
-
-)
-
-sem.full <- psem(
-
-  lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
-
-  lm(fish_mass_ln ~ sea_otter_index_tr + crab_mass_sq + abvgnd_mass_dt + sed_inside_prim, data = dat.redu),
 
   lm(grazermass_shoot_ln ~ crab_mass_sq + fish_mass_ln, data = dat.redu),
   
