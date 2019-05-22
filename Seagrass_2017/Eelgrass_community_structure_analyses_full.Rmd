@@ -706,8 +706,8 @@ ggplot(dat) +
 
 ## time and eelgrass ##
 ggplot(dat) +
-  geom_point(aes(x = date_julian, y = Cottidae), size = 5) +
-  labs(x = "sea otter index", y = "fish preds") +
+  geom_point(aes(x = date_julian, y = abvgnd_mass), size = 5) +
+  labs(x = "date", y = "aboveground biomass") +
   theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
