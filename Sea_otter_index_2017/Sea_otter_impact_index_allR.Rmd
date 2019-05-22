@@ -198,17 +198,17 @@ Assign population to site
 # S02
 S02 <- sites.eg[poparea.S02.utm,]
 S02 <- S02@data
-S02$dens <- subpop.dens$current_dens[subpop.dens$Subpop == "S02"]
+S02$dens <- subpop.dens$dens_km2[subpop.dens$Subpop == "S02"]
 
 #S03
 S03 <- sites.eg[poparea.S03.utm,]
 S03 <- S03@data
-S03$dens <- subpop.dens$current_dens[subpop.dens$Subpop == "S03"]
+S03$dens <- subpop.dens$dens_km2[subpop.dens$Subpop == "S03"]
 
 #S06
 S06 <- sites.eg[poparea.S06.utm,]
 S06 <- S06@data
-S06$dens <- subpop.dens$current_dens[subpop.dens$Subpop == "S06"]
+S06$dens <- subpop.dens$dens_km2[subpop.dens$Subpop == "S06"]
 
 # Merge all these together
 dens <- rbind.data.frame(S02, S03, S06)
@@ -227,13 +227,12 @@ DT::datatable(site.dat)
 We want to take into account the number of sea otter pits at a site. 
 
 ## Data
-For this you will need
-1. The sea otter pit data
+For this you will need the sea otter pit data
 ```{r}
 pits <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
-We now want to sum to the total number of pits at each site and append that to our master data
+We now want to sum to the total number of pits at each site and append that to our master data. 
 ```{r}
 # Summarise
 pits.site <- pits %>%  
@@ -250,8 +249,7 @@ site.dat$n_pits <- ifelse(match(site.dat$site, pits.site$site), pits.site$n_pits
 Finally we want to account for the proportion are clam shells that appear to have been cracked (consumed) by sea otters.
 
 ## Data
-You will need
-1. Sea otter clam data
+You will need sea otter clam data
 ```{r}
 shell <- read.csv("../ALL_DATA/seagrass_clam_shells_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
@@ -295,20 +293,22 @@ pairs(site.dat[,12:15])
 
 Some measures are fairly skewed because of zeros and extreme values. Transforming would help control for these extreme values. Below are untransformed histograms
 
-#### read in if you don't want to re-run all of the above
+#### read/write in if you don't want to re-run all of the above
 ```{r read already caculated}
+write.csv(site.dat, "../ALL_DATA/sea_otter_impact_index_new.csv", row.names = FALSE)
+
 site.dat <- read.csv( "../ALL_DATA/sea_otter_impact_index_new.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 
-```{r}
+```{r hist1}
 hist(site.dat$dens_surv_avg)
 hist(site.dat$n_pits)
 hist(site.dat$prop_otter_shells)
 ```
 
 Transformations
-```{r}
+```{r hist2}
 hist(log(site.dat$dens_surv_avg))
 hist(log(site.dat$n_pits + 1))
 hist(asin(sqrt(site.dat$prop_otter_shells)))
@@ -316,46 +316,17 @@ hist(asin(sqrt(site.dat$prop_otter_shells)))
 
 Create transformed dataset
 ```{r}
-site.dat.tr <- cbind(site.dat[, 1:9], log(site.dat[, 12]), site.dat[,13], log(site.dat[, 14] + 1), asin(sqrt(site.dat[, 15])))
+site.dat.tr <- cbind(site.dat[, 1:9], log(site.dat[, 12] + 1), site.dat[,13], log(site.dat[, 14] + 1), asin(sqrt(site.dat[, 15])))
 ```
 
 ### Standardizations. Measures will be standardized across sites to column maximum
 ```{r standardizations}
 # Separate values only
-dat.redu <- site.dat[, 10:15]
 dat.redu.tr <- site.dat.tr[, 10:13]
+colnames(dat.redu.tr)[1:4] <- c("avg_surv", "pop_dens", "n_pits", "prop_so")
 
 # Standardize to column (sea otter measure) maximum
-dat.std <- scale(dat.redu, center = FALSE, scale = apply(dat.redu, 2, max))
 dat.std.tr <- scale(dat.redu.tr, center = FALSE, scale = apply(dat.redu.tr, 2, max))
-```
-
-Now we can calculate the PCA - no transformation
-```{r PCA stand only}
-# PCA on standarized data
-pca <- princomp(dat.std)
-pca.summary <- summary(pca)
-pca.summary
-pca
-loadings(pca)
-biplot(pca, cex = 1)
-screeplot(pca, ylim = c(0, 0.8))
-pca$scores 
-
-final.dat <- cbind(site.dat, pca$scores[,1])
-colnames(final.dat)[16] <- "sea_otter_index"
-
-ggplot(final.dat, aes(site, sea_otter_index)) +
-  geom_point(size = 4) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Site", y = "Sea otter index (PC1)")
-
-ggplot(final.dat, aes(reorder(site, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90))
 ```
 
 Now we can calculate the PCA - transformation
@@ -370,7 +341,7 @@ screeplot(pca.tr, ylim = c(0, 0.8))
 pca.tr$scores 
 
 final.dat.tr <- cbind(site.dat.tr, pca.tr$scores[,1])
-colnames(final.dat.tr)[16] <- "sea_otter_index"
+colnames(final.dat.tr)[14] <- "sea_otter_index"
 
 ggplot(final.dat.tr, aes(site, sea_otter_index)) +
   geom_point(size = 4) +
@@ -393,78 +364,16 @@ ggplot(final.dat.tr, aes(reorder(place_name, sea_otter_index), sea_otter_index))
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
-Compare non tranformed and transformed versions
-```{r}
-plot.ntrans <- ggplot(final.dat, aes(reorder(place_name, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "Site", y = "Sea otter impact Index", col = "Sea otter impact Index") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-plot.trans <- ggplot(final.dat.tr, aes(reorder(place_name, sea_otter_index), sea_otter_index, col = sea_otter_index)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "Site", y = "Sea otter index transformed", col = "Sea otter impact Index") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-plot_grid(plot.ntrans, plot.trans)
-```
-
-### Calculate without clam shell data
-Transformed data EXCLUDING clam shell data
-```{r}
-site.dat.noshell.tr <- cbind(site.dat[, 1:9], log(site.dat[, 10:11] + 1), site.dat[, 12:13], log(site.dat[, 14] + 1))
-```
-
-Standardize data EXCLUDING clam shell data
-```{r}
-dat.redu.noshell.tr <- site.dat.noshell.tr[, 10:14]
-dat.std.noshell.tr <- scale(dat.redu.noshell.tr, center = FALSE, scale = apply(dat.redu.noshell.tr, 2, max))
-```
-
-PCA calculation with EXCLUDING clam shell data
-```{r}
-pca.ns.tr <- princomp(dat.std.noshell.tr)
-pca.summary.ns.tr <- summary(pca.ns.tr)
-pca.summary.ns.tr
-pca.ns.tr
-loadings(pca.ns.tr)
-biplot(pca.ns.tr, cex = 1)
-screeplot(pca.ns.tr, ylim = c(0, 0.8))
-pca.ns.tr$scores 
-
-final.dat.noshell.tr <- cbind(site.dat.noshell.tr, pca.ns.tr$scores[,1])
-colnames(final.dat.noshell.tr)[15] <- "sea_otter_index_tr_ns"
-
-ggplot(final.dat.noshell.tr, aes(site, sea_otter_index_tr_ns)) +
-  geom_point(size = 4) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(x = "Site", y = "Sea otter index transformed (PC1)")
-
-ggplot(final.dat.noshell.tr, aes(reorder(site, sea_otter_index_tr_ns), sea_otter_index_tr_ns, col = sea_otter_index_tr_ns)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "Site", y = "Sea otter index transformed", col = "Sea otter impact Index") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90))
-```
-
-
 Final index data table
 ```{r}
-DT::datatable(final.dat, caption = "Sea otter impact index")
 DT::datatable(final.dat.tr, caption = "Sea otter impact index")
-DT::datatable(final.dat.noshell.tr, caption = "Sea otter impact index")
 ```
 
 ## Data export
 ```{r export}
 # Combine transformed and untransformed versions
-final.dat.all <- final.dat[, 1:17]
+final.dat.all <- site.dat[, 1:15]
 final.dat.all$sea_otter_index_tr <- final.dat.tr$sea_otter_index
-final.dat.all$sea_otter_index_tr_ns <- final.dat.noshell.tr$sea_otter_index_tr_ns
 DT::datatable(final.dat.all, caption = "Sea otter impact index")
 
 # Data Export
@@ -475,39 +384,10 @@ write.csv(final.dat.all, "../ALL_DATA/sea_otter_impact_index_new.csv", row.names
 Reduce full data and organise for publication
 ```{r}
 ## Reduce full data and organise / clean up
-final.dat.redu <- final.dat[, c(2, 7, 10:16)]
-final.dat.redu <- cbind.data.frame(final.dat.redu$place_name, round(final.dat.redu[, 2:9], 2))
+final.dat.redu <- final.dat.all[, c(2, 12:16)]
+final.dat.redu <- cbind.data.frame(final.dat.redu$place_name, round(final.dat.redu[, 2:6], 2))
 final.dat.redu <- final.dat.redu[order(final.dat.redu$sea_otter_index, decreasing = TRUE),]
 
 ## Export ##
 write.csv(final.dat.redu, "../Seagrass_2017/Eelgrass_structure_MS_results/Sea_otter_index_results.csv", row.names = FALSE)
 ```
-
-## Using nmds instead
-```{r}
-library(vegan)
-dist <- vegdist(dat.std.tr[,c(1,2,5,6)], method = "bray")
-t <- metaMDS(dist, k = 2)
-tc <- cmdscale(dist, k = 2, eig = TRUE)
-
-plot(t)
-nmds1 <- t$points[,1]
-plot(nmds1)
-
-site.dat$nmds <- nmds1 * -1
-
-ggplot(site.dat, aes(reorder(place_name, nmds), nmds, col = nmds)) +
-  geom_point(size = 4) +
-  scale_color_gradient(low = "blue", high = "red") +
-  labs(x = "Site", y = "Sea otter impact Index", col = "NMDS1") +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-plot(log(site.dat$dens_surv1), site.dat$nmds)
-plot(log(site.dat$dens_surv2), site.dat$nmds)
-plot(site.dat$sea_otter_duration, site.dat$nmds)
-plot(site.dat$pop_mod_dens, site.dat$nmds)
-plot(log(site.dat$n_pits), site.dat$nmds)
-plot(asin(sqrt(site.dat$prop_otter_shells)), site.dat$nmds)
-```
-
