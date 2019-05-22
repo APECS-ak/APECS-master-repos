@@ -151,6 +151,7 @@ site.dat[is.na(site.dat)] <- 0
 # Calculate density
 site.dat$dens_surv1 <- site.dat$n_surv1 / site.dat$area
 site.dat$dens_surv2 <- site.dat$n_surv2 / site.dat$area
+site.dat$dens_surv_avg <- ((site.dat$dens_surv1 + site.dat$dens_surv2) / 2)
 ```
 
 Lets view the final table.
@@ -158,59 +159,7 @@ Lets view the final table.
 DT::datatable(site.dat, caption = "Sea otter survey data")
 ```
 
-# 2. Duration of sea otter occupation
-Now we need to assign a duration of sea otter occupation from USFWS surveys. What we are going to do is assign each site a sea otter duration based on if that site intersected the 2003 or 2010 sea otter distribution.
-
-## Data
-You will need data on. Note that what polygons you need will depend on you area of interest. This is for POW.
-1. Sites from which sea otter surveys were centered from (points) - you should already have this from above
-2. 2003 sea otter distrubution polygon
-3. 2010 sea otter distribution polygon
-
-```{r}
-## USFWS polygons ##
-# 2003 Sea Otters
-sd2003 <- readOGR(dsn = "../ALL_DATA/spatial_data", layer="Sea_Otter_disp_2003") 
-
-# 2010 Sea Otters
-sd2010 <- readOGR(dsn = "../ALL_DATA/spatial_data", layer="Sea_Otter_disp_2010") 
-```
-
-Let take a look
-```{r}
-leaflet() %>% 
-  addTiles() %>% 
-  addPolygons(data = sd2010, stroke = NA, fillColor = "blue", fillOpacity = 0.8, group = "2003") %>% 
-  addPolygons(data = sd2003, stroke = NA, fillColor = "orange", fillOpacity = 0.8, group = "2010") %>% 
-  addMarkers(data = sites.eg, ~longitude, ~latitude, label = ~site)
-```
-
-Assign year to site.
-```{r}
-# 2003
-sd2003.utm <- spTransform(sd2003, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
-disp.03 <- sites.eg[sd2003.utm,]
-disp.03 <- disp.03@data
-
-# 2010
-sd2010.utm <- spTransform(sd2010, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs"))
-disp.10 <- sites.eg[sd2010.utm,]
-disp.10 <- disp.10@data
-
-# Compare
-comp <- intersect(disp.03$site, disp.10$site)
-
-# Append to master data
-site.dat$sea_otter_duration <- ifelse(match(site.dat$site, comp), 14)
-site.dat$sea_otter_duration[is.na(site.dat$sea_otter_duration)] <- 7
-```
-
-Lets view the final table
-```{r}
-DT::datatable(site.dat)
-```
-
-# 3. Sea otter density from Tinker et. al
+# 2. Sea otter density from Tinker et. al
 Like with the sea otter duration data we need to assign the modeled sea otter population density to each site.
 
 You will need data on. Note that what polygons you need will depend on you area of interest. This is for POW.
@@ -274,7 +223,7 @@ Lets view the final table
 DT::datatable(site.dat)
 ```
 
-# 4. Number of sea otter pits
+# 3. Number of sea otter pits
 We want to take into account the number of sea otter pits at a site. 
 
 ## Data
@@ -297,7 +246,7 @@ pits.site <- pits.site[2:22,] # removes weird row with nothing in it
 site.dat$n_pits <- ifelse(match(site.dat$site, pits.site$site), pits.site$n_pits)
 ```
 
-# 5. Proportion of sea otter crakced clam shells
+# 4. Proportion of sea otter cracked clam shells
 Finally we want to account for the proportion are clam shells that appear to have been cracked (consumed) by sea otters.
 
 ## Data
@@ -338,8 +287,8 @@ DT::datatable(site.dat)
 We will be using a principle components analysis to create the sea otter impact index. First its good practice to examine the data a bit. Correlation plots indicate that most measures are reasonably correlated with eachother.
 ```{r data exploration}
 # Correlations
-corrgram(site.dat[,10:15])
-pairs(site.dat[,10:15])
+corrgram(site.dat[,12:15])
+pairs(site.dat[,12:15])
 ```
 
 ### Assessing normality of measures
@@ -353,30 +302,28 @@ site.dat <- read.csv( "../ALL_DATA/sea_otter_impact_index_new.csv", header = TRU
 
 
 ```{r}
-hist(site.dat$dens_surv1)
-hist(site.dat$dens_surv2)
+hist(site.dat$dens_surv_avg)
 hist(site.dat$n_pits)
 hist(site.dat$prop_otter_shells)
 ```
 
 Transformations
 ```{r}
-hist(log(site.dat$dens_surv1))
-hist(log(site.dat$dens_surv2))
+hist(log(site.dat$dens_surv_avg))
 hist(log(site.dat$n_pits + 1))
 hist(asin(sqrt(site.dat$prop_otter_shells)))
 ```
 
 Create transformed dataset
 ```{r}
-site.dat.tr <- cbind(site.dat[, 1:9], log(site.dat[, 10:11] + 1), site.dat[, 12:13], log(site.dat[, 14] + 1), asin(sqrt(site.dat[, 15])))
+site.dat.tr <- cbind(site.dat[, 1:9], log(site.dat[, 12]), site.dat[,13], log(site.dat[, 14] + 1), asin(sqrt(site.dat[, 15])))
 ```
 
 ### Standardizations. Measures will be standardized across sites to column maximum
 ```{r standardizations}
 # Separate values only
 dat.redu <- site.dat[, 10:15]
-dat.redu.tr <- site.dat.tr[, 10:15]
+dat.redu.tr <- site.dat.tr[, 10:13]
 
 # Standardize to column (sea otter measure) maximum
 dat.std <- scale(dat.redu, center = FALSE, scale = apply(dat.redu, 2, max))
