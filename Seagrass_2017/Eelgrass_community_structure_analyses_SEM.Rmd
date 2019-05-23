@@ -192,13 +192,9 @@ dat <- merge(dat, fishmass.site.fam, by = "site")
 
 ```
 
-Adding total eelgrass mass
-```{r quadratic, echo = FALSE}
-## Date ##
-dat$eelgrass_total_mass <- (dat$abvgnd_mass + dat$blwgnd_mass)
-```
-
 ## Analytical Approach
+*Question* Does a sea otter mediated trophic cascade occur in Southeast Alaska? What are the relationships among eelgrass community constiuents, and do sea otters play a role in that?
+
 Analysis will follow four major steps.
 
 1. Define a conceptual model that shows all biologically defenseable paths among variables. 
@@ -223,13 +219,16 @@ For our analysis we will first define our exogenous and endogenous variables.
 5. Eelgrass
 
 ### 1. Conceptual model
-Diagram represents all reasonable direct biological paths among the eelgrass associated community. Note that clam data are omitted. Upon futher thought it was determined that thoes data are just too different from the rest of the data. They represent dead clams not alive ones, and we have no way to tell how old they are.
+Diagram represents all reasonable direct biological paths among the eelgrass associated community.
 
-![](../Images/Raymond_SEM_Full_v1.png)
+![](../Images/Raymond_SEM_Full_v3.png)
 
 
 ### 2. Suitable data and variable reduction
-Following the rule of thumb that any responce of one of the component models should have 5 >= N/5 predictors, we will evaluate potential component models. For our data set we have N = 21 so 21/5 = 4.2, so any componenet model should have no more than 4 predictors. Looking at the conceptual model no endogenous variables have more than 4 paths going towards them, indicating that we have aduaquate data to fit all the pahts.
+Following the rule of thumb that any responce of one of the component models should have 5 >= N/5 predictors, we will evaluate potential component models. For our data set we have N = 21 so 21/5 = 4.2, so any componenet model should have no more than 4 predictors. Looking at the conceptual model no endogenous variables have more than 4 paths going towards them, indicating that we have aduaquate data to fit all the paths. So thats good.
+
+Grace at al 2012 is of the opinion of keeping models simple and tightly defining your question. I tend to agree, especailly considering the low sample size of the study.
+
 
 ### 3. Addressing normality and temporal trends
 To meet normality assumptions we will evaluate the data distribution and normality of for exogeneous and endogenous varibles.
@@ -295,6 +294,18 @@ shapiro.test(log(dat$crab_mass))
 shapiro.test(sqrt(dat$crab_mass))
 ```
 
+Macroalgae percent cover. Is non-normal. Transformations do not do that much. Considering that its percent cover data we will proceed with a *asin(sqrt()) transformation*.
+```{r macro norm, echo=FALSE}
+hist(dat$macro_dens, breaks = 10)
+hist(asin(sqrt((dat$macro_dens / 100))), breaks = 10)
+```
+
+Diatom percent cover. Is non-normal. Transformations do not do that much. Considering that its percent cover data we will proceed with a *asin(sqrt()) transformation*.
+```{r dia norm, echo = FALSE}
+hist(dat$diatom_dens, breaks = 10)
+hist(asin(sqrt((dat$diatom_dens / 100))), breaks = 10)
+```
+
 #### Temporal change
 Due to our sampling regime we need to assess if time has a string signal with any of out data.
 ```{r time cor, echo = FLASE}
@@ -329,14 +340,38 @@ plot(dat$date_julian, log(dat$epiphmass_shootmass_dt))
 
 Grazer load looks like it may have a temporal signal but its turns out that its not significant and has a low R-sq value.
 ```{r grz time, echo = false}
+## Assess temporal trend ##
 plot(dat$date_julian, log(dat$grazermass_shootmass))
 tmod3 <- lm(log(dat$grazermass_shootmass) ~ dat$date_julian)
 summary(tmod3)
 ```
 
 Crabmass
-```{r}
+```{r crb time, echo = FALSE}
+## Assess temporal trend ##
 plot(dat$date_julian, sqrt(dat$crab_mass))
+```
+
+Macroalgae
+```{r macro time, echo = FALSE}
+## Assess temporal trend ##
+plot(dat$date_julian, asin(sqrt(dat$macro_dens / 100)))
+tmod4 <- lm(asin(sqrt(dat$macro_dens / 100)) ~ dat$date_julian)
+summary(tmod4)
+```
+
+Diatoms have a reasonable correlation with time. *Diatom percent cover will we detrended*
+```{r dia time, echo = FALSE}
+## Assess temporal trend ##
+dat[1, 67] <- 0
+plot(dat$date_julian, asin(sqrt(dat$diatom_dens / 100)))
+tmod5 <- lm(asin(sqrt(dat$diatom_dens / 100)) ~ dat$date_julian)    
+summary(tmod5)
+
+## de-trend ##
+resid.dia <- residuals(tmod5)
+dat$diatom_dens_dt <- resid.dia
+plot(dat$date_julian, log(dat$diatom_dens_dt))
 ```
 
 ### 4. Set of structural equations
@@ -353,6 +388,8 @@ plot(dat$date_julian, sqrt(dat$crab_mass))
 3. Grazers (as grazer load - log transformed)
 4. Fish (as total fish biomass - log tranformed)
 5. Crabs (as total crab biomass - square-root transformed)
+6. Macroalgae (as percent cover - asin(sqrt()) transformed)
+7. Benthic diatoms (as percent cover - asin(sqrt()) transformed and de-trended with respect to julian day)
 
 #### Simplified data
 To simplify the analysis work space I will create a new data frame with all the data I am going to use in its final form. So tranfromed and de-trended where appropriate.
@@ -363,6 +400,8 @@ dat.redu$epiphmass_shootmass_ln_dt <- dat$epiphmass_shootmass_dt
 dat.redu$grazermass_shoot_ln <- log(dat$grazermass_shootmass)
 dat.redu$fish_mass_ln <- log(dat$fish_mass)
 dat.redu$crab_mass_sq <- sqrt(dat$crab_mass)
+dat.redu$macro_as <- asin(sqrt(dat$macro_dens / 100))
+dat.redu$diatom_dt <- dat$diatom_dens_dt
 dat.redu$sea_otter_index_tr <- dat$sea_otter_index_tr
 dat.redu$sed_inside_prim <- dat$sed_inside_prim
 dat.redu$Ntotal_site <- dat$Ntotal_site
@@ -384,15 +423,37 @@ sem.full <- psem(
 )
 ```
 
-### 5. Model diagnostics
-Below we will run through model diagnostics.
+### 5. Model checking and diagnostics
+Below we will run through model components and diagnostics.
 
 #### Basis Set
 ```{r basis diag, echo=FLASE}
 basisSet(sem.full)
 ```
 
+#### d-seperation
+No evidence of any d-separation
+```{r dsep, echo = FALSE}
+dsep <- dSep(sem.full)
+dsep
+```
 
+#### Fisher's C
+High p-value, indicating that the model is good.
+```{r fish C, echo = FALSE}
+fisherC(dsep)
+```
+
+#### Coefficients and R-sq
+```{r coef rsq, echo=FALSE}
+coefs(sem.full)
+rsquared(sem.full)
+```
+
+#### Full output
+```{r}
+summary(sem.full)
+```
 
 
 ### 6. Model refinement
