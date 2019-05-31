@@ -20,9 +20,6 @@ library(lme4)
 library(MASS)
 library(lmerTest)
 library(DT)
-library(sjPlot)
-library(cowplot)
-library(MuMIn)
 library(piecewiseSEM)
 options(na.action = "na.fail")
 theme_set(theme_classic())
@@ -82,7 +79,7 @@ nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE
 
 ### Data Prep
 Sediment data preparation. Average by site.
-```{r seds by site, echo=FALSE, results = hide}
+```{r seds by site, echo=FALSE}
 seds <- sed.site %>% 
   filter(trans_type == "Inside") %>% 
   group_by(site) %>% 
@@ -95,18 +92,6 @@ Light availability calculation
 ```{r light avail, echo=FALSE, message=FALSE, warning=FALSE}
 dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
 ```
-
-Clam data preparation. Data were collected across three transects measuring 100 X 2 meters for a total survey area of 600 square meters. We will average the clam biomass per square meter across the three transects.
-```{r clam mass, }
-clam <- clam.dat %>% 
-  group_by(Site, Transect) %>% 
-  summarise(mass_g_m2 = sum(mass_g)/200) %>% 
-  group_by(Site) %>% 
-  summarise(clam_mass = mean(mass_g_m2))
-
-dat <- merge(dat, clam, by.x = "site", by.y = "Site")
-```
-
 
 Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
 ```{r crab sites string, echo=FALSE, message=FALSE, warning=FALSE}
@@ -134,7 +119,7 @@ dat <- merge(dat, crab.rock, by = "site")
 
 Fish data preparation. 
 append taxonomy
-```{r}
+```{r fish dat, echo=FALSE}
 fish.dat <- merge(fish.dat, fish.tax, by.x = "species_scientific", by.y = "scientific_name", all = TRUE)
 ```
 
@@ -189,7 +174,6 @@ fishmass.site.fam <- fish.dat %>%
 fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
 
 dat <- merge(dat, fishmass.site.fam, by = "site")
-
 ```
 
 ## Analytical Approach
@@ -221,7 +205,7 @@ For our analysis we will first define our exogenous and endogenous variables.
 ### 1. Conceptual model
 Diagram represents all reasonable direct biological paths among the eelgrass associated community.
 
-![](../Images/Raymond_SEM_Full_v3.png)
+![](../Images/Raymond_SEM_Full_v4.png)
 
 
 ### 2. Suitable data and variable reduction
@@ -235,58 +219,58 @@ To meet normality assumptions we will evaluate the data distribution and normali
 
 #### Exogeneous data normality
 Sea otter index. Is somewhat non-normal in its distribution, however tranforming these data (PC1 values) does not make sense. We will proceed with values untransformed.
-```{r soi norm, echo = FALSE}
+```{r soi norm, echo = FALSE, results = "hide"}
 hist(dat$sea_otter_index_tr, breaks = 10)
 ```
 
 Nutrients. Is somewhat non-normal. Transformations do not improve it much. These data are just really variable. We will proceed with values untransformed.
-```{r nuts norm, echo = FALSE}
+```{r nuts norm, echo = FALSE, results = "hide"}
 hist(dat$Ntotal_site, breaks = 10)
 shapiro.test(dat$Ntotal_site)
 ```
 
 Light availability. Is reasonably normal. We will proceed with values untransformed.
-```{r light norm, echo = FALSE}
+```{r light norm, echo = FALSE, results = "hide"}
 hist(dat$light_avail, breaks = 10)
 shapiro.test(dat$light_avail)
 ```
 
 Semdiment size. Is non-normal. This is driven by a lot of low values. We will proceed with values untransformed.
-```{r seds norm, echo = FALSE}
+```{r seds norm, echo = FALSE, results = "hide"}
 hist(dat$sed_inside_prim, breaks = 10)
 shapiro.test(dat$sed_inside_prim)
 ```
 
 #### Endogenous data normality
 Aboveground eeglrass biomass. Is slightly reasonably normal. We will proceed with values untransformed.
-```{r abveg norm, echo = FALSE}
+```{r abveg norm, echo = FALSE, results = "hide"}
 hist(dat$abvgnd_mass, breaks = 10)
 shapiro.test(dat$abvgnd_mass)
 ```
 
 Epiphyte load. Is non-normal. We will proceed with a *log transformation of epiphyte load*.
-```{r epi norm, echo = FALSE}
+```{r epi norm, echo = FALSE, results = "hide"}
 hist(dat$epiphmass_shootmass, breaks = 10)
 hist(log(dat$epiphmass_shootmass), breaks = 10)
 shapiro.test(log(dat$epiphmass_shootmass))
 ```
 
 Grazer load. Is non-normal. We will proceed with a *log transformation of grazer load*.
-```{r grz norm, echo = FALSE}
+```{r grz norm, echo = FALSE, results = "hide"}
 hist(dat$grazermass_shootmass, breaks = 10)
 hist(log(dat$grazermass_shootmass), breaks = 10)
 shapiro.test(log(dat$grazermass_shootmass))
 ```
 
 Fish total mass. Is non-normal. We will proceed with a *log transformation of fish biomass*.
-```{r fish norm, echo = FALSE}
+```{r fish norm, echo = FALSE, results = "hide"}
 hist(dat$fish_mass, breaks = 10)
 hist(log(dat$fish_mass), breaks = 10)
 shapiro.test(log(dat$fish_mass))
 ```
 
 Crab total mass. Is non-normal. We will procees with a *square root transfromation of crab biomass*.
-```{r crab norm, echo = FALSE}
+```{r crab norm, echo = FALSE, results = "hide"}
 hist(dat$crab_mass, breaks = 10)
 hist(log(dat$crab_mass), breaks = 10)
 hist(sqrt(dat$crab_mass), breaks = 10)
@@ -295,23 +279,18 @@ shapiro.test(sqrt(dat$crab_mass))
 ```
 
 Macroalgae percent cover. Is non-normal. Transformations do not do that much. Considering that its percent cover data we will proceed with a *asin(sqrt()) transformation*.
-```{r macro norm, echo=FALSE}
+```{r macro norm, echo=FALSE, results = "hide"}
 hist(dat$macro_dens, breaks = 10)
 hist(asin(sqrt((dat$macro_dens / 100))), breaks = 10)
 ```
 
 Diatom percent cover. Is non-normal. Transformations do not do that much. Considering that its percent cover data we will proceed with a *asin(sqrt()) transformation*.
-```{r dia norm, echo = FALSE}
+```{r dia norm, echo = FALSE, results = "hide"}
 hist(dat$diatom_dens, breaks = 10)
 hist(asin(sqrt((dat$diatom_dens / 100))), breaks = 10)
 ```
 
 #### Temporal change
-Due to our sampling regime we need to assess if time has a string signal with any of out data.
-```{r time cor, echo = FLASE}
-pairs(dat[,c(4,21,52,97,103,111,117,118,121,125)])
-```
-
 Eelgrass aboveground biomass has a strong temporal signal. *Eelgrass aboveground biomass will be de-trended*.
 ```{r abv mass time, echo = FALSE}
 ## Assess temporal trend ##
@@ -339,7 +318,7 @@ plot(dat$date_julian, log(dat$epiphmass_shootmass_dt))
 ```
 
 Grazer load looks like it may have a temporal signal but its turns out that its not significant and has a low R-sq value.
-```{r grz time, echo = false}
+```{r grz time, echo = FALSE}
 ## Assess temporal trend ##
 plot(dat$date_julian, log(dat$grazermass_shootmass))
 tmod3 <- lm(log(dat$grazermass_shootmass) ~ dat$date_julian)
@@ -388,30 +367,27 @@ plot(dat$date_julian, log(dat$diatom_dens_dt))
 3. Grazers (as grazer load - log transformed)
 4. Fish (as total fish biomass - log tranformed)
 5. Crabs (as total crab biomass - square-root transformed)
-6. Macroalgae (as percent cover - asin(sqrt()) transformed)
-7. Benthic diatoms (as percent cover - asin(sqrt()) transformed and de-trended with respect to julian day)
 
 #### Simplified data
 To simplify the analysis work space I will create a new data frame with all the data I am going to use in its final form. So tranfromed and de-trended where appropriate.
-```{r dat redu}
+```{r dat redu, echo=FALSE}
 dat.redu <- dat[,1:6]
 dat.redu$abvgnd_mass_dt <- dat$abvgnd_mass_dt
 dat.redu$epiphmass_shootmass_ln_dt <- dat$epiphmass_shootmass_dt
 dat.redu$grazermass_shoot_ln <- log(dat$grazermass_shootmass)
 dat.redu$fish_mass_ln <- log(dat$fish_mass)
 dat.redu$crab_mass_sq <- sqrt(dat$crab_mass)
-dat.redu$macro_as <- asin(sqrt(dat$macro_dens / 100))
-dat.redu$diatom_dt <- dat$diatom_dens_dt
 dat.redu$sea_otter_index_tr <- dat$sea_otter_index_tr
 dat.redu$sed_inside_prim <- dat$sed_inside_prim
 dat.redu$Ntotal_site <- dat$Ntotal_site
 dat.redu$light_avail <- dat$light_avail
 ```
 
-
-#### Full SEM
-```{r full sem,}
-sem.full <- psem(
+#### 5. Full SEM
+##### SEM 1
+Following paths indicated in figure
+```{r full sem}
+sem.1 <- psem(
   lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
 
   lm(grazermass_shoot_ln ~ crab_mass_sq + fish_mass_ln, data = dat.redu),
@@ -423,37 +399,192 @@ sem.full <- psem(
 )
 ```
 
-### 5. Model checking and diagnostics
+###### Model checking and diagnostics
 Below we will run through model components and diagnostics.
 
-#### Basis Set
-```{r basis diag, echo=FLASE}
-basisSet(sem.full)
+###### Basis Set
+```{r basis diag1, echo=FALSE, results = "hide"}
+basisSet(sem.1)
 ```
 
-#### d-seperation
+###### d-seperation
 No evidence of any d-separation
-```{r dsep, echo = FALSE}
-dsep <- dSep(sem.full)
-dsep
+```{r dsep1, echo = FALSE}
+dsep.1 <- dSep(sem.1, .progressBar = FALSE)
+dsep.1
 ```
 
-#### Fisher's C
+###### Fisher's C
 High p-value, indicating that the model is good.
-```{r fish C, echo = FALSE}
-fisherC(dsep)
+```{r fish C1, echo = FALSE}
+fisherC(dsep.1)
 ```
 
-#### Coefficients and R-sq
-```{r coef rsq, echo=FALSE}
-coefs(sem.full)
-rsquared(sem.full)
+###### Coefficients and R-sq
+```{r coef rsq1, echo=FALSE}
+coefs(sem.1)
+rsquared(sem.1)
 ```
 
-#### Full output
-```{r}
-summary(sem.full)
+###### Full output
+```{r sem1 out}
+summary(sem.1, .progressBar = FALSE)
 ```
 
+##### SEM 2
+Given the restuls from the first SEM I will attempt to refine the model. Given that there was no indocation of d-sep I will focus on the specified paths. There are a few variables that have very little explanatory power. Abv mass - light and grazer - fish.
 
-### 6. Model refinement
+```{r sem2}
+sem.2 <- psem(
+  lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
+
+  lm(grazermass_shoot_ln ~ crab_mass_sq, data = dat.redu),
+  
+  lm(epiphmass_shootmass_ln_dt ~ grazermass_shoot_ln + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu),
+  
+  lm(abvgnd_mass_dt ~ epiphmass_shootmass_ln_dt + sed_inside_prim + Ntotal_site, data = dat.redu)
+
+)
+```
+
+###### Basis Set
+```{r basis diag, echo=FALSE, results = "hide"}
+basisSet(sem.2)
+```
+
+###### d-seperation
+No evidence of any d-separation
+```{r dsep2, echo = FALSE}
+dsep.2 <- dSep(sem.2, .progressBar = FALSE)
+dsep.2
+```
+
+###### Fisher's C
+High p-value, indicating that the model is good.
+```{r fish C2, echo = FALSE}
+fisherC(dsep.2)
+```
+
+###### Coefficients and R-sq
+```{r coef rsq2, echo=FALSE}
+coefs(sem.2)
+rsquared(sem.2)
+```
+
+###### Full output
+```{r sem2 out}
+summary(sem.2, .progressBar = FALSE)
+```
+
+##### Compare SEM 1 and SEM2
+Looking at AIC and Fisher C values SEM 2 seems to be an improvement.
+```{r sem1 sem2 comp}
+AIC(sem.1, sem.2)
+fisherC(dsep.1)
+fisherC(dsep.2)
+```
+
+##### SEM 3
+Can we refine SEM 2? Given the restuls from the first SEM I will attempt to refine the model. Given that there was no indocation of d-sep I will focus on the specified paths. There are a few variables that have very little explanatory power. Epi - light, Epi - Ntotal and Abv mass - Ntotal.
+
+```{r sem3}
+sem.3 <- psem(
+  lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
+
+  lm(grazermass_shoot_ln ~ crab_mass_sq, data = dat.redu),
+  
+  lm(epiphmass_shootmass_ln_dt ~ grazermass_shoot_ln + sed_inside_prim, data = dat.redu),
+  
+  lm(abvgnd_mass_dt ~ epiphmass_shootmass_ln_dt + sed_inside_prim, data = dat.redu)
+
+)
+```
+
+###### Basis Set
+```{r basis diag3, echo=FALSE, results = "hide"}
+basisSet(sem.3)
+```
+
+###### d-seperation
+No evidence of any d-separation
+```{r dsep3, echo = FALSE}
+dsep.3 <- dSep(sem.3, .progressBar = FALSE)
+dsep.3
+```
+
+###### Fisher's C
+High p-value, indicating that the model is good.
+```{r fish C3, echo = FALSE}
+fisherC(dsep.3)
+```
+
+###### Coefficients and R-sq
+```{r coef rsq3, echo=FALSE}
+coefs(sem.3)
+rsquared(sem.3)
+```
+
+###### Full output
+```{r sem3 out}
+summary(sem.3, .progressBar = FALSE)
+```
+
+##### Compare SEM 2 and SEM 3
+Pretty big drop in AIC and Fisher C is still pretty good. SEM 3 looks better. Now, there were no "significant" d-sep terms but the sea otter abv is 0.09, which is somewhat suggestive. So I will fit another model with that term and compare.
+```{r sem2 sem3 comp}
+AIC(sem.2, sem.3)
+fisherC(dsep.2)
+fisherC(dsep.3)
+```
+
+##### SEM 3.2
+add sea otter in abv mass equation.
+```{r sem3.2}
+sem.3.2 <- psem(
+  lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
+
+  lm(grazermass_shoot_ln ~ crab_mass_sq, data = dat.redu),
+  
+  lm(epiphmass_shootmass_ln_dt ~ grazermass_shoot_ln + sed_inside_prim, data = dat.redu),
+  
+  lm(abvgnd_mass_dt ~ epiphmass_shootmass_ln_dt + sed_inside_prim + sea_otter_index_tr, data = dat.redu)
+
+)
+```
+
+###### Basis Set
+```{r basis diag3.2, echo=FALSE, results = "hide"}
+basisSet(sem.3.2)
+```
+
+###### d-seperation
+No evidence of any d-separation
+```{r dsep3.2, echo = FALSE}
+dsep.3.2 <- dSep(sem.3.2, .progressBar = FALSE)
+dsep.3
+```
+
+###### Fisher's C
+High p-value, indicating that the model is good.
+```{r fish C3.2, echo = FALSE}
+fisherC(dsep.3.2)
+```
+
+###### Coefficients and R-sq
+```{r coef rsq3.2, echo=FALSE}
+coefs(sem.3.2)
+rsquared(sem.3.2)
+```
+
+###### Full output
+```{r sem 3.2 out}
+summary(sem.3.2, .progressBar = FALSE)
+```
+
+##### Compare SEM 3 to SEM 3.2
+```{r sem3 sem3.2 comp}
+AIC(sem.3, sem.3.2)
+fisherC(dsep.3)
+fisherC(dsep.3.2)
+```
+
