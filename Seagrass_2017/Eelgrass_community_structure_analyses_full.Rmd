@@ -301,7 +301,7 @@ General approach
 
 Global model will include julian day, sea otter index, epiphyte load, grazer load, crab biomass, fish predator biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
 ```{r mod1 global}
-mod1 <- lm(sqrt(abvgnd_mass + blwgnd_mass) ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
+mod1 <- lm(abvgnd_mass ~ date_julian + sea_otter_index_tr + log(epiphmass_shootmass) + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_preds) + sqrt(sed_inside_prim) + Ntotal_site + light_avail, data = dat)
 ```
 
 Dredge and filter models
