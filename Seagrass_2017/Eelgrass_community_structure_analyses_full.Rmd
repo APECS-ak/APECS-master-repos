@@ -6,7 +6,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-```{r}
+```{r libraries, echo=FALSE, warning=FALSE, message=FALSE}
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -33,16 +33,14 @@ st.er <- function(x, na.rm = TRUE) {
 ## Data
 **Response metrics**
 1. eelgrass aboveground biomass density (g / m^2^)
-2. eelgrass belowground biomass density (g / m^2^)
-3. ratio of aboveground to belowground biomass density (g / m^2^)
-4. epiphyte load (g epiphyte / g eelgrass)
-5. total grazer load (g grazers/ g eelgrass)
-6. crab biomass (g) - can also be counts
-7. fish biomass (g) - can also be counts
+2. epiphyte load (g epiphyte / g eelgrass)
+3. total grazer load (g grazers/ g eelgrass)
+4. crab biomass (g) - can also be counts
+5. fish biomass (g) - can also be counts
 
 **Explanatory factors**
 1. Sea otter index
-2. Time
+2. Time (julian day)
 3. Sediment type (primary sediment type from the "inside" eelgrass transect)
 4. Light attenuation
 5. crab biomass (g)
@@ -114,7 +112,7 @@ dat <- merge(dat, crab.rock, by = "site")
 
 Fish data preparation. 
 Append taxonomy
-```{r}
+```{r fish tax, echo=FALSE}
 fish.dat <- merge(fish.dat, fish.tax, by.x = "species_scientific", by.y = "scientific_name", all = TRUE)
 ```
 
@@ -174,15 +172,14 @@ dat <- merge(dat, fishmass.site.fam, by = "site")
 ## Tests for normality
 Responses and predictors should be tested to see if they meet normality assumptions.
 
-### Response data
 Aboveground biomass
-```{r abvgrnd biomass}
+```{r abvgrnd biomass, echo=FALSE}
 hist(dat$abvgnd_mass)
 shapiro.test(dat$abvgnd_mass)
 ```
 
 Belowground biomass is not normal. Log transformation fixes it.
-```{r blwgrnd biomass}
+```{r blwgrnd biomass, echo=FALSE}
 hist(dat$blwgnd_mass)
 shapiro.test(dat$blwgnd_mass)
 
@@ -191,7 +188,7 @@ shapiro.test(log(dat$blwgnd_mass))
 ```
 
 Total eelgrass biomass is non-normal. Square root fixes it. Log it too intense.
-```{r}
+```{r total elg norm, echo=FALSE}
 hist(dat$abvgnd_mass + dat$blwgnd_mass)
 shapiro.test(dat$abvgnd_mass + dat$blwgnd_mass)
 
@@ -200,13 +197,13 @@ shapiro.test(sqrt(dat$abvgnd_mass + dat$blwgnd_mass))
 ```
 
 Aboveground:belowground biomass is normal
-```{r avb:blw grnd biomass}
+```{r avb:blw grnd biomass, echo=FALSE}
 hist(dat$abvgnd_mass/dat$blwgnd_mass)
 shapiro.test(dat$abvgnd_mass/dat$blwgnd_mass)
 ```
 
 Epiphyte load is not normal but log transformation fixes it
-```{r epi load }
+```{r epi load , echo=FALSE}
 hist(dat$epiphmass_shootmass)
 range(dat$epiphmass_shootmass)
 shapiro.test(dat$epiphmass_shootmass)
@@ -216,7 +213,7 @@ shapiro.test(log(dat$epiphmass_shootmass))
 ```
 
 Grazer Load is not normal but log transformation fixes it.
-```{r grz load}
+```{r grz load, echo=FALSE}
 hist(dat$grazermass_shootmass)
 range(dat$grazermass_shootmass)
 
@@ -225,7 +222,7 @@ shapiro.test(log(dat$grazermass_shootmass))
 ```
 
 Crab biomass is not normal but is corrected with sqrt tranformation
-```{r crb biomass}
+```{r crb biomass, echo=FALSE}
 hist(dat$crab_mass)
 shapiro.test(dat$crab_mass)
 
@@ -234,7 +231,7 @@ shapiro.test(sqrt(dat$crab_mass))
 ```
 
 Fish  mass is not normal but log transforamtion fixes it. 
-```{r fish pred biomass}
+```{r fish pred biomass, echo=FALSE}
 hist(dat$fish_mass)
 shapiro.test(dat$fish_mass)
 
@@ -243,8 +240,8 @@ hist(log(dat$fish_mass))
 shapiro.test(log(dat$fish_mass))
 ```
 
-Sediment is not normal and there is not a good transformation becasue there are so many low values. I will proceed with a sqrt transformation because it appears the most normal.
-```{r}
+Sediment is not normal and there is not a good transformation becasue there are so many low values.
+```{r sed norm, echo=FALSE}
 hist(dat$sed_inside_prim)
 shapiro.test(dat$sed_inside_prim)
 
@@ -253,7 +250,7 @@ shapiro.test(sqrt(dat$sed_inside_prim))
 ```
 
 Total Nitrogen is not normal and there is not a good transformation. I will proceed with no transformation
-```{r}
+```{r tot n norm, echo=FALSE}
 hist(dat$Ntotal_site)
 shapiro.test(dat$Ntotal_site)
 
@@ -262,7 +259,7 @@ shapiro.test(log(dat$Ntotal_site))
 ```
 
 Light availability
-```{r}
+```{rli avil norm, echo=FALSE}
 hist(dat$light_avail)
 shapiro.test(dat$light_avail)
 ```
@@ -271,21 +268,18 @@ shapiro.test(dat$light_avail)
 Factor  | Transformation
 ------  | --------------
 Aboveground | none
-Belowground | log
-Total eelgrass mass | sqrt
-Abv:Blw | none
 epi load  | log
 grz load  | log
 crab  | sqrt
-fish predators | log
-sediment | sqrt
+fish | log
+sediment | none
 Total N | none
 Light avil | none
 
 ## Checking for multicolinearity among common predictors
 Checking for multicolinearity among predictors. There is little evidence for multicolinearity among predictors. Note that the plots shows string correlating between crab mass and other crab variables, which is to be expected, but they would not be used together in the same model. 
 
-```{r muticol}
+```{r muticol, echo=FALSE}
 pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116, 125)])
 ```
 
@@ -367,7 +361,7 @@ plot(dat$date_julian, sqrt(dat$crab_mass))
 Early exploratory analysis suggested that there may be some quadratic / exponetial relationships among data. This is especially true for eelgrass biomass vs. sea otter index. *Note* these relationships will be assessed with temporally detrended data if applicable.
 
 Aboveground biomass shows some slight signs of a quadratic relationship with eelgrass above ground biomass. Plotting and modeling do not suggest that such a relationship is more explanatory than a linear relationship though.
-```{r abv quad}
+```{r abv quad, echo=FALSE}
 plot(dat$sea_otter_index_tr, dat$abvgnd_mass_dt)
 
 
@@ -391,18 +385,17 @@ General approach
 
 3. Models within 2 AICc will be averages and evaluate on the 'full' average as that is recommened when there is high model selection uncertainty (Symonds and Moussalli 2011)
 
-### Model 1 - Total eelgrass biomass
+### Model 1 - Aboveground eelgrass biomass
 
-Global model will include julian day, sea otter index, epiphyte load, grazer load, crab biomass, fish predator biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
-```{r mod1 global}
+Global model will include, sea otter index, epiphyte load, grazer load, crab biomass, fish biomass, sediment score, and total nitrogen. Note transformations of variables where appropraite.
+```{r mod1 global, echo=FALSE}
 mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_mass) + sed_inside_prim + Ntotal_site, data = dat)
 ```
 
 Dredge and filter models
-```{r mod1 dr}
+```{r mod1 dr, echo=FALSE}
 ## Dredge ##
 mod1.dr <- dredge(mod1, rank = "AICc", evaluate = TRUE, extra = c("BIC", "R^2","adjR^2"), beta = "sd")
-mod1.dr
 
 ## Filter top models ##
 mod1.dr.top <- mod1.dr %>% 
