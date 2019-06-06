@@ -31,23 +31,26 @@ st.er <- function(x, na.rm = TRUE) {
 ```
 
 ## Data
+All data are summarized at the site level. That is the level at which we can apply treatments. Replicaiton listed below is how may sampler *per site* were collected. i.e. the number of quadrats per site.
 **Response metrics**
-1. eelgrass aboveground biomass density (g / m^2^)
-2. epiphyte load (g epiphyte / g eelgrass)
-3. total grazer load (g grazers/ g eelgrass)
-4. crab biomass (g) - can also be counts
-5. fish biomass (g) - can also be counts
+1. eelgrass aboveground biomass density (g / m^2^). n = 8
+2. epiphyte load (g epiphyte / g eelgrass). n = 8
+3. total grazer load (g grazers/ g eelgrass). n = 8
+4. crab biomass (g) - can also be counts. n = 3
+5. fish biomass (g) - can also be counts. n = 1
 
 **Explanatory factors**
-1. Sea otter index
-2. Time (julian day)
-3. Sediment type (primary sediment type from the "inside" eelgrass transect)
-4. Light attenuation
-5. crab biomass (g)
-6. fish biomass (g)
-7. grazer load (g/g)
-8. epiphyte load (g/g)
-9. Total nitirgen
+1. Sea otter index. n = 1
+2. Time (julian day). n = 1
+3. Sediment type (primary sediment type from the "inside" eelgrass transect). n = 10
+4. Light attenuation. n = 1
+5. crab biomass (g). n = 3
+6. fish biomass (g). n = 1
+7. grazer load (g/g). n = 8
+8. epiphyte load (g/g). n = 8
+9. macrophyte cover (percent). n = 8
+10. diatom cover (percent). n = 8
+11. Total nitrogen. n = 1, but there is the 'day of' sampling, 1m on nutrient day, and 4m on nutrient day.
 
 ```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
 ## Transect ##
@@ -172,34 +175,10 @@ dat <- merge(dat, fishmass.site.fam, by = "site")
 ## Tests for normality
 Responses and predictors should be tested to see if they meet normality assumptions.
 
-Aboveground biomass
+Aboveground biomass is fairly normal and does not need a transformaiton.
 ```{r abvgrnd biomass, echo=FALSE}
 hist(dat$abvgnd_mass)
 shapiro.test(dat$abvgnd_mass)
-```
-
-Belowground biomass is not normal. Log transformation fixes it.
-```{r blwgrnd biomass, echo=FALSE}
-hist(dat$blwgnd_mass)
-shapiro.test(dat$blwgnd_mass)
-
-hist(log(dat$blwgnd_mass))
-shapiro.test(log(dat$blwgnd_mass))
-```
-
-Total eelgrass biomass is non-normal. Square root fixes it. Log it too intense.
-```{r total elg norm, echo=FALSE}
-hist(dat$abvgnd_mass + dat$blwgnd_mass)
-shapiro.test(dat$abvgnd_mass + dat$blwgnd_mass)
-
-hist(sqrt(dat$abvgnd_mass + dat$blwgnd_mass))
-shapiro.test(sqrt(dat$abvgnd_mass + dat$blwgnd_mass))
-```
-
-Aboveground:belowground biomass is normal
-```{r avb:blw grnd biomass, echo=FALSE}
-hist(dat$abvgnd_mass/dat$blwgnd_mass)
-shapiro.test(dat$abvgnd_mass/dat$blwgnd_mass)
 ```
 
 Epiphyte load is not normal but log transformation fixes it
@@ -240,7 +219,7 @@ hist(log(dat$fish_mass))
 shapiro.test(log(dat$fish_mass))
 ```
 
-Sediment is not normal and there is not a good transformation becasue there are so many low values.
+Sediment is not normal and there is not a good transformation becasue there are so many low values. I will proceed without a tranformation. We purposly selected eelgrass beds and therefore we are going to get a certian sediment type. We see here that we see two types (generally) of sediment types. Places with small, muddy sediemnts and places with sandier more consolidated sediments.
 ```{r sed norm, echo=FALSE}
 hist(dat$sed_inside_prim)
 shapiro.test(dat$sed_inside_prim)
@@ -249,19 +228,38 @@ hist(sqrt(dat$sed_inside_prim))
 shapiro.test(sqrt(dat$sed_inside_prim))
 ```
 
-Total Nitrogen is not normal and there is not a good transformation. I will proceed with no transformation
+Total Nitrogen is not normal and there is not a good transformation. I will proceed with no transformation. This is just what the system looks like. Especially this is essentially a point estimate at each site I am not conviced that we can make trustworthy transformations.
 ```{r tot n norm, echo=FALSE}
 hist(dat$Ntotal_site)
 shapiro.test(dat$Ntotal_site)
 
-hist(log(dat$Ntotal_site))
-shapiro.test(log(dat$Ntotal_site))
+hist(sqrt(dat$Ntotal_site))
+shapiro.test(sqrt(dat$Ntotal_site))
 ```
 
-Light availability
-```{rli avil norm, echo=FALSE}
+Light availability is normal. I may not use this variable at all though. See below.
+```{r li avil norm, echo=FALSE}
 hist(dat$light_avail)
 shapiro.test(dat$light_avail)
+```
+
+Macrophyte cover. So this is tricky. Its percent coer data so one would think that a asin(sqrt()) transformation would be good, but its not. Also log gets really strange because there are so many zeros. Given this I think that we should proceed without transformation. 
+```{r macro norm, echo=FALSE}
+hist(dat$macro_dens)
+range(dat$macro_dens)
+shapiro.test(dat$macro_dens)
+
+hist(asin(sqrt(dat$macro_dens / 100)))
+hist(log(dat$macro_dens + 1), breaks = 7)
+```
+
+Diatom cover is not normal but a asin(sqrt()) tranformation does the trick.
+```{r dia norm, echo = FALSE}
+hist(dat$diatom_dens)
+shapiro.test(dat$diatom_dens)
+
+hist(asin(sqrt(dat$diatom_dens / 100)))
+shapiro.test(asin(sqrt(dat$diatom_dens / 100)))
 ```
 
 ### Summary of appropriate transformations to meet normality
@@ -275,26 +273,28 @@ fish | log
 sediment | none
 Total N | none
 Light avil | none
+Macroalgae | none
+Diatoms | asing-sqrt
 
 ## Checking for multicolinearity among common predictors
-Checking for multicolinearity among predictors. There is little evidence for multicolinearity among predictors. Note that the plots shows string correlating between crab mass and other crab variables, which is to be expected, but they would not be used together in the same model. 
+Checking for multicolinearity among predictors. There is little evidence for multicolinearity among predictors. This suggests that I can use a standard deviation predictor standardization in models later. Note that diatoms and grazers appear to have a relationships, but both will also need to be assessed for temporal effects. So we may still need to consider a partial standard deviation predictor standardization.
 
 ```{r muticol, echo=FALSE}
-pairs(dat[, c(4, 21, 51, 101, 109, 118, 115, 116, 125)])
+pairs(dat[, c(4, 21, 49, 51, 65, 67, 101, 109, 116, 125)])
 ```
 
 ## Variation of predictor variables acorss sites
-In an effort to avoid spurious models, we can look at some of the environmental co-variates across sites to see if there are even patters.
+In an effort to avoid spurious models, we can look at some of the environmental co-variates across sites to see if there are  patterns. If there seems to be no site effect it may be reasonable to exclude that variable from analysis.
 
 Sediment grain size varries strongly across sites. It should definitely be included.
-```{r site covar sed}
+```{r site covar sed, echo=FALSE}
 ggplot(dat) +
   geom_col(aes(x = site, y = sed_inside_prim)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 Total Nitorgen has a fair amount of variation across sites both on the day of eelgrass sampling and coordinated sampling. However, the magnitude is low, especailly on the day-of sampling.
-```{r site covar tn}
+```{r site covar tn, echo=FALSE}
 ggplot(dat) +
   geom_col(aes(x = site, y = Ntotal_site)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -309,7 +309,7 @@ ggplot(dat) +
 ```
 
 Light availability varries slightly acorss sites. This is a challanging variable because its just a point estimate and presumably the long term average light availability could impact primary production, and we don't know that. I think a reasonable argument can be made to not include this in alaysis because while it was actually measured, that measurment is hard to justify as being relateable/meaningful to other variables.
-```{r site covar light}
+```{r site covar light, echo=FALSE}
 ggplot(dat) +
   geom_col(aes(x = site, y = light_avail)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
@@ -357,6 +357,40 @@ Crabmass
 plot(dat$date_julian, sqrt(dat$crab_mass))
 ```
 
+Macroalgae cover does not have a temporal signal.
+```{r macro time, echo = FLASE}
+plot(dat$date_julian, dat$macro_dens)
+tmod4 <- lm(dat$macro_dens ~ dat$date_julian)
+summary(tmod4)
+```
+
+Diatom cover shows some positive signal with time but turns out that its fairly weak. A bigger issue is how to deal with the missing data from one site. Se below
+```{r dia time, echo = FALSE}
+plot(dat$date_julian, asin(sqrt(dat$diatom_dens / 100)))
+tmod5 <- lm(asin(sqrt(dat$diatom_dens[2:21] / 100)) ~ dat$date_julian[2:21])
+summary(tmod5)
+
+mean(asin(sqrt(dat$diatom_dens[2:21] / 100)))
+```
+
+### Missing data
+The diatom cover data does not have a value for one site. There are a few ways to deal with this. One is to omit the data entirely which means omitting the site. I don't really want to do that. The overall mean of the observed could also work. Seeing that the transformation does reasonable well to normalize the data and there is reasonable spread across sites I think we can proceed with this approach. Note that later interpretation will need to address this. Another approach is to take the mean value from sites sampled close in time to site with missing data. This makes logical sense, but then again we did not find a significant time effect. We could also use multiple imputation, but thats hold off.. for now. 
+
+So lets add the mean value. And check normality again. Looks good.
+```{r dia missing, echo = FALSE}
+ggplot(dat[2:21,]) +
+  geom_col(aes(x = site, y = asin(sqrt(diatom_dens/ 100)))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+## add mean value ##
+dat[1, 67] <- mean(dat$diatom_dens, na.rm = TRUE)
+
+## assess normality again ##
+hist(dat$diatom_dens)
+hist(asin(sqrt(dat$diatom_dens / 100)))
+shapiro.test(asin(sqrt(dat$diatom_dens / 100)))
+```
+
 ## Polynomial relationships
 Early exploratory analysis suggested that there may be some quadratic / exponetial relationships among data. This is especially true for eelgrass biomass vs. sea otter index. *Note* these relationships will be assessed with temporally detrended data if applicable.
 
@@ -387,9 +421,9 @@ General approach
 
 ### Model 1 - Aboveground eelgrass biomass
 
-Global model will include, sea otter index, epiphyte load, grazer load, crab biomass, fish biomass, sediment score, and total nitrogen. Note transformations of variables where appropraite.
+Global model will include, sea otter index, epiphyte load, grazer load, crab biomass, fish biomass, sediment score, total nitrogen, macroalgae, and diatom percent cover. Note transformations of variables where appropraite.
 ```{r mod1 global, echo=FALSE}
-mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_mass) + sed_inside_prim + Ntotal_site, data = dat)
+mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_mass) + macro_dens + asin(sqrt(diatom_dens / 100)) + sed_inside_prim + Ntotal_site, data = dat)
 ```
 
 Dredge and filter models
@@ -409,37 +443,42 @@ mod1.avg <- model.avg(mod1.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 ```
 
 Extract coefficents 
-```{r coefs top mod1}
+```{r coefs top mod1, echo=FALSE}
+## Summary ##
 summary(mod1.avg)
+
+## Extract coefficients ##
 coef.mod1 <- data.frame(confint(mod1.avg, full = TRUE))
 t <- data.frame(mod1.avg$coefficients[1,])
 coef.mod1$est <- t$mod1.avg.coefficients.1...
 coef.mod1$term <- rownames(coef.mod1)
 names(coef.mod1) <- c("low", "high", "est", "term")
+
+## Exclude intercept - for simplicity ##
+coef.mod1 <- filter(coef.mod1, term != "(Intercept)")
 ```
 
 Plotting coefficients by model
-```{r plots coefs}
+```{r mod1 plots coefs, echo=FALSE}
 ggplot(coef.mod1) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = " Coefficient +/- 95% CI")
+  labs(x = "Term", y = "Standardized estimate +/- 95% CI")
 ```
 
 ### Model 2 - epiphyte load
 
-Global model will include sea otter index, grazer load, crab biomass, fish biomass, sediment score, total nitrogen. Note transformations of variables where appropraite.
-```{r mod2 global}
-mod2 <- lm(epiphmass_shootmass_dt ~ sea_otter_index_tr + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_mass) + sed_inside_prim + Ntotal_site, data = dat)
+Global model will include sea otter index, grazer load, crab biomass, fish biomass, sediment score, total nitrogen and macroalgae and diatom percent cover. Note transformations of variables where appropraite.
+```{r mod2 global, echo=FALSE}
+mod2 <- lm(epiphmass_shootmass_dt ~ sea_otter_index_tr + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_mass) + sed_inside_prim + Ntotal_site + macro_dens + asin(sqrt(diatom_dens / 100)), data = dat)
 ```
 
 Dredge and filter models
-```{r mod2 dr}
+```{r mod2 dr, echo=FALSE}
 ## Dredge ##
 mod2.dr <- dredge(mod2, rank = "AICc", evaluate = TRUE, extra = c("BIC", "R^2","adjR^2"), beta = "sd")
-mod2.dr
 
 ## Filter top models ##
 mod2.dr.top <- mod2.dr %>% 
@@ -453,7 +492,7 @@ mod2.avg <- model.avg(mod2.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 ```
 
 Extract coefficents 
-```{r coefs top mod1}
+```{r coefs top mod2, echo=FALSE}
 summary(mod2.avg)
 coef.mod2 <- data.frame(confint(mod2.avg, full = TRUE))
 t <- data.frame(mod2.avg$coefficients[1,])
@@ -463,7 +502,7 @@ names(coef.mod2) <- c("low", "high", "est", "term")
 ```
 
 Plotting coefficients by model
-```{r plots coefs}
+```{r mod2 plots coefs, echo=FALSE}
 ggplot(coef.mod2) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
@@ -476,15 +515,14 @@ ggplot(coef.mod2) +
 
 Global model will include, sea otter index, epiphyte load, crab biomass, fish predator biomass, sediment score, and total nitrogen. Note transformations of variables where appropraite.
 
-```{r mod3 global}
-mod3 <- lm(log(grazermass_shootmass) ~ sea_otter_index_tr + epiphmass_shootmass_dt + sqrt(crab_mass) + log(fish_mass) + sed_inside_prim + Ntotal_site, data = dat)
+```{r mod3 global, echo=FALSE}
+mod3 <- lm(log(grazermass_shootmass) ~ sea_otter_index_tr + epiphmass_shootmass_dt + sqrt(crab_mass) + log(fish_mass) + sed_inside_prim + Ntotal_site + macro_dens + asin(sqrt(diatom_dens / 100)), data = dat)
 ```
 
 Dredge and filter models
-```{r mod3 dr}
+```{r mod3 dr, echo=FALSE}
 ## Dredge ##
 mod3.dr <- dredge(mod3, rank = "AICc", evaluate = TRUE, extra = c("BIC", "R^2","adjR^2"), beta = "sd")
-mod3.dr
 
 ## Filter top models ##
 mod3.dr.top <- mod3.dr %>% 
@@ -498,7 +536,7 @@ mod3.avg <- model.avg(mod3.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 ```
 
 Extract coefficents 
-```{r coefs top mod3}
+```{r coefs top mod3, echo=FALSE}
 summary(mod3.avg)
 coef.mod3 <- data.frame(confint(mod3.avg, full = TRUE))
 t <- data.frame(mod3.avg$coefficients[1,])
@@ -508,7 +546,7 @@ names(coef.mod3) <- c("low", "high", "est", "term")
 ```
 
 Plotting coefficients by model
-```{r plots coefs}
+```{r mod3 plots coefs, echo=FALSE}
 ggplot(coef.mod3) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
@@ -519,17 +557,16 @@ ggplot(coef.mod3) +
 
 ### Model 4 - Crab biomass
 
-Global model will include julian day, sea otter index, grazer load, epiphyte load, total eelgrass biomass, fish predator biomass, sediment score, total nitrogen and light availability. Note transformations of variables where appropraite.
+Global model will include julian day, sea otter index, grazer load, epiphyte load, aboveground eelgrass biomass, fish predator biomass, sediment score. Note transformations of variables where appropraite.
 
-```{r mod4 global}
-mod4 <- lm(sqrt(crab_mass) ~ sea_otter_index_tr + +log(grazermass_shootmass) + log(epiphmass_shootmass) + log(fish_mass) + sqrt(sed_inside_prim) + Ntotal_site, data = dat)
+```{r mod4 global, echo=FALSE}
+mod4 <- lm(sqrt(crab_mass) ~ abvgnd_mass_dt + sea_otter_index_tr + log(grazermass_shootmass) + epiphmass_shootmass_dt + log(fish_mass) + sed_inside_prim, data = dat)
 ```
 
 Dredge and filter models
-```{r mod4 dr}
+```{r mod4 dr, echo=FALSE}
 ## Dredge ##
 mod4.dr <- dredge(mod4, rank = "AICc", evaluate = TRUE, extra = c("BIC", "R^2","adjR^2"), beta = "sd")
-mod4.dr
 
 ## Filter top models ##
 mod4.dr.top <- mod4.dr %>% 
@@ -543,7 +580,7 @@ mod4.avg <- model.avg(mod4.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 ```
 
 Extract coefficents 
-```{r coefs top mod4}
+```{r coefs top mod4, echo=FALSE}
 summary(mod4.avg)
 coef.mod4 <- data.frame(confint(mod4.avg, full = TRUE))
 t <- data.frame(mod4.avg$coefficients[1,])
@@ -553,7 +590,7 @@ names(coef.mod4) <- c("low", "high", "est", "term")
 ```
 
 Plotting coefficients by model
-```{r plots coefs}
+```{r mod4 plots coefs, echo=FALSE}
 ggplot(coef.mod4) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
@@ -566,15 +603,14 @@ ggplot(coef.mod4) +
 
 Global model will include sea otter index, grazer load, epiphyte load, total eelgrass biomass, crab biomass, sediment score, total nitrogen. Note transformations of variables where appropraite.
 
-```{r mod5 global}
-mod5 <- lm(log(fish_mass) ~  sea_otter_index_tr + abvgnd_mass_dt + log(grazermass_shootmass) + log(epiphmass_shootmass) + sqrt(crab_mass)  + sqrt(sed_inside_prim) + Ntotal_site, data = dat)
+```{r mod5 global, echo=FALSE}
+mod5 <- lm(log(fish_mass) ~  sea_otter_index_tr + abvgnd_mass_dt + log(grazermass_shootmass) + epiphmass_shootmass_dt + sqrt(crab_mass) + sed_inside_prim, data = dat)
 ```
 
 Dredge and filter models
-```{r mod5 dr}
+```{r mod5 dr, echo=FALSE}
 ## Dredge ##
 mod5.dr <- dredge(mod5, rank = "AICc", evaluate = TRUE, extra = c("BIC", "R^2","adjR^2"), beta = "sd")
-mod5.dr
 
 ## Filter top models ##
 mod5.dr.top <- mod5.dr %>% 
@@ -598,7 +634,7 @@ names(coef.mod5) <- c("low", "high", "est", "term")
 ```
 
 Plotting coefficients by model
-```{r plots coefs}
+```{r mod5 plots coefs, echo=FALSE}
 ggplot(coef.mod5) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
@@ -627,7 +663,7 @@ ggplot(dat) +
 ## Grazer load and soi ##
 ggplot(dat) +
   geom_point(aes(x = sea_otter_index_tr, y = grazermass_shootmass), size = 5) +
-  labs(x = "sea otter index", y = "fish preds") +
+  labs(x = "sea otter index", y = "") +
   theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
