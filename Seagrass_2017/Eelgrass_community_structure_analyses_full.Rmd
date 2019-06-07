@@ -280,7 +280,7 @@ Diatoms | asing-sqrt
 Checking for multicolinearity among predictors. There is little evidence for multicolinearity among predictors. This suggests that I can use a standard deviation predictor standardization in models later. Note that diatoms and grazers appear to have a relationships, but both will also need to be assessed for temporal effects. So we may still need to consider a partial standard deviation predictor standardization.
 
 ```{r muticol, echo=FALSE}
-pairs(dat[, c(4, 21, 49, 51, 65, 67, 101, 109, 116, 125)])
+pairs(dat[, c( 21, 49, 65, 67, 93, 99, 101, 109, 116, 120)])
 ```
 
 ## Variation of predictor variables acorss sites
@@ -410,6 +410,19 @@ ggplot(dat) +
 summary(gam(dat$abvgnd_mass_dt ~ s(dat$sea_otter_index_tr)))
 ```
 
+## Multicolinearity
+Another check after doing transfomarions etc.
+
+The suspect grazer v diatom relationships does not look that good at all. 
+```{r multi check, echo = FALSE}
+plot(log(dat$grazermass_shootmass), asin(sqrt(dat$diatom_dens / 100)))
+```
+
+Others
+```{r multi check full, echo = FALSE}
+
+```
+
 
 ## Models
 General approach
@@ -465,7 +478,9 @@ ggplot(coef.mod1) +
   geom_point(aes(x = term, y = est), size = 3) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = "Standardized estimate +/- 95% CI")
+  labs(x = "Term", y = "Standardized estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Benthic diatom cover", "Epiphyte load", "Fish", "Sea otter index", "Sediment")) +
+  theme(text = element_text(size = 12), axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
 ### Model 2 - epiphyte load
