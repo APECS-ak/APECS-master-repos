@@ -473,14 +473,14 @@ coef.mod1 <- filter(coef.mod1, term != "(Intercept)")
 
 Plotting coefficients by model
 ```{r mod1 plots coefs, echo=FALSE}
-ggplot(coef.mod1) +
+p.abv <- ggplot(coef.mod1) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = "Standardized estimate +/- 95% CI") +
-  scale_x_discrete(labels = c("Benthic diatom cover", "Epiphyte load", "Fish", "Sea otter index", "Sediment")) +
-  theme(text = element_text(size = 12), axis.text.x = element_text(angle = 45, hjust = 1))
+  labs(x = "Term", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Benthic\ndiatoms", "Epiphytes", "Fish", "Sea otter\nindex", "Sediment")) +
+  theme(text = element_text(size = 10))
 ```
 
 ### Model 2 - epiphyte load
@@ -508,22 +508,30 @@ mod2.avg <- model.avg(mod2.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 
 Extract coefficents 
 ```{r coefs top mod2, echo=FALSE}
+## Summary ##
 summary(mod2.avg)
+
+## Extract coefficients ##
 coef.mod2 <- data.frame(confint(mod2.avg, full = TRUE))
 t <- data.frame(mod2.avg$coefficients[1,])
 coef.mod2$est <- t$mod2.avg.coefficients.1...
 coef.mod2$term <- rownames(coef.mod2)
 names(coef.mod2) <- c("low", "high", "est", "term")
+
+## Exclude intercept - for simplicity ##
+coef.mod2 <- filter(coef.mod2, term != "(Intercept)")
 ```
 
 Plotting coefficients by model
 ```{r mod2 plots coefs, echo=FALSE}
-ggplot(coef.mod2) +
+p.epi <- ggplot(coef.mod2) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = " Coefficient +/- 95% CI")
+  labs(x = "Term", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Benthic\ndiatoms", "Grazers", "Macroalgae", "Sea otter\nindex", "Sediment")) +
+  theme(text = element_text(size = 10))
 ```
 
 ### Model 3 - grazer load
@@ -552,22 +560,30 @@ mod3.avg <- model.avg(mod3.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 
 Extract coefficents 
 ```{r coefs top mod3, echo=FALSE}
+## Summary ##
 summary(mod3.avg)
+
+## Extract coefficients ##
 coef.mod3 <- data.frame(confint(mod3.avg, full = TRUE))
 t <- data.frame(mod3.avg$coefficients[1,])
 coef.mod3$est <- t$mod3.avg.coefficients.1...
 coef.mod3$term <- rownames(coef.mod3)
 names(coef.mod3) <- c("low", "high", "est", "term")
+
+## Exclude intercept - for simplicity ##
+coef.mod3 <- filter(coef.mod3, term != "(Intercept)")
 ```
 
 Plotting coefficients by model
 ```{r mod3 plots coefs, echo=FALSE}
-ggplot(coef.mod3) +
+p.grz <- ggplot(coef.mod3) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = " Coefficient +/- 95% CI")
+  labs(x = "Term", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Benthic\ndiatoms", "Epiphytes", "Crabs")) +
+  theme(text = element_text(size = 10))
 ```
 
 ### Model 4 - Crab biomass
@@ -596,22 +612,30 @@ mod4.avg <- model.avg(mod4.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 
 Extract coefficents 
 ```{r coefs top mod4, echo=FALSE}
+## Summary ##
 summary(mod4.avg)
+
+## Extract coefficients ##
 coef.mod4 <- data.frame(confint(mod4.avg, full = TRUE))
 t <- data.frame(mod4.avg$coefficients[1,])
 coef.mod4$est <- t$mod4.avg.coefficients.1...
 coef.mod4$term <- rownames(coef.mod4)
 names(coef.mod4) <- c("low", "high", "est", "term")
+
+## Exclude intercept - for simplicity ##
+coef.mod4 <- filter(coef.mod4, term != "(Intercept)")
 ```
 
 Plotting coefficients by model
 ```{r mod4 plots coefs, echo=FALSE}
-ggplot(coef.mod4) +
+p.crb <- ggplot(coef.mod4) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
-  geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
-  scale_y_continuous(limits = c(-1.1, 1), breaks = seq(-1.1, 1, by = 0.50)) +
-  labs(x = "Term", y = " Coefficient +/- 95% CI")
+  geom_errorbar(aes(x = term, ymin = round(low, 2), ymax = high), width = 0) +
+  scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
+  labs(x = "Term", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Fish", "Sea otter\nindex")) +
+  theme(text = element_text(size = 10))
 ```
 
 ### Model 5 - Fish predators
@@ -640,23 +664,38 @@ mod5.avg <- model.avg(mod5.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 
 Extract coefficents 
 ```{r coefs top mod5}
+## Summary ##
 summary(mod5.avg)
+
+## Extract coefficients ##
 coef.mod5 <- data.frame(confint(mod5.avg, full = TRUE))
 t <- data.frame(mod5.avg$coefficients[1,])
 coef.mod5$est <- t$mod5.avg.coefficients.1...
 coef.mod5$term <- rownames(coef.mod5)
 names(coef.mod5) <- c("low", "high", "est", "term")
+
+## Exclude intercept - for simplicity ##
+coef.mod5 <- filter(coef.mod5, term != "(Intercept)")
 ```
 
 Plotting coefficients by model
 ```{r mod5 plots coefs, echo=FALSE}
-ggplot(coef.mod5) +
+p.fsh <- ggplot(coef.mod5) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 3) +
-  geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
-  scale_y_continuous(limits = c(-1.1, 1), breaks = seq(-1.1, 1, by = 0.50)) +
-  labs(x = "Term", y = " Coefficient +/- 95% CI")
+  geom_errorbar(aes(x = term, ymin = round(low, 2), ymax = high), width = 0) +
+  scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
+  labs(x = "Term", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Eelgrass", "Crabs")) +
+  theme(text = element_text(size = 10))
 ```
+
+## Results summary
+All together now.
+```{r summary plot}
+plot_grid(p.fsh, p.crb, p.grz, p.epi, p.abv, ncol = 1, labels = "auto", align = "v", label_x = 0.17)
+```
+
 
 ## Useful Plots
 Plots of other data that are helpful to look at/show people so they calm down.
