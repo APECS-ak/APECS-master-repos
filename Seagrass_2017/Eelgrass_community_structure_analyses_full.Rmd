@@ -418,12 +418,6 @@ The suspect grazer v diatom relationships does not look that good at all.
 plot(log(dat$grazermass_shootmass), asin(sqrt(dat$diatom_dens / 100)))
 ```
 
-Others
-```{r multi check full, echo = FALSE}
-
-```
-
-
 ## Models
 General approach
 1. Pass a global model to the `dredge()` funciton. This global model will include all predictors that make biological sense given the current understanding of trophic relationships and cascades in eelgrass ecosystems. Models will be ranked using AICc, as is recommended with small sample sizes. In general interactions will not be evaluated unless there is a seriously good biological reason.
@@ -461,9 +455,9 @@ Extract coefficents
 summary(mod1.avg)
 
 ## Extract coefficients ##
-coef.mod1 <- data.frame(confint(mod1.avg, full = TRUE))
-t <- data.frame(mod1.avg$coefficients[1,])
-coef.mod1$est <- t$mod1.avg.coefficients.1...
+coef.mod1 <- data.frame(confint(mod1.avg, full = FALSE))
+t <- data.frame(mod1.avg$coefficients[2,])
+coef.mod1$est <- t$mod1.avg.coefficients.2...
 coef.mod1$term <- rownames(coef.mod1)
 names(coef.mod1) <- c("low", "high", "est", "term")
 
@@ -512,9 +506,9 @@ Extract coefficents
 summary(mod2.avg)
 
 ## Extract coefficients ##
-coef.mod2 <- data.frame(confint(mod2.avg, full = TRUE))
-t <- data.frame(mod2.avg$coefficients[1,])
-coef.mod2$est <- t$mod2.avg.coefficients.1...
+coef.mod2 <- data.frame(confint(mod2.avg, full = FALSE))
+t <- data.frame(mod2.avg$coefficients[2,])
+coef.mod2$est <- t$mod2.avg.coefficients.2...
 coef.mod2$term <- rownames(coef.mod2)
 names(coef.mod2) <- c("low", "high", "est", "term")
 
@@ -564,9 +558,9 @@ Extract coefficents
 summary(mod3.avg)
 
 ## Extract coefficients ##
-coef.mod3 <- data.frame(confint(mod3.avg, full = TRUE))
-t <- data.frame(mod3.avg$coefficients[1,])
-coef.mod3$est <- t$mod3.avg.coefficients.1...
+coef.mod3 <- data.frame(confint(mod3.avg, full = FALSE))
+t <- data.frame(mod3.avg$coefficients[2, ])
+coef.mod3$est <- t$mod3.avg.coefficients.2...
 coef.mod3$term <- rownames(coef.mod3)
 names(coef.mod3) <- c("low", "high", "est", "term")
 
@@ -591,7 +585,7 @@ p.grz <- ggplot(coef.mod3) +
 Global model will include julian day, sea otter index, grazer load, epiphyte load, aboveground eelgrass biomass, fish predator biomass, sediment score. Note transformations of variables where appropraite.
 
 ```{r mod4 global, echo=FALSE}
-mod4 <- lm(sqrt(crab_mass) ~ abvgnd_mass_dt + sea_otter_index_tr + log(grazermass_shootmass) + epiphmass_shootmass_dt + log(fish_mass) + sed_inside_prim, data = dat)
+mod4 <- lm(sqrt(crab_mass) ~ abvgnd_mass_dt + sea_otter_index_tr + log(grazermass_shootmass) + log(fish_mass) + sed_inside_prim, data = dat)
 ```
 
 Dredge and filter models
@@ -616,9 +610,9 @@ Extract coefficents
 summary(mod4.avg)
 
 ## Extract coefficients ##
-coef.mod4 <- data.frame(confint(mod4.avg, full = TRUE))
-t <- data.frame(mod4.avg$coefficients[1,])
-coef.mod4$est <- t$mod4.avg.coefficients.1...
+coef.mod4 <- data.frame(confint(mod4.avg, full = FALSE))
+t <- data.frame(mod4.avg$coefficients[2,])
+coef.mod4$est <- t$mod4.avg.coefficients.2...
 coef.mod4$term <- rownames(coef.mod4)
 names(coef.mod4) <- c("low", "high", "est", "term")
 
@@ -643,7 +637,7 @@ p.crb <- ggplot(coef.mod4) +
 Global model will include sea otter index, grazer load, epiphyte load, total eelgrass biomass, crab biomass, sediment score, total nitrogen. Note transformations of variables where appropraite.
 
 ```{r mod5 global, echo=FALSE}
-mod5 <- lm(log(fish_mass) ~  sea_otter_index_tr + abvgnd_mass_dt + log(grazermass_shootmass) + epiphmass_shootmass_dt + sqrt(crab_mass) + sed_inside_prim, data = dat)
+mod5 <- lm(log(fish_mass) ~  sea_otter_index_tr + abvgnd_mass_dt + log(grazermass_shootmass) + sqrt(crab_mass) + sed_inside_prim, data = dat)
 ```
 
 Dredge and filter models
@@ -668,9 +662,9 @@ Extract coefficents
 summary(mod5.avg)
 
 ## Extract coefficients ##
-coef.mod5 <- data.frame(confint(mod5.avg, full = TRUE))
-t <- data.frame(mod5.avg$coefficients[1,])
-coef.mod5$est <- t$mod5.avg.coefficients.1...
+coef.mod5 <- data.frame(confint(mod5.avg, full = FALSE))
+t <- data.frame(mod5.avg$coefficients[2,])
+coef.mod5$est <- t$mod5.avg.coefficients.2...
 coef.mod5$term <- rownames(coef.mod5)
 names(coef.mod5) <- c("low", "high", "est", "term")
 
@@ -694,6 +688,16 @@ p.fsh <- ggplot(coef.mod5) +
 All together now.
 ```{r summary plot}
 plot_grid(p.fsh, p.crb, p.grz, p.epi, p.abv, ncol = 1, labels = "auto", align = "v", label_x = 0.17)
+```
+
+## Export dredge objects
+For manuscripts and the like
+```{r export dredge}
+write.csv(mod1.dr.top, "abv_raw_dredge.csv", row.names = FALSE)
+write.csv(mod2.dr.top, "epi_raw_dredge.csv", row.names = FALSE)
+write.csv(mod3.dr.top, "grz_raw_dredge.csv", row.names = FALSE)
+write.csv(mod4.dr.top, "crb_raw_dredge.csv", row.names = FALSE)
+write.csv(mod5.dr.top, "fsh_raw_dredge.csv", row.names = FALSE)
 ```
 
 
@@ -726,9 +730,9 @@ ggplot(dat) +
   geom_col(aes(x = place_name, y = crab_mass)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+## Crabs and Fish ##
 ggplot(dat) +
-  geom_col(aes(x = place_name, y = rock_mass)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  geom_point(aes(x = crab_mass, y = log(fish_mass)))
 
 ```
 
