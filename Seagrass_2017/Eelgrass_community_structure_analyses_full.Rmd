@@ -173,7 +173,7 @@ dat <- merge(dat, fishmass.site.fam, by = "site")
 ```
 
 ## Tests for normality
-Responses and predictors should be tested to see if they meet normality assumptions.
+Responses should be tested for normality. If a responce is also a predictor it should not be tranformed unless the resulting model indicates a strange residual structure.
 
 Aboveground biomass is fairly normal and does not need a transformaiton.
 ```{r abvgrnd biomass, echo=FALSE}
@@ -330,11 +330,11 @@ dat$abvgnd_mass_dt <- resid.abv
 plot(dat$date_julian, dat$abvgnd_mass_dt)
 ```
 
-Epiphyte load has a significant negative relationships with epiphyte load. *epiphyte load will be de-trended*.
+Epiphyte load has a significant negative relationships with epiphyte load. I will not transform these data for the temporal testing. But the check the de-trended data *epiphyte load will be de-trended*.
 ```{r epi time, echo = FALSE}
 ## Assess temporal trend ##
-plot(dat$date_julian, log(dat$epiphmass_shootmass))
-tmod2 <- lm(log(dat$epiphmass_shootmass) ~ dat$date_julian)
+plot(dat$date_julian, dat$epiphmass_shootmass)
+tmod2 <- lm(dat$epiphmass_shootmass ~ dat$date_julian)
 summary(tmod2)
 
 ## De-trend ##
@@ -346,8 +346,8 @@ plot(dat$date_julian, dat$epiphmass_shootmass_dt)
 Grazer load looks like it may have a temporal signal but its turns out that its not significant and has a low R-sq value.
 ```{r grz time, echo = FALSE}
 ## Assess temporal trend ##
-plot(dat$date_julian, log(dat$grazermass_shootmass))
-tmod3 <- lm(log(dat$grazermass_shootmass) ~ dat$date_julian)
+plot(dat$date_julian, dat$grazermass_shootmass)
+tmod3 <- lm(dat$grazermass_shootmass ~ dat$date_julian)
 summary(tmod3)
 ```
 
@@ -359,8 +359,8 @@ plot(dat$date_julian, sqrt(dat$crab_mass))
 
 Macroalgae cover does not have a temporal signal.
 ```{r macro time, echo = FLASE}
-plot(dat$date_julian, dat$macro_dens)
-tmod4 <- lm(dat$macro_dens ~ dat$date_julian)
+plot(dat$date_julian, asin(sqrt(dat$macro_dens / 100)))
+tmod4 <- lm(asin(sqrt(dat$macro_dens / 100)) ~ dat$date_julian)
 summary(tmod4)
 ```
 
@@ -430,7 +430,7 @@ General approach
 
 Global model will include, sea otter index, epiphyte load, grazer load, crab biomass, fish biomass, sediment score, total nitrogen, macroalgae, and diatom percent cover. Note transformations of variables where appropraite.
 ```{r mod1 global, echo=FALSE}
-mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_mass) + macro_dens + asin(sqrt(diatom_dens / 100)) + sed_inside_prim + Ntotal_site, data = dat)
+mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + grazermass_shootmass + crab_mass + fish_mass + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)) + sed_inside_prim + Ntotal_site, data = dat)
 ```
 
 Dredge and filter models
@@ -448,6 +448,19 @@ datatable(round(mod1.dr.top, 4))
 ## Model average ##
 mod1.avg <- model.avg(mod1.dr, subset = delta < 2, fit = TRUE, beta = "sd")
 ```
+
+Model Diagnostics
+```{r mod1 diag, echo = FALSE}
+summary(mod1.avg)
+mod1.avg$coefArray
+
+beta_hat <- coef(mod1.avg)
+obs_values_hat <- beta_hat["(Intercept)"] + beta_hat["sea_otter_index_tr"] * dat$sea_otter_index_tr
+u_hat <- dat$abvgnd_mass_dt - obs_values_hat # residuals
+
+plot(obs_values_hat, u_hat)
+```
+
 
 Extract coefficents 
 ```{r coefs top mod1, echo=FALSE}
@@ -469,10 +482,10 @@ Plotting coefficients by model
 ```{r mod1 plots coefs, echo=FALSE}
 p.abv <- ggplot(coef.mod1) +
   geom_hline(yintercept = 0, lty = 2) +
-  geom_point(aes(x = term, y = est), size = 3) +
+  geom_point(aes(x = term, y = est), size = 2) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = "Estimate +/- 95% CI") +
+  labs(x = "Factor", y = "Estimate +/- 95% CI") +
   scale_x_discrete(labels = c("Benthic\ndiatoms", "Epiphytes", "Fish", "Sea otter\nindex", "Sediment")) +
   theme(text = element_text(size = 10))
 ```
@@ -481,7 +494,7 @@ p.abv <- ggplot(coef.mod1) +
 
 Global model will include sea otter index, grazer load, crab biomass, fish biomass, sediment score, total nitrogen and macroalgae and diatom percent cover. Note transformations of variables where appropraite.
 ```{r mod2 global, echo=FALSE}
-mod2 <- lm(epiphmass_shootmass_dt ~ sea_otter_index_tr + log(grazermass_shootmass) + sqrt(crab_mass) + log(fish_mass) + sed_inside_prim + Ntotal_site + macro_dens + asin(sqrt(diatom_dens / 100)), data = dat)
+mod2 <- lm(epiphmass_shootmass_dt ~ sea_otter_index_tr + grazermass_shootmass + crab_mass + fish_mass + sed_inside_prim + Ntotal_site + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
 ```
 
 Dredge and filter models
@@ -520,11 +533,11 @@ Plotting coefficients by model
 ```{r mod2 plots coefs, echo=FALSE}
 p.epi <- ggplot(coef.mod2) +
   geom_hline(yintercept = 0, lty = 2) +
-  geom_point(aes(x = term, y = est), size = 3) +
+  geom_point(aes(x = term, y = est), size = 2) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = "Estimate +/- 95% CI") +
-  scale_x_discrete(labels = c("Benthic\ndiatoms", "Grazers", "Macroalgae", "Sea otter\nindex", "Sediment")) +
+  labs(x = "Factor", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Benthic\ndiatoms", "Crabs", "Fish", "Grazers", "Nitrogen")) +
   theme(text = element_text(size = 10))
 ```
 
@@ -533,7 +546,7 @@ p.epi <- ggplot(coef.mod2) +
 Global model will include, sea otter index, epiphyte load, crab biomass, fish predator biomass, sediment score, and total nitrogen. Note transformations of variables where appropraite.
 
 ```{r mod3 global, echo=FALSE}
-mod3 <- lm(log(grazermass_shootmass) ~ sea_otter_index_tr + epiphmass_shootmass_dt + sqrt(crab_mass) + log(fish_mass) + sed_inside_prim + Ntotal_site + macro_dens + asin(sqrt(diatom_dens / 100)), data = dat)
+mod3 <- lm(log(grazermass_shootmass) ~ sea_otter_index_tr + epiphmass_shootmass_dt + crab_mass + fish_mass + sed_inside_prim + Ntotal_site + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
 ```
 
 Dredge and filter models
@@ -572,11 +585,11 @@ Plotting coefficients by model
 ```{r mod3 plots coefs, echo=FALSE}
 p.grz <- ggplot(coef.mod3) +
   geom_hline(yintercept = 0, lty = 2) +
-  geom_point(aes(x = term, y = est), size = 3) +
+  geom_point(aes(x = term, y = est), size = 2) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = "Estimate +/- 95% CI") +
-  scale_x_discrete(labels = c("Benthic\ndiatoms", "Epiphytes", "Crabs")) +
+  labs(x = "Factor", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Benthic\ndiatoms", "Crabs", "Epiphytes")) +
   theme(text = element_text(size = 10))
 ```
 
@@ -585,7 +598,7 @@ p.grz <- ggplot(coef.mod3) +
 Global model will include julian day, sea otter index, grazer load, epiphyte load, aboveground eelgrass biomass, fish predator biomass, sediment score. Note transformations of variables where appropraite.
 
 ```{r mod4 global, echo=FALSE}
-mod4 <- lm(sqrt(crab_mass) ~ abvgnd_mass_dt + sea_otter_index_tr + log(grazermass_shootmass) + log(fish_mass) + sed_inside_prim, data = dat)
+mod4 <- lm(sqrt(crab_mass) ~ abvgnd_mass_dt + sea_otter_index_tr + grazermass_shootmass + fish_mass + sed_inside_prim, data = dat)
 ```
 
 Dredge and filter models
@@ -600,8 +613,9 @@ mod4.dr.top <- mod4.dr %>%
 mod4.dr.top <- mod4.dr.top[,colSums(is.na(mod4.dr.top)) < nrow(mod4.dr.top)] # remove columns with 0s
 datatable(round(mod4.dr.top, 4))
 
-## Model average ##
-mod4.avg <- model.avg(mod4.dr, subset = delta < 2, fit = TRUE, beta = "sd")
+## Model average - except not because it does not need one ##
+mod4.avg <- lm(sqrt(crab_mass) ~ sea_otter_index_tr, data = dat)
+std.coef(mod4.avg, partial.sd = FALSE)
 ```
 
 Extract coefficents 
@@ -610,11 +624,10 @@ Extract coefficents
 summary(mod4.avg)
 
 ## Extract coefficients ##
-coef.mod4 <- data.frame(confint(mod4.avg, full = FALSE))
-t <- data.frame(mod4.avg$coefficients[2,])
-coef.mod4$est <- t$mod4.avg.coefficients.2...
+coef.mod4 <- data.frame(std.coef(mod4.avg, partial.sd = FALSE))
+coef.mod4$low <- coef.mod4$Estimate. - (coef.mod4$Std..Error. * 1.96)
+coef.mod4$high <- coef.mod4$Estimate. + (coef.mod4$Std..Error. * 1.96)
 coef.mod4$term <- rownames(coef.mod4)
-names(coef.mod4) <- c("low", "high", "est", "term")
 
 ## Exclude intercept - for simplicity ##
 coef.mod4 <- filter(coef.mod4, term != "(Intercept)")
@@ -624,11 +637,11 @@ Plotting coefficients by model
 ```{r mod4 plots coefs, echo=FALSE}
 p.crb <- ggplot(coef.mod4) +
   geom_hline(yintercept = 0, lty = 2) +
-  geom_point(aes(x = term, y = est), size = 3) +
+  geom_point(aes(x = term, y = Estimate.), size = 2) +
   geom_errorbar(aes(x = term, ymin = round(low, 2), ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = "Estimate +/- 95% CI") +
-  scale_x_discrete(labels = c("Fish", "Sea otter\nindex")) +
+  labs(x = "Factor", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Sea otter\nindex")) +
   theme(text = element_text(size = 10))
 ```
 
@@ -637,7 +650,7 @@ p.crb <- ggplot(coef.mod4) +
 Global model will include sea otter index, grazer load, epiphyte load, total eelgrass biomass, crab biomass, sediment score, total nitrogen. Note transformations of variables where appropraite.
 
 ```{r mod5 global, echo=FALSE}
-mod5 <- lm(log(fish_mass) ~  sea_otter_index_tr + abvgnd_mass_dt + log(grazermass_shootmass) + sqrt(crab_mass) + sed_inside_prim, data = dat)
+mod5 <- lm(log(fish_mass) ~  sea_otter_index_tr + abvgnd_mass_dt + grazermass_shootmass + crab_mass + sed_inside_prim, data = dat)
 ```
 
 Dredge and filter models
@@ -676,11 +689,11 @@ Plotting coefficients by model
 ```{r mod5 plots coefs, echo=FALSE}
 p.fsh <- ggplot(coef.mod5) +
   geom_hline(yintercept = 0, lty = 2) +
-  geom_point(aes(x = term, y = est), size = 3) +
+  geom_point(aes(x = term, y = est), size = 2) +
   geom_errorbar(aes(x = term, ymin = round(low, 2), ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
-  labs(x = "Term", y = "Estimate +/- 95% CI") +
-  scale_x_discrete(labels = c("Eelgrass", "Crabs")) +
+  labs(x = "Factor", y = "Estimate +/- 95% CI") +
+  scale_x_discrete(labels = c("Eelgrass", "Crabs", "Sea otter\nindex", "Sediment")) +
   theme(text = element_text(size = 10))
 ```
 
