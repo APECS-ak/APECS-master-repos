@@ -700,7 +700,7 @@ p.fsh <- ggplot(coef.mod5) +
 ## Results summary
 All together now.
 ```{r summary plot}
-plot_grid(p.fsh, p.crb, p.grz, p.epi, p.abv, ncol = 1, labels = "auto", align = "v", label_x = 0.17)
+plot_grid(p.crb, p.fsh, p.grz, p.epi, p.abv, ncol = 1, labels = "auto", align = "v", label_x = 0.17)
 ```
 
 ## Export dredge objects
