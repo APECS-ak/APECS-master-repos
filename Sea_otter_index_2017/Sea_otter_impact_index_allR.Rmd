@@ -342,6 +342,7 @@ pca.tr$scores
 
 final.dat.tr <- cbind(site.dat.tr, pca.tr$scores[,1])
 colnames(final.dat.tr)[14] <- "sea_otter_index"
+final.dat.tr$site_num <- as.character(c(1:21))
 
 ggplot(final.dat.tr, aes(site, sea_otter_index)) +
   geom_point(size = 4) +
@@ -356,12 +357,11 @@ ggplot(final.dat.tr, aes(reorder(site, sea_otter_index), sea_otter_index, col = 
   theme(axis.text.x = element_text(angle = 90))
 
 # no color
-ggplot(final.dat.tr, aes(reorder(place_name, sea_otter_index), sea_otter_index)) +
-  geom_point(size = 4) +
-  labs(x = "Site", y = "Sea otter index transformed", col = "Sea otter impact Index") +
+soi.site <- ggplot(final.dat.tr, aes(reorder(site_num, sea_otter_index), sea_otter_index)) +
+  geom_point(size = 2) +
+  labs(x = "Site", y = "Sea otter index") +
   scale_y_continuous(limits = c(-0.8, 1.2), breaks = seq(-0.8, 1.2, by = 0.4)) +
-  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  theme(text = element_text(size = 12), axis.ticks = element_line(size = 2))
 ```
 
 Final index data table
