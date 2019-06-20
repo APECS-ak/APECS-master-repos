@@ -170,6 +170,9 @@ fishmass.site.fam <- fish.dat %>%
 fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
 
 dat <- merge(dat, fishmass.site.fam, by = "site")
+
+## add site numbers ##
+dat$site_num <- as.character(c(1:21))
 ```
 
 ## Tests for normality
@@ -731,12 +734,11 @@ ggplot(dat) +
   theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-## Grazer load and soi ##
+## Grazer load and epiphyte load ##
 ggplot(dat) +
-  geom_point(aes(x = sea_otter_index_tr, y = grazermass_shootmass), size = 5) +
-  labs(x = "sea otter index", y = "") +
-  theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  geom_point(aes(x = grazermass_shootmass, y = epiphmass_shootmass)) +
+  labs(x = "Grazer load (g/g eelgrass)", y = "Epiphyte load (g/g eelgrass)") +
+  theme(text = element_text(size = 10))
 
 ## Crab Mass by site ##
 ggplot(dat) +
@@ -747,5 +749,20 @@ ggplot(dat) +
 ggplot(dat) +
   geom_point(aes(x = crab_mass, y = log(fish_mass)))
 
+## Epiphytes and site ##
+ggplot(dat) +
+  geom_point(aes(x = order(site_num), y = epiphmass_shootmass)) +
+  geom_errorbar(aes(x = order(site_num), ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se), width = 0) +
+  scale_x_continuous(breaks = c(1:21)) +
+  labs(x = "Site", y = "Epiphyte load +/- SE (g/g eelgrass)") +
+  theme(text = element_text(size = 10))
+
+## Eelgrass and fish ##
+ggplot(dat) +
+  geom_point(aes(x = fish_mass / 1000, y = abvgnd_mass)) +
+  labs(x = "Fish mass (kg)", y = bquote('Eelgrass mass' ~(g/m^2))) +
+  scale_x_continuous(breaks = c(0, 25, 50, 75, 100, 125, 150)) +
+  scale_y_continuous(breaks = c(0, 40, 80, 120, 160)) +
+  theme(text = element_text(size = 10))
 ```
 
