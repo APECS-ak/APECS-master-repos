@@ -129,5 +129,5 @@ dat <- merge(clam.site, site.sed, by = "site")
 
 ## Export
 ```{r export simple summaries}
-write.csv(dat, "../../ALL_DATA/eelgrass_clam_derived.csv", row.names = FALSE)
+write.csv(dat, "../../ALL_DATA/eelgrass_clam_2018_derived.csv", row.names = FALSE)
 ```

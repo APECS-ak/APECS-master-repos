@@ -29,9 +29,9 @@ st.er <- function(x, na.rm = TRUE) {
 ## Data to import
 We want to combine a few sets of data here so that we can run meaning full analyses. These are site characterization data, eelgrass transect data, eelgrass biometrics data, sea otter index data, and site nutirent data.
 ```{r}
-eg.bio <- read.csv("../ALL_DATA/Eelgrass_biometrics_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+eg.bio <- read.csv("../../ALL_DATA/Eelgrass_biometrics_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 
-eg.tran <- read.csv("../ALL_DATA/Eelgrass_transect_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+eg.tran <- read.csv("../../ALL_DATA/Eelgrass_transect_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ## Calculations
@@ -121,6 +121,6 @@ dat <- merge(dat, site.bio, by = "site")
 
 ## Export
 ```{r export}
-write.csv(dat, "../ALL_DATA/Eelgrass_biometrics_derived.csv", row.names = FALSE)
+write.csv(dat, "../../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", row.names = FALSE)
 ```
 
