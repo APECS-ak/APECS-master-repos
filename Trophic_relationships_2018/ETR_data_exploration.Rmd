@@ -1,0 +1,71 @@
+---
+title: "ETR_data_exploration_2018"
+author: "Wendel Raymond"
+date: "June 20, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Eelgrass community trophic relationships (ETR) data exploration
+Here I will conduct exploratory analysis of 2018 eelgrass community data
+
+```{r libraries}
+library(dplyr)
+library(ggplot2)
+library(DT)
+
+theme_set(theme_classic())
+```
+
+## Load data
+Load biomass/abundace data, stable isotope, and fatty acid data
+
+Biomass
+```{r dat bio}
+eg <- read.csv("../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+crb <- read.csv("../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+clm <- read.csv("../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+fsh <- read.csv("../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+Stable Isotope
+```{r dat iso}
+##
+```
+
+Fatty Acid
+```{r dat fa}
+##
+```
+
+### Complie biomass data
+Merge all the different biomass data types into one data frame
+```{r}
+dat <- merge(eg, crb, by = c("site", "place_name"), all.x = TRUE)
+dat <- merge(dat, clm[, c(1, 5:13)], by = "site")
+dat <- merge(dat, fsh, by = "site")
+```
+
+## Data exploration
+```{r}
+## Eelgrass mass ##
+ggplot(dat) +
+  geom_col(aes(x = site, y  = eg_shoot_mass * 55.55)) +
+  geom_errorbar(aes(x = site, ymin = (eg_shoot_mass - eg_shoot_mass_se) * 55.55, ymax = (eg_shoot_mass + eg_shoot_mass_se) * 55.55), width = 0) +
+  labs(x = "Site", y = "Eelgrass shoot mass (g/m2)")
+
+## Epiphyte load ##
+
+## Crust load ##
+
+## Crab mass ##
+ggplot(dat) +
+  geom_col(aes(x = site, y = crab_mass)) +
+  geom_errorbar(aes(x = site, ymin = crab_mass - crab_mass_se, ymax = crab_mass + crab_mass_se, width = 0)) +
+  labs(x = "Site", y = "Crab mass (g/string)")
+```
+
