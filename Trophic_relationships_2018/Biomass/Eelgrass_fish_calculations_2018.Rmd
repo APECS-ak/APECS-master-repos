@@ -157,10 +157,38 @@ fish.all$a <- ifelse(fish.all$sp_code == "UNLORD", fams$mean_a[fams$Family == "C
 fish.all$a <- ifelse(fish.all$sp_code == "UNARTE", fams$mean_a[fams$Family == "Cottidae"], fish.all$a)
 fish.all$a <- ifelse(fish.all$sp_code == "UNGUNN", fams$mean_a[fams$Family == "Pholidae"], fish.all$a)
 
+fish.all$b <- ifelse(fish.all$sp_code == "UNLORD", fams$mean_b[fams$Family == "Cottidae"], fish.all$b)
+fish.all$b <- ifelse(fish.all$sp_code == "UNARTE", fams$mean_b[fams$Family == "Cottidae"], fish.all$b)
+fish.all$b <- ifelse(fish.all$sp_code == "UNGUNN", fams$mean_b[fams$Family == "Pholidae"], fish.all$b)
+
 ## Calculate mass per fish ##
 fish.all$fork_length_cm <- fish.all$fork_length / 10 # Convert mm to cm
 fish.all$mass_g <- (fish.all$a * fish.all$fork_length_cm^fish.all$b)
 
 range(fish.all$mass_g, na.rm = TRUE)
-
 ```
+
+## Group: Mass by site, species, total
+Summarise data so that there is mass by site for each species and the total for that site.
+
+```{r site sum}
+## Summarise and spread ##
+dat <- fish.all %>% 
+  group_by(site, sp_code) %>% 
+  summarise(mass_g = sum(mass_g)) %>% 
+  spread(key = sp_code, value = mass_g)
+
+## clean up and calculate ##
+dat <- dat[, -29] # remove NA column
+dat[is.na(dat)] <- 0
+dat$total_fish_mass <- rowSums(dat[, 2:30])
+```
+
+## Export
+Export of raw form and site summary form
+```{r}
+write.csv(fish.all, "../../ALL_DATA/Fish_mass_full_2018_derived.csv", row.names = FALSE)
+
+write.csv(dat, "../../ALL_DATA/Fish_mass_site_2018_derived.csv", row.names = FALSE)
+```
+
