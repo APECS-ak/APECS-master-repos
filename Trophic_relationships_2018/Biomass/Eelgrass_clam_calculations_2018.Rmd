@@ -87,28 +87,39 @@ Summaries by site and species
 ```{r clam site and species}
 clam.site.sp <- clam %>% 
   group_by(site, sp_code) %>% 
-  summarise(total_crab_sp = n(),
+  summarise(total_clam_sp = n(),
             width = mean(width_mm), 
             width_se = st.er(width_mm),
             mass = mean(mass_g),
             mass_se = st.er(mass_g))
 ```
 
-Summaries by site only
+Summaries by site and quadrat
 ```{r clam site summary}
-clam.site <- clam %>% 
+clam.site.quad <- clam %>% 
+  group_by(site, quadrat) %>% 
+  summarise(unique(place_name),
+            unique(date),
+            total_clam = n(),
+            total_clam_m = total_clam * 16,
+            clam_width = mean(width_mm), 
+            clam_width_se = st.er(width_mm),
+            clam_mass_m = mean(mass_g * 16),
+            clam_mass_m_se = st.er(mass_g * 16))
+
+# clean up column names
+colnames(clam.site.quad)[3:4] <- c("place_name", "date")
+
+clam.site <- clam.site.quad %>% 
   group_by(site) %>% 
   summarise(unique(place_name),
             unique(date),
-            unique(YYYYMMDD),
-            total_clam = n(),
-            clam_width = mean(width_mm), 
-            clam_width_se = st.er(width_mm),
-            clam_mass = mean(mass_g),
-            clam_mass_se = st.er(mass_g))
-
-# clean up column names
-colnames(clam.site)[1:4] <- c("site", "place_name", "date", "YYYYMMDD")
+            n_clam_m = mean(total_clam_m),
+            n_clam_m_se = st.er(total_clam_m, na.rm = TRUE),
+            clm_width = mean(clam_width), 
+            clm_width_se = st.er(clam_width, na.rm = TRUE),
+            clm_mass_m = mean(clam_mass_m),
+            clm_mass_m_se = st.er(clam_mass_m, na.rm = TRUE))
 ```
 
 ## Sediment data
