@@ -50,11 +50,17 @@ eg.bio$epi_mass <- eg.bio$pad_dw_mass_g - eg.bio$pad_pre_mass_g
 ## Epiphyte load ##
 eg.bio$epi_load <- eg.bio$epi_mass / eg.bio$shoot_mass
 
-# Idotea mass ##
+## Idotea mass ##
 eg.bio$idotea_mass <- eg.bio$idotea_dw_foil_mass_g - eg.bio$idotea_foil_mass_g
+
+## Idotea load ##
+eg.bio$idotea_load <- eg.bio$idotea_mass / eg.bio$shoot_mass
 
 ## Limpet mass ##
 eg.bio$limpet_mass <- eg.bio$limpet_dw_foil_mass_g - eg.bio$limpet_foil_mass_g
+
+## Limpet load ##
+eg.bio$limpet_load <- eg.bio$limpet_mass / eg.bio$shoot_mass
 
 ## Caprellid mass ##
 eg.bio$caprellid_mass <- eg.bio$caprellid_dw_foil_mass_g - eg.bio$caprellid_foil_mass_g
@@ -99,8 +105,12 @@ site.bio <- eg.bio %>%
             epiph_load_se = st.er(epi_load, na.rm = TRUE),
             ido_mass = mean(idotea_mass, na.rm = TRUE),
             ido_mass_se = st.er(idotea_mass, na.rm = TRUE),
+            ido_load = mean(idotea_load),
+            ido_load_se = st.er(idotea_load, na.rm = TRUE),
             limp_mass = mean(limpet_mass, na.rm = TRUE),
             limp_mass_se = st.er(limpet_mass, na.rm = TRUE),
+            limp_load = mean(limpet_load),
+            limp_load_se = st.er(limpet_load, na.rm = TRUE),
             capr_mass = mean(caprellid_mass, na.rm = TRUE),
             capr_mass_se = st.er(caprellid_mass, na.rm = TRUE),
             amph_mass = mean(amphipod_mass, na.rm = TRUE),
