@@ -35,14 +35,20 @@ eg.tran <- read.csv("../../ALL_DATA/Eelgrass_transect_2018_RAW.csv", header = TR
 ```
 
 ## Calculations
-Subtracting out foil weights to get clean dry weights
+Subtracting out foil weights to get clean dry weights. To convert to m-sq eelgrass data should be multiplies by 55.55.
 ```{r calcs}
 ### Biometrics ###
 ## Shoot mass ##
-eg.bio$shoot_mass <- eg.bio$shoot_dw_foil_mass_g - eg.bio$shoot_foil_mass_g
+eg.bio$shoot_mass <- (eg.bio$shoot_dw_foil_mass_g - eg.bio$shoot_foil_mass_g)
+
+## Shoot mass per meter ##
+eg.bio$shoot_mass_m <- (eg.bio$shoot_mass * 55.55)
 
 ## Epiphyte mass ##
 eg.bio$epi_mass <- eg.bio$pad_dw_mass_g - eg.bio$pad_pre_mass_g
+
+## Epiphyte load ##
+eg.bio$epi_load <- eg.bio$epi_mass / eg.bio$shoot_mass
 
 # Idotea mass ##
 eg.bio$idotea_mass <- eg.bio$idotea_dw_foil_mass_g - eg.bio$idotea_foil_mass_g
@@ -62,12 +68,19 @@ eg.bio$gastropod_mass <- eg.bio$gastropod_dw_foil_mass_g - eg.bio$gastropod_foil
 ## Convert NA to 0 ##
 eg.bio[is.na(eg.bio)] <- 0
 
+## Total grazer mass ##
+eg.bio$grazer_mass <- rowSums(eg.bio[1:48, 37:41])
+
+## Grazer load ##
+eg.bio$grazer_load <- eg.bio$grazer_mass / eg.bio$shoot_mass 
+
 ### Area/Transect ###
 ## Eeglrass shoots m2 ##
-eg.tran$eelgrass_shoots_msq <- eg.tran$eelgrass_shoots_0.25msq * 4
+eg.tran$eelgrass_shoots_m <- eg.tran$eelgrass_shoots_0.25msq * 4
 
 ## Eelgrass flowering shoots m2 ##
-eg.tran$flowering_shoots_msq <- eg.tran$flowering_shoots_0.25msq * 4
+eg.tran$flowering_shoots_m <- eg.tran$flowering_shoots_0.25msq * 4
+
 ```
 
 ## Summarize by site
@@ -78,8 +91,12 @@ site.bio <- eg.bio %>%
   group_by(site) %>% 
   summarise(eg_shoot_mass = mean(shoot_mass),
             eg_shoot_mass_se = st.er(shoot_mass, na.rm = TRUE),
+            eg_shoot_mass_m = mean(shoot_mass_m),
+            eg_shoot_mass_m_se = st.er(shoot_mass_m, na.rm = TRUE),
             epiph_mass = mean(epi_mass),
             epiph_mass_se = st.er(epi_mass, na.rm = TRUE),
+            epiph_load = mean(epi_load),
+            epiph_load_se = st.er(epi_load, na.rm = TRUE),
             ido_mass = mean(idotea_mass, na.rm = TRUE),
             ido_mass_se = st.er(idotea_mass, na.rm = TRUE),
             limp_mass = mean(limpet_mass, na.rm = TRUE),
@@ -93,7 +110,11 @@ site.bio <- eg.bio %>%
             all_crust_mass = mean((idotea_mass + caprellid_mass + amphipod_mass), na.rm = TRUE),
             all_crust_mass_se = st.er((idotea_mass + caprellid_mass + amphipod_mass), na.rm = TRUE),
             all_gast_mass = mean((limpet_mass + gastropod_mass), na.rm = TRUE),
-            all_gast_mass_se = st.er((limpet_mass + gastropod_mass), na.rm = TRUE))
+            all_gast_mass_se = st.er((limpet_mass + gastropod_mass), na.rm = TRUE),
+            graz_mass = mean(grazer_mass),
+            graz_mass_se = st.er(grazer_mass, na.rm = TRUE),
+            graz_load = mean(grazer_load),
+            graz_load_se = st.er(grazer_load, na.rm = TRUE))
 
 ## Transect ##
 site.tran <- eg.tran %>% 
@@ -102,10 +123,10 @@ site.tran <- eg.tran %>%
             macro_cover_se = st.er(macroalgae_cover_0.25msq, na.rm = TRUE),
             diatom_cover = mean(diatom_cover_0.25msq, na.rm = TRUE),
             diatom_cover_se = st.er(diatom_cover_0.25msq, na.rm = TRUE),
-            eelgrass_shoot_dens = mean(eelgrass_shoots_msq, na.rm = TRUE),
-            eelgrass_shoot_dens_se = st.er(eelgrass_shoots_msq, na.rm = TRUE),
-            flowering_shoot_dens = mean(flowering_shoots_msq, na.rm = TRUE),
-            flowering_shoot_dens_se = st.er(flowering_shoots_msq, na.rm = TRUE),
+            eelgrass_shoot_dens = mean(eelgrass_shoots_m, na.rm = TRUE),
+            eelgrass_shoot_dens_se = st.er(eelgrass_shoots_m, na.rm = TRUE),
+            flowering_shoot_dens = mean(flowering_shoots_m, na.rm = TRUE),
+            flowering_shoot_dens_se = st.er(flowering_shoots_m, na.rm = TRUE),
             sed_prime = mean(primary_sediment_score),
             sed_prime_se = st.er(primary_sediment_score),
             sed_second  = mean(secondary_sediment_score),
