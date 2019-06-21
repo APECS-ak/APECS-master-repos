@@ -23,13 +23,13 @@ Load biomass/abundace data, stable isotope, and fatty acid data
 
 Biomass
 ```{r dat bio}
-eg <- read.csv("../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+eg <- read.csv("../../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb <- read.csv("../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb <- read.csv("../../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm <- read.csv("../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+clm <- read.csv("../../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-fsh <- read.csv("../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+fsh <- read.csv("../../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Stable Isotope
@@ -54,13 +54,39 @@ dat <- merge(dat, fsh, by = "site")
 ```{r}
 ## Eelgrass mass ##
 ggplot(dat) +
-  geom_col(aes(x = site, y  = eg_shoot_mass * 55.55)) +
-  geom_errorbar(aes(x = site, ymin = (eg_shoot_mass - eg_shoot_mass_se) * 55.55, ymax = (eg_shoot_mass + eg_shoot_mass_se) * 55.55), width = 0) +
+  geom_col(aes(x = site, y  = eg_shoot_mass_m)) +
+  geom_errorbar(aes(x = site, ymin = eg_shoot_mass_m - eg_shoot_mass_m_se, ymax = eg_shoot_mass_m + eg_shoot_mass_m_se), width = 0) +
   labs(x = "Site", y = "Eelgrass shoot mass (g/m2)")
 
 ## Epiphyte load ##
+ggplot(dat) +
+  geom_col(aes(x = site, y  = epiph_load)) +
+  geom_errorbar(aes(x = site, ymin = epiph_load - epiph_load_se, ymax = epiph_load + epiph_load_se), width = 0) +
+  labs(x = "Site", y = "Epiphyte load (g/g eelgrass)")
 
-## Crust load ##
+## Grazer load ##
+ggplot(dat) +
+  geom_col(aes(x = site, y  = graz_load)) +
+  geom_errorbar(aes(x = site, ymin = graz_load - graz_load_se, ymax = graz_load + graz_load_se), width = 0) +
+  labs(x = "Site", y = "Grazer load (g/g eelgrass)")
+
+## Idotea load ##
+ggplot(dat) +
+  geom_col(aes(x = site, y  = ido_load)) +
+  geom_errorbar(aes(x = site, ymin = ido_load - ido_load_se, ymax = ido_load + ido_load_se), width = 0) +
+  labs(x = "Site", y = "Idotea load (g/g eelgrass)")
+
+## Limpet load ##
+ggplot(dat) +
+  geom_col(aes(x = site, y  = limp_load)) +
+  geom_errorbar(aes(x = site, ymin = limp_load - limp_load_se, ymax = limp_load + limp_load_se), width = 0) +
+  labs(x = "Site", y = "Limpet load (g/g eelgrass)")
+
+## Clam mass ##
+ggplot(dat) +
+  geom_col(aes(x = site, y  = clm_mass_m)) +
+  geom_errorbar(aes(x = site, ymin = clm_mass_m - clm_mass_m_se, ymax = clm_mass_m + clm_mass_m_se), width = 0) +
+  labs(x = "Site", y = "Clam mass (g/m2)")
 
 ## Crab mass ##
 ggplot(dat) +
