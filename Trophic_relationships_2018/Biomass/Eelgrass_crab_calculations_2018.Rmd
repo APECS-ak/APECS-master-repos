@@ -136,4 +136,5 @@ crab.site <- merge(crab.site, crab.site.sp.wide[, c(1, 5:6)], by = "site")
 Exporting simple site level summaries of total crabs, width, mass, and diversity. This file can then be loaded in elsewhere for analysis.
 ```{r export simple summaries}
 write.csv(crab.site, "../../ALL_DATA/crab_simple_site_2018_derived.csv", row.names = FALSE)
+write.csv(crab.site.sp, "../../ALL_DATA/crab_site_sp_2018_derived.csv", row.names = FALSE)
 ```
