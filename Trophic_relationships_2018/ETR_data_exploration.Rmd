@@ -10,10 +10,11 @@ editor_options:
 # Eelgrass community trophic relationships (ETR) data exploration
 Here I will conduct exploratory analysis of 2018 eelgrass community data
 
-```{r libraries}
+```{r libraries, echo = FALSE, warning=FALSE, message = FALSE}
 library(dplyr)
 library(ggplot2)
 library(DT)
+library(cowplot)
 
 theme_set(theme_classic())
 ```
@@ -22,76 +23,130 @@ theme_set(theme_classic())
 Load biomass/abundace data, stable isotope, and fatty acid data
 
 Biomass
-```{r dat bio}
+```{r dat bio, echo=FALSE}
 eg <- read.csv("../../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 crb <- read.csv("../../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
+crb.sp <- read.csv("../../ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
 clm <- read.csv("../../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+clm.sp <- read.csv("../../ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 
 fsh <- read.csv("../../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
-Stable Isotope
-```{r dat iso}
+Stable Isotope - data forthcomming
+```{r dat iso, echo = FALSE}
 ##
 ```
 
-Fatty Acid
-```{r dat fa}
+Fatty Acid - data forthcomming
+```{r dat fa, echo = FALSE}
 ##
 ```
 
 ### Complie biomass data
 Merge all the different biomass data types into one data frame
-```{r}
+```{r merge, echo = FALSE}
 dat <- merge(eg, crb, by = c("site", "place_name"), all.x = TRUE)
 dat <- merge(dat, clm[, c(1, 5:13)], by = "site")
 dat <- merge(dat, fsh, by = "site")
 ```
 
 ## Data exploration
-```{r}
+```{r exp plots, echo = FALSE}
 ## Eelgrass mass ##
-ggplot(dat) +
+eel <- ggplot(dat) +
   geom_col(aes(x = site, y  = eg_shoot_mass_m)) +
   geom_errorbar(aes(x = site, ymin = eg_shoot_mass_m - eg_shoot_mass_m_se, ymax = eg_shoot_mass_m + eg_shoot_mass_m_se), width = 0) +
   labs(x = "Site", y = "Eelgrass shoot mass (g/m2)")
 
+## Macroalgae cover ##
+mac <- ggplot(dat) +
+  geom_col(aes(x = site, y  = macro_cover)) +
+  geom_errorbar(aes(x = site, ymin = macro_cover - macro_cover_se, ymax = macro_cover + macro_cover_se), width = 0) +
+  labs(x = "Site", y = "Macroalgae % cover")
+
+## Diatom cover ##
+dia <- ggplot(dat) +
+  geom_col(aes(x = site, y  = diatom_cover)) +
+  geom_errorbar(aes(x = site, ymin = diatom_cover - diatom_cover_se, ymax = diatom_cover + diatom_cover_se), width = 0) +
+  labs(x = "Site", y = "Diatom % cover")
+
 ## Epiphyte load ##
-ggplot(dat) +
+epi <- ggplot(dat) +
   geom_col(aes(x = site, y  = epiph_load)) +
   geom_errorbar(aes(x = site, ymin = epiph_load - epiph_load_se, ymax = epiph_load + epiph_load_se), width = 0) +
   labs(x = "Site", y = "Epiphyte load (g/g eelgrass)")
 
 ## Grazer load ##
-ggplot(dat) +
+grz <- ggplot(dat) +
   geom_col(aes(x = site, y  = graz_load)) +
   geom_errorbar(aes(x = site, ymin = graz_load - graz_load_se, ymax = graz_load + graz_load_se), width = 0) +
   labs(x = "Site", y = "Grazer load (g/g eelgrass)")
 
 ## Idotea load ##
-ggplot(dat) +
+ido <- ggplot(dat) +
   geom_col(aes(x = site, y  = ido_load)) +
   geom_errorbar(aes(x = site, ymin = ido_load - ido_load_se, ymax = ido_load + ido_load_se), width = 0) +
   labs(x = "Site", y = "Idotea load (g/g eelgrass)")
 
 ## Limpet load ##
-ggplot(dat) +
+lim <- ggplot(dat) +
   geom_col(aes(x = site, y  = limp_load)) +
   geom_errorbar(aes(x = site, ymin = limp_load - limp_load_se, ymax = limp_load + limp_load_se), width = 0) +
   labs(x = "Site", y = "Limpet load (g/g eelgrass)")
 
 ## Clam mass ##
-ggplot(dat) +
+clms <- ggplot(dat) +
   geom_col(aes(x = site, y  = clm_mass_m)) +
   geom_errorbar(aes(x = site, ymin = clm_mass_m - clm_mass_m_se, ymax = clm_mass_m + clm_mass_m_se), width = 0) +
   labs(x = "Site", y = "Clam mass (g/m2)")
 
+## Clam species ##
+clms.sp <- ggplot(clm.sp, aes(x = site, y = mass, fill = sp_code)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(ymin = mass - mass_se, ymax = mass + mass_se), width = 0, position=position_dodge(0.9)) +
+  labs(x = "Site", y = "Clam mass (g/m2)")
+
 ## Crab mass ##
-ggplot(dat) +
+crbs <- ggplot(dat) +
   geom_col(aes(x = site, y = crab_mass)) +
   geom_errorbar(aes(x = site, ymin = crab_mass - crab_mass_se, ymax = crab_mass + crab_mass_se, width = 0)) +
   labs(x = "Site", y = "Crab mass (g/string)")
+
+## Crab species mass ##
+crbs.sp <- ggplot(crb.sp, aes(x = site, y = mass, fill = sp_code)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(ymin = mass - mass_se, ymax = mass + mass_se), width = 0, position=position_dodge(0.9)) +
+  labs(x = "Site", y = "Crab mass (g/string)")
+
+## All Fish ##
+fshs <- ggplot(dat) +
+  geom_col(aes(x = site, y = total_fish_mass / 1000)) +
+  labs(x = "Site", y = "Fish mass (kg/site)")
+
+## Shiner Perch ##
+shn <- ggplot(dat) +
+  geom_col(aes(x = site, y = PERCHSH / total_fish_mass)) +
+  labs(x = "Site", y = "Proportion shiner perch mass")
+
+## Staghorn Sculpin ##
+st <- ggplot(dat) +
+  geom_col(aes(x = site, y = SCULPSTG / total_fish_mass)) +
+  labs(x = "Site", y = "Proportion staghorn mass")
+
+## Snake prickleback ##
+snk <- ggplot(dat) +
+  geom_col(aes(x = site, y = PRICKSN / total_fish_mass)) +
+  labs(x = "Site", y = "Proportion snake prickleback mass")
+```
+
+#### Biomass Summary
+Plot of major biomass constiuents across sites
+```{r}
+#plot_grid(eel, mac, dia, epi, grz, ido, lim, clms, clms.sp, crbs, crbs.sp, fshs, shn, st, snk, nrow = 5, ncol = 3)
 ```
 
