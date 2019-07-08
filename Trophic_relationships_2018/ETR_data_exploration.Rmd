@@ -15,6 +15,7 @@ library(dplyr)
 library(ggplot2)
 library(DT)
 library(cowplot)
+library(RColorBrewer)
 
 theme_set(theme_classic())
 ```
@@ -24,22 +25,24 @@ Load biomass/abundace data, stable isotope, and fatty acid data
 
 Biomass
 ```{r dat bio, echo=FALSE}
-eg <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+eg <- read.csv("../../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb <- read.csv("../../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb.sp <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb.sp <- read.csv("../../ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+clm <- read.csv("../../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm.sp <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+clm.sp <- read.csv("../../ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 
-fsh <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+fsh <- read.csv("../../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
-Stable Isotope - data forthcomming
+Stable Isotope - preliminary
 ```{r dat iso, echo = FALSE}
-##
+si <- read.csv("C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/SI_prelim_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+
+bm <- read.csv("C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Fatty Acid - data forthcomming
@@ -56,6 +59,7 @@ dat <- merge(dat, fsh, by = "site")
 ```
 
 ## Data exploration
+### Biomass
 ```{r exp plots, echo = FALSE}
 ## Eelgrass mass ##
 ggplot(dat) +
@@ -143,3 +147,23 @@ ggplot(dat) +
   geom_col(aes(x = site, y = PRICKSN / total_fish_mass)) +
   labs(x = "Site", y = "Proportion snake prickleback mass")
 ```
+
+### Stable Isotopes
+Merge species with si values
+```{r si, echo = FALSE}
+si <- merge(si, bm, by = "Biomarker_ID", all.x = TRUE)
+```
+
+Plots
+```{r si plots, echo = FALSE}
+pal <- colorRampPalette(brewer.pal(9, "Set1"))
+
+ggplot(si) +
+  geom_point(aes(x = del_C, y = del_N, color = Species_common), size = 2) +
+  scale_color_manual(values = pal(19))
+  
+
+ggplot(si) +
+  geom_point(aes(x = del_C, y = del_N, color = Sea_otter_region), size = 2)
+```
+
