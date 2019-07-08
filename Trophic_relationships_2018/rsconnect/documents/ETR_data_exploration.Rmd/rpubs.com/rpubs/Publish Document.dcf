@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/508078/c4702a83af484e72a0c636abb866d21f
+bundleId: https://api.rpubs.com/api/v1/document/508078/c4702a83af484e72a0c636abb866d21f
+url: http://rpubs.com/wraymond/508078
+when: 1562603689.84293

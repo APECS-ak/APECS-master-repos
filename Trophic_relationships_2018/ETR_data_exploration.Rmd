@@ -25,17 +25,17 @@ Load biomass/abundace data, stable isotope, and fatty acid data
 
 Biomass
 ```{r dat bio, echo=FALSE}
-eg <- read.csv("../../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+eg <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb <- read.csv("../../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb.sp <- read.csv("../../ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb.sp <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm <- read.csv("../../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+clm <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm.sp <- read.csv("../../ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+clm.sp <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 
-fsh <- read.csv("../../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+fsh <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Stable Isotope - preliminary
