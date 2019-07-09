@@ -40,10 +40,6 @@ eg.tran <- read.csv("../ALL_DATA/seagrass_transect_2017_RAW.csv", stringsAsFacto
 
 # Sea Otter Impact Index
 so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_new.csv", stringsAsFactors = FALSE, header = TRUE)
-
-# Nutrients
-nuts <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
-
 ```
 
 ## Data Check
@@ -58,7 +54,6 @@ str(so.index)
 str(nuts)
 
 # Additional code could be added here at anytime.
-
 ```
 
 ## Data prep
@@ -104,10 +99,6 @@ eg.tran$date_julian <- format(eg.tran$date, "%j")
 ## Site ##
 eg.site$date <- as.Date(eg.site$date, format = "%m/%d/%Y")
 eg.site$date_julian <- format(eg.site$date, "%j")
-
-## Nutrients ##
-nuts$date_corr <- as.Date(nuts$date_corr, format = "%m/%d/%Y")
-nuts$date_julian <- format(nuts$date_corr, "%j")
 ```
 
 ## Calculations
@@ -253,60 +244,6 @@ site.quad$crustmass_shootmass <- (site.quad$crust_mass / (site.quad$s_shoot_mass
 site.quad$gastromass_shootmass <- (site.quad$gastro_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass)) 
 ```
 
-## Nutrient data
-There is a lot of nutirent data but we want to summerize it two ways. First is the nutirent levels on the day of sampling and second the nutreint levels during nutirent day. Nutrient day was when we sampled all the sites in the same day.
-
-```{r}
-## summarise site nutirent levels ##
-nuts.site.eg <- nuts %>%
-  filter(sampling_type == "eelgrass") %>% 
-  filter(site_full != "2017_M_01") %>% # becasue we threw out all other sampling at this site
-  group_by(site_full) %>% 
-  summarise(NOX_site = mean(nox_umol),
-            NOX_site_se = st.er(nox_umol),
-            NH4_site = mean(nh4_umol),
-            NH4_site_se = st.er(nh4_umol),
-            PO4_site = mean(po4_umol),
-            PO4_site_se = st.er(po4_umol),
-            Ntotal_site = mean(tot_N),
-            Ntotal_site_se = st.er(tot_N),
-            NP_site = mean(N.P),
-            NP_site_se = st.er(N.P))
-
-## summarise nutirent day samples 1 meter ##
-nuts.site.nday.1m <- nuts %>% 
-  filter(sampling_type == "nutday") %>%
-  filter(depth_m == 1) %>% 
-  group_by(site_full) %>% 
-  summarise(NOX_1m_ND = mean(nox_umol),
-            NOX_1m_ND_se = st.er(nox_umol),
-            NH4_1m_ND = mean(nh4_umol),
-            NH4_1m_ND_se = st.er(nh4_umol),
-            PO4_1m_ND = mean(po4_umol),
-            PO4_1m_ND_se = st.er(po4_umol),
-            Ntotal_1m_ND = mean(tot_N),
-            Ntotal_1m_ND_se = st.er(tot_N),
-            NP_1m_ND = mean(N.P),
-            NP_1m_ND_se = st.er(N.P))
-
-## summarise nutirnet day sample 4 meter ##
-nuts.site.nday.4m <- nuts %>% 
-  filter(sampling_type == "nutday") %>%
-  filter(depth_m == 4) %>% 
-  group_by(site_full) %>% 
-  summarise(NOX_4m_ND = mean(nox_umol),
-            NOX_4m_ND_se = st.er(nox_umol),
-            NH4_4m_ND = mean(nh4_umol),
-            NH4_4m_ND_se = st.er(nh4_umol),
-            PO4_4m_ND = mean(po4_umol),
-            PO4_4m_ND_se = st.er(po4_umol),
-            Ntotal_4m_ND = mean(tot_N),
-            Ntotal_4m_ND_se = st.er(tot_N),
-            NP_4m_ND = mean(N.P),
-            NP_4m_ND_se = st.er(N.P))
-```
-
-
 ## Compiling result of calculations to a usable data set.
 We can now take the intermediate data frame generated above to make a complied data frame.
 ```{r Compiling}
@@ -317,7 +254,7 @@ tran.dat <- eg.tran %>%
   distinct(primary_obeserver, secondary_observer, transect_start_time, transect_end_time, depth_m)
   
 ### Master - more will be added later ###
-dat <- data.frame(cbind(eg.site[, c(1:3, 32, 4:9)], tran.dat[, 2:5], nuts.site.eg [,2:11], nuts.site.nday.1m [,2:11], nuts.site.nday.4m [,2:11], so.index[, 12:16], eg.site[, 14:26]))
+dat <- data.frame(cbind(eg.site[, c(1:3, 32, 4:9)], tran.dat[, 2:5], so.index[, 12:16], eg.site[, 14:26]))
 ```
 
 Final set of calculations at site level.
