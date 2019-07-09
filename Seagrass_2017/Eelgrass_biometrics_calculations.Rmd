@@ -334,6 +334,10 @@ dat <- merge(dat, site.bio, by = "site")
 
 ### Clean up ###
 dat$specific_conductivity_transect <- as.numeric(dat$specific_conductivity_transect)
+
+### Add site number ###
+dat <- dat[order(-dat$sea_otter_index_tr), ]
+dat$site_num <- as.factor(1:21)
 ```
 
 ## Export
