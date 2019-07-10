@@ -21,6 +21,7 @@ library(sjPlot)
 library(cowplot)
 library(MuMIn)
 library(AICcmodavg)
+library(LaCroixColoR)
 options(na.action = "na.fail") # needed for MuMIn
 theme_set(theme_classic())
 
@@ -74,6 +75,7 @@ fish.tax <- read.csv("../ALL_DATA/fish_taxonomy_RAW.csv", header = TRUE, strings
 
 ## RAW Nutrient Data ##
 nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+nut.temp <- read.csv("../ALL_DATA/site_abiotic_template_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ### Data Prep
@@ -82,7 +84,8 @@ Sediment data preparation. We will assign the average sediment score from the in
 seds <- sed.site %>% 
   filter(trans_type == "Inside") %>% 
   group_by(site) %>% 
-  summarise(sed_inside_prim = mean(sed1_no, na.rm = TRUE))
+  summarise(sed_inside_prim = mean(sed1_no, na.rm = TRUE),
+            sed_inside_prim_se = st.er(sed1_no))
 
 dat <- merge(tran.dat, seds, by = "site")
 ```
@@ -170,10 +173,42 @@ fishmass.site.fam <- fish.dat %>%
 fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
 
 dat <- merge(dat, fishmass.site.fam, by = "site")
-
-## add site numbers ##
-dat$site_num <- as.character(c(1:21))
 ```
+
+Look at nutrient data
+```{r}
+## Summarize good data by site and sampling type ##
+nut.sum <- nut.dat %>% 
+  filter(site_full != "2017_M_01") %>% 
+  filter(quality == "G") %>% 
+  group_by(site_full, sampling_type, depth_m) %>% 
+  summarise(NOx_umol = mean(nox_umol),
+            NH4_umol = mean(nh4_umol),
+            PO4_umol = mean(po4_umol),
+            NTotal_umol = mean(tot_N),
+            N_P = mean(N.P))
+
+## Merge with template ##
+abiot.final <- nut.temp[, 1:7]
+
+abiot.final$NOx_umol <- c(nut.sum$NOx_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$NOx_umol[nut.sum$sampling_type == "nutday"])
+
+abiot.final$NH4_umol <- c(nut.sum$NH4_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$NH4_umol[nut.sum$sampling_type == "nutday"])
+
+abiot.final$PO4_umol <- c(nut.sum$PO4_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$PO4_umol[nut.sum$sampling_type == "nutday"])
+
+abiot.final$NTotal_umol <- c(nut.sum$NTotal_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$NTotal_umol[nut.sum$sampling_type == "nutday"])
+
+abiot.final$N_P <- c(nut.sum$N_P[nut.sum$sampling_type == "eelgrass"], nut.sum$N_P[nut.sum$sampling_type == "nutday"])
+
+```
+
+Append total N to dat
+```{r}
+dat$Ntotal_site <- abiot.final$NTotal_umol[abiot.final$sample_type == "site"]
+dat$NOx_site <- abiot.final$NOx_umol[abiot.final$sample_type == "site"]
+```
+
 
 ## Tests for normality
 Responses should be tested for normality. If a responce is also a predictor it should not be tranformed unless the resulting model indicates a strange residual structure.
@@ -386,7 +421,7 @@ ggplot(dat[2:21,]) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ## add mean value ##
-dat[1, 67] <- mean(dat$diatom_dens, na.rm = TRUE)
+dat[1, 37] <- mean(dat$diatom_dens, na.rm = TRUE)
 
 ## assess normality again ##
 hist(dat$diatom_dens)
@@ -421,6 +456,42 @@ The suspect grazer v diatom relationships does not look that good at all.
 plot(log(dat$grazermass_shootmass), asin(sqrt(dat$diatom_dens / 100)))
 ```
 
+## Environmental data
+Plots and analyses of environmental data across sites. I will focus on primary sediment, and coordinated nutirents, temp, salinity.
+
+```{r envi dat, echo = FALSE}
+pal <- lacroix_palette("PeachPear")
+
+## Sediment ##
+ggplot(dat) +
+  geom_col(aes(x = site_num, y = sed_inside_prim)) +
+  geom_errorbar(aes(x = site_no, ymin = sed_inside_prim - sed_inside_prim_se, ymax = sed_inside_prim + sed_inside_prim_se), width = 0) +
+  scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, by = 1)) +
+  labs(x = "Site", y = "Primary sediment score +/- SE") +
+  theme(text = element_text(size = 10))
+
+## Temperature ##
+ggplot(subset(abiot.final, sample_type != "site")) +
+  geom_bar(aes(x = as.factor(site_number), y = temperature_c, fill = sample_type), position = "dodge", stat = "identity") +
+  scale_y_continuous(limits = c(0, 16), breaks = seq(0, 16, by = 2)) +
+  scale_fill_manual(values = c("blue3", "deepskyblue"), name = "Sampling\nperiod", labels = c("1m", "4m")) +
+  labs(x = "Site", y = expression('Temperature ('*~degree*C*')'))
+
+## Nitrate ##
+ggplot(abiot.final) +
+  geom_bar(aes(x = as.factor(site_number), y = NOx_umol, fill = sample_type), position = "dodge", stat = "identity") +
+  scale_y_continuous(limits = c(0, 3), breaks = seq(0, 3, by = 0.5)) +
+  scale_fill_manual(values = c("blue3", "deepskyblue", "grey"), name = "Sampling\nperiod", labels = c("1m", "4m", "eelgrass")) +
+  labs(x = "Site", y = "Nitrate (umol)")
+
+## Salinity ##
+ggplot(abiot.final) +
+  geom_bar(aes(x = as.factor(site_number), y = salinity_ppt, fill = sample_type), position = "dodge", stat = "identity") +
+  scale_y_continuous(limits = c(0, 33), breaks = seq(0, 33, by = 2)) +
+  scale_fill_manual(values = c("blue3", "deepskyblue", "grey"), name = "Sampling\nperiod", labels = c("1m", "4m", "eelgrass")) +
+  labs(x = "Site", y = "Salinity (ppt)")
+```
+
 ## Models
 General approach
 1. Pass a global model to the `dredge()` funciton. This global model will include all predictors that make biological sense given the current understanding of trophic relationships and cascades in eelgrass ecosystems. Models will be ranked using AICc, as is recommended with small sample sizes. In general interactions will not be evaluated unless there is a seriously good biological reason.
@@ -433,7 +504,7 @@ General approach
 
 Global model will include, sea otter index, epiphyte load, grazer load, crab biomass, fish biomass, sediment score, total nitrogen, macroalgae, and diatom percent cover. Note transformations of variables where appropraite.
 ```{r mod1 global, echo=FALSE}
-mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + grazermass_shootmass + crab_mass + fish_mass + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)) + sed_inside_prim + Ntotal_site, data = dat)
+mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + grazermass_shootmass + crab_mass + fish_mass + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)) + sed_inside_prim + NOx_site, data = dat)
 ```
 
 Dredge and filter models
@@ -464,7 +535,6 @@ u_hat <- dat$abvgnd_mass_dt - obs_values_hat # residuals
 plot(obs_values_hat, u_hat)
 ```
 
-
 Extract coefficents 
 ```{r coefs top mod1, echo=FALSE}
 ## Summary ##
@@ -489,7 +559,7 @@ p.abv <- ggplot(coef.mod1) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
   scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
   labs(x = "Factor", y = "Estimate +/- 95% CI") +
-  scale_x_discrete(labels = c("Benthic\ndiatoms", "Epiphytes", "Fish", "Sea otter\nindex", "Sediment")) +
+  scale_x_discrete(labels = c("Diatoms", "Epiphytes", "Fish", "Nitrate","Sea otter\nindex", "Sediment")) +
   theme(text = element_text(size = 10))
 ```
 
@@ -497,7 +567,7 @@ p.abv <- ggplot(coef.mod1) +
 
 Global model will include sea otter index, grazer load, crab biomass, fish biomass, sediment score, total nitrogen and macroalgae and diatom percent cover. Note transformations of variables where appropraite.
 ```{r mod2 global, echo=FALSE}
-mod2 <- lm(epiphmass_shootmass_dt ~ sea_otter_index_tr + grazermass_shootmass + crab_mass + fish_mass + sed_inside_prim + Ntotal_site + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
+mod2 <- lm(epiphmass_shootmass_dt ~ sea_otter_index_tr + grazermass_shootmass + crab_mass + fish_mass + sed_inside_prim + NOx_umol + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
 ```
 
 Dredge and filter models
@@ -549,7 +619,7 @@ p.epi <- ggplot(coef.mod2) +
 Global model will include, sea otter index, epiphyte load, crab biomass, fish predator biomass, sediment score, and total nitrogen. Note transformations of variables where appropraite.
 
 ```{r mod3 global, echo=FALSE}
-mod3 <- lm(log(grazermass_shootmass) ~ sea_otter_index_tr + epiphmass_shootmass_dt + crab_mass + fish_mass + sed_inside_prim + Ntotal_site + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
+mod3 <- lm(log(grazermass_shootmass) ~ sea_otter_index_tr + epiphmass_shootmass_dt + crab_mass + fish_mass + sed_inside_prim + NOx_umol + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
 ```
 
 Dredge and filter models
