@@ -200,7 +200,6 @@ abiot.final$PO4_umol <- c(nut.sum$PO4_umol[nut.sum$sampling_type == "eelgrass"],
 abiot.final$NTotal_umol <- c(nut.sum$NTotal_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$NTotal_umol[nut.sum$sampling_type == "nutday"])
 
 abiot.final$N_P <- c(nut.sum$N_P[nut.sum$sampling_type == "eelgrass"], nut.sum$N_P[nut.sum$sampling_type == "nutday"])
-
 ```
 
 Append total N to dat
@@ -557,17 +556,21 @@ p.abv <- ggplot(coef.mod1) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 2) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
-  scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
+  scale_y_continuous(limits = c(-1.1, 1.1), breaks = seq(-1, 1, by = 0.50)) +
   labs(x = "Factor", y = "Estimate +/- 95% CI") +
   scale_x_discrete(labels = c("Diatoms", "Epiphytes", "Fish", "Nitrate","Sea otter\nindex", "Sediment")) +
   theme(text = element_text(size = 10))
+
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt), size = 2) +
+  labs(x = "Sea otter index", y = expression(paste("Aboveground eelgrass biomass (g/m"^"2"*")")))
 ```
 
 ### Model 2 - epiphyte load
 
 Global model will include sea otter index, grazer load, crab biomass, fish biomass, sediment score, total nitrogen and macroalgae and diatom percent cover. Note transformations of variables where appropraite.
 ```{r mod2 global, echo=FALSE}
-mod2 <- lm(epiphmass_shootmass_dt ~ sea_otter_index_tr + grazermass_shootmass + crab_mass + fish_mass + sed_inside_prim + NOx_umol + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
+mod2 <- lm(epiphmass_shootmass_dt ~ sea_otter_index_tr + grazermass_shootmass + crab_mass + fish_mass + sed_inside_prim + NOx_site + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
 ```
 
 Dredge and filter models
@@ -608,9 +611,9 @@ p.epi <- ggplot(coef.mod2) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 2) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
-  scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
+  scale_y_continuous(limits = c(-1.1, 1.1), breaks = seq(-1, 1, by = 0.50)) +
   labs(x = "Factor", y = "Estimate +/- 95% CI") +
-  scale_x_discrete(labels = c("Benthic\ndiatoms", "Crabs", "Fish", "Grazers", "Nitrogen")) +
+  scale_x_discrete(labels = c("Benthic\ndiatoms", "Macroalgae", "Crabs", "Fish", "Grazers", "Nitrate", "Sediment")) +
   theme(text = element_text(size = 10))
 ```
 
@@ -619,7 +622,7 @@ p.epi <- ggplot(coef.mod2) +
 Global model will include, sea otter index, epiphyte load, crab biomass, fish predator biomass, sediment score, and total nitrogen. Note transformations of variables where appropraite.
 
 ```{r mod3 global, echo=FALSE}
-mod3 <- lm(log(grazermass_shootmass) ~ sea_otter_index_tr + epiphmass_shootmass_dt + crab_mass + fish_mass + sed_inside_prim + NOx_umol + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
+mod3 <- lm(log(grazermass_shootmass) ~ sea_otter_index_tr + epiphmass_shootmass_dt + crab_mass + fish_mass + sed_inside_prim + NOx_site + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)), data = dat)
 ```
 
 Dredge and filter models
@@ -660,10 +663,16 @@ p.grz <- ggplot(coef.mod3) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 2) +
   geom_errorbar(aes(x = term, ymin = low, ymax = high), width = 0) +
-  scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
+  scale_y_continuous(limits = c(-1.1, 1.1), breaks = seq(-1, 1, by = 0.50)) +
   labs(x = "Factor", y = "Estimate +/- 95% CI") +
   scale_x_discrete(labels = c("Benthic\ndiatoms", "Crabs", "Epiphytes")) +
   theme(text = element_text(size = 10))
+
+ggplot(dat) +
+  geom_point(aes(x = epiphmass_shootmass_dt, y = grazermass_shootmass), size = 2) +
+  labs(x = "Epiphyte load (g /g eelgrass)", y = "Grazer load (g / g eelgrass)")
+
+predict(mod3.avg)
 ```
 
 ### Model 4 - Crab biomass
@@ -712,13 +721,17 @@ p.crb <- ggplot(coef.mod4) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = Estimate.), size = 2) +
   geom_errorbar(aes(x = term, ymin = round(low, 2), ymax = high), width = 0) +
-  scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
+  scale_y_continuous(limits = c(-1.1, 1.1), breaks = seq(-1, 1, by = 0.50)) +
   labs(x = "Factor", y = "Estimate +/- 95% CI") +
   scale_x_discrete(labels = c("Sea otter\nindex")) +
   theme(text = element_text(size = 10))
+
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index_tr, y = crab_mass), size = 2)
+  
 ```
 
-### Model 5 - Fish predators
+### Model 5 - Fish
 
 Global model will include sea otter index, grazer load, epiphyte load, total eelgrass biomass, crab biomass, sediment score, total nitrogen. Note transformations of variables where appropraite.
 
@@ -764,7 +777,7 @@ p.fsh <- ggplot(coef.mod5) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_point(aes(x = term, y = est), size = 2) +
   geom_errorbar(aes(x = term, ymin = round(low, 2), ymax = high), width = 0) +
-  scale_y_continuous(limits = c(-1, 1), breaks = seq(-1, 1, by = 0.50)) +
+  scale_y_continuous(limits = c(-1.1, 1.1), breaks = seq(-1, 1, by = 0.50)) +
   labs(x = "Factor", y = "Estimate +/- 95% CI") +
   scale_x_discrete(labels = c("Eelgrass", "Crabs", "Sea otter\nindex", "Sediment")) +
   theme(text = element_text(size = 10))
@@ -785,7 +798,6 @@ write.csv(mod3.dr.top, "grz_raw_dredge.csv", row.names = FALSE)
 write.csv(mod4.dr.top, "crb_raw_dredge.csv", row.names = FALSE)
 write.csv(mod5.dr.top, "fsh_raw_dredge.csv", row.names = FALSE)
 ```
-
 
 ## Useful Plots
 Plots of other data that are helpful to look at/show people so they calm down.
