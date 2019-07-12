@@ -1,0 +1,133 @@
+---
+title: "Eelgrass_clam_calculations"
+author: "Wendel Raymond"
+date: "April 24, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r libraries, echo = FALSE}
+library(dplyr)
+library(tidyr)
+library(vegan)
+library(ggplot2)
+
+theme_set(theme_classic())
+```
+
+```{r functions, echo = FALSE}
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+# Clam transect calculations
+From the raw data this script will export a file summarized by site ready for analysis. The goal will be to summaries this data at the site level. Summaries will occur in a few different ways to prep the data for different types on analysis. There are X files generated here. Simple summaries...(fill in more here as appropriate)
+
+## Data import
+All we need is the clam transect data and the clam width-mass conversions. This can be merged with other data that already has been summarized in other scripts. The merging can either happen here or in other scripts depending on the purpose.
+
+Clam data was collected in 8 XX by XX by XX at ~ 0m MLLW.
+
+```{r data}
+clam <- read.csv("../../ALL_DATA/Clam_transect_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+clamWM <- read.csv("../../ALL_DATA/clam_length_weight_conversions.csv", stringsAsFactors = FALSE, header = TRUE)
+
+clam.sed <- read.csv("../../ALL_DATA/Clam_sediment_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+## Calculations
+The first thing to do is to add the width - mass conversions to the staring data frame so that we can convert valvue widths the biomass. This will be done by adding the species specific coefficients to the data frame.
+
+### average coefs
+Multiple values were present for clma W-M coefficients they will be averaged here
+```{r}
+clamWM.mean <- clamWM %>%
+  group_by(species_scientific) %>% 
+  summarise(a = mean(a),
+            b = mean(b))
+```
+
+
+Add width - mass coeffs
+```{r adding length to weight conversion}
+clam <- merge(clam, clamWM.mean, by = "species_scientific", all.x = TRUE)
+# deal with Macoma #
+clam$a <- ifelse(clam$sp_code == "CLMMAC", 0.0046, clam$a)
+clam$b <- ifelse(clam$sp_code == "CLMMAC", 2.5212, clam$b)
+```
+
+Calculate mass
+```{r calcualte mass}
+clam$mass_g <- (clam$a * (clam$width_mm)^clam$b)
+range(clam$mass_g, na.rm = TRUE)
+
+# Some example plots
+ggplot(clam, aes(mass_g)) +
+  geom_histogram()
+
+ggplot(clam, aes(mass_g)) +
+  geom_histogram() +
+  facet_wrap(~place_name)
+
+ggplot(clam, aes(mass_g)) +
+  geom_histogram() +
+  facet_wrap(~sp_code)
+```
+
+### Summary calculations
+Generally we want to summaries by site. This will pool pot type and string.
+
+#### Mass, counts, species
+Summaries by site and species
+```{r clam site and species}
+clam.site.sp <- clam %>% 
+  group_by(site, sp_code) %>% 
+  summarise(total_crab_sp = n(),
+            width = mean(width_mm), 
+            width_se = st.er(width_mm),
+            mass = mean(mass_g),
+            mass_se = st.er(mass_g))
+```
+
+Summaries by site only
+```{r clam site summary}
+clam.site <- clam %>% 
+  group_by(site) %>% 
+  summarise(unique(place_name),
+            unique(date),
+            unique(YYYYMMDD),
+            total_clam = n(),
+            clam_width = mean(width_mm), 
+            clam_width_se = st.er(width_mm),
+            clam_mass = mean(mass_g),
+            clam_mass_se = st.er(mass_g))
+
+# clean up column names
+colnames(clam.site)[1:4] <- c("site", "place_name", "date", "YYYYMMDD")
+```
+
+## Sediment data
+We colleced sediment data at each clam core. We will summarise and add to clam data we alrady summariezed. 
+```{r calm sed}
+site.sed <- clam.sed %>% 
+  group_by(site) %>% 
+  summarise(prim_sed_clam = mean(primary_sediment_score),
+            prim_sed_clam_se = st.er(primary_sediment_score),
+            secd_sed_clam = mean(secondary_sediment_score),
+            secd_sed_clam_se = st.er(secondary_sediment_score))
+```
+
+## Merge
+```{r}
+dat <- merge(clam.site, site.sed, by = "site")
+```
+
+## Export
+```{r export simple summaries}
+write.csv(dat, "../../ALL_DATA/eelgrass_clam_derived.csv", row.names = FALSE)
+```

@@ -25,6 +25,13 @@ library(DT)
 library(sf)
 ```
 
+```{r}
+library(leaflet)
+leaflet() %>% 
+   addTiles(urlTemplate = '//tileservice.charts.noaa.gov/tiles/50000_1/{z}/{x}/{y}.png')  #use NOAA chart tiles here
+```
+
+
 ```{r load data}
 ## Prince of Wales Water Polygon ##
 h2o.utm <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "POW_water_UTM")
