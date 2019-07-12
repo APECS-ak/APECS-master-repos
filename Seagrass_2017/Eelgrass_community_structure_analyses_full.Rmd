@@ -22,6 +22,7 @@ library(cowplot)
 library(MuMIn)
 library(AICcmodavg)
 library(LaCroixColoR)
+library(corrplot)
 options(na.action = "na.fail") # needed for MuMIn
 theme_set(theme_classic())
 
@@ -452,7 +453,15 @@ Another check after doing transfomarions etc.
 
 The suspect grazer v diatom relationships does not look that good at all. 
 ```{r multi check, echo = FALSE}
-plot(log(dat$grazermass_shootmass), asin(sqrt(dat$diatom_dens / 100)))
+## Calculate correlations ##
+dat.cor <- dat[, c(88, 92, 77, 69, 117, 19, 35, 37, 84, 116)]
+colnames(dat.cor) <- c("Crabs", "Fish", "Grazers", "Epiphytes", "Eelgrass", "SOI", "Macroalgae", "Diatoms", "Sediment", "Nitrate")
+
+correl <- cor(dat.cor)
+
+## Plotting correlations ##
+corrplot(correl, method = "color", type = "lower", addCoef.col =  "black", number.cex = 0.5, tl.cex = 0.6, cl.cex = 0.5)
+
 ```
 
 ## Environmental data
