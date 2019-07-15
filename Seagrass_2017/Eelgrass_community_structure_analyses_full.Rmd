@@ -455,11 +455,11 @@ The suspect grazer v diatom relationships does not look that good at all.
 ```{r multi check, echo = FALSE}
 ## Calculate correlations ##
 dat.cor <- dat[, c(88, 92, 77, 69, 117, 19, 35, 37, 84, 116)]
-colnames(dat.cor) <- c("Crabs", "Fish", "Grazers", "Epiphytes", "Eelgrass", "SOI", "Macroalgae", "Diatoms", "Sediment", "Nitrate")
+colnames(dat.cor) <- c("Crabs", "Fish", "Grazers", "Epiphytes", "Eelgrass", "SOI*", "Macroalgae*", "Diatoms*", "Sediment*", "Nitrate*")
 
 ## Transform as necessary ##
 dat.cor <- as.data.frame(cbind(sqrt(dat.cor$Crabs), log(dat.cor$Fish), log(dat.cor$Grazers), dat.cor$Epiphytes, dat.cor$Eelgrass, dat.cor$SOI, asin(sqrt(dat.cor$Macroalgae / 100)), asin(sqrt(dat.cor$Diatoms / 100)), dat.cor$Sediment, dat.cor$Nitrate))
-colnames(dat.cor) <- c("Crabs", "Fish", "Grazers", "Epiphytes", "Eelgrass", "SOI", "Macroalgae", "Diatoms", "Sediment", "Nitrate")
+colnames(dat.cor) <- c("Crabs", "Fish", "Grazers", "Epiphytes", "Eelgrass", "SOI*", "Macroalgae*", "Diatoms*", "Sediment*", "Nitrate*")
 
 correl <- cor(dat.cor)
 
