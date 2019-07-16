@@ -314,13 +314,6 @@ Light avil | none
 Macroalgae | none
 Diatoms | asing-sqrt
 
-## Checking for multicolinearity among common predictors
-Checking for multicolinearity among predictors. There is little evidence for multicolinearity among predictors. This suggests that I can use a standard deviation predictor standardization in models later. Note that diatoms and grazers appear to have a relationships, but both will also need to be assessed for temporal effects. So we may still need to consider a partial standard deviation predictor standardization.
-
-```{r muticol, echo=FALSE}
-pairs(dat[, c( 21, 49, 65, 67, 93, 99, 101, 109, 116, 120)])
-```
-
 ## Variation of predictor variables acorss sites
 In an effort to avoid spurious models, we can look at some of the environmental co-variates across sites to see if there are  patterns. If there seems to be no site effect it may be reasonable to exclude that variable from analysis.
 
@@ -858,6 +851,14 @@ ggplot(dat) +
   labs(x = "Fish mass (kg)", y = bquote('Eelgrass mass' ~(g/m^2))) +
   scale_x_continuous(breaks = c(0, 25, 50, 75, 100, 125, 150)) +
   scale_y_continuous(breaks = c(0, 40, 80, 120, 160)) +
+  theme(text = element_text(size = 10))
+
+## SOI and site ##
+ggplot(dat) +
+  geom_point(aes(x = site_num, y = sea_otter_index_tr)) +
+  labs(x = "Site", y = "Sea otter index") +
+  scale_x_continuous(limits = c(1, 21), breaks = seq(1, 21, by = 1)) +
+  scale_y_continuous(limits = c(-0.8, 1.2), breaks = seq(-0.8, 1.2, by = 0.2)) +
   theme(text = element_text(size = 10))
 ```
 
