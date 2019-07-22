@@ -25,24 +25,24 @@ Load biomass/abundace data, stable isotope, and fatty acid data
 
 Biomass
 ```{r dat bio, echo=FALSE}
-eg <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+eg <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb.sp <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb.sp <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+clm <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm.sp <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+clm.sp <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 
-fsh <- read.csv("C:/Users/Wendubs/Documents/Graduate School/APECS_master/ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+fsh <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Stable Isotope - preliminary
 ```{r dat iso, echo = FALSE}
-si <- read.csv("C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/SI_prelim_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+si <- read.csv("E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/SI_prelim_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 
-bm <- read.csv("C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+bm <- read.csv("E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Fatty Acid - data forthcomming
@@ -161,9 +161,25 @@ pal <- colorRampPalette(brewer.pal(9, "Set1"))
 ggplot(si) +
   geom_point(aes(x = del_C, y = del_N, color = Species_common), size = 2) +
   scale_color_manual(values = pal(19))
-  
 
 ggplot(si) +
   geom_point(aes(x = del_C, y = del_N, color = Sea_otter_region), size = 2)
+```
+
+```{r}
+limp <- si %>% 
+  filter(Species_common == "Limpet")
+
+ggplot(limp) +
+  geom_point(aes(x = n_pooled, y = del_C, color = Place_name), size = 2) +
+  scale_color_manual(values = pal(6))
+
+ggplot(limp) +
+  geom_point(aes(x = Collection_Date, y = del_C, color = Place_name), size = 2) +
+  scale_color_manual(values = pal(6))
+
+ggplot(limp) +
+  geom_point(aes(x = del_C, y = del_N, color = Place_name), size = 2) +
+  scale_color_manual(values = pal(6))
 ```
 
