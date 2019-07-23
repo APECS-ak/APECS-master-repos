@@ -23,19 +23,23 @@ theme_set(theme_classic())
 ## Load data
 Load biomass/abundace data, stable isotope, and fatty acid data
 
-Biomass
+Biomass and oceanography
 ```{r dat bio, echo=FALSE}
-eg <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+eg <- read.csv("../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb <- read.csv("../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb.sp <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb.sp <- read.csv("../ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+clm <- read.csv("../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-clm.sp <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+clm.sp <- read.csv("../ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 
-fsh <- read.csv("E:/wraymond2/My Documents/Graduate School/APECS_master/ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+fsh <- read.csv("../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+pom <- read.csv("../ALL_DATA/POM_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+oce <- read.csv("../ALL_DATA/Site_oceanography_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Stable Isotope - preliminary
@@ -56,6 +60,7 @@ Merge all the different biomass data types into one data frame
 dat <- merge(eg, crb, by = c("site", "place_name"), all.x = TRUE)
 dat <- merge(dat, clm[, c(1, 5:13)], by = "site")
 dat <- merge(dat, fsh, by = "site")
+dat <- merge(dat, oce[, c(1, 6:19)], by = "site")
 ```
 
 ## Data exploration
@@ -147,6 +152,16 @@ ggplot(dat) +
   geom_col(aes(x = site, y = PRICKSN / total_fish_mass)) +
   labs(x = "Site", y = "Proportion snake prickleback mass")
 ```
+
+### Oceanography
+```{r oce, echo = false}
+ggplot(dat) +
+  geom_col(aes(x = site, y = X1m_temp_C))
+
+ggplot(dat) +
+  geom_col(aes(x = site, y = X5m_temp_C))
+```
+
 
 ### Stable Isotopes
 Merge species with si values
