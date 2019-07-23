@@ -1,0 +1,43 @@
+---
+title: "Eelgrass_POM_calculations_2018"
+author: "Wendel Raymond"
+date: "July 23, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Particulate organic matter (POM) calculations
+From the raw cleaned data this script will export a file summarized by site ready for analysis. Major task are the calculation 
+
+## Libraries
+Processing of this data will require the following
+```{r libraries}
+library(dplyr)
+library(ggplot2)
+```
+
+## Data to import
+Data includes the field POM collection data, filter masses
+```{r data}
+pom <- read.csv("../ALL_DATA/POM_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+
+filt <- read.csv("../ALL_DATA/POM_filter_mass_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+## Caclulate POM organic and inorganic mass
+```{r filter}
+filt$POM_org_mass <- (filt$dry_mass_g - filt$pan_mass_g) - filt$pre_dry_mass_g
+filt$POM_inorg_mass <- (filt$burn_dry_mass_g - filt$pan_mass_g) - filt$pre_dry_mass_g
+```
+
+## Merge POM org/inorg with POM data
+```{r merge}
+pom <- merge(pom, filt[, 3:9], by.x = "quant_filter_no", by.y = "filter_no")
+```
+
+## Export
+```{r export}
+write.csv(pom, "../ALL_DATA/POM_2018_derived.csv", row.names = FALSE)
+```
+
