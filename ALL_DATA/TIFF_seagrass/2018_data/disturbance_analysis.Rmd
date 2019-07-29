@@ -1,0 +1,352 @@
+---
+title: "Untitled"
+author: "Tiff Stephens"
+date: "5/22/2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+\elevations \densities \biomasses
+```{r}
+df.grass <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Seagrass elevation, density, biomass [2018]/elevation_density_biomass_2018_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+```{r}
+glimpse(df.grass)
+df1 <- aggregate(beach_slope_percent ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df1b <- aggregate(beach_slope_angle ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df2 <- aggregate(fucus_upper_elev_mllw_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df3 <- aggregate(fucus_lower_elev_mllw_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df4 <- aggregate(fucus_mean_elev_mllw_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df5 <- aggregate(fucus_band_height_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df6 <- aggregate(edge_diffuse_elev_mllw_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df7 <- aggregate(edge_continuous_elev_mllw_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df8 <- aggregate(diffuse_band_height_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df9 <- aggregate(diffuse_band_sloped_width_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df10 <- aggregate(diffuse_band_horizontal_width_cm ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df11 <- aggregate(shoot_density_diffuse_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df12 <- aggregate(shoot_density_continuous_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df13 <- aggregate(shoot_density_inside_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df14 <- aggregate(flower_density_diffuse_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df15 <- aggregate(flower_density_continuous_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df16 <- aggregate(flower_density_inside_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df17 <- aggregate(leaf_dw_g_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df18 <- aggregate(rhizome_dw_g_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df18 <- aggregate(total_biomass_dw_g_m2 ~ site_name, data = df.grass, mean, na.rm = TRUE)
+df19 <- aggregate(leaf.rhizome ~ site_name, data = df.grass, mean, na.rm = TRUE)
+
+
+df.grass.means <- left_join(df1, df1b, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df2, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df3, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df4, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df5, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df6, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df7, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df8, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df9, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df10, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df11, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df12, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df13, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df14, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df15, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df16, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df17, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df18, by = c("site_name"))
+df.grass.means <- left_join(df.grass.means, df19, by = c("site_name"))
+
+rm(df1)
+rm(df1b)
+rm(df2)
+rm(df3)
+rm(df4)
+rm(df5)
+rm(df6)
+rm(df7)
+rm(df8)
+rm(df9)
+rm(df10)
+rm(df11)
+rm(df12)
+rm(df13)
+rm(df14)
+rm(df15)
+rm(df16)
+rm(df17)
+rm(df18)
+rm(df19)
+```
+
+
+
+\import \pits
+```{r}
+df.pitsed <- read.csv("/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/DATA_ARCHIVING/Tiff/Pits and sediment [2017,2018]/seagrass_pit_sediment_all_CLEAN.csv", stringsAsFactors = FALSE, header = TRUE)
+
+df.pitsed <- df.pitsed[-c(1:630), ] # remove 2017 data
+df.pitsed <- df.pitsed[ ,-c(14,15,19,20)] 
+```
+
+```{r}
+glimpse(df.pitsed)
+
+df1 <- aggregate(pit_count_bin ~ site_name + trans_loc, data = df.pitsed, sum, na.rm = TRUE)
+df2 <- aggregate(pit_density_m2 ~ site_name + trans_loc, data = df.pitsed, mean, na.rm = TRUE)
+df3 <- aggregate(sed1_no ~ site_name + trans_loc, data = df.pitsed, mean, na.rm = TRUE)
+df4 <- aggregate(sed2_no ~ site_name + trans_loc, data = df.pitsed, mean, na.rm = TRUE)
+df5 <- aggregate(sed_avg_no ~ site_name + trans_loc, data = df.pitsed, mean, na.rm = TRUE)
+
+
+
+# summarise sediment quality with transects in independent columns
+df1 <- spread(df1, key = trans_loc, value = pit_count_bin) # split into three columns
+colnames(df1)[2] <- "pit_count_edge" # change column names
+colnames(df1)[3] <- "pit_count_inside" # change column names
+colnames(df1)[4] <- "pit_count_outside" # change column names
+df1 <- df1 %>%
+  mutate(pit_count_abovegrass = pit_count_edge + pit_count_outside) %>%
+  mutate(pit_count_site = pit_count_edge + pit_count_inside + pit_count_outside) 
+
+df2 <- spread(df2, key = trans_loc, value = pit_density_m2) # split into three columns
+colnames(df2)[2] <- "pit_density_m2_edge" # change column names
+colnames(df2)[3] <- "pit_density_m2_inside" # change column names
+colnames(df2)[4] <- "pit_density_m2_outside" # change column names
+df2 <- df2 %>%
+  mutate(pit_density_m2_site = (pit_density_m2_edge + pit_density_m2_inside + pit_density_m2_outside) / 3)
+
+df3 <- spread(df3, key = trans_loc, value = sed1_no) # split into three columns
+colnames(df3)[2] <- "sed1_edge" # change column names
+colnames(df3)[3] <- "sed1_inside" # change column names
+colnames(df3)[4] <- "sed1_outside" # change column names
+df3 <- df3 %>%
+  mutate(sed1_site = (sed1_edge + sed1_inside + sed1_outside) / 3)
+
+df4 <- spread(df4, key = trans_loc, value = sed2_no) # split into three columns
+colnames(df4)[2] <- "sed2_edge" # change column names
+colnames(df4)[3] <- "sed2_inside" # change column names
+colnames(df4)[4] <- "sed2_outside" # change column names
+df4 <- df4 %>%
+  mutate(sed2_site = (sed2_edge + sed2_inside + sed2_outside) / 3)
+
+df5 <- spread(df5, key = trans_loc, value = sed_avg_no) # split into three columns
+colnames(df5)[2] <- "sed_avg_edge" # change column names
+colnames(df5)[3] <- "sed_avg_inside" # change column names
+colnames(df5)[4] <- "sed_avg_outside" # change column names
+df5 <- df5 %>%
+  mutate(sed_avg_site = (sed_avg_edge + sed_avg_inside + sed_avg_outside) / 3)
+
+
+
+
+df.pitsed.means <- left_join(df1, df2, by = c("site_name")) # join both seds together
+df.pitsed.means <- left_join(df.pitsed.means, df3, by = c("site_name"))
+df.pitsed.means <- left_join(df.pitsed.means, df4, by = c("site_name"))
+df.pitsed.means <- left_join(df.pitsed.means, df5, by = c("site_name"))
+
+rm(df1)
+rm(df2)
+rm(df3)
+rm(df4)
+rm(df5)
+```
+
+
+
+
+\join
+```{r}
+df.all <- left_join(df.grass.means, df.pitsed.means, by = c("site_name"))
+
+#join other site data
+df.temp <- df.pitsed[ ,-c(6, 8:16)] 
+df.temp <- unique(df.temp[c("site_name", "site_code", "latitude_N", "longitude_E", "so_region", "date_mm.dd.yyyy")])
+
+df.all <- left_join(df.temp, df.all, by = c("site_name"))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\correcting \elevation \by \fucus
+```{r}
+# there is a negative correlation between fucus upper elevation and elevation of continuous edge
+
+summary(df.all) # mean upper fucus is 228.4
+```
+
+```{r}
+# fucus correction
+df.all = df.all %>% 
+  #mutate(edge_diffuse_elev_corrct_pos = edge_diffuse_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) %>%
+  #mutate(edge_continuous_elev_corrct_pos = edge_continuous_elev_mllw_cm / (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_diffuse_elev_corrct = edge_diffuse_elev_mllw_cm * (fucus_mean_elev_mllw_cm/169.72)) %>%
+  mutate(edge_continuous_elev_corrct = edge_continuous_elev_mllw_cm * (fucus_mean_elev_mllw_cm/169.72))
+
+#colnames(df.elev.means)[2] <- "diffuse_band_distance_cm" # change column names
+#colnames(df.elev.means)[9] <- "diffuse_band_height_cm" # change column names
+#colnames(df.elev.means)[10] <- "diffuse_band_area_m2" # change column names
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\primary \regressions \pits \elev
+```{r}
+glimpse(df.all)
+
+fit <- nls(edge_continuous_elev_mllw_cm ~ SSasymp(pit_density_m2_site, yf, y0, log_alpha), data = df.all)
+fit
+alpha = exp(2.022) #enter value from "log_alpha"
+
+
+nls((edge_continuous_elev_mllw_cm) ~ yf + (y0 - yf) * exp(-alpha * pit_density_m2_site), 
+    data = df.all,
+    start = list(y0 = 48.890, yf = -47.519, alpha = 7.55341667023))
+
+#0.02517257929789 site
+#0.0373284431 abovegrass
+#0.0455474791175 outside
+
+
+p1 = ggplot(df.all, aes(x = pit_density_m2_site, y = edge_continuous_elev_mllw_cm)) + 
+  geom_point(size=2) +
+  stat_smooth(method = "nls", formula = y ~ SSasymp(x, Asym, R0, lrc), se = FALSE)
+  #geom_text(aes(label = site_name), size = 2)
+plot(p1)
+
+
+
+
+
+glimpse(df.all)
+summary(df.all)
+
+linear.model <- (y ~ x)
+
+p2 = ggplot(df.all, aes(pit_density_m2_site, log(edge_continuous_elev_mllw_cm + 75))) +
+  geom_point(size=2) + # allows for trendline on general trend
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE, fullrange = FALSE) +
+  #xlab("Sea Otter Index (PC1)")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
+  #geom_text(aes(label=site_name), size=2) +
+  #geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed", size = 0.5) +
+  stat_poly_eq(formula = linear.model,
+        label.x = "right",
+        label.y = "top",
+        parse = TRUE) +
+  stat_fit_glance(method = "lm", 
+        method.args = list(formula = linear.model),
+        label.x = "left",
+        label.y = "top",
+        aes(label = paste("italic(P)*\"-value = \"*", 
+        signif(..p.value.., digits = 4), sep = "")),
+        parse = TRUE)
+plot(p2)
+```
+
+
+
+
+
+
+
+
+
+
+
+\scatterplot
+```{r}
+glimpse(df.all)
+
+linear.model <- (y ~ x)
+
+p2 = ggplot(df.all, aes(beach_slope_angle, fucus_upper_elev_mllw_cm, color = so_region)) +
+  geom_point(size=2) + # allows for trendline on general trend
+  geom_smooth(method = lm, formula = y ~ x, se = FALSE, fullrange = FALSE) +
+  #xlab("Sea Otter Index (PC1)")+ylab("Diffuse edge elevation (cm, MLLW)") +
+  #theme(legend.title=element_text(size=8), legend.text=element_text(size=8)) +
+  geom_text(aes(label=site_name), size=2) +
+  #geom_abline(intercept = 0, slope = 1, color = "red", linetype = "dashed", size = 0.5) +
+  stat_poly_eq(formula = linear.model,
+        label.x = "right",
+        label.y = "top",
+        parse = TRUE) +
+  stat_fit_glance(method = "lm", 
+        method.args = list(formula = linear.model),
+        label.x = "left",
+        label.y = "top",
+        aes(label = paste("italic(P)*\"-value = \"*", 
+        signif(..p.value.., digits = 4), sep = "")),
+        parse = TRUE)
+plot(p2)
+```
+
+\barplot
+```{r}
+p = ggplot(df.all, aes(site_name, edge_continuous_elev_mllw_cm , fill = so_region)) +
+  stat_summary(fun.y=mean, geom="bar", position="dodge") +
+  stat_summary(fun.data=mean_se, geom="errorbar", position=position_dodge(width=0.90), width=0.1) +
+  #labs(y="Blade RGR (mm/d)", title="Blade Elongation")+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5))
+  #facet_wrap(~independent, scales = "free")
+plot(p)
+```
+
+\boxplot
+```{r}
+df.all$so_region=factor(df.all$so_region, levels=c("Low","Mid","High")) # order sites
+
+p <- ggplot(df.all, aes(so_region, fucus_upper_elev_mllw_cm)) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(alpha = 0.3, width = 0.15) +
+  theme(legend.position="right") 
+  #theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0)) +
+  #xlab("Sea otter presence")+ylab("Mean elevation of Fucus band (cm, MLLW)")
+  #facet_wrap(~sediment)
+plot(p)
+
+```
+
