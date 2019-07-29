@@ -25,23 +25,20 @@ library(DT)
 library(sf)
 ```
 
-```{r}
-library(leaflet)
-leaflet() %>% 
-   addTiles(urlTemplate = '//tileservice.charts.noaa.gov/tiles/50000_1/{z}/{x}/{y}.png')  #use NOAA chart tiles here
-```
-
-
 ```{r load data}
 ## Prince of Wales Water Polygon ##
-h2o.utm <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "POW_water_UTM")
+h2o.utm <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "POW_water_UTM")
 h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
 ## Create survey area
-### Where is your site?
+### Where is your site? 
+
+THIS IS REALLY IMPORTANT
+
 Input Lat/Long in decimal degrees below. Make sure that the site is "in the water"! Otherwise this wont work.
 ```{r site}
+## input your site coordinants in the site object leave everything else the same ##
 site <- structure(list(id = "site", longitude = -133.0011, latitude = 55.344914), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
 xy <- site[,c(2,3)]
 
@@ -53,7 +50,7 @@ site <- spTransform(site, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0"))
 
 ### Make the polygon
 Some spatial math happens here. Its scary.
-```{r}
+```{r poly}
 buff <- gBuffer(site, byid = TRUE, width = 3704, quadsegs = 10) # create buffer
 buff <- spTransform(buff, CRS("+init=epsg:4326")) # transform buffer
 buff.water <- gIntersection(h2o.latlong, buff, byid = TRUE) # clip the buffer area by water so we only have water area left
@@ -78,23 +75,9 @@ a <- (2500 * length(survey.poly.utm) / 1000000) # caculate area of the polygon i
 ```{r make map}
 site.latlong <- spTransform(site, CRS("+init=epsg:4326"))
 leaflet() %>% 
-  addProviderTiles(providers$Esri.WorldImagery) %>% 
+  addTiles(urlTemplate = '//tileservice.charts.noaa.gov/tiles/50000_1/{z}/{x}/{y}.png') %>% 
   addCircleMarkers(data = site, ~longitude, ~latitude, color = "black", fillOpacity = 1, stroke = FALSE, radius = 5) %>% 
   addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "yellow", fillOpacity = 0.5, group = "POW")
-
-
-
-
-library(rgeos)
-gArea(a)
-
-
-
-
-#leaflet() %>% 
-  #addTiles(owi.usgs.gov/blog/basemaps) %>% 
-  #addCircleMarkers(data = site, ~longitude, ~latitude, color = "black", fillOpacity = 1, stroke = FALSE, radius = 5) %>% 
-  #addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "yellow", fillOpacity = 0.5, group = "POW")
 ```
 
 
