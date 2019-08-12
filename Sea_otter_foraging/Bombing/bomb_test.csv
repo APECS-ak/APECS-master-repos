@@ -1,149 +1,197 @@
-SIN,KJ,Season,Species,Sex,Site,Comments,star
-403900,10.3249,Spring,apc,,Soda Bay,,
-403901,12.5029,Spring,apc,,Soda Bay,,
-403902,9.2141,Spring,apc,,Soda Bay,,
-403903,9.2035,Spring,apc,,Soda Bay,,
-403904,8.2414,Spring,apc,,Soda Bay,,
-403905,13.1959,Summer,apc,,Soda Bay,,
-403906,14.1471,Summer,apc,,Soda Bay,,
-403907,14.038,Summer,apc,,Soda Bay,,
-403908,15.074,Summer,apc,,Soda Bay,,
-403909,15.1328,Summer,apc,,Soda Bay,,
-403925,20.2365,Spring,sag,,Craig,,
-403926,19.8869,Spring,sag,,Craig,,
-403927,20.2449,Spring,sag,,Craig,,
-403928,19.9308,Spring,sag,,Craig,,
-403930,17.8391,Summer,sag,,Craig,,
-403931,19.0236,Summer,sag,,Craig,,
-403932,18.3301,Summer,sag,,Craig,,
-403933,19.4206,Summer,sag,,Craig,,
-403934,15.8565,Summer,sag,,Craig,,
-403935,17.9501,Spring,prs,,Craig,,
-403936,17.8007,Spring,prs,,Craig,,
-403937,20.5929,Spring,prs,,Craig,,
-403938,19.7789,Spring,prs,,Craig,,
-403939,19.1607,Spring,prs,,Craig,,
-403940,18.9653,Summer,prs,,Craig,,
-403941,18.1348,Summer,prs,,Craig,,
-403942,18.645,Summer,prs,,Craig,,
-403943,18.2688,Summer,prs,,Craig,,
-403944,18.4061,Summer,prs,,Craig,,
-403945,19.5621,Spring,cln,,Craig,,
-403946,19.0527,Spring,cln,,Craig,,
-403947,19.8886,Spring,cln,,Craig,,
-403948,19.825,Spring,cln,,Craig,,
-403949,19.6259,Spring,cln,,Craig,,
-403950,16.8891,Summer,cln,,Craig,,
-403951,17.2901,Summer,cln,,Craig,,
-403952,18.1767,Summer,cln,,Craig,,
-403953,19.2341,Summer,cln,,Craig,,
-403954,17.1011,Summer,cln,,Craig,,
-403960,21.2927,Spring,tec,m,Nossuk,,
-403961,20.6917,Spring,tec,m,Nossuk,,
-403962,17.7161,Spring,tec,m,Nossuk,,
-403963,19.8852,Spring,tec,m,Nossuk,,
-403964,20.4837,Spring,tec,m,Nossuk,,
-403967,19.9154,Spring,cef,,Craig,,
-403968,22.7806,Spring,cef,,Craig,,
-403969,20.7307,Spring,cef,,Craig,,
-403970,19.9523,Spring,cef,,Craig,,
-403973,21.9948,Spring,tes,,Craig,,
-403977,17.0987,Spring,cap,m,Soda Bay,,
-403978,20.1217,Spring,cap,m,Soda Bay,,
-403979,19.4706,Spring,cap,m,Soda Bay,,
-403980,20.4551,Spring,cap,m,Soda Bay,,
-403981,20.7933,Spring,cap,m,Soda Bay,,
-403984,20.8236,Spring,cam,m,Soda Bay,,
-403986,18.6343,Spring,cam,m,Soda Bay,,
-403988,20.922,Summer,cao,m,Craig,,
-403989,17.8876,Spring,sag,,Nossuk,,
-403990,20.0182,Spring,prs,,Soda Bay,,
-403991,19.7402,Spring,prs,,Soda Bay,,
-403992,19.9902,Spring,prs,,Soda Bay,,
-403993,19.9907,Spring,prs,,Soda Bay,,
-403994,19.9112,Spring,prs,,Soda Bay,,
-403995,19.896,Spring,sag,,Soda Bay,,
-403996,20.5103,Spring,sag,,Soda Bay,,
-403997,17.7215,Spring,sag,,Soda Bay,,
-403998,21.6586,Summer,cam,f,Soda Bay,,
-403999,17.5577,Summer,cam,f,Soda Bay,,
-404000,20.5691,Summer,cam,m,Soda Bay,,
-404001,11.0772,Winter,apc,,Soda Bay,,
-404002,12.3799,Winter,apc,,Soda Bay,,
-404003,13.374,Winter,apc,,Soda Bay,,
-404005,19.8153,Spring,sag,,Soda Bay,,
-404007,20.3572,Spring,cln,,Nossuk,,
-404008,20.8148,Spring,cln,,Nossuk,,
-404009,20.9417,Spring,cln,,Nossuk,,
-404010,24.5338,Spring,prs,,Nossuk,,
-404011,20.4733,Spring,prs,,Nossuk,,
-404012,20.2544,Spring,prs,,Nossuk,,
-404013,19.5258,Spring,prs,,Nossuk,,
-404016,20.4021,Spring,sag,,Soda Bay,,
-404020,20.7444,Spring,stf,,,,
-404021,21.2705,Spring,stf,,,,
-404024,27.2895,Summer,pio,,Soda Bay,,stomach
-404025,18.5981,Summer,pio,,Soda Bay,,feet
-404026,22.7306,Summer,pio,,Soda Bay,,gonads
-404027,27.1101,Summer,pio,,Soda Bay,,stomach
-404028,23.2873,Summer,pio,,Soda Bay,,gonads
-404029,18.6604,Summer,pio,,Soda Bay,,feet
-404030,26.5933,Summer,pio,,Soda Bay,,stomach
-404031,22.6417,Summer,pio,,Soda Bay,,gonads
-404032,18.3336,Summer,pio,,Soda Bay,,feet
-404033,8.9284,Winter,apc,,Soda Bay,combined 2,
-404035,19.2436,Winter,cln,,Soda Bay,,
-404036,18.6998,Winter,cln,,Soda Bay,,
-404037,20.1497,Winter,cln,,Soda Bay,,
-404038,19.2444,Winter,prs,,Soda Bay,,
-404039,18.9342,Winter,prs,,Soda Bay,,
-404040,18.9071,Winter,prs,,Soda Bay,,
-404041,19.061,Winter,prs,,Soda Bay,,
-404043,20.5649,Winter,sag,,Soda Bay,,
-404050,22.466,Summer,nul,,Craig,,
-404888,26.2449,Summer,pio,,Soda Bay,"composite (404024, 404025, 404026)",whole
-404999,25.5925,Summer,pio,,Soda Bay,"composite (404027, 404028, 404029)",whole
-404054,11.6658,Summer,squid eggs,,Nossuk,,
-404055,18.756,Winter,sag,,Craig,,
-404056,19.5378,Winter,sag,,Craig,,
-404057,18.4655,Winter,sag,,Craig,,
-404058,19.3882,Winter,sag,,Craig,,
-404059,17.1176,Summer,cln,,Soda Bay,,
-404060,26.4026,Spring,pio,,Craig,,
-404060,27.119,Spring,pio,,Craig,replicate,stomach
-404061,17.93,Summer,sag,,Soda Bay,,
-404062,17.1446,Summer,sag,,Soda Bay,,
-404063,15.4426,Winter,prs,,Craig,,
-404064,17.6711,Summer,sag,,Soda Bay,,
-404065,21.4552,Spring,pio,,Craig,,gonads
-404066,18.6571,Summer,sag,,Soda Bay,,
-404067,18.1269,Winter,prs,,Craig,,
-404068,17.1151,Winter,prs,,Craig,,
-404069,17.5711,Winter,prs,,Craig,,
-404070,16.4702,Summer,prs,,Soda Bay,,
-404071,28.0847,Winter,pio,,Craig,,stomach
-404072,18.7031,Summer,stf,,Soda Bay,,
-404073,19.6611,Winter,prs,,Craig,,
-404074,17.3823,Summer,cln,,Soda Bay,,
-404075,17.4853,Summer,cln,,Soda Bay,,
-404076,14.0104,Summer,stf,,Soda Bay,,
-404077,18.4237,Winter,cln,,Craig,,
-404078,17.8744,Summer,prs,,Soda Bay,,
-404079,18.1539,Summer,sag,,Soda Bay,,
-404080,16.9537,Summer,prs,,Soda Bay,,
-404081,21.3567,Summer,std,,Soda Bay,,
-404082,17.9332,Summer,prs,,Soda Bay,,
-404083,18.0888,Summer,prs,,Soda Bay,,
-404084,22.38,Winter,pio,,Craig,,gonads
-404086,18.8549,Winter,sag,,Craig,,
-404087,15.9076,Summer,cln,,Soda Bay,,
-404088,15.5399,Winter,stf,,Soda Bay,,
-404089,16.6767,Winter,pio,,Craig,,feet
-404090,12.352,Summer,stf,,Soda Bay,,
-404091,25.2073,Spring,evt,,Craig,,stomach
-404092,18.8041,Spring,pio,,Craig,,feet
-404093,21.6912,Summer,pas,,Soda Bay,,
-404094,19.9276,Summer,std,,Soda Bay,,
-404095,19.004,Summer,std,,Craig,,
-404096,13.1506,Summer,stf,,Craig,,
-404097,17.0683,Summer,std,,Soda Bay,,
+SIN,KJ,Season,Species,Sex,Site,Comments,star,size
+403900,10.3249,Spring,apc,,Soda Bay,,,470
+403901,12.5029,Spring,apc,,Soda Bay,,,460
+403902,9.2141,Spring,apc,,Soda Bay,,,240
+403903,9.2035,Spring,apc,,Soda Bay,,,80
+403904,8.2414,Spring,apc,,Soda Bay,,,80
+403905,13.1959,Summer,apc,,Soda Bay,,,220
+403906,14.1471,Summer,apc,,Soda Bay,,,200
+403907,14.038,Summer,apc,,Soda Bay,,,270
+403908,15.074,Summer,apc,,Soda Bay,,,230
+403909,15.1328,Summer,apc,,Soda Bay,,,230
+403925,20.2365,Spring,sag,,Craig,,,85
+403926,19.8869,Spring,sag,,Craig,,,81
+403927,20.2449,Spring,sag,,Craig,,,62
+403928,19.9308,Spring,sag,,Craig,,,60
+403929,20.3686,Spring,sag,,Craig,,,23
+403930,17.8391,Summer,sag,,Craig,,,64.5
+403931,19.0236,Summer,sag,,Craig,,,55.5
+403932,18.3301,Summer,sag,,Craig,,,67
+403933,19.4206,Summer,sag,,Craig,,,51
+403934,15.8565,Summer,sag,,Craig,,,73.5
+403935,17.9501,Spring,prs,,Craig,,,42
+403936,17.8007,Spring,prs,,Craig,,,45
+403937,20.5929,Spring,prs,,Craig,,,52
+403938,19.7789,Spring,prs,,Craig,,,39
+403939,19.1607,Spring,prs,,Craig,,,47.5
+403940,18.9653,Summer,prs,,Craig,,,53
+403941,18.1348,Summer,prs,,Craig,,,58
+403942,18.645,Summer,prs,,Craig,,,55.5
+403943,18.2688,Summer,prs,,Craig,,,60
+403944,18.4061,Summer,prs,,Craig,,,54
+403945,19.5621,Spring,cln,,Craig,,,50
+403946,19.0527,Spring,cln,,Craig,,,42
+403947,19.8886,Spring,cln,,Craig,,,52
+403948,19.825,Spring,cln,,Craig,,,54.5
+403949,19.6259,Spring,cln,,Craig,,,30
+403950,16.8891,Summer,cln,,Craig,,,44
+403951,17.2901,Summer,cln,,Craig,,,59
+403952,18.1767,Summer,cln,,Craig,,,59.5
+403953,19.2341,Summer,cln,,Craig,,,56.5
+403954,17.1011,Summer,cln,,Craig,,,46.5
+403955,19.8699,Spring,nul,,Craig,,,27
+403956,21.5862,Spring,nul,,Craig,,,29
+403957,19.6349,Spring,nul,,Craig,,,30
+403958,19.7954,Spring,nul,,Craig,,,25
+403959,19.2078,Spring,nul,,Craig,,,27
+403960,21.2927,Spring,tec,m,Nossuk,,,55
+403961,20.6917,Spring,tec,m,Nossuk,,,52
+403962,17.7161,Spring,tec,m,Nossuk,,,57
+403963,19.8852,Spring,tec,m,Nossuk,,,59
+403964,20.4837,Spring,tec,m,Nossuk,,,66
+403965,16.3455,Spring,cao,,Craig,,,29.5
+403966,20.1765,Spring,cao,,Craig,,,29
+403967,19.9154,Spring,cef,,Craig,,,64
+403968,22.7806,Spring,cef,,Craig,,,67
+403969,20.7307,Spring,cef,,Craig,,,69
+403970,19.9523,Spring,cef,,Craig,,,53
+403971,20.1545,Spring,cef,,Craig,,,45
+403972,20.4649,Spring,tes,,Craig,,,24
+403973,21.9948,Spring,tes,,Craig,,,26
+403974,19.6133,Spring,tes,,Craig,,,23
+403975,20.844,Spring,tes,,Craig,,,24
+403976,20.2745,Spring,tes,,Craig,,,21
+403977,17.0987,Spring,cap,m,Soda Bay,,,143
+403978,20.1217,Spring,cap,m,Soda Bay,,,160
+403979,19.4706,Spring,cap,m,Soda Bay,,,138
+403980,20.4551,Spring,cap,m,Soda Bay,,,135
+403981,20.7933,Spring,cap,m,Soda Bay,,,121.5
+403982,11.9277,Spring,cam,m,Soda Bay,,,43
+403984,20.8236,Spring,cam,m,Soda Bay,,,47
+403985,9.7525,Spring,cam,m,Soda Bay,,,41
+403986,18.6343,Spring,cam,m,Soda Bay,,,185
+403987,19.0025,Summer,cao,f,Craig,,,32.5
+403988,20.922,Summer,cao,m,Craig,,,31.5
+403989,17.8876,Spring,sag,,Nossuk,,,75
+403990,20.0182,Spring,prs,,Soda Bay,,,51
+403991,19.7402,Spring,prs,,Soda Bay,,,68
+403992,19.9902,Spring,prs,,Soda Bay,,,56
+403993,19.9907,Spring,prs,,Soda Bay,,,45
+403994,19.9112,Spring,prs,,Soda Bay,,,65
+403995,19.896,Spring,sag,,Soda Bay,,,65.5
+403996,20.5103,Spring,sag,,Soda Bay,,,45
+403997,17.7215,Spring,sag,,Soda Bay,,,86
+403998,21.6586,Summer,cam,f,Soda Bay,,,160
+403999,17.5577,Summer,cam,f,Soda Bay,,,71
+404000,20.5691,Summer,cam,m,Soda Bay,,,89
+404001,11.0772,Winter,apc,,Soda Bay,,,250
+404002,12.3799,Winter,apc,,Soda Bay,,,350
+404003,13.374,Winter,apc,,Soda Bay,,,250
+404004,11.8159,Winter,apc,,Soda Bay,,,250
+404005,19.8153,Spring,sag,,Soda Bay,,,37
+404006,19.225,Spring,cln,,Nossuk,,,25
+404007,20.3572,Spring,cln,,Nossuk,,,27
+404008,20.8148,Spring,cln,,Nossuk,,,30
+404009,20.9417,Spring,cln,,Nossuk,,,36
+404010,24.5338,Spring,prs,,Nossuk,,,32
+404011,20.4733,Spring,prs,,Nossuk,,,31
+404012,20.2544,Spring,prs,,Nossuk,,,31
+404013,19.5258,Spring,prs,,Nossuk,,,32
+404014,15.9631,Spring,std,,Craig,,,46
+404016,20.4021,Spring,sag,,Soda Bay,,,26
+404020,20.7444,Spring,stf,,,,,57
+404021,21.2705,Spring,stf,,,,,52
+404024,27.2895,Summer,pio,,Soda Bay,,stomach,79
+404025,18.5981,Summer,pio,,Soda Bay,,feet,79
+404026,22.7306,Summer,pio,,Soda Bay,,gonads,79
+404027,27.1101,Summer,pio,,Soda Bay,,stomach,90
+404028,23.2873,Summer,pio,,Soda Bay,,gonads,90
+404029,18.6604,Summer,pio,,Soda Bay,,feet,90
+404030,26.5933,Summer,pio,,Soda Bay,,stomach,79
+404031,22.6417,Summer,pio,,Soda Bay,,gonads,79
+404032,18.3336,Summer,pio,,Soda Bay,,feet,79
+404033,8.9284,Winter,apc,,Soda Bay,combined 2,,80
+404035,19.2436,Winter,cln,,Soda Bay,,,62
+404036,18.6998,Winter,cln,,Soda Bay,,,49
+404037,20.1497,Winter,cln,,Soda Bay,,,58
+404038,19.2444,Winter,prs,,Soda Bay,,,40
+404039,18.9342,Winter,prs,,Soda Bay,,,44
+404040,18.9071,Winter,prs,,Soda Bay,,,46
+404041,19.061,Winter,prs,,Soda Bay,,,44
+404043,20.5649,Winter,sag,,Soda Bay,,,41
+404048,22.278,Summer,nul,,Craig,,,31
+404049,18.8932,Summer,nul,,Craig,,,33
+404050,22.466,Summer,nul,,Craig,,,32
+404050,20.1439,Summer,nul,,Craig,,,32
+404051,18.9414,Summer,nul,,Craig,small bomb?,,30
+404052,22.6076,Summer,nul,,Craig,,,29
+404053,20.2433,Summer,nul,,Craig,,,30
+404054,11.6658,Summer,squid eggs,,Nossuk,,,100
+404055,18.756,Winter,sag,,Craig,,,84
+404056,19.5378,Winter,sag,,Craig,,,80.5
+404057,18.4655,Winter,sag,,Craig,,,77
+404058,19.3882,Winter,sag,,Craig,,,78
+404059,17.1176,Summer,cln,,Soda Bay,,,65
+404060,26.4026,Spring,pio,,Craig,,,88
+404060,27.119,Spring,pio,,Craig,replicate,stomach,88
+404061,17.93,Summer,sag,,Soda Bay,,,64.5
+404062,17.1446,Summer,sag,,Soda Bay,,,63
+404063,15.4426,Winter,prs,,Craig,,,58
+404064,17.6711,Summer,sag,,Soda Bay,,,59
+404065,21.4552,Spring,pio,,Craig,,gonads,88
+404066,18.6571,Summer,sag,,Soda Bay,,,64
+404067,18.1269,Winter,prs,,Craig,,,56
+404068,17.1151,Winter,prs,,Craig,,,52.5
+404069,17.5711,Winter,prs,,Craig,,,54
+404070,16.4702,Summer,prs,,Soda Bay,,,54
+404071,28.0847,Winter,pio,,Craig,,stomach,64
+404072,18.7031,Summer,stf,,Soda Bay,,,47
+404073,19.6611,Winter,prs,,Craig,,,44
+404074,17.3823,Summer,cln,,Soda Bay,,,46
+404075,17.4853,Summer,cln,,Soda Bay,,,47
+404076,14.0104,Summer,stf,,Soda Bay,,,49
+404077,18.4237,Winter,cln,,Craig,,,44.5
+404078,17.8744,Summer,prs,,Soda Bay,,,45.5
+404079,18.1539,Summer,sag,,Soda Bay,,,43
+404080,16.9537,Summer,prs,,Soda Bay,,,45
+404081,21.3567,Summer,std,,Soda Bay,,,46
+404082,17.9332,Summer,prs,,Soda Bay,,,46
+404083,18.0888,Summer,prs,,Soda Bay,,,42.5
+404084,22.38,Winter,pio,,Craig,,gonads,64
+404086,18.8549,Winter,sag,,Craig,,,43.5
+404087,15.9076,Summer,cln,,Soda Bay,,,43
+404088,15.5399,Winter,stf,,Soda Bay,,,47
+404089,16.6767,Winter,pio,,Craig,,feet,64
+404090,12.352,Summer,stf,,Soda Bay,,,43
+404091,25.2073,Spring,evt,,Craig,,stomach,49
+404092,18.8041,Spring,pio,,Craig,,feet,88
+404093,21.6912,Summer,pas,,Soda Bay,,,103
+404094,19.9276,Summer,std,,Soda Bay,,,40
+404095,19.004,Summer,std,,Craig,,,37
+404096,13.1506,Summer,stf,,Craig,,,36
+404097,17.0683,Summer,std,,Soda Bay,,,43
+404098,18.2854,Summer,std,,Soda Bay,,,37.5
+404099,16.2845,Summer,std,,Soda Bay,,,38.5
+404101,20.6606,Winter,evt,,Craig,,whole,26
+404102,21.7883,Summer,pas,,Soda Bay,,,91
+404105,20.0822,Summer,cam,,Craig,m,,46
+404106,19.9176,Summer,cam,,Craig,m,,68
+404107,17.7372,Summer,cam,,Craig,f,,83
+404108,22.2988,Winter,cam,,Craig,f,,75.5
+404109,22.9253,Winter,cam,,Craig,f,,62
+404110,20.2698,Summer,cam,,Nossuk,f,,63
+404111,17.2859,Summer,cam,,Nossuk,f,,79
+404112,17.6273,Winter,cam,,Soda Bay,m,,66
+404113,22.6858,Winter,cam,,Soda Bay,f,,61
+404114,20.181,Summer,cap,,Craig,m,,106
+404115,22.6053,Summer,cap,gravid,Craig,f,,89
+404115,22.8125,Summer,cap,"gravid, replicat",Craig,f,,89
+404116,19.9219,Summer,cap,,Soda Bay,m,,145
+404117,16.3059,Summer,cap,,Soda Bay,m,,170
+404118,20.4337,Winter,cap,,Craig,m,,78
+404119,19.9836,Summer,tec,,Craig,f,,48
+404120,20.2053,Summer,tec,,Soda Bay,m,,75
+404121,16.8596,Winter,tec,,Soda Bay,m,,45
+404399,21.5879,Spring,std,404015 and 404018 combined,,,,30
+404888,26.2449,Summer,pio,,Soda Bay,"composite (404024, 404025, 404026)",whole,79
+404999,25.5925,Summer,pio,,Soda Bay,"composite (404027, 404028, 404029)",whole,90
