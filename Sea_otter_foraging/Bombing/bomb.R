@@ -82,3 +82,7 @@ plot(bomb.crab$size, bomb.crab$KJ)
 #clam by size
 plot(bomb.clam$size, bomb.clam$KJ)
 
+ggplot(data= bomb.crab, aes(x=KJ)) +
+  geom_histogram(aes(fill=Species)) +
+  labs(x="KJ") +
+  theme_classic()
