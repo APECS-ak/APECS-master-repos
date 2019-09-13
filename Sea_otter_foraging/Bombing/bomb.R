@@ -19,7 +19,7 @@ bomb.test$PreyCat <- ifelse(bomb.test$Species == "apc", "Cucumber",
                           ifelse(bomb.test$Species == "cln" | bomb.test$Species == "prs" | bomb.test$Species == "sag", "Clam", 
                                  ifelse(bomb.test$Species == "cam" | bomb.test$Species == "cap" | bomb.test$Species == "cao" | 
                                           bomb.test$Species == "tec"| bomb.test$Species == "pas", "Crab", ifelse(bomb.test$Species == "cef" | 
-                                                    bomb.test$Species == "tes" | bomb.test$Species == "nul", "Snail", 
+                                                    bomb.test$Species == "tes" | bomb.test$Species == "nul" | bomb.test$Species == "lid", "Snail", 
                                                     ifelse(bomb.test$Species == "pio" | bomb.test$Species == "evt", "Star", 
                                                            ifelse(bomb.test$Species == "stf"| bomb.test$Species == "std", "Urchin",  ""))))))
 
@@ -56,17 +56,33 @@ ggplot(data= bomb.test, aes(y=KJ, x=Season)) +
 bomb.snail <- filter(bomb.test, PreyCat == "Snail")
 plot(y=bomb.snail$KJ,x=bomb.snail$Season)
 
+#boxplot for all prey cats
+ggplot(data= bomb.test, aes(y=KJ, x=Season)) +
+  geom_boxplot(aes(color = Species)) +
+  facet_wrap(vars(PreyCat)) 
 
-#reduce bomb file to just clam
+#reduce bomb file to prey cat
 bomb.clam<- filter(bomb.test, Species== "cln" | Species == "sag" | Species == "prs")
 bomb.crab<- filter(bomb.test, Species== "cam" | Species == "cao" | Species== "cap" | Species== "tec")
+bomb.urch<- filter(bomb.test, Species== "std" | Species == "stf")
+bomb.star<-filter(bomb.test, Species== "pio" | Species == "evt")
+bomb.snail<- filter(bomb.test, Species== "tes" | Species == "cef" | Species == "lid" | Species == "nul")
+
+
+ggplot(data= bomb.star, aes(x=Season, y=KJ)) +
+  geom_point(aes(color=Tissue, shape= Species)) +
+  labs(x="Season", y="KJ per dry gram") +
+  facet_wrap(vars(Tissue))
 
 #anova
-clam.aov <- aov(KJ~Season + Site + Species, data = bomb.clam)
+clam.aov <- aov(KJ~Season + Site + Species + size, data = bomb.clam)
 summary(clam.aov)
 
 crab.aov <- aov(KJ~Season + Site + Species, data = bomb.crab)
 summary(crab.aov)
+
+snail.aov <- aov(KJ~Season + Site + Species, data = bomb.snail)
+summary(snail.aov)
 
 #looking at SAG KJ
 ggplot(data=filter(bomb.clam, Species == "sag"), aes(x=KJ)) + 
@@ -74,15 +90,29 @@ ggplot(data=filter(bomb.clam, Species == "sag"), aes(x=KJ)) +
 
 #SAG by size
 sag.size<-filter(bomb.test, Species == "sag")
-plot(sag.size$size, sag.size$KJ)
+ggplot(data=sag.size, aes(x=size, y=KJ)) +
+  geom_point() +
+  labs(x="Saxidomus Width (mm)", y="KJ per dry gram") +
+  theme_classic()
 
-#crab by size
-plot(bomb.crab$size, bomb.crab$KJ)
 
-#clam by size
+#clam size by KJ
+ggplot(data= bomb.clam, aes(x=size, y=KJ)) +
+  geom_point(aes(color=Species)) +
+  labs(x="Clam Width (mm)", y="KJ per dry gram") +
+  theme_classic()
+
+#Find the problem child
 plot(bomb.clam$size, bomb.clam$KJ)
+identify(bomb.clam$size, bomb.clam$KJ)
 
-ggplot(data= bomb.crab, aes(x=KJ)) +
-  geom_histogram(aes(fill=Species)) +
-  labs(x="KJ") +
+#Any other problem children?
+plot(bomb.crab$size, bomb.crab$KJ)
+identify(bomb.crab$size, bomb.crab$KJ)
+
+
+#crab size by KJ
+ggplot(data= bomb.crab, aes(x=size, y=KJ)) +
+  geom_point(aes(color=Species)) +
+  labs(x="Crab Width (mm)", y="KJ per dry gram") +
   theme_classic()
