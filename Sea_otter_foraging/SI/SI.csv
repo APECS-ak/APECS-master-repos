@@ -1,4 +1,4 @@
-﻿SIN,N,C ,Size,Species,Weight,Dissected_weight,SEX,Site,Season,site_number,Tissue,Tray,Percent_N,Percent_C,C_N
+﻿SIN,N,C ,Size,Species,Weight,Dissectwt,Sex,Site,Season,SiteNumber,Tissue,Tray,PercentN,PercentC,CN
 403900,10.11,-15.12,470,apc,731.97,,,Soda Bay,Spring,9,,3,5.519662083,23.37205354,4.234326882
 403901,10.85,-15.18,460,apc,633.49,,,Soda Bay,Spring,9,,3,6.801701647,26.87886601,3.95178551
 403902,9.17,-16.08,240,apc,131.77,,,Soda Bay,Spring,9,,3,4.516209107,21.18590087,4.691080588

@@ -8,6 +8,8 @@ library(ggplot2)
 library(lattice)
 library(dplyr)
 
+
+
 #load files
 si.test <- read.csv("SI/SI.csv")
 
@@ -20,6 +22,10 @@ si.test$PreyCat <- ifelse(si.test$Species == "apc", "Cucumber",
                    ifelse(si.test$Species == "cef" | si.test$Species == "tes" | si.test$Species == "nul", "Snail", 
                    ifelse(si.test$Species == "pio" | si.test$Species == "evt", "Star",
                    ifelse(si.test$Species == "std" | si.test$Species == "stf", "Urchin",""))))))
+
+### Fixing C for high fat critters. Anything above 3.5:1 ratio
+si.test$Cnorm <- NA
+si.test$Cnorm<- ifelse(si.test$CN >= 3.5, si.test$C-3.32+(0.99*si.test$CN), si.test$C)
 
 #reduce si file to just clam/crab/snail/urchin
 si.clam<- filter(si.test, Species== "cln" | Species == "sag" | Species == "prs")
@@ -35,6 +41,11 @@ ggplot(data=si.test, aes(x=N)) +
 
 #plot of all species Carbon
 ggplot(data=si.test, aes(x=C)) + 
+  geom_histogram(binwidth = .5) +
+  facet_wrap(vars(Species))
+
+#now all normalized carbon
+ggplot(data=si.test, aes(x=Cnorm)) + 
   geom_histogram(binwidth = .5) +
   facet_wrap(vars(Species))
 
@@ -157,7 +168,7 @@ plot(si.test$Species, si.test$C)
 
 
 #d13C vs CN ratio
-ggplot(data= si.star, aes(x=C, y=C_N)) +
+ggplot(data= si.star, aes(x=C, y=CN)) +
   geom_point(aes(color=Tissue, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y="Carbon:Nitrogen") +
@@ -165,21 +176,21 @@ ggplot(data= si.star, aes(x=C, y=C_N)) +
 
 # C:N ratio for all species except stars  - Looks like Urchins also are very high
 xstar<- filter(si.test, PreyCat != "Star" & PreyCat != "Urchin")
-ggplot(data= xstar, aes(x=C, y=C_N)) +
+ggplot(data= xstar, aes(x=C, y=CN)) +
   geom_point(aes(color=Species, shape= PreyCat)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y="Carbon:Nitrogen") +
   theme_classic()
 
 # C:N ratio of just urchins
-ggplot(data= si.urch, aes(x=C, y=C_N)) +
+ggplot(data= si.urch, aes(x=C, y=CN)) +
   geom_point(aes(color=Species, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y="Carbon:Nitrogen") +
   theme_classic()
 
 # C:N ratio of just clams
-ggplot(data= si.clam, aes(x=C, y=C_N)) +
+ggplot(data= si.clam, aes(x=C, y=CN)) +
   geom_point(aes(color=Species, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y="Carbon:Nitrogen") +
@@ -189,6 +200,20 @@ ggplot(data= si.crab, aes(x=C, y=N)) +
   geom_point(aes(color=Site, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" )))  +
+  theme_classic()
+
+#Making mean and min/max for each prey type. 
+si.mean <-si.test %>%
+  group_by(PreyCat) %>% 
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Cmin=min(Cnorm), Cmax= max(Cnorm), Nmin=min(N), Nmax=max(N))
+si.mean<-si.mean[-1,]
+
+ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
+  geom_point(aes(color=PreyCat)) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  geom_errorbar(aes(ymin = Nmin,ymax = Nmax, color= PreyCat), width=0) + 
+  geom_errorbarh(aes(xmin = Cmin,xmax = Cmax, color= PreyCat), height=0) +
   theme_classic()
 
 ## Mixing Models ##
