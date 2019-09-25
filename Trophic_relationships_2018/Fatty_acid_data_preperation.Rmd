@@ -11,10 +11,8 @@ editor_options:
 This script will tranform the raw area and concentration data from the FA chromatograph to ready for analysis. This include combining raw files into a master tall dataframe, and preforming initioal proportion calculations.
 
 ```{r libraries, echo=FALSE}
-library(dplyr)
-library(tidyr)
+library(tidyverse)
 ```
-
 
 ## Data
 Import all FA area/concentration data from IDing.
@@ -84,8 +82,8 @@ b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:71)[,3]
 b3_ac$Batch <- as.character(3)
 
 ## Batch 4 ##
-b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:67)
-b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:67)[,3]
+b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:66)
+b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:66)[,3]
 b4_ac$Batch <- as.character(4)
 
 ## Batch 5 ##
@@ -125,8 +123,7 @@ FA_ac$Area <- as.numeric(FA_ac$Area)
 For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample.
 
 ```{r calc, prop, echo = FALSE}
-t <- FA_ac %>%
-  group_by(ID) %>%
-  summarise(Prop_area = Area / sum(Area))
+t <- FA_ac %>% 
+  filter(str_detect(ID, "^B"))
 ```
 
