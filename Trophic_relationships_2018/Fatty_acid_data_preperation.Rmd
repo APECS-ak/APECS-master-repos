@@ -1,0 +1,132 @@
+---
+title: "Fatty_acid_data_preperation"
+author: "Wendel Raymond"
+date: "September 24, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Fatty acid data preperation
+This script will tranform the raw area and concentration data from the FA chromatograph to ready for analysis. This include combining raw files into a master tall dataframe, and preforming initioal proportion calculations.
+
+```{r libraries, echo=FALSE}
+library(dplyr)
+library(tidyr)
+```
+
+
+## Data
+Import all FA area/concentration data from IDing.
+
+Naming will follow the convension of
+batch#_type
+example: b1_area is batch 1 area data
+
+```{r data import, echo=FALSE}
+## Batch 1 ##
+b1_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_1_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+b1_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_1_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Batch 2 ##
+b2_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_2_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+b2_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_2_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Batch 3 ##
+b3_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_3_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+b3_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_3_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Batch 4 ##
+b4_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_4_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+b4_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_4_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Batch 5 ##
+b5_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_5_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+b5_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_5_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Batch 6 ##
+b6_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_6_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+b6_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_6_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Batch 7 ##
+b7_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_7_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+b7_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_7_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+## Batch 8 ##
+b8_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_8_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+b8_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_8_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+```
+
+## Compile to tall data
+Combine all batch data and convert to tall format. Preserve batch number identity for claculations and figuring out any data issues. Clean up sample names.
+```{r combine, echo = FALSE}
+## Batch 1 ##
+b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:64)
+b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:64)[,3]
+b1_ac$Batch <- as.character(1)
+
+## Batch 2 ##
+b2_ac <- gather(b2_area, key = "FA", value = "Area", 2:72)
+b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:72)[,3]
+b2_ac$Batch <- as.character(2)
+
+## Batch 3 ##
+b3_ac <- gather(b3_area, key = "FA", value = "Area", 2:71)
+b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:71)[,3]
+b3_ac$Batch <- as.character(3)
+
+## Batch 4 ##
+b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:67)
+b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:67)[,3]
+b4_ac$Batch <- as.character(4)
+
+## Batch 5 ##
+b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:81)
+b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:81)[,3]
+b5_ac$Batch <- as.character(5)
+
+## Batch 6 ##
+b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:84)
+b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:84)[,3]
+b6_ac$Batch <- as.character(6)
+
+## Batch 7 ##
+b7_ac <- gather(b7_area, key = "FA", value = "Area", 2:71)
+b7_ac$Conc <- gather(b7_conc, key = "FA", value = "Conc", 2:71)[,3]
+b7_ac$Batch <- as.character(7)
+
+## Batch 8 ##
+b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:70)
+b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:70)[,3]
+b8_ac$Batch <- as.character(8)
+
+## Combine all batches together ##
+FA_ac <- rbind(b1_ac, b2_ac, b3_ac, b4_ac, b5_ac, b6_ac, b7_ac, b8_ac)
+
+## Add ID column ##
+FA_ac$ID <- substr(FA_ac$Sample, 1, 5)
+
+## Arragne ##
+FA_ac <- cbind(FA_ac[, c(6,1,5,2,3,4)])
+
+## Area to numeric ##
+FA_ac$Area <- as.numeric(FA_ac$Area)
+```
+
+## Calculate proportion by area
+For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample.
+
+```{r calc, prop, echo = FALSE}
+t <- FA_ac %>%
+  group_by(ID) %>%
+  summarise(Prop_area = Area / sum(Area))
+```
+
