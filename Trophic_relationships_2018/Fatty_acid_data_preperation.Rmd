@@ -15,13 +15,14 @@ library(tidyverse)
 ```
 
 ## Data
-Import all FA area/concentration data from IDing.
+Import all FA area/concentration data and dry weight data
 
+### Area and concentration data
 Naming will follow the convension of
 batch#_type
 example: b1_area is batch 1 area data
 
-```{r data import, echo=FALSE}
+```{r data area conc, echo=FALSE}
 ## Batch 1 ##
 b1_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_1_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
@@ -63,7 +64,19 @@ b8_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_8_Area_RAW.csv", stri
 b8_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_8_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
-## Compile to tall data
+### Dry sample mass data
+```{r data mass, echo = FALSE}
+samp_mass <- read.csv("../ALL_DATA/Biomarker_extraction_mass_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+samp_mass$Weigh_date <- as.Date(samp_mass$Weigh_date, "%m/%d/%Y")
+samp_mass$Extraction_date <- as.Date(samp_mass$Extraction_date, "%m/%d/%Y")
+
+samp_mass_redu <- samp_mass %>% 
+  filter(Notes != "error in extraction") %>% 
+  drop_na(Extraction_date)
+```
+
+
+## Compile area and concentration data to tall data
 Combine all batch data and convert to tall format. Preserve batch number identity for claculations and figuring out any data issues. Clean up sample names.
 ```{r combine, echo = FALSE}
 ## Batch 1 ##
@@ -112,7 +125,7 @@ FA_ac <- rbind(b1_ac, b2_ac, b3_ac, b4_ac, b5_ac, b6_ac, b7_ac, b8_ac)
 ## Add ID column ##
 FA_ac$ID <- substr(FA_ac$Sample, 1, 5)
 
-## Arragne ##
+## Arrange ##
 FA_ac <- cbind(FA_ac[, c(6,1,5,2,3,4)])
 
 ## Area to numeric ##
@@ -123,7 +136,71 @@ FA_ac$Area <- as.numeric(FA_ac$Area)
 For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample.
 
 ```{r calc, prop, echo = FALSE}
-t <- FA_ac %>% 
-  filter(str_detect(ID, "^B"))
+## Calcualte proportion of total sample area ##
+FA_ac <- FA_ac %>% 
+  filter(str_detect(ID, "^B_")) %>%
+  group_by(ID) %>% 
+  mutate(Total_area = sum(Area))
+
+FA_ac$Prop_area <- FA_ac$Area / FA_ac$Total_area
+```
+
+## C19 standard data
+
+### Extract C19 data 
+Multiple C19 satandards were made for all the extractions. The concentration of theses standard will be extracted from the sample mass data and to make a new dataframe where standards can be assigned to extractions days.
+
+```{r c19, echo = FALSE}
+## filter C19 data ##
+C19 <- samp_mass %>% 
+  filter(Species_common == "C19")
+
+## Calcualte concentration ##
+C19$C19_conc_mgL <- C19$sample_extracted_mass_mg / c(6.5, 10, 10)
+```
+
+
+### Assign C19 concentrations standards to extraction days
+DIffernet C19 solutions were used on different extraction days. 
+
+C19.2.25 was used on extraction days 2.25.2019 to 3.26.2019
+C19.2.27 was used on extraction days 2.27.2019 to 3.9.2019
+C19.3.10 was used on extraction days 3.10.2019 to 3.19.2019
+
+```{r assign concentration, echo = FALSE}
+samp_mass$C19_conc <- NA
+samp_mass$C19_conc[which(samp_mass$Extraction_date == "2019-02-25")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_2.25"]
+samp_mass$C19_conc[which(samp_mass$Extraction_date > "2019-02-25" & samp_mass$Extraction_date <= "2019-03-09")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_2.27"]
+samp_mass$C19_conc[which(samp_mass$Extraction_date > "2019-03-09")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_3.10"]
+```
+
+### Calculate recovery
+Using C19 data we will calcualte the proporiton recovered as a way to assess our extraction.
+```{r recov, echo = FALSE}
+FA_recov <- FA_ac %>% 
+  filter(FA == "C19.0")
+
+FA_recov <- merge(FA_recov, samp_mass_redu[, c(1, 7)], by.x = "ID", by.y = "Biomarker_ID")
+
+FA_recov$Recovery <- (FA_recov$Conc / (((1.007 * 1000 * 70) / 1500) * 0.666667))
+```
+
+## Examine area proportion
+compute summary
+
+First add additional data to FA dataframe
+```{r}
+FA_ac <- merge(FA_ac, samp_mass[, c(1, 2, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
+
+## Arrange ##
+FA_ac <- cbind(FA_ac[, c(1, 2, 9:11, 3:8)])
+
+t <- FA_ac %>%
+  filter(Prop_area >= 0.005) %>% 
+  group_by(Batch, FA, Species_common) %>% 
+  summarise(n = n(),
+            mean_prop = mean(Prop_area),
+            min_prop = min(Prop_area),
+            max_prop = max(Prop_area))
 ```
 
