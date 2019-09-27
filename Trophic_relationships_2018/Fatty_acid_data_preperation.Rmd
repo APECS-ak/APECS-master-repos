@@ -72,7 +72,8 @@ samp_mass$Extraction_date <- as.Date(samp_mass$Extraction_date, "%m/%d/%Y")
 
 samp_mass_redu <- samp_mass %>% 
   filter(Notes != "error in extraction") %>% 
-  drop_na(Extraction_date)
+  filter(Biomarker_ID != "B_004" & Weigh_date != "2019-02-26") %>% 
+  filter(Biomarker_ID != "B_160")
 ```
 
 
@@ -152,7 +153,7 @@ Multiple C19 satandards were made for all the extractions. The concentration of 
 
 ```{r c19, echo = FALSE}
 ## filter C19 data ##
-C19 <- samp_mass %>% 
+C19 <- samp_mass_redu %>% 
   filter(Species_common == "C19")
 
 ## Calcualte concentration ##
@@ -180,7 +181,7 @@ Using C19 data we will calcualte the proporiton recovered as a way to assess our
 FA_recov <- FA_ac %>% 
   filter(FA == "C19.0")
 
-FA_recov <- merge(FA_recov, samp_mass_redu[, c(1, 7)], by.x = "ID", by.y = "Biomarker_ID")
+FA_recov <- merge(FA_recov, samp_mass_redu[, c(1, 7, 9)], by.x = "ID", by.y = "Biomarker_ID")
 
 FA_recov$Recovery <- (FA_recov$Conc / (((1.007 * 1000 * 70) / 1500) * 0.666667))
 ```
