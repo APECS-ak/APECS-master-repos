@@ -72,7 +72,7 @@ samp_mass$Extraction_date <- as.Date(samp_mass$Extraction_date, "%m/%d/%Y")
 
 samp_mass_redu <- samp_mass %>% 
   filter(Notes != "error in extraction") %>% 
-  filter(Biomarker_ID != "B_004" & Weigh_date != "2019-02-26") %>% 
+  filter(Biomarker_ID != "B_004" & sample_on_foil_mg != 22.67) %>% 
   filter(Biomarker_ID != "B_160")
 ```
 
@@ -81,43 +81,43 @@ samp_mass_redu <- samp_mass %>%
 Combine all batch data and convert to tall format. Preserve batch number identity for claculations and figuring out any data issues. Clean up sample names.
 ```{r combine, echo = FALSE}
 ## Batch 1 ##
-b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:64)
-b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:64)[,3]
+b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:57)
+b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:57)[,3]
 b1_ac$Batch <- as.character(1)
 
 ## Batch 2 ##
-b2_ac <- gather(b2_area, key = "FA", value = "Area", 2:72)
-b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:72)[,3]
+b2_ac <- gather(b2_area, key = "FA", value = "Area", 2:62)
+b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:62)[,3]
 b2_ac$Batch <- as.character(2)
 
 ## Batch 3 ##
-b3_ac <- gather(b3_area, key = "FA", value = "Area", 2:71)
-b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:71)[,3]
+b3_ac <- gather(b3_area, key = "FA", value = "Area", 2:56)
+b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:56)[,3]
 b3_ac$Batch <- as.character(3)
 
 ## Batch 4 ##
-b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:66)
-b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:66)[,3]
+b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:51)
+b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:51)[,3]
 b4_ac$Batch <- as.character(4)
 
 ## Batch 5 ##
-b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:81)
-b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:81)[,3]
+b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:63)
+b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:63)[,3]
 b5_ac$Batch <- as.character(5)
 
 ## Batch 6 ##
-b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:84)
-b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:84)[,3]
+b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:73)
+b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:73)[,3]
 b6_ac$Batch <- as.character(6)
 
 ## Batch 7 ##
-b7_ac <- gather(b7_area, key = "FA", value = "Area", 2:71)
-b7_ac$Conc <- gather(b7_conc, key = "FA", value = "Conc", 2:71)[,3]
+b7_ac <- gather(b7_area, key = "FA", value = "Area", 2:55)
+b7_ac$Conc <- gather(b7_conc, key = "FA", value = "Conc", 2:55)[,3]
 b7_ac$Batch <- as.character(7)
 
 ## Batch 8 ##
-b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:70)
-b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:70)[,3]
+b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:58)
+b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:58)[,3]
 b8_ac$Batch <- as.character(8)
 
 ## Combine all batches together ##
@@ -129,8 +129,9 @@ FA_ac$ID <- substr(FA_ac$Sample, 1, 5)
 ## Arrange ##
 FA_ac <- cbind(FA_ac[, c(6,1,5,2,3,4)])
 
-## Area to numeric ##
+## To numeric ##
 FA_ac$Area <- as.numeric(FA_ac$Area)
+FA_ac$Conc <- as.numeric(FA_ac$Conc)
 ```
 
 ## Calculate proportion by area
@@ -140,7 +141,7 @@ For a sample, calculate the proportion of each unique FA as the area of that FA 
 ## Calcualte proportion of total sample area ##
 FA_ac <- FA_ac %>% 
   filter(str_detect(ID, "^B_")) %>%
-  group_by(ID) %>% 
+  group_by(ID) %>%
   mutate(Total_area = sum(Area))
 
 FA_ac$Prop_area <- FA_ac$Area / FA_ac$Total_area
@@ -169,38 +170,37 @@ C19.2.27 was used on extraction days 2.27.2019 to 3.9.2019
 C19.3.10 was used on extraction days 3.10.2019 to 3.19.2019
 
 ```{r assign concentration, echo = FALSE}
-samp_mass$C19_conc <- NA
-samp_mass$C19_conc[which(samp_mass$Extraction_date == "2019-02-25")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_2.25"]
-samp_mass$C19_conc[which(samp_mass$Extraction_date > "2019-02-25" & samp_mass$Extraction_date <= "2019-03-09")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_2.27"]
-samp_mass$C19_conc[which(samp_mass$Extraction_date > "2019-03-09")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_3.10"]
+samp_mass_redu$C19_conc <- NA
+samp_mass_redu$C19_conc[which(samp_mass_redu$Extraction_date == "2019-02-25")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_2.25"]
+samp_mass_redu$C19_conc[which(samp_mass_redu$Extraction_date > "2019-02-25" & samp_mass_redu$Extraction_date <= "2019-03-09")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_2.27"]
+samp_mass_redu$C19_conc[which(samp_mass_redu$Extraction_date > "2019-03-09")] <- C19$C19_conc_mgL[C19$Biomarker_ID == "C19_3.10"]
 ```
 
 ### Calculate recovery
 Using C19 data we will calcualte the proporiton recovered as a way to assess our extraction.
 ```{r recov, echo = FALSE}
-FA_recov <- FA_ac %>% 
+FA_ac <- merge(FA_ac, samp_mass_redu[, c(1, 2,  7, 9)], by.x = "ID", by.y = "Biomarker_ID")
+
+FA_C19_recov <- FA_ac %>% 
   filter(FA == "C19.0")
 
-FA_recov <- merge(FA_recov, samp_mass_redu[, c(1, 7, 9)], by.x = "ID", by.y = "Biomarker_ID")
-
-FA_recov$Recovery <- (FA_recov$Conc / (((1.007 * 1000 * 70) / 1500) * 0.666667))
+FA_C19_recov$Recovery <- (FA_C19_recov$Conc  / (((FA_C19_recov$C19_conc * 1000 * 70) / 1500) * 0.666667))
 ```
 
 ## Examine area proportion
-compute summary
+Compute summary proporional data to identify outliers. Initially assume to throw away any proportion < 0.005 or < 0.5%.
 
-First add additional data to FA dataframe
-```{r}
-FA_ac <- merge(FA_ac, samp_mass[, c(1, 2, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-
+```{r prop exam, echo = FALSE}
 ## Arrange ##
-FA_ac <- cbind(FA_ac[, c(1, 2, 9:11, 3:8)])
+FA_ac <- cbind(FA_ac[, c(1, 2, 9, 10, 3:8, 11)])
 
-t <- FA_ac %>%
-  filter(Prop_area >= 0.005) %>% 
-  group_by(Batch, FA, Species_common) %>% 
+## Summary by species ##
+sp_prop_summary <- FA_ac %>%
+  filter(Prop_area >= 0.01) %>% 
+  group_by(Species_common, FA) %>% 
   summarise(n = n(),
             mean_prop = mean(Prop_area),
+            sd_prop = sd(Prop_area),
             min_prop = min(Prop_area),
             max_prop = max(Prop_area))
 ```
