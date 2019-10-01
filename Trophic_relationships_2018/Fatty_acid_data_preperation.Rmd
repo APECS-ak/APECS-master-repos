@@ -81,13 +81,13 @@ samp_mass_redu <- samp_mass %>%
 Combine all batch data and convert to tall format. Preserve batch number identity for claculations and figuring out any data issues. Clean up sample names.
 ```{r combine, echo = FALSE}
 ## Batch 1 ##
-b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:57)
-b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:57)[,3]
+b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:56)
+b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:56)[,3]
 b1_ac$Batch <- as.character(1)
 
 ## Batch 2 ##
-b2_ac <- gather(b2_area, key = "FA", value = "Area", 2:62)
-b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:62)[,3]
+b2_ac <- gather(b2_area, key = "FA", value = "Area", 2:61)
+b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:61)[,3]
 b2_ac$Batch <- as.character(2)
 
 ## Batch 3 ##
@@ -101,13 +101,13 @@ b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:51)[,3]
 b4_ac$Batch <- as.character(4)
 
 ## Batch 5 ##
-b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:63)
-b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:63)[,3]
+b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:61)
+b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:61)[,3]
 b5_ac$Batch <- as.character(5)
 
 ## Batch 6 ##
-b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:73)
-b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:73)[,3]
+b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:72)
+b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:72)[,3]
 b6_ac$Batch <- as.character(6)
 
 ## Batch 7 ##
@@ -187,21 +187,49 @@ FA_C19_recov <- FA_ac %>%
 FA_C19_recov$Recovery <- (FA_C19_recov$Conc  / (((FA_C19_recov$C19_conc * 1000 * 70) / 1500) * 0.666667))
 ```
 
+## Remove small FAs
+We will filter out all FAs that constitute less than 0.5% or less than 1.0% of a samples total FA area. We will then examine how many FAs are lost in these two methods.
+```{r reduce, echo = FALSE}
+## Filter out less than 0.5% ##
+FA_ac_0.5 <- FA_ac %>%
+  filter(Prop_area >= 0.005) %>% 
+  group_by(ID) %>%
+  mutate(Total_area_0.5 = sum(Area))
+
+FA_ac_0.5$Prop_area_0.5 <- FA_ac_0.5$Area / FA_ac_0.5$Total_area_0.5
+
+## Filter out less than 1.0% ##
+FA_ac_1.0 <- FA_ac %>%
+  filter(Prop_area >= 0.01) %>% 
+  group_by(ID) %>%
+  mutate(Total_area_1.0 = sum(Area))
+
+FA_ac_1.0$Prop_area_1.0 <- FA_ac_1.0$Area / FA_ac_1.0$Total_area_1.0
+```
+
+
 ## Examine area proportion
-Compute summary proporional data to identify outliers. Initially assume to throw away any proportion < 0.005 or < 0.5%.
+Compute summary proporional data to identify outliers.
 
 ```{r prop exam, echo = FALSE}
-## Arrange ##
-FA_ac <- cbind(FA_ac[, c(1, 2, 9, 10, 3:8, 11)])
-
-## Summary by species ##
-sp_prop_summary <- FA_ac %>%
-  filter(Prop_area >= 0.01) %>% 
+## Summary by species form greater than 0.5% data ##
+sp_prop_summary_0.5 <- FA_ac_0.5 %>%
   group_by(Species_common, FA) %>% 
   summarise(n = n(),
-            mean_prop = mean(Prop_area),
-            sd_prop = sd(Prop_area),
-            min_prop = min(Prop_area),
-            max_prop = max(Prop_area))
+            mean_prop_corr = mean(Prop_area_0.5),
+            sd_prop_corr = sd(Prop_area_0.5),
+            min_prop_corr = min(Prop_area_0.5),
+            max_prop_corr = max(Prop_area_0.5))
+
+## Summary by species form greater than 1.0% data ##
+sp_prop_summary_1.0 <- FA_ac_1.0 %>%
+  group_by(Species_common, FA) %>% 
+  summarise(n = n(),
+            mean_prop_corr = mean(Prop_area_1.0),
+            sd_prop_corr = sd(Prop_area_1.0),
+            min_prop_corr = min(Prop_area_1.0),
+            max_prop_corr = max(Prop_area_1.0))
+
+write.csv(sp_prop_summary_0.5, "Species_FA_summaries.csv", row.names = FALSE)
 ```
 
