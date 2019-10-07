@@ -135,12 +135,13 @@ FA_ac$Conc <- as.numeric(FA_ac$Conc)
 ```
 
 ## Calculate proportion by area
-For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample.
+For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample. NOTE that C19 is removed for this calculation
 
 ```{r calc, prop, echo = FALSE}
 ## Calcualte proportion of total sample area ##
 FA_ac <- FA_ac %>% 
   filter(str_detect(ID, "^B_")) %>%
+  filter(ID != "C19.0") %>% 
   group_by(ID) %>%
   mutate(Total_area = sum(Area))
 
@@ -212,7 +213,15 @@ FA_ac_1.0$Prop_area_1.0 <- FA_ac_1.0$Area / FA_ac_1.0$Total_area_1.0
 Compute summary proporional data to identify outliers.
 
 ```{r prop exam, echo = FALSE}
+## Sum n samples by tissue ##
+FA_samps <- data.frame(unique(FA_ac[, c(1,9)]))
+FA_samps.n <- FA_samps %>% 
+  group_by(Species_common) %>% 
+  summarise(n_all_sp = n())
+
 ## Summary by species form greater than 0.5% data ##
+FA_ac_0.5 <- merge(FA_ac_0.5, samp_mass_redu[, c(1, 2)], by.x = "ID", by.y = "Biomarker_ID")
+
 sp_prop_summary_0.5 <- FA_ac_0.5 %>%
   group_by(Species_common, FA) %>% 
   summarise(n = n(),
@@ -222,6 +231,8 @@ sp_prop_summary_0.5 <- FA_ac_0.5 %>%
             max_prop_corr = max(Prop_area_0.5))
 
 ## Summary by species form greater than 1.0% data ##
+FA_ac_1.0 <- merge(FA_ac_1.0, samp_mass_redu[, c(1, 2)], by.x = "ID", by.y = "Biomarker_ID")
+
 sp_prop_summary_1.0 <- FA_ac_1.0 %>%
   group_by(Species_common, FA) %>% 
   summarise(n = n(),
@@ -230,6 +241,33 @@ sp_prop_summary_1.0 <- FA_ac_1.0 %>%
             min_prop_corr = min(Prop_area_1.0),
             max_prop_corr = max(Prop_area_1.0))
 
+## Export ##
+sp_prop_summary_0.5 <- cbind(sp_prop_summary_0.5[, c(1, 2, 8, 3:7)])
 write.csv(sp_prop_summary_0.5, "Species_FA_summaries.csv", row.names = FALSE)
+```
+
+## Prep for multivariate analysis
+Convert tall data to wide for multivarite analysis. General structure will be sample data columns followed by FA columns with zeros filling instances when a sample did not have a FA that other samples did.
+
+```{r tall to wide, echo = FALSE}
+## 0.5% filter data ##
+FA_prop_0.5 <- spread(FA_ac_0.5[, c(1, 4, 10, 11)], key = FA, value = Prop_area_0.5)
+
+FA_prop_0.5[is.na(FA_prop_0.5)] <- 0
+
+## 1.0 % filter data ##
+FA_prop_1.0 <- spread(FA_ac_1.0[, c(1, 4, 10, 11)], key = FA, value = Prop_area_1.0)
+
+FA_prop_1.0[is.na(FA_prop_1.0)] <- 0
+
+```
+
+### Export wide data
+```{r export wide, echo = FALSE}
+## 0.5% filter ##
+write.csv(FA_prop_0.5, "../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", row.names = FALSE)
+
+## 1.0% filter ##
+write.csv(FA_prop_1.0, "../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", row.names = FALSE)
 ```
 
