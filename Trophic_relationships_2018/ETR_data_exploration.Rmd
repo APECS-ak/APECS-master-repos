@@ -16,6 +16,7 @@ library(ggplot2)
 library(DT)
 library(cowplot)
 library(RColorBrewer)
+library(vegan)
 
 theme_set(theme_classic())
 ```
@@ -51,7 +52,9 @@ bm <- read.csv("E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass trop
 
 Fatty Acid - data forthcomming
 ```{r dat fa, echo = FALSE}
-##
+fa_0.5 <- read.csv("../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+fa_1.0 <- read.csv("../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ### Complie biomass data
@@ -197,4 +200,22 @@ ggplot(limp) +
   geom_point(aes(x = del_C, y = del_N, color = Place_name), size = 2) +
   scale_color_manual(values = pal(6))
 ```
+
+### Fatty acids
+The ultimate goal will be to look at some basic nmds plots of all species. Then overlay some depended variables like site and sea otter treatment.
+
+First will will have to prep that data with some manipulations and transformations and standardizations.
+
+#### Transformations and standardizations
+I will use and arcsine sqrt transformation 
+```{r trans std, echo = FALSE}
+## Transformation ##
+fa_0.5_trs <- asin(sqrt(fa_0.5[, 3:82]))
+
+## Standardization ##
+fa_0.5_trs_std <- scale(fa_0.5_trs, center = FALSE, scale = apply(fa_0.5_trs, 2, max))
+```
+
+
+
 
