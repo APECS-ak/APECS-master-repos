@@ -91,23 +91,23 @@ b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:61)[,3]
 b2_ac$Batch <- as.character(2)
 
 ## Batch 3 ##
-b3_ac <- gather(b3_area, key = "FA", value = "Area", 2:56)
-b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:56)[,3]
+b3_ac <- gather(b3_area, key = "FA", value = "Area", 2:55)
+b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:55)[,3]
 b3_ac$Batch <- as.character(3)
 
 ## Batch 4 ##
-b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:51)
-b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:51)[,3]
+b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:50)
+b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:50)[,3]
 b4_ac$Batch <- as.character(4)
 
 ## Batch 5 ##
-b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:61)
-b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:61)[,3]
+b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:60)
+b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:60)[,3]
 b5_ac$Batch <- as.character(5)
 
 ## Batch 6 ##
-b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:72)
-b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:72)[,3]
+b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:69)
+b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:69)[,3]
 b6_ac$Batch <- as.character(6)
 
 ## Batch 7 ##
@@ -116,8 +116,8 @@ b7_ac$Conc <- gather(b7_conc, key = "FA", value = "Conc", 2:55)[,3]
 b7_ac$Batch <- as.character(7)
 
 ## Batch 8 ##
-b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:58)
-b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:58)[,3]
+b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:57)
+b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:57)[,3]
 b8_ac$Batch <- as.character(8)
 
 ## Combine all batches together ##
@@ -135,9 +135,13 @@ FA_ac$Conc <- as.numeric(FA_ac$Conc)
 ```
 
 ## Calculate proportion by area
-For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample. NOTE that C19 is removed for this calculation
+For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample. NOTE that C19 is removed for this calculation. NOTE any area and concentration data that is imported at a negative number will be converted to a zero.
 
 ```{r calc, prop, echo = FALSE}
+## Convert neg to zero ##
+FA_ac$Area <- ifelse(FA_ac$Area < 0, 0, FA_ac$Area) 
+FA_ac$Conc <- ifelse(FA_ac$Conc < 0, 0, FA_ac$Conc) 
+
 ## Calcualte proportion of total sample area ##
 FA_ac <- FA_ac %>% 
   filter(str_detect(ID, "^B_")) %>%
@@ -234,10 +238,6 @@ sp_prop_summary_1.0 <- FA_ac_1.0 %>%
             sd_prop_corr = sd(Prop_area_1.0),
             min_prop_corr = min(Prop_area_1.0),
             max_prop_corr = max(Prop_area_1.0))
-
-## Export ##
-sp_prop_summary_0.5 <- cbind(sp_prop_summary_0.5[, c(1, 2, 8, 3:7)])
-write.csv(sp_prop_summary_0.5, "Species_FA_summaries.csv", row.names = FALSE)
 ```
 
 ## Prep for multivariate analysis
