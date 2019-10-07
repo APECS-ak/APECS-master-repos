@@ -141,7 +141,7 @@ For a sample, calculate the proportion of each unique FA as the area of that FA 
 ## Calcualte proportion of total sample area ##
 FA_ac <- FA_ac %>% 
   filter(str_detect(ID, "^B_")) %>%
-  filter(ID != "C19.0") %>% 
+  filter(FA != "C19.0") %>% 
   group_by(ID) %>%
   mutate(Total_area = sum(Area))
 
@@ -219,9 +219,6 @@ FA_samps.n <- FA_samps %>%
   group_by(Species_common) %>% 
   summarise(n_all_sp = n())
 
-## Summary by species form greater than 0.5% data ##
-FA_ac_0.5 <- merge(FA_ac_0.5, samp_mass_redu[, c(1, 2)], by.x = "ID", by.y = "Biomarker_ID")
-
 sp_prop_summary_0.5 <- FA_ac_0.5 %>%
   group_by(Species_common, FA) %>% 
   summarise(n = n(),
@@ -229,9 +226,6 @@ sp_prop_summary_0.5 <- FA_ac_0.5 %>%
             sd_prop_corr = sd(Prop_area_0.5),
             min_prop_corr = min(Prop_area_0.5),
             max_prop_corr = max(Prop_area_0.5))
-
-## Summary by species form greater than 1.0% data ##
-FA_ac_1.0 <- merge(FA_ac_1.0, samp_mass_redu[, c(1, 2)], by.x = "ID", by.y = "Biomarker_ID")
 
 sp_prop_summary_1.0 <- FA_ac_1.0 %>%
   group_by(Species_common, FA) %>% 
@@ -251,12 +245,12 @@ Convert tall data to wide for multivarite analysis. General structure will be sa
 
 ```{r tall to wide, echo = FALSE}
 ## 0.5% filter data ##
-FA_prop_0.5 <- spread(FA_ac_0.5[, c(1, 4, 10, 11)], key = FA, value = Prop_area_0.5)
+FA_prop_0.5 <- spread(FA_ac_0.5[, c(1, 4, 9, 13)], key = FA, value = Prop_area_0.5)
 
 FA_prop_0.5[is.na(FA_prop_0.5)] <- 0
 
 ## 1.0 % filter data ##
-FA_prop_1.0 <- spread(FA_ac_1.0[, c(1, 4, 10, 11)], key = FA, value = Prop_area_1.0)
+FA_prop_1.0 <- spread(FA_ac_1.0[, c(1, 4, 9, 13)], key = FA, value = Prop_area_1.0)
 
 FA_prop_1.0[is.na(FA_prop_1.0)] <- 0
 
