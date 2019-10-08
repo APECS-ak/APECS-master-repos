@@ -212,32 +212,56 @@ The ultimate goal will be to look at some basic nmds plots of all species. Then 
 #### Examine FAs
 What FAs do we have here.
 ```{r}
-colnames(fa_1.0)
+FA_names <- colnames(fa_1.0)
 ```
 
 
 First will will have to prep that data with some manipulations and transformations and standardizations.
 
 #### Transformations and standardizations
+Subsets
+```{r subset, echo = FALSE}
+## Aminals ##
+fa_anm_1.0 <- fa_1.0 %>% 
+  filter(Species_common != "Eelgrass" & Species_common != "Eelgrass diatoms" & Species_common != "Fucus" & Species_common != "Particulate organic matter" & Species_common != "Sugar kelp" & Species_common != "Ulva")
+
+## Producers ##
+fa_pro_1.0 <- fa_1.0 %>%
+  filter(Species_common == "Eelgrass" | Species_common == "Eelgrass diatoms" | Species_common == "Fucus" | Species_common == "Particulate organic matter" | Species_common == "Sugar kelp" | Species_common == "Ulva")
+```
+
+
 I will use and arcsine sqrt transformation 
 ```{r trans std, echo = FALSE}
 ## Transformation ##
 fa_0.5_trs <- asin(sqrt(fa_0.5[, 3:77]))
-fa_1.0_trs <- asin(sqrt(fa_1.0[, 3: 67]))
+
+fa_all_1.0_trs <- asin(sqrt(fa_1.0[, 3: 67]))
+fa_anm_1.0_trs <- asin(sqrt(fa_anm_1.0[, 3:67]))
+fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 3:67]))
 
 ## Standardization ##
 fa_0.5_trs_std <- scale(fa_0.5_trs, center = FALSE, scale = apply(fa_0.5_trs, 2, max))
-fa_1.0_trs_std <- scale(fa_1.0_trs, center = FALSE, scale = apply(fa_1.0_trs, 2, max))
+
+fa_all_1.0_trs_std <- scale(fa_all_1.0_trs, center = FALSE, scale = apply(fa_all_1.0_trs, 2, max))
+fa_anm_1.0_trs_std <- scale(fa_anm_1.0_trs, center = FALSE, scale = apply(fa_anm_1.0_trs, 2, max))
+fa_pro_1.0_trs_std <- scale(fa_pro_1.0_trs, center = FALSE, scale = apply(fa_pro_1.0_trs, 2, max))
 ```
 
 #### NMDS
 ```{r fa nmds, echo = FALSE}
 ## Calculate distances ##
-fa_1.0_dist <- vegdist(fa_1.0_trs_std, method = "bray")
+fa_all_1.0_dist <- vegdist(fa_1.0_trs_std, method = "bray")
+fa_anm_1.0_dist <- vegdist(fa_anm_1.0_trs_std, method = "bray" )
+fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "bray" )
+
 fa_0.5_dist <- vegdist(fa_0.5_trs_std, method = "bray")
 
 ## nmds ##
-fa_1.0_mds <- metaMDS(fa_1.0_dist)
+fa_all_1.0_mds <- metaMDS(fa_all_1.0_dist)
+fa_anm_1.0_mds <- metaMDS(fa_anm_1.0_dist)
+fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
+
 fa_0.5_mds <- metaMDS(fa_0.5_dist, try = 50)
 ```
 
@@ -247,25 +271,48 @@ fa_0.5_mds <- metaMDS(fa_0.5_dist, try = 50)
 pal <- colorRampPalette(brewer.pal(9, "Set1"))
 
 ## Prep dataframe ##
-fa_1.0_mds_dat <- as.data.frame(scores(fa_1.0_mds))
-fa_1.0_mds_dat$ID <- fa_1.0$ID 
-fa_1.0_mds_dat$Species_common <- fa_1.0$Species_common
-fa_1.0_mds_dat <- merge(fa_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+# All data #
+fa_all_1.0_mds_dat <- as.data.frame(scores(fa_all_1.0_mds))
+fa_all_1.0_mds_dat$ID <- fa_1.0$ID 
+fa_all_1.0_mds_dat$Species_common <- fa_1.0$Species_common
+fa_all_1.0_mds_dat <- merge(fa_all_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_all_1.0_mds_dat$Species_common <- factor(fa_all_1.0_mds_dat$Species_common, levels = c("Shiner perch", "Snake prickleback", "Staghorn sculpin", "Dungeness crab", "Helmet crab", "Red rock crab", "Dock shrimp", "Macoma sp.", "Bentnose Macoma", "Pointed Macoma", "Butter clam", "Idotea", "Limpet", "Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva"))
+
+# Animals #
+fa_anm_1.0_mds_dat <- as.data.frame(scores(fa_anm_1.0_mds))
+fa_anm_1.0_mds_dat$ID <- fa_anm_1.0$ID 
+fa_anm_1.0_mds_dat$Species_common <- fa_anm_1.0$Species_common
+fa_anm_1.0_mds_dat <- merge(fa_anm_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_anm_1.0_mds_dat$Species_common <- factor(fa_anm_1.0_mds_dat$Species_common, levels = c("Shiner perch", "Snake prickleback", "Staghorn sculpin", "Dungeness crab", "Helmet crab", "Red rock crab", "Dock shrimp", "Macoma sp.", "Bentnose Macoma", "Pointed Macoma", "Butter clam", "Idotea", "Limpet"))
+
+# Producers #
+fa_pro_1.0_mds_dat <- as.data.frame(scores(fa_pro_1.0_mds))
+fa_pro_1.0_mds_dat$ID <- fa_pro_1.0$ID 
+fa_pro_1.0_mds_dat$Species_common <- fa_pro_1.0$Species_common
+fa_pro_1.0_mds_dat <- merge(fa_pro_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_pro_1.0_mds_dat$Species_common <- factor(fa_pro_1.0_mds_dat$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva"))
 
 fa_0.5_mds_dat <- as.data.frame(scores(fa_0.5_mds))
 fa_0.5_mds_dat$ID <- fa_0.5$ID 
 fa_0.5_mds_dat$Species_common <- fa_0.5$Species_common
 
-## nmds species ##
-ggplot(fa_1.0_mds_dat) +
+## nmds species all ##
+ggplot(fa_all_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Species_common, shape = Species_common), size = 3) +
   scale_color_manual(values = pal(19)) +
   scale_shape_manual(values = rep(c(15:19), 4))
 
-ggplot(fa_0.5_mds_dat) +
+## nmds species animals ##
+ggplot(fa_anm_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Species_common, shape = Species_common), size = 3) +
-  scale_color_manual(values = pal(19)) +
-  scale_shape_manual(values = rep(c(15:19), 4))
+  scale_color_manual(values = pal(13)) +
+  scale_shape_manual(values = rep(c(15:19), 3))
+
+## nmds species prodecers ##
+ggplot(fa_pro_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Species_common, shape = Species_common), size = 3) +
+  scale_color_manual(values = pal(6)) +
+  scale_shape_manual(values = rep(c(15:19), 2))
 
 ## nmds sites and species ##
 ggplot(fa_1.0_mds_dat) +
