@@ -65,7 +65,7 @@ ggplot(data= bomb.test) +
   labs(x="Season", y="KJ (g)") +
   theme_classic()
 
-####
+#### In this graph I want to draw a red line with the averages and the light bands for the SD?
 #KJ for each species by season
 ggplot(data= bomb.test, aes(y=KJ, x=Season)) +
   geom_point() +
