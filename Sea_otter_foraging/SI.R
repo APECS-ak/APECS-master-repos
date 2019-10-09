@@ -27,10 +27,12 @@ si.test$PreyCat <- ifelse(si.test$Species == "apc", "Cucumber",
 ### Fixing C for high fat critters. Anything above 3.5:1 ratio
 si.test$Cnorm <- NA
 si.test$Cnorm<- ifelse(si.test$CN >= 3.5, si.test$C-3.32+(0.99*si.test$CN), si.test$C)
+si.test$SiteNumber<-as.character(si.test$SiteNumber)
 
 #load whisker data
 whisker <- read.csv("SI/whiskers.csv")
 whisker$OtterID<-as.character(whisker$OtterID)
+
 #whisker<-whisker[-c(64:68), ] #this version has extra NA rows, so deleting, may not be needed in future
 
 #reduce si file to just clam/crab/snail/urchin
@@ -56,7 +58,8 @@ ggplot(data=si.test, aes(x=Cnorm)) +
   geom_histogram(binwidth = .5) +
   facet_wrap(vars(Species))
 
-#Biplot with catagories
+#Biplot with catagories seperated by species
+#kind of confusing with a lot of overlap
 ggplot(data= si.test, aes(x=C, y=N)) +
   geom_point(aes(color=Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
@@ -64,6 +67,7 @@ ggplot(data= si.test, aes(x=C, y=N)) +
   stat_ellipse(mapping=aes(color=PreyCat)) +
   theme_classic()
 
+#separated by site and catagory
 ggplot(data= si.test, aes(x=C, y=N)) +
   geom_point(aes(color=PreyCat, shape= Site)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
@@ -149,11 +153,15 @@ ggplot(data= si.mus, aes(x=C, y=N)) +
   stat_ellipse(mapping=aes(color=Site)) +
   theme_classic()
 
+ggsave("mussel.png", device = "png", path = "SI/", width = 8, 
+       height = 6, units = "in", dpi = 300)
+
+
 ggplot(data= si.mus, aes(x=C, y=N)) +
   geom_point(aes(color=Season, shape= Site)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
-  stat_ellipse(mapping=aes(color=Season, type= Site)) +
+  stat_ellipse(mapping=aes(color=Season)) +
   theme_classic()
 
 #look at seasonal changes in one site for crab - Not enough data
@@ -168,21 +176,47 @@ ggplot(data= c.si.crab, aes(x=C, y=N)) +
   theme_classic()
 
 #anova for Nitrogen
-clam.aov <- aov(N~Season + Site + Species, data = si.clam)
+clam.aov <- aov(N~Season + Site + Species + Size, data = si.clam)
 summary(clam.aov)
 
 crab.aov <- aov(N~Season + Site + Species, data = si.crab)
 summary(crab.aov)
 
+snail.aov <- aov(N~Season + Species, data = si.snail)
+summary(snail.aov)
+
+mus.aov <- aov(N~Season + Site, data = si.mus)
+summary(mus.aov)
+
+urch.aov <- aov(N~Season + Site + Species, data = si.urch)
+summary(urch.aov)
+
+#Only GONAD? Not Enough samples!! 
+si.star2<-filter(si.star, Tissue == "gonads")
+star.aov <- aov(N~Season + Site, data = si.star2)
+summary(star.aov)
+
 #Species is significant for clams and crabs, but crabs are only 0.03
 #site is also sigg for clams
 
 #anova for Carbon
-clam.aov <- aov(C~Season + Site + Species, data = si.clam)
+clam.aov <- aov(C~Season + Site + Species + Size, data = si.clam)
 summary(clam.aov)
 
 crab.aov <- aov(C~Season + Site + Species, data = si.crab)
 summary(crab.aov)
+
+snail.aov <- aov(C~Season + Species, data = si.snail)
+summary(snail.aov)
+
+mus.aov <- aov(C~Season + Site, data = si.mus)
+summary(mus.aov)
+
+urch.aov <- aov(C~Season + Site + Species, data = si.urch)
+summary(urch.aov)
+
+star.aov <- aov(C~Season + Site + Species, data = si.star)
+summary(star.aov)
 
 #Species is NOT significant for clams or crabs, but site is significant for both
 
@@ -246,6 +280,9 @@ ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
   geom_errorbarh(aes(xmin = Cmin,xmax = Cmax, color= PreyCat), height=0) +
   theme_classic()
 
+ggsave("prey.png", device = "png", path = "SI/", width = 8, 
+       height = 6, units = "in", dpi = 300)
+
 #changing whiskers for TDF values that are listed in Tyrell paper
 ##This makes the values way too low. 
 whis.mean<-whisker %>%
@@ -282,6 +319,36 @@ ggplot() +
   geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Csd, xmax = TDFC+Csd), height=0) +
   theme_classic()
 
+ggsave("whis_prey.png", device = "png", path = "SI/", width = 8, 
+       height = 6, units = "in", dpi = 300)
+
+#now without error bars for otters (but still avg of each otter)
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat)) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmin,ymax = Nmax, color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmin,xmax = Cmax, color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN))+
+  theme_classic()
+
+ggsave("whis_prey_nobars.png", device = "png", path = "SI/", width = 8, 
+       height = 6, units = "in", dpi = 300)
+
+#now without error bars for otters (all points separate)
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat)) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmin,ymax = Nmax, color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmin,xmax = Cmax, color= PreyCat), height=0) +
+  geom_point(data=whisker, aes(x=C-2.5, y=N-3))+
+  theme_classic()
+
+ggsave("whis_prey_nobars_points.png", device = "png", path = "SI/", width = 8, 
+       height = 6, units = "in", dpi = 300)
+
+  
 #without TDFs
 ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
   geom_point(aes(color=PreyCat)) +
@@ -334,7 +401,7 @@ ggplot() +
   geom_point(data=whisker, aes(x=C-2.5, y=N-3))+
   theme_classic()
 
-ggsave("prey.png", device = "png", path = "SI/", width = 6, 
+ggsave("prey_nocarbonnorm.png", device = "png", path = "SI/", width = 6, 
        height = 8, units = "in", dpi = 300)
 
 #################################################
@@ -346,24 +413,19 @@ ggplot(data= whisker, aes(x=distance, y=C)) +
        y=expression(paste(delta^13, "C (\u2030)" )))  +
   theme_classic()
 
+ggsave("whis_carbon.png", device = "png", path = "SI/", width = 7, 
+       height = 8, units = "in", dpi = 300)
+
 ggplot(data=whisker, aes(x=distance, y=N)) +
   geom_line(aes(color=OtterID)) +
   labs(x= "Distance from root (cm)", 
        y=expression(paste(delta^15, "N (\u2030)" )))  +
   theme_classic()
 
-#creating a secondary axis = sec.axis
-ggplot(data=whisker) +
-  geom_line(aes(x=distance, y=N, color="N")) +
-  geom_line(aes(x=distance, y=C+28, color="C")) +
-  labs(x= "Distance from root (cm)", 
-       y=expression(paste(delta^15, "N (\u2030)" )), 
-       colour = "Isotope")  +
-  scale_y_continuous(sec.axis = sec_axis(~.-28, 
-         name = expression(paste(delta^13, "C (\u2030)" )))) +
-  facet_wrap(vars(OtterID), nrow=3) +
-  theme_light()
+ggsave("whis_nitrogen.png", device = "png", path = "SI/", width = 7, 
+       height = 8, units = "in", dpi = 300)
 
+#creating a secondary axis = sec.axis
 
 ggplot(data=whisker) +
   geom_line(aes(x=distance, y=N, color="N")) +
@@ -373,8 +435,7 @@ ggplot(data=whisker) +
        colour = "Isotope")  +
   scale_y_continuous(sec.axis = sec_axis(~.-28, 
        name = expression(paste(delta^13, "C (\u2030)" )))) +
-  facet_wrap(vars(OtterID), nrow=3) +
-  xlim(0,8) +
+  facet_wrap(vars(OtterID), nrow=5) +
   theme_light()
 
 ggsave("whiskers.png", device = "png", path = "SI/", width = 8, 
