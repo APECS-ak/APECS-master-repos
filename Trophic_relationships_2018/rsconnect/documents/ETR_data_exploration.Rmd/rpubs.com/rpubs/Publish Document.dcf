@@ -6,5 +6,5 @@ server: rpubs.com
 hostUrl: rpubs.com
 appId: https://api.rpubs.com/api/v1/document/511368/b2cdde768d79413bbf28b4ed19d6658b
 bundleId: https://api.rpubs.com/api/v1/document/511368/b2cdde768d79413bbf28b4ed19d6658b
-url: http://rpubs.com/publish/claim/511368/02523ad545df4587b0e4ea7d5dfac2d6
-when: 1562605400.1735
+url: http://rpubs.com/wraymond/511368
+when: 1570645625.20087
