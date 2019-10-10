@@ -60,6 +60,23 @@ Biomarker metadata
 bimrk <- read.csv("../ALL_DATA/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
+### Biomarker metadata
+Extract metadata on samples. N pooled, size, etc.
+```{r biomarker sum, echo = FALSE}
+## Filter out ones that I actualy processed all the way ##
+bimrk_redu <- bimrk %>%
+  filter(Biomarker_ID %in% fa_1.0$ID)
+
+## Run some caculations ##
+bimrk_redu$mean_size <- mean(bimrk_redu[, 11: 24], na.rm = TRUE)
+
+## Summary table ##
+bimrk_sum <- bimrk_redu %>% 
+  group_by(Place_name, Species_common) %>% 
+  summarise(n_samples = n())
+```
+
+
 ### Complie biomass data
 Merge all the different biomass data types into one data frame
 ```{r merge, echo = FALSE}
