@@ -32,6 +32,8 @@ crb <- read.csv("../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, 
 
 crb.sp <- read.csv("../ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
+crb.all <- read.csv("../ALL_DATA/Crab_pots_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
 clm <- read.csv("../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 clm.sp <- read.csv("../ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
@@ -66,14 +68,6 @@ Extract metadata on samples. N pooled, size, etc.
 ## Filter out ones that I actualy processed all the way ##
 bimrk_redu <- bimrk %>%
   filter(Biomarker_ID %in% fa_1.0$ID)
-
-## Run some caculations ##
-bimrk_redu$mean_size <- mean(bimrk_redu[, 11: 24], na.rm = TRUE)
-
-## Summary table ##
-bimrk_sum <- bimrk_redu %>% 
-  group_by(Place_name, Species_common) %>% 
-  summarise(n_samples = n())
 ```
 
 
@@ -176,6 +170,18 @@ ggplot(dat) +
   labs(x = "Site", y = "Proportion snake prickleback mass")
 ```
 
+### Size frequency
+Size-frequency distributions of crabs and fishes
+```{r size-fq, echo = FALSE}
+crb.all <- crb.all %>% 
+  filter(taxon == "Decapoda")
+
+ggplot(crb.all) +
+  geom_histogram(aes(carapace_width_mm)) +
+  facet_grid(cols = vars(species_common), rows = vars(place_name))
+```
+
+
 ### Particulate Organic Matter
 summaries by site
 ```{r pom data, echo = FALSE}
@@ -257,6 +263,14 @@ fa_anm_1.0 <- fa_1.0 %>%
 ## Producers ##
 fa_pro_1.0 <- fa_1.0 %>%
   filter(Species_common == "Eelgrass" | Species_common == "Eelgrass diatoms" | Species_common == "Fucus" | Species_common == "Particulate organic matter" | Species_common == "Sugar kelp" | Species_common == "Ulva")
+
+## Crabs ##
+fa_crb_1.0 <- fa_1.0 %>% 
+  filter(Species_common == "Dungeness crab" | Species_common == "Red rock crab" | Species_common == "Helmet crab")
+
+## Clams ##
+fa_clm_1.0 <- fa_1.0 %>% 
+  filter(Species_common == "Butter clam" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
 ```
 
 
@@ -268,6 +282,8 @@ fa_0.5_trs <- asin(sqrt(fa_0.5[, 3:77]))
 fa_all_1.0_trs <- asin(sqrt(fa_1.0[, 3: 67]))
 fa_anm_1.0_trs <- asin(sqrt(fa_anm_1.0[, 3:67]))
 fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 3:67]))
+fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 3:67]))
+fa_clm_1.0_trs <- asin(sqrt(fa_clm_1.0[, 3:67]))
 
 ## Standardization ##
 fa_0.5_trs_std <- scale(fa_0.5_trs, center = FALSE, scale = apply(fa_0.5_trs, 2, max))
@@ -275,6 +291,8 @@ fa_0.5_trs_std <- scale(fa_0.5_trs, center = FALSE, scale = apply(fa_0.5_trs, 2,
 fa_all_1.0_trs_std <- scale(fa_all_1.0_trs, center = FALSE, scale = apply(fa_all_1.0_trs, 2, max))
 fa_anm_1.0_trs_std <- scale(fa_anm_1.0_trs, center = FALSE, scale = apply(fa_anm_1.0_trs, 2, max))
 fa_pro_1.0_trs_std <- scale(fa_pro_1.0_trs, center = FALSE, scale = apply(fa_pro_1.0_trs, 2, max))
+fa_crb_1.0_trs_std <- scale(fa_crb_1.0_trs, center = FALSE, scale = apply(fa_crb_1.0_trs, 2, max))
+fa_clm_1.0_trs_std <- scale(fa_clm_1.0_trs, center = FALSE, scale = apply(fa_clm_1.0_trs, 2, max))
 ```
 
 #### NMDS
@@ -284,6 +302,8 @@ NMDS calculations
 fa_all_1.0_dist <- vegdist(fa_all_1.0_trs_std, method = "bray")
 fa_anm_1.0_dist <- vegdist(fa_anm_1.0_trs_std, method = "bray")
 fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "bray")
+fa_crb_1.0_dist <- vegdist(fa_crb_1.0_trs_std, method = "bray")
+fa_clm_1.0_dist <- vegdist(fa_clm_1.0_trs_std, method = "bray")
 
 fa_0.5_dist <- vegdist(fa_0.5_trs_std, method = "bray")
 
@@ -291,6 +311,8 @@ fa_0.5_dist <- vegdist(fa_0.5_trs_std, method = "bray")
 fa_all_1.0_mds <- metaMDS(fa_all_1.0_dist)
 fa_anm_1.0_mds <- metaMDS(fa_anm_1.0_dist)
 fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
+fa_crb_1.0_mds <- metaMDS(fa_crb_1.0_dist)
+fa_clm_1.0_mds <- metaMDS(fa_clm_1.0_dist)
 
 fa_0.5_mds <- metaMDS(fa_0.5_dist, try = 50)
 ```
@@ -337,6 +359,20 @@ fa_pro_1.0_mds_dat$ID <- fa_pro_1.0$ID
 fa_pro_1.0_mds_dat$Species_common <- fa_pro_1.0$Species_common
 fa_pro_1.0_mds_dat <- merge(fa_pro_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
 fa_pro_1.0_mds_dat$Species_common <- factor(fa_pro_1.0_mds_dat$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva"))
+
+## Crabs ##
+fa_crb_1.0_mds_dat <- as.data.frame(scores(fa_crb_1.0_mds))
+fa_crb_1.0_mds_dat$ID <- fa_crb_1.0$ID 
+fa_crb_1.0_mds_dat$Species_common <- fa_crb_1.0$Species_common
+fa_crb_1.0_mds_dat <- merge(fa_crb_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_crb_1.0_mds_dat$Species_common <- factor(fa_crb_1.0_mds_dat$Species_common, levels = c("Dungeness crab", "Helmet crab", "Red rock crab"))
+
+## Clams ##
+fa_clm_1.0_mds_dat <- as.data.frame(scores(fa_clm_1.0_mds))
+fa_clm_1.0_mds_dat$ID <- fa_clm_1.0$ID 
+fa_clm_1.0_mds_dat$Species_common <- fa_clm_1.0$Species_common
+fa_clm_1.0_mds_dat <- merge(fa_clm_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_clm_1.0_mds_dat$Species_common <- factor(fa_clm_1.0_mds_dat$Species_common, levels = c("Butter clam", "Macoma sp." ,"Pointed Macoma", "Bentnose Macoma"))
 
 fa_0.5_mds_dat <- as.data.frame(scores(fa_0.5_mds))
 fa_0.5_mds_dat$ID <- fa_0.5$ID 
@@ -410,6 +446,36 @@ ggplot(fa_pro_1.0_mds_dat) +
   scale_color_manual(values = pal(19)[14:19]) +
   scale_shape_manual(values = c(16, 1)) +
   geom_text(x = -0.40, y = -0.22, label = "stress = 0.1306")
+
+## nmds species crabs ##
+ggplot(fa_crb_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Species_common, size = 3))
+
+## nmds sites and species crabs ##
+ggplot(fa_crb_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Species_common, shape = Place_name), size = 3) +
+  scale_shape_manual(values = c(0, 15, 16, 17, 18, 19))
+
+## nmds sea otter crabs ##
+ggplot(fa_crb_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, shape = Sea_otter_region, color = Species_common), size = 3.5) +
+  scale_color_manual(values = c("chocolate4", "darkgreen", "red")) +
+  scale_shape_manual(values = c(16, 1))
+
+## nmds species clams ##
+ggplot(fa_clm_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Species_common), size = 3)
+
+## nmds sites and species clams ##
+ggplot(fa_clm_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Species_common, shape = Place_name), size = 3) +
+  scale_shape_manual(values = c(0, 15, 16, 17, 18, 19))
+
+## nmds sea otter clams ##
+ggplot(fa_clm_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, shape = Sea_otter_region, color = Species_common), size = 3.5) +
+  #scale_color_manual(values = c("chocolate4", "darkgreen", "red")) +
+  scale_shape_manual(values = c(16, 1))
 ```
 
 
