@@ -181,7 +181,6 @@ ggplot(crb.all) +
   facet_grid(cols = vars(species_common), rows = vars(place_name))
 ```
 
-
 ### Particulate Organic Matter
 summaries by site
 ```{r pom data, echo = FALSE}
@@ -268,6 +267,11 @@ fa_pro_1.0 <- fa_1.0 %>%
 fa_crb_1.0 <- fa_1.0 %>% 
   filter(Species_common == "Dungeness crab" | Species_common == "Red rock crab" | Species_common == "Helmet crab")
 
+fa_crb_1.0 <- merge(fa_crb_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+
+fa_crb_1.0 <- cbind(fa_crb_1.0[,c(69:76, 1, 3:67)])
+colnames(fa_crb_1.0)[6] <- "Species_common"
+
 ## Clams ##
 fa_clm_1.0 <- fa_1.0 %>% 
   filter(Species_common == "Butter clam" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
@@ -282,7 +286,7 @@ fa_0.5_trs <- asin(sqrt(fa_0.5[, 3:77]))
 fa_all_1.0_trs <- asin(sqrt(fa_1.0[, 3: 67]))
 fa_anm_1.0_trs <- asin(sqrt(fa_anm_1.0[, 3:67]))
 fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 3:67]))
-fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 3:67]))
+fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 10:74]))
 fa_clm_1.0_trs <- asin(sqrt(fa_clm_1.0[, 3:67]))
 
 ## Standardization ##
@@ -316,25 +320,6 @@ fa_clm_1.0_mds <- metaMDS(fa_clm_1.0_dist)
 
 fa_0.5_mds <- metaMDS(fa_0.5_dist, try = 50)
 ```
-
-FA vectors
-```{r fa vector, echo = FALSE, eval = FALSE}
-## get arrows of FAs correlating to first two dimensions ##
-vec.fa <- envfit(fa_all_1.0_mds$points, fa_all_1.0_dist, perm = 9999) # fit vector arrows of FAs correlating with dimensions
-
-## pull scores vector arrows of FAs correlating with dimensions ##
-FA_arrows <- scores(vec.fa, display = c("vectors")) 
-
-## calculate scaling multiplier based on min range of points in NMDS ##
-scalefactor <- 0.3 * min(max(fa_all_1.0_mds$points[,1]) - min(fa_all_1.0_mds$points[,1]),max(fa_all_1.0_mds$points[,2]) - min(fa_all_1.0_mds$points[,2]))
-
-FA_arrows <- FA_arrows * scalefactor # scaling of arrows to fit plot area based on scalefactor above
-
-FA_arrows <- as.data.frame(FA_arrows) # save those as a datafullframe
-
-## Naming arrows ##
-```
-
 
 ##### NMDS plots
 Data prep. Build dataframe from metaMDS output fo easy plotting
@@ -458,9 +443,14 @@ ggplot(fa_crb_1.0_mds_dat) +
 
 ## nmds sea otter crabs ##
 ggplot(fa_crb_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, shape = Sea_otter_region, color = Species_common), size = 3.5) +
-  scale_color_manual(values = c("chocolate4", "darkgreen", "red")) +
-  scale_shape_manual(values = c(16, 1))
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
+  scale_color_manual(values = c("red", "deepskyblue3")) +
+  scale_shape_manual(values = c(15, 16, 17)) +
+  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
+  geom_text(x = -0.25, y = -0.25, label = "stress = 0.1892") +
+  geom_text(x = -0.15, y = -0.28, label = "PERMANOVA on sea otter region p = 0.001") +
+  geom_segment(data = vec.crb.dat.sig, aes(x = 0, xend = MDS1, y = 0, yend = MDS2)) +
+  geom_text(data = vec.crb.dat.sig, aes(x = MDS1,y = MDS2, label = FA, size = 2)
 
 ## nmds species clams ##
 ggplot(fa_clm_1.0_mds_dat) +
@@ -473,9 +463,39 @@ ggplot(fa_clm_1.0_mds_dat) +
 
 ## nmds sea otter clams ##
 ggplot(fa_clm_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, shape = Sea_otter_region, color = Species_common), size = 3.5) +
-  #scale_color_manual(values = c("chocolate4", "darkgreen", "red")) +
-  scale_shape_manual(values = c(16, 1))
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
+  scale_color_manual(values = c("red", "deepskyblue3")) +
+  scale_shape_manual(values = c(15:18)) +
+  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
+  geom_text(x = -0.48, y = -0.25, label = "stress = 0.1258") +
+  geom_text(x = -0.23, y = -0.28, label = "PERMANOVA on sea otter region p = 0.005")
 ```
 
+#### NMDS examination
+FA vectors
+```{r fa vector, echo = FALSE, eval = FALSE}
+## Crabs vectors ##
+vec.crb <- envfit(fa_crb_1.0_mds$points, fa_crb_1.0[, 10:74], perm = 9999)
+vec.crb.arrows <- scores(vec.crb, display = "vectors")
+scalefactor <- 0.3 * min(max(fa_crb_1.0_mds_dat$NMDS1) - min(fa_crb_1.0_mds_dat$NMDS1), max(fa_crb_1.0_mds_dat$NMDS2) - min(fa_crb_1.0_mds_dat$NMDS2))
+vec.crb.arrows <- vec.crb.arrows * scalefactor
+
+vec.crb.dat <- data.frame(vec.crb.arrows)
+vec.crb.dat$pvals <- vec.crb$vectors$pvals
+vec.crb.dat$FA <- row.names(vec.crb.dat)
+
+vec.crb.dat.sig <- vec.crb.dat %>% 
+  filter(pvals < 0.01)
+```
+
+#### PERMANOVA
+```{r}
+
+
+adonis2(fa_crb_1.0_dist ~ Sea_otter_region, data = fa_crb_1.0, permutations = 9999)
+
+fa_clm_1.0 <- merge(fa_clm_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+
+adonis2(fa_clm_1.0_dist ~ Sea_otter_region, data = fa_clm_1.0, permutations = 9999)
+```
 
