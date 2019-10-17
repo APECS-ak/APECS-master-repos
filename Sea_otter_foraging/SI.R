@@ -445,4 +445,6 @@ ggsave("whiskers.png", device = "png", path = "SI/", width = 8,
 ## Mixing Models ##
 
 library(MixSIAR)
+library(RGtk2)
 browseVignettes("MixSIAR")
+mixsiar_gui()

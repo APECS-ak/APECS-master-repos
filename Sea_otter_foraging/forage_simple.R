@@ -1,27 +1,26 @@
 ####### First look at foraging data #####
 
+#load programs
 library(ggplot2)
 library(lattice)
-require(stats)
-library(tidyverse)
-library(plyr)
-library(scales)
-setwd("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging")
+library(dplyr)
 
-###  DATA  ###
-s.prop <- read.csv("s_prop.csv") # import a file with the male/female proportions
-age.prop <- read.csv("age_prop.csv")
-all.prop <- read.csv("all_prop.csv")
-year.prop <- read.csv("year_prop.csv")
-otter.prop<- read.csv("otter_by_prop.csv")
-otter.gram<- read.csv("otter_by_gram.csv", row.names=1)
-ott.sum <- read.csv("otter_sum.csv", row.names=1)
-ott.raw <- read.csv("2018_Foraging_data_RAW.csv")
-s.gram<- read_csv("sex_table.csv")
-prey <- read.csv("Prey_Class.csv")
-sex.prey <- read.csv("sex_prey.csv")
-compare.prop <- read.csv("compare.csv")
+###  OLD DATA  ###
+#s.prop <- read.csv("s_prop.csv") # import a file with the male/female proportions
+#age.prop <- read.csv("age_prop.csv")
+#all.prop <- read.csv("all_prop.csv")
+#year.prop <- read.csv("year_prop.csv")
+#otter.prop<- read.csv("otter_by_prop.csv")
+#otter.gram<- read.csv("otter_by_gram.csv", row.names=1)
+#ott.sum <- read.csv("otter_sum.csv", row.names=1)
+#ott.raw <- read.csv("2018_Foraging_data_RAW.csv")
+#s.gram<- read_csv("sex_table.csv")
+#prey <- read.csv("Prey_Class.csv")
+#sex.prey <- read.csv("sex_prey.csv")
+#compare.prop <- read.csv("compare.csv")
 
+## RAW DATA 
+forage<-read.csv("2018_Foraging.csv")
 
 # to make the classes order in the way I want
 as.factor()
@@ -29,36 +28,34 @@ as.factor()
 ## add a prey class into raw data
 #ott.raw$PreyItem%%select()
 
-ott.raw$PreyCat <- NA
-ott.raw$PreyCat <- ifelse(ott.raw$PreyItem == "APC" | ott.raw$PreyItem == "CUC" |  ott.raw$PreyItem == "CUM", 
-                   "Cucumber", ifelse(ott.raw$PreyItem == "CLA" | ott.raw$PreyItem == "CLN" |  
-                   ott.raw$PreyItem == "GAC" | ott.raw$PreyItem == "MAN" | ott.raw$PreyItem == "MAP" | 
-                   ott.raw$PreyItem == "MAS" | ott.raw$PreyItem == "MYA" | ott.raw$PreyItem == "MYS" | 
-                   ott.raw$PreyItem == "MYT" | ott.raw$PreyItem == "PRS" | ott.raw$PreyItem == "SAG" | 
-                   ott.raw$PreyItem == "TRC", "Clam", ifelse(ott.raw$PreyItem == "STF" | 
-                   ott.raw$PreyItem == "URC" | ott.raw$PreyItem == "STD" | ott.raw$PreyItem == "STP",
-                   "Urchin", ifelse(ott.raw$PreyItem == "CAM" | ott.raw$PreyItem == "CAN" |
-                   ott.raw$PreyItem == "CAP" | ott.raw$PreyItem == "CRA" | ott.raw$PreyItem == "KCR" | 
-                   ott.raw$PreyItem == "PUP" | ott.raw$PreyItem == "PUS" | ott.raw$PreyItem == "TEC", "Crab",
-                   ifelse(ott.raw$PreyItem == "CEF" | ott.raw$PreyItem == "SNA", "Snail", 
-                   ifelse(ott.raw$PreyItem == "MUS" | ott.raw$PreyItem == "MTR" | ott.raw$PreyItem == "MOM", 
-                   "Mussel", ifelse(ott.raw$PreyItem == "PIO" | ott.raw$PreyItem == "EVT" | 
-                   ott.raw$PreyItem == "PES", "Star", "")))))))
+forage$PreyCat <- NA
+forage$PreyCat <- ifelse(forage$PreyItem == "APC" | forage$PreyItem == "CUC" |  forage$PreyItem == "CUM", 
+                   "Cucumber", 
+                  ifelse(forage$PreyItem == "CLA" | forage$PreyItem == "CLN" | forage$PreyItem == "GAC" | 
+                           forage$PreyItem == "MAN" | forage$PreyItem == "MAP" | forage$PreyItem == "MAS" | 
+                           forage$PreyItem == "MYA" | forage$PreyItem == "MYS" | forage$PreyItem == "MYT" | 
+                           forage$PreyItem == "PRS" | forage$PreyItem == "SAG" | forage$PreyItem == "TRC", "Clam", 
+                   ifelse(forage$PreyItem == "STF" | forage$PreyItem == "URC" | forage$PreyItem == "STD" | 
+                            forage$PreyItem == "STP", "Urchin", 
+                   ifelse(forage$PreyItem == "CAM" | forage$PreyItem == "CAN" | forage$PreyItem == "CAP" | 
+                            forage$PreyItem == "CRA" | forage$PreyItem == "KCR" | forage$PreyItem == "PUP" | 
+                            forage$PreyItem == "PUS" | forage$PreyItem == "TEC", "Crab",
+                   ifelse(forage$PreyItem == "CEF" | forage$PreyItem == "SNA", "Snail", 
+                   ifelse(forage$PreyItem == "MUS" | forage$PreyItem == "MTR" | forage$PreyItem == "MOM", "Mussel", 
+                   ifelse(forage$PreyItem == "PIO" | forage$PreyItem == "EVT" | forage$PreyItem == "PES", "Star", NA)))))))
 
-ott.raw$Occupation <- NA
-ott.raw$Occupation <- ifelse(ott.raw$YEAR == "1975", "40 years", ifelse(ott.raw$YEAR == "1988", "30 years",
-                      ifelse(ott.raw$YEAR == "1994", "15 years", ifelse(ott.raw$YEAR == "2003", "15 years", 
-                      ifelse(ott.raw$YEAR == "2010", "8 years","")))))
+forage$Occupation <- NA
+forage$Occupation <- ifelse(forage$YEAR == "1975", "40 years", ifelse(forage$YEAR == "1988", "30 years",
+                      ifelse(forage$YEAR == "1994", "15 years", ifelse(forage$YEAR == "2003", "15 years", 
+                      ifelse(forage$YEAR == "2010", "8 years", NA)))))
                              
                                
 # checking the data frame
-is.data.frame(all.prop) # will say if this is a dataframe, should say TRUE
-dim(s.prop)
-names(all.prop)
-str(s.prop)
-str(age.prop)
-str(year.prop)
-head(ott.raw) 
+is.data.frame(forage) # will say if this is a dataframe, should say TRUE
+dim(forage)
+names(forage)
+str(forage)
+head(forage) 
 
 
 #sort the data (using dplyr)
