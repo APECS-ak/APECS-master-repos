@@ -101,7 +101,8 @@ Crab data preparation. This needs to be done to summarise by site and string (i.
 crab.site <- crab.dat %>% 
   group_by(site) %>% 
   summarise(crab_count = mean(count, na.rm = TRUE),
-            crab_mass = mean(mass_g, na.rm = TRUE))
+            crab_mass = mean(mass_g, na.rm = TRUE),
+            crab_mass_se = st.er(mass_g, na.rm = TRUE))
 
 dat <- merge(dat, crab.site, by = "site")
 ```
@@ -469,8 +470,8 @@ pal <- lacroix_palette("PeachPear")
 
 ## Sediment ##
 ggplot(dat) +
-  geom_col(aes(x = site_num, y = sed_inside_prim)) +
-  geom_errorbar(aes(x = site_no, ymin = sed_inside_prim - sed_inside_prim_se, ymax = sed_inside_prim + sed_inside_prim_se), width = 0) +
+  geom_col(aes(x = site, y = sed_inside_prim)) +
+  geom_errorbar(aes(x = site, ymin = sed_inside_prim - sed_inside_prim_se, ymax = sed_inside_prim + sed_inside_prim_se), width = 0) +
   scale_y_continuous(limits = c(0, 6), breaks = seq(0, 6, by = 1)) +
   labs(x = "Site", y = "Primary sediment score +/- SE") +
   theme(text = element_text(size = 10))
@@ -482,9 +483,21 @@ ggplot(subset(abiot.final, sample_type != "site")) +
   scale_fill_manual(values = c("blue3", "deepskyblue"), name = "Sampling\nperiod", labels = c("1m", "4m")) +
   labs(x = "Site", y = expression('Temperature ('*~degree*C*')'))
 
+ggplot(dat = dat) +
+  geom_bar(aes(x = date_julian, y = temperature_C_transect), position = "dodge", stat = "identity") +
+  scale_y_continuous(limits = c(0, 16), breaks = seq(0, 16, by = 2)) +
+  scale_fill_manual(values = c("blue3", "deepskyblue"), name = "Sampling\nperiod", labels = c("1m", "4m")) +
+  labs(x = "Site", y = expression('Temperature ('*~degree*C*')'))
+
 ## Nitrate ##
 ggplot(abiot.final) +
   geom_bar(aes(x = as.factor(site_number), y = NOx_umol, fill = sample_type), position = "dodge", stat = "identity") +
+  scale_y_continuous(limits = c(0, 3), breaks = seq(0, 3, by = 0.5)) +
+  scale_fill_manual(values = c("blue3", "deepskyblue", "grey"), name = "Sampling\nperiod", labels = c("1m", "4m", "eelgrass")) +
+  labs(x = "Site", y = "Nitrate (umol)")
+
+ggplot(data = dat) +
+  geom_bar(aes(x = site, y = NOx_umol), position = "dodge", stat = "identity") +
   scale_y_continuous(limits = c(0, 3), breaks = seq(0, 3, by = 0.5)) +
   scale_fill_manual(values = c("blue3", "deepskyblue", "grey"), name = "Sampling\nperiod", labels = c("1m", "4m", "eelgrass")) +
   labs(x = "Site", y = "Nitrate (umol)")
@@ -496,6 +509,22 @@ ggplot(abiot.final) +
   scale_fill_manual(values = c("blue3", "deepskyblue", "grey"), name = "Sampling\nperiod", labels = c("1m", "4m", "eelgrass")) +
   labs(x = "Site", y = "Salinity (ppt)")
 ```
+
+Testing for efffects of sites on environmental variables.
+```{r envi test, echo = FALSE}
+temp.mod <- lm(temperature_C_transect ~ date_julian, data = dat)
+summary(temp.mod)
+
+nx.mod <- lm(NOx_site ~ date_julian, data = dat)
+summary(nx.mod)
+
+sal.mod <- lm(salinity_ppt_transect ~ date_julian, data = dat)
+summary(sal.mod)
+
+lit.mod <- lm(light_avail ~ date_julian, data = dat)
+summary(lit.mod)
+```
+
 
 ## Models
 General approach
@@ -804,6 +833,64 @@ write.csv(mod3.dr.top, "grz_raw_dredge.csv", row.names = FALSE)
 write.csv(mod4.dr.top, "crb_raw_dredge.csv", row.names = FALSE)
 write.csv(mod5.dr.top, "fsh_raw_dredge.csv", row.names = FALSE)
 ```
+
+## Major results plots
+Plots of major/significant results
+```{r}
+## Crabs and SOI ##
+ggplot(data = dat) +
+  geom_point(aes(x = sea_otter_index_tr, y = crab_mass), size = 1.5) +
+  geom_errorbar(aes(x = sea_otter_index_tr, ymin = crab_mass - crab_mass_se, ymax = crab_mass + crab_mass_se), width = 0) +
+  labs(x = "SOI", y = "Crab mass (g)") +
+  scale_x_continuous(limits = c(-0.80, 1.20), breaks = seq(-0.80, 1.20, by = 0.40)) +
+  scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 50)) +
+  theme(text = element_text(size = 10))
+
+## Fish and Crabs ##
+ggplot(data = dat) +
+  geom_point(aes(x = crab_mass, y = (log(fish_mass / 1000) + 1 )), size = 1.5) +
+  labs(x = "Crab mass (g)", y = "Log fish mass (Kg)") +
+  scale_x_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 50)) +
+  scale_y_continuous(limits = c(0, 5), breaks = seq(0, 5, by = 1)) +
+  theme(text = element_text(size = 10))
+
+## Grazers and Epiphytes ##
+ggplot(data = dat) +
+  geom_point(aes(x = epiphmass_shootmass, y = grazermass_shootmass), size = 1.5) +
+  geom_errorbar(aes(x = epiphmass_shootmass, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), width = 0) +
+  labs(x = "Epiphyte load (g/g)", y = "Grazer load (g/g)") +
+  scale_x_continuous(limits = c(-0.0, 0.20), breaks = seq(0, 0.20, by = 0.04)) +
+  scale_y_continuous(limits = c(-0.0, 0.24), breaks = seq(0, 0.24, by = 0.04)) +
+  theme(text = element_text(size = 10))
+
+## Epi and Nitrate ##
+ggplot(data = dat) +
+  geom_point(aes(x = NOx_site, y = epiphmass_shootmass), size = 1.5) +
+  geom_errorbar(aes(x = NOx_site, ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se), width = 0) +
+  labs(x = bquote("Nitrate ("*mu~'mol)'), y = "Epiphyte load (g/g)") +
+  scale_x_continuous(limits = c(0.0, 3), breaks = seq(0, 3, by = 1)) +
+  scale_y_continuous(limits = c(0.0, 0.24), breaks = seq(0, 0.24, by = 0.04)) +
+  theme(text = element_text(size = 10))
+
+## Eelgrass and SOI ##
+ggplot(data = dat) +
+  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass), size = 1.5) +
+  geom_errorbar(aes(x = sea_otter_index_tr, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), width = 0) +
+  labs(x = "SOI", y = "Eelgrass mass (g/m)") +
+  scale_x_continuous(limits = c(-0.80, 1.20), breaks = seq(-0.80, 1.20, by = 0.40)) +
+  scale_y_continuous(limits = c(0.0, 200), breaks = seq(0, 200, by = 50)) +
+  theme(text = element_text(size = 10))
+
+## Eelgrass and Nitrate ##
+ggplot(data = dat) +
+  geom_point(aes(x = NOx_site, y = abvgnd_mass), size = 1.5) +
+  geom_errorbar(aes(x = NOx_site, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), width = 0) +
+  labs(x = bquote("Nitrate ("*mu~'mol)'), y = "Eelgrass mass (g/m)") +
+  scale_x_continuous(limits = c(0.0, 3), breaks = seq(0, 3, by = 1)) +
+  scale_y_continuous(limits = c(0.0, 200), breaks = seq(0, 200, by = 50)) +
+  theme(text = element_text(size = 10))
+```
+
 
 ## Useful Plots
 Plots of other data that are helpful to look at/show people so they calm down.
