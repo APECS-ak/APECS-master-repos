@@ -538,7 +538,7 @@ General approach
 
 Global model will include, sea otter index, epiphyte load, grazer load, crab biomass, fish biomass, sediment score, total nitrogen, macroalgae, and diatom percent cover. Note transformations of variables where appropraite.
 ```{r mod1 global, echo=FALSE}
-mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + grazermass_shootmass + crab_mass + fish_mass + asin(sqrt(macro_dens / 100)) + asin(sqrt(diatom_dens / 100)) + sed_inside_prim + NOx_site, data = dat)
+mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + epiphmass_shootmass_dt + grazermass_shootmass + crab_mass + NOx_site, data = dat)
 ```
 
 Dredge and filter models
@@ -860,6 +860,15 @@ ggplot(data = dat) +
   geom_errorbar(aes(x = epiphmass_shootmass, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), width = 0) +
   labs(x = "Epiphyte load (g/g)", y = "Grazer load (g/g)") +
   scale_x_continuous(limits = c(-0.0, 0.20), breaks = seq(0, 0.20, by = 0.04)) +
+  scale_y_continuous(limits = c(-0.0, 0.24), breaks = seq(0, 0.24, by = 0.04)) +
+  theme(text = element_text(size = 10))
+
+## Grazers and Diatoms ##
+ggplot(data = dat) +
+  geom_point(aes(x = diatom_dens, y = grazermass_shootmass), size = 1.5) +
+  geom_errorbar(aes(x = diatom_dens, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), width = 0) +
+  labs(x = "Diatom cover (%)", y = "Grazer load (g/g)") +
+  scale_x_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 25)) +
   scale_y_continuous(limits = c(-0.0, 0.24), breaks = seq(0, 0.24, by = 0.04)) +
   theme(text = element_text(size = 10))
 
