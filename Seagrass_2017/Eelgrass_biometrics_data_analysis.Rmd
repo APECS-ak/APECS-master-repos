@@ -353,7 +353,7 @@ Assign lengths to unmeasured fish based on sampled distribution. This assignment
 Option 1 will be to assume the least and jsut use the sampled proportions to assign lenghts to unmeasured fish
 ```{r assignment direct}
 # Exclued fishes that do not have a measured counterpart. These were insantces when we tossed a fish without knowing what it was other than it was a sculpin thing  
-fish.um.redu <- fish.um[c(1:29, 31, 32, 34, 35, 36, 38:53, 55:60, 63:89, 91:95),]
+fish.um.redu <- fish.um[c(1:29, 31, 32, 34, 35, 36, 38:53, 55:60, 63:89, 91:95),] # not the cazy 
 
 d <- data.frame()
 for(s in unique(fish.um.redu$site)){ # cycle through sites
@@ -361,6 +361,7 @@ for(s in unique(fish.um.redu$site)){ # cycle through sites
     filter(site == s)
   dat.um <- fish.um.redu %>% #subset unmeasured data
       filter(site == s)
+  for(t in unique())
   for(i in unique(dat.um$sp_code)){ #cycle through species that are in UNMEASURED data
     samp <- dat.m %>% # create sample from which to make distrubution
       filter(sp_code == i)

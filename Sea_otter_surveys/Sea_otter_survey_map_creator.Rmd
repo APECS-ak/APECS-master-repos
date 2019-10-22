@@ -27,15 +27,15 @@ library(sf)
 
 ```{r load data}
 ## Prince of Wales Water Polygon ##
-h2o.utm <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "POW_water_UTM")
+h2o.utm <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", layer = "POW_water_UTM")
 h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
 ## Create survey area
 ### Where is your site?
 Input Lat/Long in decimal degrees below. Make sure that the site is "in the water"! Otherwise this wont work.
-```{r site}
-site <- structure(list(id = "site", longitude = -133.0011, latitude = 55.344914), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
+```{r site}	
+site <- structure(list(id = "site", longitude = -133.147, latitude = 55.52904		), .Names = c("id", "longitude", "latitude"), class = "data.frame", row.names = c(NA, -1L))
 xy <- site[,c(2,3)]
 
 site <- SpatialPointsDataFrame(coords = xy, data = site,
@@ -46,6 +46,7 @@ site <- spTransform(site, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0"))
 
 ### Make the polygon
 Some spatial math happens here. Its scary.
+
 ```{r}
 buff <- gBuffer(site, byid = TRUE, width = 3704, quadsegs = 10) # create buffer
 buff <- spTransform(buff, CRS("+init=epsg:4326")) # transform buffer
@@ -71,15 +72,16 @@ a <- (2500 * length(survey.poly.utm) / 1000000) # caculate area of the polygon i
 ```{r make map}
 site.latlong <- spTransform(site, CRS("+init=epsg:4326"))
 leaflet() %>% 
-  addProviderTiles(providers$Esri.WorldImagery) %>% 
+  #addProviderTiles(providers$Esri.WorldImagery) %>% 
+  addTiles() %>%
   addCircleMarkers(data = site, ~longitude, ~latitude, color = "black", fillOpacity = 1, stroke = FALSE, radius = 5) %>% 
   addPolygons(data = survey.poly.latlong, stroke = NA, fillColor = "yellow", fillOpacity = 0.5, group = "POW")
 
 
 
 
-library(rgeos)
-gArea(a)
+#library(rgeos)
+#gArea(a)
 
 
 

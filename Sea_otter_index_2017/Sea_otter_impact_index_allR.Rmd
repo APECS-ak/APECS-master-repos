@@ -40,6 +40,8 @@ library(DT)
 library(sf)
 library(compare)
 library(corrgram)
+library(lubridate)
+library(cowplot)
 
 theme_set(theme_classic())
 ```
@@ -54,15 +56,39 @@ You will need data on.
 3. A polygon of the water around the study area. In this case I am using a polygon of all the coastal waters of POW.
 ```{r data}
 ## Sites ##
-sites <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "Otter_Survey_Sites_2017_All_UTM")
-sites.eg <- subset(sites, site_type %in% "Eelgrass")
+# for 2019
+sites <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", layer = "Otter_survey_sites_2019_UTM")
+# for 2017
+# sites <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", layer = "Otter_Survey_Sites_2017_All_UTM")
+
+#sites.eg <- subset(sites, site_type %in% "Eelgrass") 
+# change syntax for 2019 data
+sites.eg <- subset(sites, habitat %in% "eelgrass")
+# for 2019 remove site code column
+# sites.eg <- sites.eg[,-2]
 
 ## Sea otters that where observed ##
-otts <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "Otter_Survey_All_10Jan18_UTM")
+# for 2019
+otts <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", 
+                layer = "so_survey_2019_UTM")
+
+# for 2017: 
+#otts <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", layer = "Otter_Survey_All_10Jan18_UTM")
+
+# change 2019 dataframe to match exactly the 2017 data
+otts@data$longitude <- otts@data$X 
+otts@data$latitude <- otts@data$Y
+otts@data <- otts@data %>%
+  select(site, latitude, longitude, n_otter, date_YYYYM) %>%
+  mutate(survey_dat = ymd(date_YYYYM)) %>%
+  rename(n_otters = n_otter) %>%
+  select(-date_YYYYM)
+
 otts@data$n_otters <- as.numeric(as.character(otts@data$n_otters)) # data is imported as a factor
+otts@data$survey_dat <- as.factor(otts@data$survey_dat)
 
 ## Prince of Wales Water Polygon
-h2o.utm <- readOGR(dsn = "/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer = "POW_water_UTM")
+h2o.utm <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", layer = "POW_water_UTM")
 h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
@@ -70,12 +96,12 @@ h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```{r}
  # converting sea otter data from spatial file to dataframe and .csv
 require(rgdal)
-df.otts <- readOGR(dsn="/Users/tiff/Desktop/R Studio/APECS-master-repos/ALL_DATA/spatial_data", layer="Otter_Survey_All_10Jan18_UTM")
+df.otts <- readOGR(dsn="../APECS Master repo/ALL_DATA/spatial_data", 
+                   layer="so_survey_2019_UTM")
 df.otts <- as(df.otts, "data.frame")
 
 
-# Data Export
-write.csv(df.otts, "/Users/tiff/Desktop/R Studio/APECS-master-repos/Sea_otter_index_2017/otter_gps_2017.csv", row.names = FALSE)
+write.csv(df.otts, "/Users/liadomke/liadomke1/Desktop/Grad School/UAF/Data/APECS Master repository/2019_Data_LD/Otter_Survey_2019/otter_gps_2019.csv", row.names = FALSE)
 ```
 
 ## Plot sites and sea otters
@@ -97,7 +123,7 @@ The general steps are as follows
 The following for loop generates a 2nm (== 3704 meter) as the otter swims survey area for each sites. It then selects the otters that were where sited in that survey area and generates a data table of that data. This is done for each site iterativley and the resulting data frames are pasted together. 
 ```{r loop to extract surveyed otters to sites}
 d <- data.frame() # set up blank data frame to append to later
-for(i in unique(1:21)){
+for(i in unique(1:25)){
   s <- sites.eg[i,] # subset sites 
   b <- gBuffer(s, byid = TRUE, width = 3704, quadsegs = 10) # create 3704 meter radius buffer around site
   b <- spTransform(b, CRS("+init=epsg:4326")) # change projection to for next step
