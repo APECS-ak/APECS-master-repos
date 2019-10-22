@@ -527,19 +527,19 @@ distance.aov <- aov(C~distance + OtterID + distance:OtterID, data = whisker)
 summary(distance.aov)
 
 #                   Df Sum Sq Mean Sq F value   Pr(>F)    
-#  distance          1   0.14   0.143   0.155   0.6951    
-#  OtterID           9  69.90   7.767   8.432 1.91e-08 ***
-#  distance:OtterID  9  17.89   1.987   2.158   0.0354 *  
-#  Residuals        71  65.40   0.921   
+#  distance          1   0.21   0.214   0.371 0.54364     
+#  OtterID          16 121.05   7.566  13.102 < 2e-16 ***
+#  distance:OtterID 16  23.35   1.459   2.527 0.00214 **   
+#  Residuals       125  72.18   0.577 
 
 distance.aov <- aov(N~distance + OtterID + distance:OtterID, data = whisker)
 summary(distance.aov)
 
 #                   Df Sum Sq Mean Sq F value   Pr(>F)    
-#  distance          1  2.443  2.4425   6.514   0.0129 *  
-#  OtterID           9 23.670  2.6300   7.014 3.54e-07 ***
-#  distance:OtterID  9  1.849  0.2055   0.548   0.8344    
-#  Residuals        71 26.624  0.3750    
+#  distance          1   5.29   5.285  21.374 9.28e-06 ***  
+#  OtterID          16  53.03   3.314  13.403  < 2e-16 ***
+#  distance:OtterID 16   5.22   0.326   1.318    0.196    
+#  Residuals       125  30.91   0.247    
 
 ggplot(data=whisker) +
   geom_boxplot(aes(x=Season, y=N)) +
@@ -559,11 +559,11 @@ ggplot(data=whisker) +
 ########################################################################
 
 library(MixSIAR)
-browseVignettes("MixSIAR")
-mixsiar_gui() # this won't work and I cannot figure out why
+#browseVignettes("MixSIAR")
+#mixsiar_gui() # this won't work and I cannot figure out why
 mixsiar.dir <- find.package("MixSIAR")
-paste0(mixsiar.dir,"/example_scripts")
-source(paste0(mixsiar.dir,"/example_scripts/mixsiar_script_wolves.R"))
+#paste0(mixsiar.dir,"/example_scripts")
+#source(paste0(mixsiar.dir,"/example_scripts/mixsiar_script_wolves.R"))
 
 #working dir for consumer (whisker)
 mix.filename <- "/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging/SI/whis_consumer.csv"
@@ -599,7 +599,19 @@ plot_data(filename="isospace_plot", plot_save_pdf=TRUE, plot_save_png=FALSE, mix
 calc_area(source=source,mix=mix,discr=discr)
 
 # default "UNINFORMATIVE" / GENERALIST prior (alpha = 1)
-plot_prior(alpha.prior=1,source)
+#plot_prior(alpha.prior=1,source)
+
+#Run with an informative primer
+# Our 14 fecal samples were 10, 1, 0, 0, 3
+mix.alpha <- c(69.2,14.0,3.4,1.1,7.9,3.3)
+
+
+# Plot your informative prior
+plot_prior(alpha.prior=mix.alpha,
+           source=source,
+           plot_save_pdf=TRUE,
+           plot_save_png=FALSE,
+           filename="prior_plot_inf")
 
 # Write the JAGS model file
 model_filename <- "MixSIAR_model.txt"   # Name of the JAGS model file
@@ -611,10 +623,10 @@ run <- list(chainLength=200000, burn=150000, thin=50, chains=3, calcDIC=TRUE)
 
 
 jags.1 <- run_model(run="test", mix, source, discr, model_filename,
-                    alpha.prior = 1, resid_err, process_err)
+                    alpha.prior = mix.alpha, resid_err, process_err)
 
 jags.1 <- run_model(run="normal", mix, source, discr, model_filename,
-                    alpha.prior = 1, resid_err, process_err)
+                    alpha.prior = mix.alpha, resid_err, process_err)
 
 output_options <- list(summary_save = TRUE,
                        summary_name = "summary_statistics",
@@ -638,3 +650,4 @@ output_options <- list(summary_save = TRUE,
                        plot_xy_save_png = FALSE)
 
 output_JAGS(jags.1, mix, source, output_options)
+
