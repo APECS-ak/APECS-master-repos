@@ -1,0 +1,242 @@
+---
+title: "EDA_salmon_data"
+author: "Lia Domke"
+date: "10/7/2019"
+output: html_document
+---
+
+# Libraries
+```{r libraries, echo = FALSE}
+library(tidyverse)
+library(corrgram)
+library(MASS)
+library(pscl)
+library(visreg)
+```
+
+# Data
+This file is based on the "DataCleaning_Seine_2019" R Markdown script. Extracted relevant salmon abundances (with zeros where we seined but caught no salmon), environmental information (from YSI meter), habitat information (i.e. shoot/flowering shoot density/m2), and otter density by site. 
+```{r, echo = FALSE}
+dat <- read.csv("FISH604_combined_10-5-19.csv")
+
+
+```
+
+# Exploratory Analysis (EDA)
+
+```{r}
+# Take a look at data
+glimpse(dat)
+
+# do some minor clean up 
+dat <- dat[-42,-1]
+dat$year <- as.factor(dat$year)
+dat[,25:29] <- data.frame(lapply(dat[,25:29], as.numeric), stringsAsFactors = FALSE)
+dat <- dat %>%
+  rowwise() %>%
+  mutate(abundance = sum(SALCHIN, SALCHUM, SALCOHO, SALPINK, SALSOCK))
+# visualize relationships among variables: scatterplot matricies
+corrgram(dat[,c(4,5,8,9,12:14,17:19,21,25:29)], lower.panel=panel.shade, upper.panel=panel.ellipse,
+         diag.panel=panel.density)
+
+pairs(dat[,c(5,6,9,10,13:15,18:20,22,25:30)], lower.panel = panel.smooth)
+
+# graph abundance data 
+dat$site <- reorder(dat$site, -dat$avg_density)
+dat %>%
+  group_by(site, avg_density, year) %>%
+  summarise(abundance = as.numeric(sum(SALCHIN, SALCHUM, SALCOHO, SALPINK, SALSOCK))) %>%
+  ggplot() + geom_bar(aes(x = site, y = abundance, fill = year), stat = "identity", position = "dodge") + theme(axis.text.x = element_text(angle = 90))
+
+# look at the sites against the average sea otter density
+ggplot(data = dat) + geom_bar(aes(x = site, y = avg_density, fill = year), stat = "identity") + theme(axis.text.x = element_text(angle = 90))
+
+
+# visualize distribution of salmon abundance
+hist(x = dat$abundance)
+boxplot(dat$abundance)
+# distribution of abundances
+# Can see that there are a lot of zeros and a few low, some mid, and only a few high abundances
+plot(table(dat$abundance))
+```
+
+# Models
+## Binomial models 
+(1) Predictor variables: avg_density, juli_date, 
+(2) Binomial family (salmon is present or not)
+(3) Logit link (because its the binomial family)
+### Graphical exploration
+```{r}
+hist(as.numeric(dat$abundance > 0))
+dat$year <- as.factor(dat$year)
+summary(dat)
+
+plot((abundance > 0) ~ avg_density, data = dat)
+plot((abundance >0) ~ avg_shoot, data = dat)
+plot((abundance >0) ~ avg_flowering, data = dat)
+plot((abundance >0) ~ juli_date, data = dat)
+# hard to see any real patterns of presence of salmon with otter density or shoot density, flowering density
+# or julian date
+
+table((dat$abundance >0), dat$year)
+# there are more sites with salmon than without in 2019, likely due to the time of sampling
+# makes sense that 2017 has about half and half due to the even spread of sampling across the summer. 
+table((dat$abundance >0), dat$juli_date)
+# appears that there are more "false" i.e. no salmon later in the summer when compared to earlier in the summer, once again makes sense based on what we know about out migration of salmon. 
+plot(abundance ~ year, data = dat)
+
+dat$binomial[dat$abundance > 0] <- 1
+dat$binomial[dat$abundance == 0] <- 0  
+# convert to 0, 1 for modelling
+
+plot(dat$juli_date, dat$binomial)
+
+ggplot(dat, aes(avg_density, binomial, color = year)) + geom_jitter(width = 0.5, height = 0.05) + facet_wrap(~year, ncol = 1)
+
+ggplot(data = dat, aes(x = reorder(site, -avg_density), y = avg_density, fill = year)) + geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 90)) +facet_wrap(~year, ncol = 1)
+
+# finally lets look at a corrigram of the response variables
+library(corrgram)
+corrgram(dat[,c(1,6,8,19,21,24,30)], lower.panel=panel.shade, upper.panel=panel.ellipse,
+         diag.panel=panel.density)
+# No distinguishable pattern aside from the decline in abundance over time
+```
+
+### Model fitting and selection
+Want to start by fitting a full model including interaction
+```{r}
+#Try a fit that includes sea otter density and date, including an interaction
+fit1 <- glm(binomial ~ avg_density*juli_date*year, family = binomial(link = logit), data = dat)
+summary(fit1)
+# try without interaction (not significant)
+fit1.red <- glm(binomial ~ avg_density+juli_date+year, family = binomial(link = logit), data = dat)
+summary(fit1.red)
+
+fit1.time <- glm(binomial ~ juli_date+year, family = binomial(link = logit), data = dat[-41,])
+summary(fit1.time)
+# compare AIC values and Analysis of Deviance
+AIC(fit1, fit1.red, fit1.time) # reduced has slightly lower AIC value
+anova(fit1, fit1.red, fit1.time, test = "Chisq") # the null hypothesis is rejected indicating
+# that the true model is the second model that includes avg_density, juli_date, and y ear
+anova(fit1, test = "Chisq")
+
+# Try another fit using seagrass densities and date
+# If the seagrass and sea otter have a hypothesized relationship (based on WR work) they should 
+# be in included separately. 
+fit2.intx <- glm(binomial ~ avg_shoot * avg_flowering * juli_date * year, family= binomial(link = logit), data = dat[-41,])
+summary(fit2.intx) # somethign weird happened here... it did not converge...
+# drop the interactions, not significant
+fit2 <- glm(binomial ~ avg_shoot + avg_flowering + juli_date + year, family = binomial(link = logit), data = dat[-41,])
+summary(fit2)
+# looks like julian date is important.... 
+# lets drop the other non significant values and see 
+fit2.red <- glm(binomial ~ juli_date + year, family = binomial(link = logit), data = dat[-41,])
+summary(fit2.red)
+
+anova(fit2.intx, fit2, fit2.red, test= "Chisq")
+AIC(fit2.intx, fit2, fit2.red) # fit 2 reduced only reduces the AIC values by 3... 
+anova(fit2.intx, test = "Chisq")
+
+# How do we look at these two models with different parameters if the  models aren't nested? 
+
+```
+
+### Visualize the binomial models 
+```{r}
+visreg(fit1.red, scale = "response", overlapy = T, gg=T)
+visreg(fit2, scale = "response", overlay = T, gg = T)
+
+# diagnostic plots taken with a grain of salt for binomial models
+par(mfrow=c(2,2))
+plot(fit1.red, which=1:4)
+
+# potential outliers with large influence based on Cook's distance
+dat[4,] # Kaguk (high density, seined in july)
+dat[6,] # Guktu (high, density, seined in August)
+
+# Try and refit the model (fit1.red) without these outliers
+fit1.red.up <- glm(binomial ~ avg_density+juli_date+year, family = binomial(link = logit), data = dat[-c(4,6),])
+summary(fit1.red.up)
+
+visreg(fit1.red.up, scale = "response", overlap = T, gg=T)
+par(mfrow=c(2,2))
+plot(fit1.red.up, which=1:4) # does this look better?
+
+```
+
+## Abundance based models (Poisson and Negative Binomial)
+Okay so we looked at the data using a strictly binomial model (i.e. presence absence) of all salmon species. 
+Can we try to model the salmon abundance (this makes the assumption that all salmon species are influenced by the same conditions)
+### Graphical exploration of salmon abundance
+```{r}
+table(dat$SALCHIN); table(dat$SALCHUM); table(dat$SALCOHO); table(dat$SALPINK); table(dat$SALSOCK)
+table(dat$SALCHIN>0); table(dat$SALCHUM>0); table(dat$SALCOHO>0); table(dat$SALPINK>0); table(dat$SALSOCK>0)
+# Notice that there are many more zeros than positive numbers. 
+table(dat$abundance>0)
+prop.table(table(dat$abundance>0))
+# 68% of the data has a positive abundance
+prop.table(table(dat$SALCHUM>0))
+prop.table(table(dat$SALPINK>0))
+# more positive abundances of chum than pink, but we'll include all salmon together in the model using
+# abundance
+
+hist(dat$abundance)
+hist(dat$SALCHUM)
+hist(dat$SALPINK)
+hist(dat$SALCOHO)
+# yup a lot of zeros but some positive values. 
+```
+
+```{r, echo = FALSE}
+# try to fit to a glm using poisson distribution
+# have to add a constant to abundance data because poisson doens't like zeros
+# this glm framework automatically transforms the data
+fit <- glm(abundance+1 ~ avg_density*year*juli_date*I(juli_date^2), data = dat, family = poisson)
+summary(fit)
+
+# residuals vs fitted appear to show an increase in variance, check summary output
+# the normal QQ plot indicates a couple worrisome points (case numbers 16 and 25 and 9) ; however
+# the majority of the points fall along the qqline
+plot(fit)
+summary(fit)
+# the residual deviance is greater than the df--this could indicate that there is overdispersion in the data
+
+# try fitting a quasi poission model to better account for the overdispersion
+fit.qp <- glm(abundance+1 ~ avg_density*year*juli_date*I(juli_date^2), data = dat, family = quasipoisson)
+summary(fit.qp)
+#year, date and their interactions appear to be significant. Residual deviance is extremely higher than
+# than df.... overdispersion. data looks weird
+plot(fit.qp)
+# the residuals against the fitted values looks somewhat better; however, the qqplot looks like it might
+# have a stepwise pattern. A few spurrious points (case numbers 16, 9, 29)
+
+# try even better accounting for the overdispersion through fitting a negative binomial with includes
+# another parameter (theta) to better account for increasing variance
+fit.nb <- glm.nb(abundance ~ year*juli_date*avg_density+I(juli_date^2), data = dat, init.theta=0.535, control=glm.control(maxit = 50))
+summary(fit.nb)
+# for some reason can't run the glm.nb including *I(juli_date^2) it says that the algorithm does not converge.... even if you use the initial theta of the model without the parameter.have to add it in
+
+fit.nb2 <- glm.nb(abundance ~ year:juli_date + juli_date:avg_density + year:avg_density + juli_date + avg_density + year, data = dat)
+summary(fit.nb2)
+library(lmtest)
+# Which model is better?
+lrtest(fit.nb2, fit.nb) # there isn't a significant reduction of deviance by including the other interaction variable. drop density*juliday
+AIC(fit.nb2); AIC(fit.nb) # basically the same AIC value 
+
+# Out of curiosity lets look at if we drop all interaction terms aside form julday:year
+fit.nb3 <- glm.nb(abundance ~ avg_density + juli_date + year + juli_date*year, data = dat)
+summary(fit.nb3)
+lrtest(fit.nb3, fit.nb2)
+
+# Since we know there is a high abundance of zero in the data try and fit the hurdle model
+library(pscl)
+fit.hurdle <- hurdle(abundance ~ avg_density + juli_date + year, data = dat[-41,], dist = "negbin")
+summary(fit.hurdle)
+ lrtest(fit.nb3, fit.hurdle)
+
+# try something else out with more flexibility for the julian date
+library(mgcv)
+  fit.gam<- gam(abundance ~ s(juli_date, avg_density, bs = "tp", k = 6) +avg_density+ s(juli_date, k = 3) + year + avg_shoot + avg_flowering, data = dat, family = nb(link = "log"))
+summary(fit.gam)
+visreg(fit.gam, scale = "response")
+```
