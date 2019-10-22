@@ -1,0 +1,51 @@
+site,habitat,date,YYYYMMDD,time,weather,tide,depth,dissolved_O2_mgL,dissolved_O2_%,Spec_cond,salinity,temperature,notes
+Baker Island - kelp,kelp,6/19/2019,20190619,NA,overcast,906,1,9.69,108.8,47513,30.8,11.9,in fieldnotebook
+Baker Island - kelp,kelp,6/19/2019,20190619,NA,overcast,906,bed,9.45,103.8,49388,32.1,10.4,
+Shakan Bay - eel,eelgrass,6/7/2019,20190607,109,overcast,1059,1,13.03,145.2,50048,32.1,11.3,in fieldnotebook
+Shakan Bay - eel,eelgrass,6/7/2019,20190607,109,overcast,1059,bed,13.45,150.1,50197,31.8,11.2,
+Chusini Cove,eelgrass,6/14/2019,20190614,921,overcast,523,1,11.42,128.6,48435,31.6,12,
+Chusini Cove,eelgrass,6/14/2019,20190614,921,overcast,523,bed,11.8,134.6,48667,31.7,11.8,
+Craig Highway,kelp,6/1/2019,20190601,1240,overcast,635,1,9.95,112,48069,31.3,11.9,in fieldnotebook
+Craig Highway,kelp,6/1/2019,20190601,1240,overcast,635,bed,10.25,115.3,48380,31.4,11.7,
+Dunbar Inlet,eelgrass,6/17/2019,20190617,857,overcast light rain,750,1,10.49,121.1,47837,31.1,13.1,
+Dunbar Inlet,eelgrass,6/17/2019,20190617,857,overcast light rain,750,bed,9.46,107.9,48317,31.4,12.5,
+Goats mouth inlet,eelgrass,6/17/2019,20190617,810,overcast light rain,750,1,10.44,119.5,48466,31.6,12.5,
+Goats mouth inlet,eelgrass,6/17/2019,20190617,810,overcast light rain,750,bed,9.6,109.3,48230,31.4,12.5,
+Guktu Bay,eelgrass,6/14/2019,20190614,725,overcast,523,1,11.7,129.3,50080,32.6,10.1,
+Guktu Bay,eelgrass,6/14/2019,20190614,725,overcast,523,bed,11.65,127.4,50181,32.6,10.1,
+Heceta,eelgrass,6/15/2019,20190615,842,overcast,653,1,10.51,120,46806,30.4,12.8,
+Heceta,eelgrass,6/15/2019,20190615,842,overcast,653,bed,10.51,119.1,46732,30.3,12.7,
+Heceta - kelp,kelp,6/3/2019,20190603,930,sun with overcast skies,729,1,11.4,125.2,49917,32.5,10.4,
+Heceta - kelp,kelp,6/3/2019,20190603,930,sun with overcast skies,729,bed,11.84,130.2,49841,32.4,10.4,
+Kaguk Cove,eelgrass,6/6/2019,20190606,1148,sunny ,1007,1,12.82,144.2,49739,32.5,11.4,
+Kaguk Cove,eelgrass,6/6/2019,20190606,1148,sunny,1007,bed,12.95,144.9,49691,32.5,11.7,
+Klawock airport,eelgrass,6/1/2019,20190601,115,overcast,635,1,9.58,108.9,45730,29.6,12.6,in fieldnotebook
+Klawock airport,eelgrass,6/1/2019,20190601,115,overcast,635,bed,10.17,113.2,48100,31.2,11.3,
+Natzuhini Bay,eelgrass,6/16/2019,20190616,835,overcast rainy,702,1,10.71,121.2,47614,30.9,12.2,
+Natzuhini Bay,eelgrass,6/16/2019,20190616,835,overcast rainy,702,bed,10.23,116.1,47393,30.8,12.3,
+Naukati Bay,eelgrass,6/20/2019,20190620,1120,sunny ligth cloud cover,944,1,11.1,126.3,45280,29.3,13,in fieldnotebook
+Naukati Bay,eelgrass,6/20/2019,20190620,1120,sunny ligth cloud cover,944,bed,11.3,123.3,43918,28.4,13.1,
+North Fish Egg Island,eelgrass,5/23/2019,20190523,1205,overcast,1040,1,12.2,134.6,47524,30.8,11.1,
+North Fish Egg Island,eelgrass,5/23/2019,20190523,1205,overcast,1040,bed,12.14,134,47494,30.8,11.1,
+North Fish Egg - kelp,kelp,5/23/2019,20190523,1210,overcast,1040,1,11.87,131,47581,30.9,11.1,
+North Fish Egg - kelp,kelp,5/23/2019,20190523,1210,overcast,1040,bed,12.54,139.3,47651,30.9,11.2,
+Nossuk Bay,eelgrass,6/14/2019,20190614,650,overcast,523,1,12.98,146.7,49881,32.6,11.7,
+Nossuk Bay,eelgrass,6/14/2019,20190614,650,overcast,523,bed,12.98,146.8,49838,32.5,11.8,
+Baker Island - eel,eelgrass,6/18/19,20190618,1020,overcast,813,1,10.02,108.2,39068,26.4,12.3,
+Baker Island - eel,eelgrass,6/18/19,20190618,1020,overcast,813,bed,9.8,108,50436,32.9,10.4,
+Salt Lake Bay,eelgrass,6/2/2019,20190602,800,overcast,654,1,9.69,109.1,49851,32.5,11.6,
+Salt Lake Bay,eelgrass,6/2/2019,20190602,800,overcast,654,bed,9.59,108.3,49854,32.5,11.6,
+Shinaku Inlet,eelgrass,6/1/2019,20190601,135,overcast,635,1,9.74,110.9,48352,31.5,12.5,in fieldnotebook
+Shinaku Inlet,eelgrass,6/1/2019,20190601,135,overcast,635,bed,9.8,112.4,48437,31.5,12.2,
+Shakan - kelp,kelp,6/8/2019,20190608,1240,overcast,1120,1,13.65,153.2,50772,33.2,11,
+Shakan - kelp,kelp,6/8/2019,20190608,1240,overcast,1120,bed,14.65,162.4,50792,33.2,11,
+South Fish Egg Island,eelgrass,6/1/19,20190601,1220,overcast,600,1,10.55,120.6,49118,32,12.4,in fieldnotebook
+South Fish Egg Island,eelgrass,6/1/19,20190601,1220,overcast,600,bed,10.41,119.6,49238,32.1,12.4,
+South Wadleigh Island,eelgrass,6/1/2019,20190601,1230,overcast,635,1,10.62,118.6,49165,32,11.3,in fieldnotebook
+South Wadleigh Island,eelgrass,6/1/2019,20190601,1230,overcast,635,bed,10.4,115.5,49280,32.1,11.1,
+Farallon Bay,eelgrass,7/5/19,20190705,NA,NA,NA,1,10.42,124.3,49277,32.3,14.4,transferred from back of eelgrass shot metrics sheet on 7/5
+Farallon Bay,eelgrass,7/5/19,20190705,NA,NA,NA,bed,11.3,135.5,49463,32.3,14.4,
+Port Refugio,eelgrass,7/19/19,20190719,NA,NA,NA,1,9.81,115,49581,32.4,13.7,transferred from site metadata from Regugio 7/19 numbers on back of sheet and used U1 and L4
+Port Refugio,eelgrass,7/19/19,20190719,NA,NA,NA,bed,10.01,118.4,49622,32.3,13.5,
+North Pass,eelgrass,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,data never collected
+North Pass,eelgrass,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,NA,
