@@ -1,0 +1,328 @@
+---
+title: "FishLength-Biomass_Calculations"
+author: "Lia Domke"
+date: "2/11/2019"
+output: html_document
+---
+Script extracted from "Eelgrass_biometrics_data_analysis" updated by Wendel Raymond on Jan. 16 2018. 
+
+# Fish data for analysis
+This scrip will generate a dataframe from the beach seine data that will be ready for analysis. In genreal nothing will be summerized, data will report values from each replicate at each site. One task is to assign lengths to unmeasured fish and then convert lengths to biomass.
+# Libraries 
+```{r}
+library(ggplot2)
+library(plyr)
+library(dplyr)
+library(stringr)
+
+```
+
+## Data
+We need fish data and length weight conversion data.
+```{r}
+setwd("~/Desktop/Grad School/UAF/Data/APECS Master repository/APECS Master repo/ALL_DATA")
+getwd()
+fish <- read.csv("../ALL_DATA/Lia_Trial/FishSeine_RawData_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+fishWR17 <- read.csv("../ALL_DATA/seagrass_beach_seine_data_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+fishLW <- read.csv("../ALL_DATA/fish_length_weight_conversions_05Feb2018.csv", header = TRUE, stringsAsFactors = FALSE)
+
+seine <- read.csv("~/Desktop/Grad School/UAF/Data/NOAA Fish data/NOAA_All_Data.csv", header = TRUE, stringsAsFactors = FALSE)
+
+```
+# how many pcod are around?
+```{r}
+# Wendel's data
+Pcod <- fishWR17 %>%
+  filter(sp_code == "PERCHSH")
+
+Pcod$month <- ifelse(Pcod$YYYYMMDD < 20170600, 'May', ifelse(Pcod$YYYYMMDD < 20170700, 'June', 
+      ifelse(Pcod$YYYYMMDD < 20170800, 'July', ifelse(Pcod$YYYYMMDD < 20170900, 'August'))))
+
+Pcod$species_counts <- ifelse(is.na(Pcod$fork_length), paste(Pcod$unmeasured), 1)
+Pcod$species_counts<-as.numeric(Pcod$species_counts)
+
+df <- Pcod %>% 
+  group_by(sp_code, month) %>%                           
+  summarise(species_counts=sum(species_counts))
+
+df$month <- factor(df$month, levels = c ("May", "June", "July", "August"))
+require(ggplot2)
+p <- ggplot(df, aes(month, species_counts))+
+  geom_bar(stat="identity")+theme_minimal()+ labs(x = "Month", y = "Number of Pcod", fill = "Species")
+p
+
+# NOAA seine data
+require(tidyverse)
+# convert dataset to tibble dataframe (see https://tibble.tidyverse.org/)
+seine <- as_tibble(seine)
+seine <- seine %>% filter(Region == "southeastern Alaska") # only southeast and only seagrass included
+levels(factor(seine$Region)) # Check only southeast
+seine <- seine %>% filter(Habitat_LC == "eelgrass" | Habitat_LC == "surfgrass") # only seagrass included
+levels(factor(seine$Habitat_LC)) # Check only seagrass
+head(seine)
+Pcod <- seine %>% filter(SpCode == "HERRING") 
+
+#Count Pcods
+Pcod$species_counts <- ifelse(is.na(Pcod$ForkLength), paste(Pcod$Unmeasured), 1) 
+# Because I created a new column I need to tell R what form of data it is: counts are numeric and codes are factors. 
+Pcod$species_counts<-as.numeric(Pcod$species_counts)
+# Sum number of salmon by species code and month, saved == df5 
+require(dplyr)
+df2<-Pcod %>% 
+  group_by(SpCode, Mon) %>%                           
+  summarise(species_counts=sum(species_counts))
+# How many sites individual hauls were done by each month?
+df.mon <- Pcod %>% 
+  group_by(Mon) %>%                           
+  summarise(Unique.counts=n_distinct(EventID))
+df3 <- full_join(df2, df.mon, by = "Mon") # joins the two dataframes based on the common column "Mon"
+# Plot Pcod from NOAA
+levels(factor(Pcod$Mon))
+df3$Mon <- factor(df3$Mon, levels = c ("Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"))
+require(ggplot2)
+p <- ggplot(df3, aes(Mon, species_counts, label=Unique.counts)) + geom_bar(stat="identity") +
+  geom_text(aes(x=Mon, y=species_counts, label=Unique.counts), vjust=-1) +
+  theme_minimal()+ labs(x = "Month", y = "Number of Pacific Cod", fill = "Species")
+p
+
+```
+
+
+## Separate measured and unmeasured fish
+The first step is to separate the measured fish from the unmeasured fish.
+```{r measured - unmeasured split}
+# Add a taxon column if not present (i.e. fishLD18)
+fish <- as_tibble(fish)
+fish <- fish %>% 
+  mutate(taxon = ifelse(str_detect(sp_code, "CRAB"), "Decapoda", "Vertebrata"))
+
+# Then filter by only fish 
+fish.m <- fish %>%
+  filter(taxon == "Vertebrata") %>%
+  filter(fork_length > 0)
+
+fish.um <- fish %>%
+  filter(taxon == "Vertebrata") %>% 
+  filter(unmeasured != "estimate") %>% # assume that infield estimates are accurate
+  filter(unmeasured > 0)
+
+fish.um$unmeasured <- as.numeric(fish.um$unmeasured)
+```
+
+## Assign lengths to unmeasured fish
+When beach seining we only measured the first 30 individuals of a species, and counted the rest. We can use the measured fishes to create a distribution from which we can assign lengths to the unmeasured fishes.
+
+Assign lengths to unmeasured fish based on sampled distribution. This assignment should happen at the site level. i.e. use the distribution of fishes at a site to assign unmeasured fishes at that site. There was only one seine per site and only one sine per day so site and date are essentially unique identifiers for how we want to restrict our analysis. 
+
+Option 1 will be to assume the least and jsut use the sampled proportions to assign lenghts to unmeasured fish
+```{r assignment direct}
+# Exclued fishes that do not have a measured counterpart. These were insantces when we tossed a fish without knowing what it was other than it was a sculpin thing  
+fish.um.redu <- fish.um[c(1:29, 31, 32, 34, 35, 36, 38:53, 55:60, 63:89, 91:95),]
+
+d <- data.frame()
+for(s in unique(fish.um.redu$site)){ # cycle through sites
+  dat.m <- fish.m %>% # subset measured data
+    filter(site == s)
+  dat.um <- fish.um.redu %>% #subset unmeasured data
+      filter(site == s)
+  for(i in unique(dat.um$sp_code)){ #cycle through species that are in UNMEASURED data
+    samp <- dat.m %>% # create sample from which to make distrubution
+      filter(sp_code == i)
+    unmeas <- dat.um %>% # isolate unmeasured fish
+      filter(sp_code == i)
+    unmeas <- as.numeric(unmeas$unmeasured) # save unmeasured value
+    dat <- data.frame(size = as.character(samp$fork_length))
+    dat2 <- dat %>% 
+      group_by(size) %>% 
+      summarise(count = n())
+    dat2$porb <- (dat2$count/sum(dat2$count))
+    dat2$x <- as.numeric(paste(dat2$size))
+    fx <- function(n){ # function derived from limits and probabilities of above
+    sample(x = min(dat2$x):max(dat2$x), n, replace = TRUE, prob = dat2$prob)
+    }
+    dat3 <- data.frame(site = s, sp_code = i, fork_length = fx(unmeas))
+    d <- rbind(d, dat3)
+  }
+} # this is returning an error in regards to prob, but i am not sure what its talking about
+```
+
+Append assigned lengths to master data with all site level data
+```{r}
+## Extract site and sp data ##
+fish.site <- unique(fish[,1:8])
+fish.sp <- unique(fish.m[,9:11])
+
+## Merge with loop output, the lengths of unmeasured fishes ##
+d.info <- merge(d, fish.site, by = "site")
+
+## Add species detail ##
+d.info <- merge(d.info, fish.sp, by = "sp_code")
+
+test <- anti_join(d.info, d, by = "sp_code")
+
+## Merge with original measured fishes ##
+fish.all <- bind_rows(fish.m, d.info)
+```
+
+
+**NOPE DONT USE** Option 2 will generate a smooth distribution around the sampled fish and then create a function to assing lengths - this is NOT preferes as on Feb 7 2018
+```{r assignment distribution}
+# Exclued fishes that do not have a measured counterpart. These were insantces when we tossed a fish without knowing what it was other than it was a sculpin thing  
+fish.um <- fish.um[c(1:29, 31, 32, 34, 35, 36, 38:53, 55:60, 63:89, 91:95),]
+
+d <- data.frame() # dummy data frame
+for(s in unique(fish.um$site)){ # cycle through sites
+  dat.m <- fish.m %>% # subset measured data
+    filter(site == s)
+  dat.um <- fish.um %>% #subset unmeasured data
+      filter(site == s)
+  for(i in unique(dat.um$sp_code)){ #cycle through species that are in UNMEASURED data
+    samp <- dat.m %>% # create sample from which to make distrubution
+      filter(sp_code == i)
+    unmeas <- dat.um %>% # isolate unmeasured fish
+      filter(sp_code == i)
+    unmeas <- as.numeric(unmeas$unmeasured)# save number of unmeasured fish
+    dens <- density(samp$fork_length, n = 1000, from = min(samp$fork_length), to = max(samp$fork_length)) # create kernel density around sampled fish distribution but restrict upper and lower bounds to observed upper and lower
+    df <- data.frame(x = as.character(round(dens$x, 0)), y = dens$y) # convert dens to dataframe
+    df2 <- df %>% # sum predicted values by size classes
+      group_by(x) %>% 
+      summarise(pred = sum(y))
+    df2$x <- as.numeric(levels(df2$x))[df2$x] # convert size bins to numeric
+    df2$prop <- df2$pred/sum(df2$pred) # calcualte probability of each bin
+    fx <- function(n){ # function derived from limits and probabilities of above
+    sample(x = min(df2$x):max(df2$x), n, replace = TRUE, prob = df2$prop)
+    }
+    lfq.df <- data.frame(site = s, sp_code = i, val = fx(unmeas)) # sample from that disctribution using the function
+    d <- rbind(d, lfq.df) # bind results to dummy data frame
+  }
+}
+```
+
+## Calculate Biomass
+Using the length-weight conversion values individual lengths will be converted to biomass. Coefficients are in cm*g so fork lengths will need to be converted to cm from mm.
+
+First the L-W conversion data will need to be prepped for use. This will include defineing one a value (collapse the a TL column), define sp_code for new species, and filter out estimates that were made from SL (standard length) and fish calssified as UNFISH or unidentified fish, and then summarise by taking the average a and b value for each species.
+```{r prep L-W}
+## put all a values in one column ##
+fishLW$a_cm.g <- ifelse(is.na(fishLW$a_cm.g), fishLW$aTL_cm.g, fishLW$a_cm.g)
+
+## define sp_code for new species ##
+# Shorthorn sculpin #
+fishLW$sp_code <- ifelse(fishLW$species_common == "Shorthorn sculpin", paste("SCULSHRN"), fishLW$sp_code)
+
+# Longhorn sculpin #
+fishLW$sp_code <- ifelse(fishLW$species_common == "Longhorn sculpin", paste("SCULLHRN"), fishLW$sp_code)
+
+# Rockfish general #
+fishLW$sp_code <- ifelse(fishLW$species_common == "Rockfish", paste("ROCKSEB"), fishLW$sp_code)
+
+## Filter and summarise ##
+LW <- fishLW %>%
+  filter(Type != "SL") %>% 
+  filter(sp_code != "UNFISH") %>% 
+  group_by(sp_code) %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g))
+```
+
+We know that we do not have estimates for a and b estiamtes for all the species so we need to apply other values to other species. First identify what species we need to have stand ins for
+1. "UNSCUL" - Unidentified sculpins will use the average a and b values for all sculpins species.
+2. "UNFLAT" - Unidentified flatfish will use the average a and b values for all flatfish species.
+3. "UNGREEN" - Unidentified greenling will use the average a and b values for all greenling speices.
+4. "UNMYOXO" - Unidentified Myoxocephalus sp. will use the the average of a and b values of sampled members of the Myoxocephalus genus.
+5. "UNGUNN" - Unidentified gunnel will use average a and b values from the sampled gunnel species
+6. "UNARTE" - Unidentified Aretedius sp. will use the average a nad b values of sampled members of the Artedeius genus.
+
+```{r setting stand ins}
+## Unique species in master data ##
+sp <- data.frame(sp_code = unique(fish.all$sp_code))
+
+## Species that need stand ins ##
+nomatch <- anti_join(sp, LW, by = "sp_code")
+
+## Summarising stand ins ##
+# Sculpins
+scul <- data.frame(sp_code = "UNSCUL", fishLW %>% 
+  filter(sp_code == "SCULBUF" | sp_code == "SCULGRT" | sp_code == "SCULGRU" |sp_code == "SCULLHRN" | sp_code == "SCULMAN" |sp_code == "SCULPAD" | sp_code == "SCULPSTG" | sp_code == "SCULSAIL" | sp_code == "SCULSHRN" | sp_code =="SCULSILV" | sp_code == "SCULSMO" | sp_code == "SCULTIDE") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+# Flats
+flat <- data.frame(sp_code = "UNFLAT", fishLW %>% 
+  filter(sp_code == "SDABPAC" | sp_code == "SDABSPKL" | sp_code == "SOLEBUT" |sp_code == "SOLECO" | sp_code == "SOLEENG" |sp_code == "SOLEROC" | sp_code == "FLOUNST") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+# Greenlings
+grns <- data.frame(sp_code = "UNGREEN", fishLW %>% 
+  filter(sp_code == "GREENKEL" | sp_code == "GREENMAS" | sp_code == "GREENWHI") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+# Myoxocephalus
+myoxo <- data.frame(sp_code = "UNMYOXO", fishLW %>% 
+  filter(sp_code == "SCULGRT" | sp_code == "SCULLHRN" | sp_code == "SCULSHRN") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+# Gunnels
+gunn <- data.frame(sp_code = "UNGUNN", fishLW %>% 
+  filter(sp_code == "GUNNCRE" | sp_code == "GUNNPEN") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+arte <- data.frame(sp_code = "UNARTE", fishLW %>% 
+  filter(sp_code == "SCULPAD" | sp_code == "SCULSMO") %>% 
+  summarise(a = mean(a_cm.g),
+            b = mean(b_cm.g)))
+
+## Master a b lsit ##
+LW.master <- rbind.data.frame(LW, scul, flat, grns, myoxo, gunn, arte)
+
+## Filter out UNFISH from fish.all ##
+fish.all <- fish.all %>% 
+  filter(sp_code != "UNFISH")
+
+## Check that everything is cool ##
+anti_join(fish.all, LW.master, by = "sp_code")
+```
+
+Finally join the a and b values from above with the master data and calcualte biomass.
+```{r final join and calculate}
+## Merge a and b values ##
+fish.all.m <- merge(fish.all, LW.master, by = "sp_code")
+
+## Convert mm to cm ##
+fish.all.m$fork_length_cm <- fish.all.m$fork_length / 10
+
+## Calculate mass in g ##
+fish.all.m$mass_g <- (fish.all.m$a * fish.all.m$fork_length_cm^fish.all.m$b)
+
+## some plots, cuz ya know ##
+hist(fish.all.m$mass_g)
+hist(log(fish.all.m$mass_g))
+range(fish.all.m$mass_g)
+
+## Clean up ##
+fish.all.m$taxon[is.na(fish.all.m$taxon)] <- "Vertebrata"
+```
+
+```{r checking}
+## Checking ##
+fish.site <- fish.all.m %>% 
+  group_by(site) %>% 
+  summarise(mass_g = sum(mass_g))
+
+fish.site$mass_kg <- fish.site$mass_g / 1000
+
+boxplot(fish.site$mass_g)
+
+m02 <- fish.all.m[fish.all.m$site == "2017_M_02",]
+```
+
+### Export
+Save to master file for use elsewhere
+```{r export}
+write.csv(fish.all.m, "../ALL_DATA/eelgrass_beach_seine_derived.csv", row.names = FALSE)
+write.csv(LW.master, "../ALL_DATA/fish_mean_LW_factors.csv", row.names = FALSE)
+```
