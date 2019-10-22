@@ -1,0 +1,125 @@
+---
+title: "All_sites_mapping"
+author: "Lia Domke"
+date: "2/22/2019"
+output: html_document
+---
+
+When preparing for the field season 2019, we want to identify potential sites for multiple purposes. 
+Goal: minimize the number of sites in order to maximize amount of work that can get done. We need to: 
+1. identify where Tiff and Wendel's sites are 
+2. determine how many unique sites we have already sampled, when, what, and by whom. (see excel sheet "Potential_sites_2019")
+For 2019/2020 sites: our objectives are two-fold
+1. Design an experiment to look at fish community composition in eelgrass and understory kelp habitat using before after controlled impact (see excel sheets qry19_PrinceOfWales_EelgrassSampling.xlsx, qry19_PrinceOfWales_KelpSampling.xlsx)
+
+2. Sample *eelgrass* sites across a sea otter gradient (abundance) from low to high in the early spring 
+Our questions for site selection then become: 
+1. how many sites can we sample/do we need to sample across the s.o. gradient, 
+2. how many eelgrass can be BACI and gradient sites and 
+3. Can these overlap with other sites? 
+
+Can the eelgrass gradient sites overlap with the seagrass wasting disease sites? (because full community analysis)
+
+In addition: where did the eelgrass/kelp monitoring happen in the 90's?
+```{r}
+
+```
+# Species in kelp and eelgrass?
+```{r}
+require(tidyverse)
+rm(list = ls(all = TRUE))
+setwd("~/Desktop/Grad School/UAF/Data/APECS Master repository/APECS Master repo/ALL_DATA")
+setwd("~/Desktop")
+sp <- read.csv("eelgrass_fish_IACUC.csv")
+seine <- read.csv("~/Desktop/Grad School/UAF/Data/NOAA Fish data/NOAA_All_Data.csv")
+seine2 <- read.csv("~/Desktop/Grad School/UAF/Data/APECS Master repository/APECS Master repo/ALL_DATA/noaa_seak_fish_atlas_CLEAN.csv")
+seine2 <- as_tibble(seine)
+seine <- seine2 %>% filter(Region == "southeastern Alaska") # only southeast and only seagrass included
+levels(factor(seine$Region)) # Check only southeast
+levels(factor(seine$Habitat))
+seine <- seine %>% filter(Habitat == "Kelp" | Habitat == "Eelgrass") # only kelp included
+levels(factor(seine$Habitat)) # Check only seagrass and kelp
+
+head(seine2)
+# list unique species
+df <- data.frame(levels(seine2$Sp_ScientificName))
+colnames(seine2)[22] <- "name"
+colnames(df)[1] <- "name"
+df<- df[-1,]
+write.csv(df, "kelp_sp_noaa.csv")
+
+colnames(sp)[2] <- "name"
+sp <- data.frame(sp$name)
+
+require(dplyr)
+setdiff(df, sp)
+m <- match(df, sp)
+A[!is.na(m)]
+
+# whats the average number of species per seine (CPUE)?
+# using noaa seine including kelp 
+seine$species_counts <- ifelse(is.na(seine$Length), paste(seine$Unmeasured), 1) 
+# Because I created a new column I need to tell R what form of data it is: counts are numeric and codes are factors. Check this with sal.seine %>% glimpse () :: dplyr
+sal.seine %>% glimpse()
+seine$species_counts<-as.numeric(seine$species_counts)
+# Sum number of salmon by species code and month, saved == df5 
+require(dplyr)
+df <- seine %>% 
+  group_by(Sp_ScientificName) %>%
+  summarise(species_counts=mean(species_counts))
+df$species_counts <- round(df$species_counts, 1)
+detach(package:dplyr)
+write.csv(df, "~/Desktop/kelp_sp_counts.csv")
+
+
+```
+
+# Previous site location?
+```{r}
+require(tidyverse)
+tiff.sites <- read.csv("~/Desktop/Grad School/UAF/Data/APECS Master repository/APECS Master repo/ALL_DATA/TIFF_seagrass/2018_data_efforts/sites_2018.csv")
+setwd("~/Desktop")
+write.csv(tiff.sites, "tiff.sites.csv")
+
+require(dplyr)
+noaa.sites <- read.csv("~/Desktop/Grad School/UAF/Data/NOAA Fish data/BeforeAfterSeinesNOAA.csv")
+noaa.sites.red<- noaa.sites %>%
+  filter(Before_Aft != "After") %>%
+  filter(Habitat == "Kelp" | Habitat == "Eelgrass")
+
+levels(factor(noaa.sites.red$Locale))
+noaa.sites.nor <- noaa.sites.red %>%
+  filter(Locale == "Shakan Bay"| Locale == "Warm Chuck Inlet"| Locale == "Port San Antonio" |Locale   == "Klawock Inlet")
+
+# Noaa no otters
+no.otter <- c(619, 620,	162, 163, 164, 165, 616, 617, 613, 614, 611, 610, 602, 603, 605, 606, 607)
+no.otter.sites <- subset(noaa.sites, SiteID %in% no.otter)
+write.csv(no.otter.sites, file = "no_otter_sites.csv")
+
+sites <- read.csv("~/Desktop/sites_locations_WRTS.csv")
+require(leaflet)
+
+icon.site <- awesomeIcons(icon = "map_pin",
+                           markerColor = ifelse(sites$sampler == "WR", "blue", "red"),
+                           library = "fa",
+                           iconColor = "black")
+
+icon.noaa <- awesomeIcons(icon = "map_pin", 
+                          markerColor = ifelse(noaa.sites.red$Habitat == "Kelp", "orange", "green"), 
+                          library = "fa", iconColor = "black")
+
+#leaflet(noaa.sites.red) %>% addTiles() %>%
+
+leaflet(sites) %>% addTiles() %>%
+  addAwesomeMarkers(lng = ~lon, lat = ~lat,
+             label = ~place_name,
+             icon = icon.site) %>%
+  addAwesomeMarkers(data = noaa.sites.red, lng = ~Long1, lat = ~Lat1,label = ~ as.character(SiteID), icon = icon.noaa, labelOptions(permanen = TRUE))
+require(htmlwidgets)
+saveWidget(m, file="Sites.html")
+
+leaflet(noaa.sites.red) %>% addTiles() %>%
+  addAwesomeMarkers(~Long1, ~Lat1, label = ~Date, icon = icon.noaa)
+
+```
+
