@@ -1,0 +1,120 @@
+---
+title: "ETR_analyses"
+author: "Wendel Raymond"
+date: "October 22, 2019"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Eelgrass trophic relationships - analyses
+*Question:* Do sea otters effects the tropic structure of eelgrass communities in Southeast Alaska? From my 2017 data we found that sea otters have a large negative effect on crabs and are positively related to eelgrass biomass, suggesting that sea otter are influencing the eelgrass community. Furthermore we did not find evidence for all the hypothesized links between major community members necessary to complete the full trophic cascade. Notable we found no evidence of a relationship between crabs and grazer and fish and grazers. To this end we further investigated the dynamics of this community by measuring the biomass, stable isotopes, and fatty acids of key eelgrass community constituents.
+
+*Some opening notes* There is a lot of data. There could be multiple papers here. Some more exploratory analysis is definitely warranted but the original goal was to look at the whole community. Crafting analyses so that we answer questions from that perspective should be the priority. However, if interesting stories arise maybe the approach will change. Just sayin. 
+
+```{r libraries, echo = FALSE, warning = FALSE, message = FALSE}
+library(dplyr)
+library(ggplot2)
+library(DT)
+library(cowplot)
+library(RColorBrewer)
+library(vegan)
+
+theme_set(theme_classic())
+```
+
+## Data
+Data falls under three broad categories. Biomass, stable isotopes, and fatty acids. Biomass data files are broken up by sampling type but can easily be combined. In addition, biomarker (SI and FA) metadata is useful to match those data with site, date, treatment, etc. data.
+Biomass and oceanography
+```{r dat bio, echo=FALSE}
+eg <- read.csv("../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+crb <- read.csv("../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+crb.sp <- read.csv("../ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+crb.all <- read.csv("../ALL_DATA/Crab_pots_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
+clm <- read.csv("../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+clm.sp <- read.csv("../ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+
+fsh <- read.csv("../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+pom <- read.csv("../ALL_DATA/POM_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+oce <- read.csv("../ALL_DATA/Site_oceanography_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+Stable Isotope - preliminary
+```{r dat iso, echo = FALSE}
+si <- read.csv("E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/SI_prelim_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+Fatty Acid
+```{r dat fa, echo = FALSE}
+fa_0.5 <- read.csv("../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+fa_1.0 <- read.csv("../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+Biomarker metadata
+```{r dat biomarker, echo = FALSE}
+bimrk <- read.csv("../ALL_DATA/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+### Complie biomass data
+Merge all the different biomass data types into one data frame
+```{r merge, echo = FALSE}
+dat <- eg
+dat$sea_otter_tr <- c("high", "high", "high", "low", "low", "low")
+dat <- cbind(dat[, c(1:10, 53, 11:52)])
+dat <- merge(dat, crb, by = c("site", "place_name"), all.x = TRUE)
+dat <- merge(dat, clm[, c(1, 5:13)], by = "site")
+dat <- merge(dat, fsh, by = "site")
+dat <- merge(dat, oce[, c(1, 6:19)], by = "site")
+```
+
+
+## Analyses
+A critical piece for all analyses is testing the effect of site and sea otter treatment. Within each sea otter treatment three different sites were sampled. 
+
+### Biomass
+Compare biomass of community members between sea otter treatments
+
+#### ANOVAS of sites and treatment
+Eelgrass
+
+Epiphytes
+
+Grazers
+
+Crabs
+
+Fish
+
+### Stable Isotopes
+There are two perspectives in analysis. 1) The whole community (all data) comparisons and 2) by species comparisons.
+
+#### Whole community
+Convex hulls
+
+#### Species specific
+Convex hulls
+
+Trophic level
+
+### Fatty Acids
+Similar to SI data there are two perspectives to analysis. 1) The whole community and 2) by species comparisons.
+
+#### Whole community
+PERMANOVA and PERMDISP of site by treatment. We know/suspect that species will differ from each other. We should show this (to make sure) but really this is not the story. They story will more be on the within species by treatment comparisons. 
+
+#### Species specific
+PERMANOVA and PERMDISP by treatment
+
+FA vectors
+
+SIMPER - what FAs are driving differences?
+
+Specific FA comparisons - What this looks like will likely depend on the results from multivariate analyses.
