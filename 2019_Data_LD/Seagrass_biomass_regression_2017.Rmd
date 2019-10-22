@@ -10,10 +10,10 @@ Data available: In 2017 21 sites were surveyed for seagrass. At each site, 8 0.2
 We are interested in the length of the longest leaf and the dry biomass. 
 # Data import
 ```{r}
-eelgrass <- read.csv("../APECS Master repo/ALL_DATA/seagrass_biometrics_CLEAN.csv")
+eelgrass <- read.csv("..//ALL_DATA/seagrass_biometrics_CLEAN.csv")
 ```
 # Libraries
-```{r}
+```{r, echo = FALSE}
 library(tidyverse)
 library(MASS)
 ```
@@ -22,8 +22,9 @@ library(MASS)
 # extract what we're interested in 
 str(eelgrass)
 eel <- eelgrass %>%
-  mutate(shoot_dw = shoot_foil_dw-shoot_foil)
-eel2 <- eel %>%
+  mutate(shoot_dw = shoot_foil_dw-shoot_foil)  # calculate dry weight
+# determin max leaf length
+eel2 <- eel %>% 
   rowwise() %>%
   mutate(max_length = max(leaf_length1, leaf_length2, leaf_length3, leaf_length4, leaf_length5, leaf_length6, leaf_length7, leaf_length8, leaf_length9, leaf_length10, na.rm=TRUE)) %>%
   mutate(mean_length = mean(leaf_length1, leaf_length2, leaf_length3, leaf_length4, leaf_length5, leaf_length6, leaf_length7, leaf_length8, leaf_length9, leaf_length10, na.rm=TRUE))
@@ -36,35 +37,35 @@ eel_sub <- eel2 %>%
 str(eel_sub)
 levels(as.factor(eel_sub$YYYYMMDD))
 summary(eel_sub)
-eel_sub2 <- na.omit(data.frame(eel_sub$shoot_dw, eel_sub$max_length))
-names(eel_sub2) <- c("shoot_dw", "max_length")
+eel_sub2 <- na.omit(data.frame(eel_sub$shoot_dw, eel_sub$max_length, eel_sub$mean_length, eel_sub$shoot_mass_fw))
+names(eel_sub2) <- c("shoot_dw", "max_length", "mean_length", "shoot_mass_fw")
 ```
 
 # Look at data
 ```{r}
-plot(eel2$max_length, eel2$shoot_dw)
+plot(eel_sub2$max_length, eel_sub2$shoot_dw)
 # Looks like the variance in shoot dw might be increasing with the the length (mm) of the longest blade. 
-plot(eel2$mean_length, eel2$shoot_dw)
-plot(eel2$max_length, eel2$shoot_mass_fw)
+plot(eel_sub2$mean_length, eel_sub2$shoot_dw)
+plot(eel_sub2$max_length, eel_sub2$shoot_mass_fw)
 # not as tight as a correlation
-cor(eel2$max_length, eel2$shoot_dw, use = "complete.obs")
-cor(eel2$mean_length, eel2$shoot_dw, use = "complete.obs")
-cor(eel2$mean_length, eel2$shoot_mass_fw, use = "complete.obs")
+cor(eel_sub2$max_length, eel_sub2$shoot_dw, use = "complete.obs")
+cor(eel_sub2$mean_length, eel_sub2$shoot_dw, use = "complete.obs")
+cor(eel_sub2$mean_length, eel_sub2$shoot_mass_fw, use = "complete.obs")
 # stronger positive linear relationship with max length than average length (makes sense)
 par(mfrow=c(1,2))
-boxplot(eel2$max_length)
-boxplot(eel2$shoot_dw)
+boxplot(eel_sub2$max_length)
+boxplot(eel_sub2$shoot_dw)
 # Looks like both varibles may have some outliers, in particular the shoot dry weight. 
 
 par(mfrow=c(1,2))
-plot(density(eel2$max_length), ylab = "Frequency")
-plot(density(eel2$shoot_dw, na.rm = T), ylab = "Frequency")
+plot(density(eel_sub2$max_length), ylab = "Frequency")
+plot(density(eel_sub2$shoot_dw, na.rm = T), ylab = "Frequency")
 
-hist(eel2$max_length)
+hist(eel_sub2$max_length)
 # max length looks pretty normal with some slight right? skew
-hist(eel2$shoot_dw)
+hist(eel_sub2$shoot_dw)
 # heavily right skewed does log make it look better?
-hist(log(eel2$shoot_dw))
+hist(log(eel_sub2$shoot_dw))
 # skews it the other way... 
 
 
@@ -72,12 +73,13 @@ hist(log(eel2$shoot_dw))
 ```
 
 # Linear models
+## data only before july
 ```{r}
 
-dat <- na.omit(data.frame(eel2$shoot_dw, eel2$max_length))
-names(dat) <- c("dw", "length_max")
+dat <- na.omit(data.frame(eel_sub2$shoot_dw, eel_sub2$max_length))
+names(dat) <- c("dw", "max_length")
 
-plot(dat$dw, dat$length_max)
+plot(dat$dw, dat$max_length)
 # Lets fit an untransformed linear model 
 fit.lm <- lm(dw ~ max_length, data = dat)
 plot(fit.lm)
@@ -95,55 +97,46 @@ e <- residuals(fit.lm)
 shapiro.test(e)
 n <- length(dat$dw)
 
-ggplot(dat, aes(x = dw, y = max_length)) + geom_point() + theme_classic() +
-  geom_smooth(method = lm, se = TRUE)
+ggplot(dat, aes(x = max_length, y = dw)) + geom_point() + theme_classic() +
+  geom_smooth(method = "lm", se = TRUE)
 
 
 # Does a boxcox indicate a transformation is necessary? 
 library(MASS)
 boxcox(fit.lm)
 boxcox(fit.lm, lambda=seq(from=0, to=0.6, by=.01)) 
-# Umm of like fourth root?
+# Umm of like square root?
 # Could also try a log
 
 
-hist(dat$y^0.25)
-y.4 <- dat$y^(0.25)
+
+hist(dat$dw^0.5)
+y.2 <- dat$y^(0.5)
 # looks way better with a fourth root transformation, normal distribution
-fit2 <- lm(y.4 ~ x1, data = dat)
+fit2 <- lm(dw^(0.5) ~ max_length, data = dat)
 plot(fit2)
 # looks a lot better, homoscedascity is good, qq plot tails are a little weird, still some outliers
 summary(fit2)
 # r squared is better, model is still significant
-plot(x1, y.4)
+plot(dat$max_length, dat$dw^(0.5))
+
+# Plot the square root transformed data
+ggplot(dat, aes(x = max_length, y = dw^(0.5))) + geom_point() + geom_smooth(method = "lm", se = TRUE)
 
 # Compare to a logtransformed model (easier to understand)
-y.log <- log(dat$y)
-fit3 <- lm(y.log ~ x1, data = dat)
+
+fit3 <- lm(log(dw) ~ max_length, data = dat)
 plot(fit3)
 summary(fit3)
-hist(dat$y)
+hist(log(dat$dw))
 
-plot(x1, y)
-```
+plot(dat$max_length, log(dat$dw))
 
-# Only data collected before july
-```{r}
-plot(eel_sub2$max_length, eel_sub2$shoot_dw)
-hist(eel_sub2$max_length)
-hist(eel_sub2$shoot_dw)
-
-lm1 <- lm(shoot_dw ~ max_length, data = eel_sub2)
-summary(lm1)
-plot(lm1)
-
-ggplot(data = eel_sub2, aes(y = shoot_dw, x = max_length)) + theme_classic() + geom_point() + geom_smooth(method = "lm", se =TRUE)
-
-
+# log-log transformation
 lm2 <- lm(log(shoot_dw) ~ log(max_length), data = eel_sub2)
 summary(lm2)
 plot(lm2)
-
 ```
+
 
 
