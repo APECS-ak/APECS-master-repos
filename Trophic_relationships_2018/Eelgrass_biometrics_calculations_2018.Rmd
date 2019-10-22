@@ -29,9 +29,9 @@ st.er <- function(x, na.rm = TRUE) {
 ## Data to import
 We want to combine a few sets of data here so that we can run meaning full analyses. These are site characterization data, eelgrass transect data, eelgrass biometrics data, sea otter index data, and site nutirent data.
 ```{r}
-eg.bio <- read.csv("../../ALL_DATA/Eelgrass_biometrics_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+eg.bio <- read.csv("../ALL_DATA/Eelgrass_biometrics_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 
-eg.tran <- read.csv("../../ALL_DATA/Eelgrass_transect_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+eg.tran <- read.csv("../ALL_DATA/Eelgrass_transect_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ## Calculations
@@ -88,6 +88,16 @@ eg.tran$eelgrass_shoots_m <- eg.tran$eelgrass_shoots_0.25msq * 4
 eg.tran$flowering_shoots_m <- eg.tran$flowering_shoots_0.25msq * 4
 
 ```
+
+## Combine full data
+```{r full combine}
+eg.tran <- eg.tran[, c(1:20, 24:25)] # remove extra columns
+dat.full <- merge(eg.tran, eg.bio[, c(1, 6:45)], by = c("site", "quadrat"))
+
+## Reduce to only include columns used in analyses  - like get rid of pantins mass ##
+dat.full <- dat.full[, c(1:12, 21:22, 28, 32, 36, 40, 44, 49:61)]
+```
+
 
 ## Summarize by site
 Caculate mean values of above for each site.
@@ -152,6 +162,7 @@ dat <- merge(dat, site.bio, by = "site")
 
 ## Export
 ```{r export}
-write.csv(dat, "../../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", row.names = FALSE)
+write.csv(dat, "../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", row.names = FALSE)
+write.csv(dat.full, "../ALL_DATA/Eelgrass_biometrics_all_2018_derived.csv", row.names = FALSE)
 ```
 
