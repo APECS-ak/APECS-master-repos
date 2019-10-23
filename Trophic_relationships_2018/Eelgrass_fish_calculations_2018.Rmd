@@ -29,9 +29,9 @@ From the raw data this script will export a file summarized by site ready for an
 All we need is the beach seine data and the fish length-mass conversions. This can be merged with other data that already has been summarized in other scripts. The merging can either happen here or in other scripts depending on the purpose.
 
 ```{r data}
-fish <- read.csv("../../ALL_DATA/Beach_seine_eelgrass_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+fish <- read.csv("../ALL_DATA/Beach_seine_eelgrass_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
-fishLW <- read.csv("../../ALL_DATA/SEAK_fish_tax_LW.csv", stringsAsFactors = FALSE, header = TRUE)
+fishLW <- read.csv("../ALL_DATA/SEAK_fish_tax_LW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 ## Separate measured and unmeasured fish
@@ -187,8 +187,8 @@ dat$total_fish_mass <- rowSums(dat[, 2:30])
 ## Export
 Export of raw form and site summary form
 ```{r}
-write.csv(fish.all, "../../ALL_DATA/Fish_mass_full_2018_derived.csv", row.names = FALSE)
+write.csv(fish.all, "../ALL_DATA/Fish_mass_full_2018_derived.csv", row.names = FALSE)
 
-write.csv(dat, "../../ALL_DATA/Fish_mass_site_2018_derived.csv", row.names = FALSE)
+write.csv(dat, "../ALL_DATA/Fish_mass_site_2018_derived.csv", row.names = FALSE)
 ```
 
