@@ -33,11 +33,11 @@ All we need is the clam transect data and the clam width-mass conversions. This 
 Clam data was collected in 8 XX by XX by XX at ~ 0m MLLW.
 
 ```{r data}
-clam <- read.csv("../../ALL_DATA/Clam_transect_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+clam <- read.csv("../ALL_DATA/Clam_transect_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
-clamWM <- read.csv("../../ALL_DATA/clam_length_weight_conversions.csv", stringsAsFactors = FALSE, header = TRUE)
+clamWM <- read.csv("../ALL_DATA/clam_length_weight_conversions.csv", stringsAsFactors = FALSE, header = TRUE)
 
-clam.sed <- read.csv("../../ALL_DATA/Clam_sediment_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+clam.sed <- read.csv("../ALL_DATA/Clam_sediment_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ## Calculations
@@ -51,7 +51,6 @@ clamWM.mean <- clamWM %>%
   summarise(a = mean(a),
             b = mean(b))
 ```
-
 
 Add width - mass coeffs
 ```{r adding length to weight conversion}
@@ -79,8 +78,14 @@ ggplot(clam, aes(mass_g)) +
   facet_wrap(~sp_code)
 ```
 
+Reduce for by quadrat export
+```{r clam redu, echp = FALSE}
+clam.redu <- cbind(clam[, c(1:9, 12)])
+```
+
+
 ### Summary calculations
-Generally we want to summaries by site. This will pool pot type and string.
+Generally we want to summaries by site.
 
 #### Mass, counts, species
 Summaries by site and species
@@ -139,7 +144,10 @@ dat <- merge(clam.site, site.sed, by = "site")
 ```
 
 ## Export
+By site summaries and by quadrat
 ```{r export simple summaries}
-write.csv(dat, "../../ALL_DATA/eelgrass_clam_2018_derived.csv", row.names = FALSE)
-write.csv(clam.site.sp, "../../ALL_DATA/eelgrass_clam_site_sp_2018.csv", row.names = FALSE)
+write.csv(dat, "../ALL_DATA/eelgrass_clam_2018_derived.csv", row.names = FALSE)
+write.csv(clam.site.sp, "../ALL_DATA/eelgrass_clam_site_sp_2018.csv", row.names = FALSE)
+
+write.csv(clam.redu, "../ALL_DATA/eelgrass_clam_all_2018_derived.csv", row.names = FALSE)
 ```
