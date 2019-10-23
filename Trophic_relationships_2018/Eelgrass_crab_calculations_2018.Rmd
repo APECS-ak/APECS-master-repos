@@ -32,9 +32,9 @@ All we need is the crab data and the crab length weight conversions. This can be
 Crab data was collected by setting three string of three pots each at each one of our sites. Each string consisted of a traditional crab pot, a shrimp pot, and a minnow pot.
 
 ```{r data}
-crab <- read.csv("../../ALL_DATA/Crab_pots_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+crab <- read.csv("../ALL_DATA/Crab_pots_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
-crabLW <- read.csv("../../ALL_DATA/crab_length_weight_conversion_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+crabLW <- read.csv("../ALL_DATA/crab_length_weight_conversion_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
 ## Cleaning up dat columns
@@ -78,6 +78,14 @@ ggplot(crab, aes(mass_g)) +
   geom_histogram() +
   facet_wrap(~sp_code)
 ```
+
+Reduce for by string export
+```{r crab redu, echo = FALSE}
+crab.redu <- cbind(crab[, c(1:17, 33)])
+colnames(crab.redu)[14] <- "species_scientific"
+colnames(crab.redu)[15] <- "taxon"
+```
+
 
 ### Summary calculations
 Generally we want to summaries by site. This will pool pot type and string.
@@ -137,4 +145,6 @@ Exporting simple site level summaries of total crabs, width, mass, and diversity
 ```{r export simple summaries}
 write.csv(crab.site, "../../ALL_DATA/crab_simple_site_2018_derived.csv", row.names = FALSE)
 write.csv(crab.site.sp, "../../ALL_DATA/crab_site_sp_2018_derived.csv", row.names = FALSE)
+
+write.csv(crab.redu, "../ALL_DATA/crab_all_2018_dertived.csv", row.names = FALSE)
 ```

@@ -1,0 +1,109 @@
+"sp_code","site","place_name","date_set","YYYYMMDD_set","time_set","date_pulled","YYYYMMDD_pulled","time_pulled","time_soak_hr","trap_type","string","species_common","species_scientific","taxon","carapace_width_mm","sex","mass_g"
+"CRABDUN","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",52,"M",31.0134628032229
+"CRABDUN","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",67,"M",54.0936274343286
+"CRABDUN","2018_H_02","Gaktu Cove",2018-07-21,20180721,1400,2018-07-22,20180722,1425,24.45,"minnow",4,"Dungeness crab","Metacarcinus magister","Decapod",51,"M",29.7194180194087
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",57,"M",37.9371098232429
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",60,"M",42.4579186455904
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",61,"M",44.0265825670941
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",54,"M",33.6919063236521
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",60,"M",42.4579186455904
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",51,"F",29.7194180194087
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",69,"M",57.7011395688381
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",65,"M",50.6125300439617
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",55,"F",35.0765271478837
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",64,"M",48.9191549201151
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",58,"M",39.4132841292962
+"CRABDUN","2018_H_02","Gaktu Cove",2018-07-21,20180721,1400,2018-07-22,20180722,1425,24.45,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",51,"M",29.7194180194087
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",48,"F",26.0166223556409
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",59,"M",40.9201862198533
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",55,"M",35.0765271478837
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",51,"M",29.7194180194087
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",59,"M",40.9201862198533
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",3,"Dungeness crab","Metacarcinus magister","Decapoda",50,"F",28.4553402905669
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",4,"Dungeness crab","Metacarcinus magister","Decapoda",57,"M",37.9371098232429
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",56,"M",36.4915593173524
+"CRABDUN","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",33,"M",11.4309090083544
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",4,"Dungeness crab","Metacarcinus magister","Decapoda",56,"M",36.4915593173524
+"CRABDUN","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",68,"F",55.8815358255716
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",56,"M",36.4915593173524
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",53,"M",32.3375882755168
+"CRABDUN","2018_H_02","Gaktu Cove",2018-07-21,20180721,1400,2018-07-22,20180722,1425,24.45,"minnow",3,"Dungeness crab","Metacarcinus magister","Decapoda",56,"M",36.4915593173524
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",60,"M",42.4579186455904
+"CRABDUN","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"crab",2,"Dungeness crab","Metacarcinus magister","Decapoda",163,"F",380.737009125746
+"CRABDUN","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",90,"M",103.385921973643
+"CRABDUN","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",64,"M",48.9191549201151
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",60,"F",42.4579186455904
+"CRABDUN","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",60,"M",42.4579186455904
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",63,"M",47.2571028367047
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",4,"Dungeness crab","Metacarcinus magister","Decapoda",60,"M",42.4579186455904
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",55,"M",35.0765271478837
+"CRABDUN","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Dungeness crab","Metacarcinus magister","Decapoda",98,"M",124.63402902493
+"CRABDUN","2018_H_03","Nossuk Bay",2018-07-21,20180721,1310,2018-07-22,20180722,1325,24.25,"minnow",1,"Dungeness crab","Metacarcinus magister","Decapoda",65,"M",50.6125300439617
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Helmet crab","Telmessus cheiragonus","Decapoda",51,"M",41.7843248443553
+"CRABHEL","2018_H_02","Gaktu Cove",2018-07-21,20180721,1400,2018-07-22,20180722,1425,24.45,"minnow",2,"Helmet crab","Telmessus cheiragonus","Decapoda",46,"M",33.4622252115244
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",1,"Helmet crab","Telmessus cheiragonus","Decapoda",45,"M",31.9160047497759
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",1,"Helmet crab","Telmessus cheiragonus","Decapoda",46,"M",33.4622252115244
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",3,"Helmet crab","Telmessus cheiragonus","Decapoda",36,"F",19.742844187304
+"CRABHEL","2018_H_02","Gaktu Cove",2018-07-21,20180721,1400,2018-07-22,20180722,1425,24.45,"minnow",2,"Helmet crab","Telmessus cheiragonus","Decapoda",37,"M",20.9422237902974
+"CRABHEL","2018_H_02","Gaktu Cove",2018-07-21,20180721,1400,2018-07-22,20180722,1425,24.45,"minnow",3,"Helmet crab","Telmessus cheiragonus","Decapoda",52,"M",43.5678152438258
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Helmet crab","Telmessus cheiragonus","Decapoda",40,"M",24.7686716828274
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Helmet crab","Telmessus cheiragonus","Decapoda",51,"M",41.7843248443553
+"CRABHEL","2018_H_02","Gaktu Cove",2018-07-21,20180721,1400,2018-07-22,20180722,1425,24.45,"minnow",1,"Helmet crab","Telmessus cheiragonus","Decapoda",49,"M",38.3367813043324
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Helmet crab","Telmessus cheiragonus","Decapoda",50,"M",40.0406869230683
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Helmet crab","Telmessus cheiragonus","Decapoda",39,"M",23.4549845795201
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",1,"Helmet crab","Telmessus cheiragonus","Decapoda",41,"M",26.1207616757736
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",1,"Helmet crab","Telmessus cheiragonus","Decapoda",40,"F",24.7686716828274
+"CRABHEL","2018_H_02","Gaktu Cove",2018-07-21,20180721,1400,2018-07-22,20180722,1425,24.45,"minnow",3,"Helmet crab","Telmessus cheiragonus","Decapoda",45,"M",31.9160047497759
+"CRABHEL","2018_H_01","Kaguk Cove",2018-07-21,20180721,1430,2018-07-22,20180722,1500,24.5,"minnow",2,"Helmet crab","Telmessus cheiragonus","Decapoda",50,"M",40.0406869230683
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Red rock crab","Cancer productus","Decapoda",160,"M",380.131449501329
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Red rock crab","Cancer productus","Decapoda",150,"M",324.274702677683
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"crab",3,"Red rock crab","Cancer productus","Decapoda",107,"F",141.138629808352
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",1,"Red rock crab","Cancer productus","Decapoda",163,"M",397.924171044206
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",3,"Red rock crab","Cancer productus","Decapoda",111,"M",154.48850825774
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Red rock crab","Cancer productus","Decapoda",159,"M",374.307701559239
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Red rock crab","Cancer productus","Decapoda",131,"F",232.310537654471
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",3,"Red rock crab","Cancer productus","Decapoda",103,"F",128.499077606054
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"crab",4,"Red rock crab","Cancer productus","Decapoda",110,"F",151.083776374981
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",4,"Red rock crab","Cancer productus","Decapoda",155,"M",351.544373276176
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",4,"Red rock crab","Cancer productus","Decapoda",130,"F",227.967979175298
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",1,"Red rock crab","Cancer productus","Decapoda",140,"M",273.607899645923
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",1,"Red rock crab","Cancer productus","Decapoda",123,"M",198.920563718013
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",1,"Red rock crab","Cancer productus","Decapoda",132,"M",236.701848747843
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",1,"Red rock crab","Cancer productus","Decapoda",150,"M",324.274702677683
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",3,"Red rock crab","Cancer productus","Decapoda",131,"F",232.310537654471
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"crab",2,"Red rock crab","Cancer productus","Decapoda",159,"M",374.307701559239
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",2,"Red rock crab","Cancer productus","Decapoda",160,"M",380.131449501329
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",2,"Red rock crab","Cancer productus","Decapoda",145,"M",298.3026076966
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",2,"Red rock crab","Cancer productus","Decapoda",141,"M",278.445631892098
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",2,"Red rock crab","Cancer productus","Decapoda",149,"M",318.977118388244
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",2,"Red rock crab","Cancer productus","Decapoda",140,"M",273.607899645923
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",2,"Red rock crab","Cancer productus","Decapoda",132,"M",236.701848747843
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"crab",3,"Red rock crab","Cancer productus","Decapoda",147,"M",308.537020440483
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",3,"Red rock crab","Cancer productus","Decapoda",145,"M",298.3026076966
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",4,"Red rock crab","Cancer productus","Decapoda",152,"M",335.025743524721
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",4,"Red rock crab","Cancer productus","Decapoda",153,"M",340.479519020137
+"CRABRR","2018_L_03","Sukkwan",2018-07-28,20180728,1115,2018-07-29,20180729,1020,23.1,"minnow",4,"Red rock crab","Cancer productus","Decapoda",141,"F",278.445631892098
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",1,"Red rock crab","Cancer productus","Decapoda",151,"M",329.624191138929
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",1,"Red rock crab","Cancer productus","Decapoda",151,"M",329.624191138929
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",1,"Red rock crab","Cancer productus","Decapoda",149,"M",318.977118388244
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",1,"Red rock crab","Cancer productus","Decapoda",149,"M",318.977118388244
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",1,"Red rock crab","Cancer productus","Decapoda",153,"M",340.479519020137
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Red rock crab","Cancer productus","Decapoda",158,"M",368.537275597735
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Red rock crab","Cancer productus","Decapoda",149,"M",318.977118388244
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Red rock crab","Cancer productus","Decapoda",128,"M",219.428429432172
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",2,"Red rock crab","Cancer productus","Decapoda",151,"M",329.624191138929
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Red rock crab","Cancer productus","Decapoda",163,"M",397.924171044206
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Red rock crab","Cancer productus","Decapoda",141,"M",278.445631892098
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Red rock crab","Cancer productus","Decapoda",121,"M",191.050121750491
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Red rock crab","Cancer productus","Decapoda",151,"M",329.624191138929
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Red rock crab","Cancer productus","Decapoda",142,"M",283.333803995125
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Red rock crab","Cancer productus","Decapoda",143,"M",288.272581091416
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Red rock crab","Cancer productus","Decapoda",140,"M",273.607899645923
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",2,"Red rock crab","Cancer productus","Decapoda",143,"M",288.272581091416
+"CRABRR","2018_L_01","North Pass",2018-07-28,20180728,1144,2018-07-29,20180729,1110,23.5,"minnow",3,"Red rock crab","Cancer productus","Decapoda",133,"M",241.142084227346
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",3,"Red rock crab","Cancer productus","Decapoda",153,"M",340.479519020137
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"crab",4,"Red rock crab","Cancer productus","Decapoda",162,"M",391.939530177833
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"crab",4,"Red rock crab","Cancer productus","Decapoda",172,"M",454.231391806354
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",4,"Red rock crab","Cancer productus","Decapoda",149,"M",318.977118388244
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",4,"Red rock crab","Cancer productus","Decapoda",140,"M",273.607899645923
+"CRABRR","2018_L_02","Natzuhini",2018-07-28,20180728,1211,2018-07-29,20180729,1158,23.2,"minnow",4,"Red rock crab","Cancer productus","Decapoda",110,"F",151.083776374981
