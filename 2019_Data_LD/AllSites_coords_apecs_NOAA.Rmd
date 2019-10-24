@@ -1,0 +1,49 @@
+---
+title: "NOAA_17_19_sites"
+author: "Lia Domke"
+date: "10/23/2019"
+output: html_document
+---
+
+```{r}
+noaa <- read.csv("../ALL_DATA/Lia_fish/NOAA_All_Data.csv")
+sites17 <- read.csv("../ALL_DATA/sites_coordinates.csv")
+sites19 <- read.csv("../ALL_DATA/spatial_data/Otter_survey_sites_2019.csv")
+```
+
+```{r}
+require(tidyverse)
+glimpse(noaa)
+noaa2 <- noaa %>%
+  filter(Region == "southeastern Alaska", Gear == "BSEINE") %>%
+  dplyr::select(Data_Events_SiteID, EventID, Date, Location, SubLocale, Habitat_LC, Lat1, Long1) %>%
+  rename(habitat = Habitat_LC, latitude = Lat1, longitude = Long1, site_eventID = EventID, date = Date) %>%
+  mutate(year = "NA") %>%
+  distinct() 
+noaa2$site_eventID <- as.character(noaa2$site_eventID)
+
+levels(as.factor(noaa2$EventID))
+
+sites <- sites19 %>%
+  glimpse() %>%
+  mutate(year = "2019") %>%
+  rename(site_eventID = site, date = date_seine_2019)
+sites$date <- as.character(sites$date)
+sites$site_eventID <- as.character(sites$site_eventID)
+sites$habitat <- as.character(sites$habitat)
+
+sites2 <- sites17 %>%
+  glimpse() %>%
+  rename(site_eventID = X...site) %>%
+  mutate(year = "2017", date = "NA") %>%
+  mutate(habitat = "eelgrass")
+sites2$site_eventID <- as.character(sites2$site_eventID)
+
+df <- semi_join(sites, sites2, by = c("site_eventID", "latitude", "longitude", "habitat", "date", "year"))
+
+write.csv(sites, "sites2019cord.csv")
+write.csv(sites2, "sites2017cord.csv")
+write.csv(noaa2, "sitesNOAAcord.csv")
+
+write_csv(all_data, "site_coordinates_noaa_apeces_alldata.csv")
+```
