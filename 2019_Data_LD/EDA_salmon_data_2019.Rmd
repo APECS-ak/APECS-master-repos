@@ -35,11 +35,23 @@ dat[,25:29] <- data.frame(lapply(dat[,25:29], as.numeric), stringsAsFactors = FA
 dat <- dat %>%
   rowwise() %>%
   mutate(abundance = sum(SALCHIN, SALCHUM, SALCOHO, SALPINK, SALSOCK))
+
+dat <- dat %>%
+  filter(juli_date < 180)
+
 # visualize relationships among variables: scatterplot matricies
 corrgram(dat[,c(4,5,8,9,12:14,17:19,21,25:29)], lower.panel=panel.shade, upper.panel=panel.ellipse,
          diag.panel=panel.density)
 
 pairs(dat[,c(5,6,9,10,13:15,18:20,22,25:30)], lower.panel = panel.smooth)
+
+# is there a correlatino between sea otter density and seagrass density
+glimpse(dat)
+cor(dat$avg_density, dat$avg_shoot, use = "complete.obs")
+# based on pearson correlation there is a slight negative correlation. Is it statistical?
+plot(dat$avg_density, dat$avg_shoot)
+summary(lm(avg_shoot ~ avg_density + juli_date, data = dat))
+# nope, should probably include them together in the models...
 
 # graph abundance data 
 dat$site <- reorder(dat$site, -dat$avg_density)
@@ -58,6 +70,8 @@ boxplot(dat$abundance)
 # distribution of abundances
 # Can see that there are a lot of zeros and a few low, some mid, and only a few high abundances
 plot(table(dat$abundance))
+
+
 ```
 
 # Models
@@ -232,11 +246,12 @@ lrtest(fit.nb3, fit.nb2)
 library(pscl)
 fit.hurdle <- hurdle(abundance ~ avg_density + juli_date + year, data = dat[-41,], dist = "negbin")
 summary(fit.hurdle)
- lrtest(fit.nb3, fit.hurdle)
+
 
 # try something else out with more flexibility for the julian date
 library(mgcv)
   fit.gam<- gam(abundance ~ s(juli_date, avg_density, bs = "tp", k = 6) +avg_density+ s(juli_date, k = 3) + year + avg_shoot + avg_flowering, data = dat, family = nb(link = "log"))
 summary(fit.gam)
 visreg(fit.gam, scale = "response")
+visreg(fit.gam)
 ```
