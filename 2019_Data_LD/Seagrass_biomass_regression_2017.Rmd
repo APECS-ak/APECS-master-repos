@@ -5,7 +5,7 @@ date: "10/21/2019"
 output: html_document
 ---
 We're curious to see if there is a relationship between *longest* leaf length to *total* shoot biomass. 
-Data available: In 2017 21 sites were surveyed for seagrass. At each site, 8 0.25m^2 quadrats were surveyed and 5 entire shoots (i.e. multiple leaves) were removed and brought back to the lab to be measured. Each shoot (n = 840) was weighed to get total fresh and dry biomass and each leaf on the shoot had its length and width measured. 
+Data available: In 2017 21 sites were surveyed for seagrass. At each site, 8 0.25m^2 quadrats were surveyed and 5 entire shoots (i.e. multiple leaves) were removed and brought back to the lab to be measured (in cm). Each shoot (n = 840) was weighed to get total fresh and dry biomass (in grams) and each leaf on the shoot had its length (cm) and width (cm) measured. 
 
 We are interested in the length of the longest leaf and the dry biomass. 
 # Data import
@@ -16,6 +16,9 @@ eelgrass <- read.csv("..//ALL_DATA/seagrass_biometrics_CLEAN.csv")
 ```{r, echo = FALSE}
 library(tidyverse)
 library(MASS)
+library(visreg)
+library(readxl)
+library(ggplot2)
 ```
 # Data Cleaning
 ```{r}
@@ -121,7 +124,16 @@ summary(fit2)
 plot(dat$max_length, dat$dw^(0.5))
 
 # Plot the square root transformed data
-ggplot(dat, aes(x = max_length, y = dw^(0.5))) + geom_point() + geom_smooth(method = "lm", se = TRUE)
+lm_eqn <- function(dat){
+    m <- fit2;
+    eq <- substitute(italic(sqrt(y)) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+         list(a = format(unname(coef(m)[1]), digits = 2),
+              b = format(unname(coef(m)[2]), digits = 2),
+             r2 = format(summary(m)$r.squared, digits = 3)))
+    as.character(as.expression(eq));
+}
+ggplot(dat, aes(x = max_length, y = dw^(0.5))) + geom_point() + geom_smooth(method = "lm", se = TRUE, level = 0.95) + geom_text(x = 25, y = 0.8, label = lm_eqn(dat), parse = TRUE, check_overlap = TRUE) + theme_classic()
+
 
 # Compare to a logtransformed model (easier to understand)
 
@@ -136,7 +148,95 @@ plot(dat$max_length, log(dat$dw))
 lm2 <- lm(log(shoot_dw) ~ log(max_length), data = eel_sub2)
 summary(lm2)
 plot(lm2)
+
+# plot the log-log transformed data with linear model 
+lm_eqn <- function(dat){
+    m <- lm2;
+    eq <- substitute(italic(log(y)) == a + b %.% italic(log(x))*","~~italic(r)^2~"="~r2, 
+         list(a = format(unname(coef(m)[1]), digits = 2),
+              b = format(unname(coef(m)[2]), digits = 2),
+             r2 = format(summary(m)$r.squared, digits = 3)))
+    as.character(as.expression(eq));
+}
+ggplot(dat, aes(x = log(max_length), y = log(dw))) + geom_point() + geom_smooth(method = "lm", se = TRUE, level = 0.95) + geom_text(x = 2.5, y = -0.5, label = lm_eqn(dat), parse = TRUE, check_overlap = TRUE) + 
+  theme_classic()
+
+visreg(lm2, gg = T)
+```
+
+# Use selected linear model to predict 2019 biomass data
+## Import 2019 data
+The data for 2019: is set up in a 3 sheet excel spreadsheets. quadrat_ID in hab_qrt is unique for *every*
+quadrat that was done in summer 2019. Use the quadrat_ID to connect to the other sheets (hab_lng and hab_wgt). Hab_lng has all the individual lengths for all measured plants (in mm) (for eelgrass its 15 blades from each quadrat/site. For kelp its up to 3 of each species collected from the site). Hab_wgt has the biomass weights for individual species biomass by bag
+
+For this purpose we are interested in only the length data but need to use the quadrat sheet to make sure we only are looking at the eelgrass sites
+newest version of data is : RAW_10-22-19
+```{r}
+hab_qrt <- read_excel("../ALL_DATA/Lia_fish/Habitat_2019_RAW_10-23-19.xlsx", sheet = 1)
+hab_lng <- read_excel("../ALL_DATA/Lia_fish/Habitat_2019_RAW_10-23-19.xlsx", sheet = 2)
+hab_wgt <- read_excel("../ALL_DATA/Lia_fish/Habitat_2019_RAW_10-23-19.xlsx", sheet = 3)
 ```
 
 
+## Data cleaning
+We want only the eelgrass sites and need to convert the length measurements (in mm) to cm 
+``` {r}
+glimpse(hab_qrt)
 
+# Want to only extract the quadrat numbers that were used to sample eelgrass sites
+eel_qrts <- na.omit(ifelse(hab_qrt$habitat == "seagrass", paste(hab_qrt$quadrat_ID), NA))
+# subset the length data by quadrat at an eelgrass site
+lng_sub <- subset(hab_lng, quadrat_ID %in% eel_qrts)
+levels(as.factor(lng_sub$species)) # only Z. marina, awesome! 
+
+lng_sub <- lng_sub %>%
+  mutate(length_cm = length/100)
+
+```
+
+## Predict based on linear models
+```{r}
+summary(lm2)
+# formula :
+#   log (y) = beta0 + beta1 * log (x) 
+#   log (dw) = -7.78 + 1.57 * log (max_length) 
+# create a new dataframe with the leaf lengths from 2019
+newx <- data.frame(max_length = as.numeric(lng_sub$length_cm))
+# use the log-log linear model (equation above) to calculate the dry mass of the shoot with 95% CI 
+# make sure to exp() the values because its a log-log relationship
+pr.lm <- exp(predict(lm2, newdata = newx, interval = "confidence", level = 0.95))
+
+# graph these new predicted values
+# create data.frame first
+newdata <- cbind(lng_sub, pr.lm)
+ggplot(newdata, aes(x = length_cm, y = fit)) + geom_point() + theme_classic() + geom_smooth(method = "lm")
+
+
+```
+
+
+## Estimate total biomass 
+``` {r}
+str(newdata)
+str(hab_qrt)
+hab_qrt$density <- as.numeric(hab_qrt$density)
+hab_qrt$flowering_shoots <- as.numeric(hab_qrt$flowering_shoots)
+# Want to only extract the quadrat numbers that were used to sample eelgrass sites
+dsty <- hab_qrt %>%
+  filter(habitat == 'seagrass') %>%
+  mutate(density_m2 = (density)*4) %>%
+  mutate(flowering_m2 = (flowering_shoots)*4)
+dsty <- dsty[,c(1,8,9,11,12)]
+
+# calculate average biomass for 15 shoots for each quadrat
+require(dplyr)
+df <- newdata %>%
+  group_by(quadrat_ID) %>%
+  mutate(avg_biomass = mean(fit))
+df1 <- df %>%
+  dplyr::select(quadrat_ID, avg_biomass) %>%
+  distinct()
+
+df2 <- left_join(df1, dsty, by = "quadrat_ID")
+write.csv(df2, "../ALL_DATA/seagrass_biomass_conversions.csv") 
+```
