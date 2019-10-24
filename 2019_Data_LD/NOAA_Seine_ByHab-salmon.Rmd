@@ -1,0 +1,67 @@
+---
+title: "NOAA_Seine_ByHab-salmon"
+author: "Lia Domke"
+date: "10/23/2019"
+output: html_document
+---
+# Libraries
+```{r}
+library(readxl)
+library(tidyverse)
+require(reshape2)
+```
+# Input Data
+```{r}
+allsites <- read_xls("../ALL_DATA/Lia_fish/dist2_anad_allsites_102319.xls", sheet = 1)
+fish <- read.csv("../ALL_DATA/noaa_seak_fish_atlas_CLEAN.csv")
+```
+
+# Data cleaning
+Comment on format: EventID in fish and site_event SHOULD correspond. EventID is equal to *each* time the seine net went into the water regardless if it was at the same site at a different time. There may be duplicates of SiteID as it represents each *unique* site.
+```{r}
+# remove the non-noaa sites (i.e. those done in 2017 and 2019)
+# besides those entries have funky incorrect info
+noaa <- allsites[-c(616:661),]
+
+# lets look at the data
+names(fish)
+names(noaa)
+head(fish)
+
+# want to combine the distance to anadromous stream with the beach seine data. 
+noaa <- rename(noaa, EventID = site_event) # change site_event to EventID to be able to: 
+fish$EventID <- as.numeric(fish$EventID)
+noaa$EventID <- as.numeric(noaa$EventID)
+
+
+seak_fish <- noaa %>%
+  group_by(EventID) %>% # group by EventID first so that it will replicate dist for each row
+  left_join(fish, noaa[,c(3,12)], by = "EventID") %>% # join the anadromous distance (in meters) to the       fish data frame by the EventID
+  dplyr::select(SiteID, EventID, Date, Season, Mon, SeasonNoYear, Year, Gear, Temp, Salinity, NEAR_DIST, Region, Locale, Location.y, SubLocale.y, Nickname, Habitat, Lat1, Long1, SpCode, Sp_CommonName, Sp_ScientificName, Length, Unmeasured, taxon)
+
+# double check to make sure we're only looking at SEAK and BSEINE gear
+seak_fish <- seak_fish %>%
+  filter(Region == "southeastern Alaska", Gear == "BSEINE") %>%
+  rename(Dist_anad_m = NEAR_DIST, Latitude = Lat1, Longitude = Long1)
+
+# Extract environmental only data 
+env <- seak_fish %>%
+  dplyr::select(SiteID, EventID, Date, Year, Temp, Salinity, Dist_anad_m, Habitat, Latitude, Longitude) %>%
+  distinct()
+
+# Calculate fish abundance
+str(seak_fish)
+seak_fish$abundance <- as.numeric(ifelse(is.na(seak_fish$Length), paste(seak_fish$Unmeasured), 1)) 
+
+# summarise abundance by site, seine event, and species
+sum_fish <- seak_fish %>%
+  group_by(SiteID, EventID, Date, Mon, Season, Year, SpCode, Sp_CommonName, Sp_ScientificName) %>% 
+  summarise(abundance = sum(abundance))
+
+
+# long --> wide
+df_wide <- spread(data = sum_fish, key = Sp_ScientificName, value = abundance, fill = 0)
+
+# wide -- > long, convserves zeros and site/event ID information
+df_long <- gather(data = df_wide, key = "species", value = "abundance", -EventID, -SiteID, -Habitat, na.rm = TRUE,    factor_key = TRUE)
+```
