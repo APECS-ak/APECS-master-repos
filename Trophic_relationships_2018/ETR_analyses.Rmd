@@ -27,23 +27,15 @@ theme_set(theme_classic())
 Data falls under three broad categories. Biomass, stable isotopes, and fatty acids. Biomass data files are broken up by sampling type but can easily be combined. In addition, biomarker (SI and FA) metadata is useful to match those data with site, date, treatment, etc. data.
 Biomass and oceanography
 ```{r dat bio, echo=FALSE}
-eg <- read.csv("../ALL_DATA/Eelgrass_biometrics_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+eg <- read.csv("../ALL_DATA/Eelgrass_biometrics_all_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb <- read.csv("../ALL_DATA/crab_simple_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+crb <- read.csv("../ALL_DATA/crab_all_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-crb.sp <- read.csv("../ALL_DATA/crab_site_sp_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
-
-crb.all <- read.csv("../ALL_DATA/Crab_pots_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
-
-clm <- read.csv("../ALL_DATA/eelgrass_clam_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
-
-clm.sp <- read.csv("../ALL_DATA/eelgrass_clam_site_sp_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+clm <- read.csv("../ALL_DATA/eelgrass_clam_all_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 fsh <- read.csv("../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-pom <- read.csv("../ALL_DATA/POM_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
-
-oce <- read.csv("../ALL_DATA/Site_oceanography_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+site <- read.csv("../ALL_DATA/Eelgrass_trophic_relationships_site_metadata_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Stable Isotope - preliminary
@@ -53,7 +45,7 @@ si <- read.csv("E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass trop
 
 Fatty Acid
 ```{r dat fa, echo = FALSE}
-fa_0.5 <- read.csv("../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+#fa_0.5 <- read.csv("../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 fa_1.0 <- read.csv("../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
@@ -63,24 +55,39 @@ Biomarker metadata
 bimrk <- read.csv("../ALL_DATA/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
-### Complie biomass data
-Merge all the different biomass data types into one data frame
-```{r merge, echo = FALSE}
-dat <- eg
-dat$sea_otter_tr <- c("high", "high", "high", "low", "low", "low")
-dat <- cbind(dat[, c(1:10, 53, 11:52)])
-dat <- merge(dat, crb, by = c("site", "place_name"), all.x = TRUE)
-dat <- merge(dat, clm[, c(1, 5:13)], by = "site")
-dat <- merge(dat, fsh, by = "site")
-dat <- merge(dat, oce[, c(1, 6:19)], by = "site")
+### Data managemnet
+Clean up files. Make sure appropriate columns are there.
+```{r data clean up, echo=FALSE}
+eg <- merge(eg, site[, c(1,5)], by = "site")
 ```
 
 
 ## Analyses
-A critical piece for all analyses is testing the effect of site and sea otter treatment. Within each sea otter treatment three different sites were sampled. 
+A critical piece for all analyses is testing the effect of site and sea otter treatment. Within each sea otter treatment three different sites were sampled.
 
 ### Biomass
 Compare biomass of community members between sea otter treatments
+
+#### Eelgrass - biomass and shoot density tests
+```{r eg site x treatment, echo = FALSE}
+mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + site + sea_otter_tr:site, data = eg)
+anova(mod.eg.1)
+
+t.test(eg$shoot_mass_m[eg$sea_otter_tr == "high"], eg$shoot_mass_m[eg$sea_otter_tr == "low"])
+
+mod.eg.2 <- lm(eelgrass_shoots_m ~ sea_otter_tr * site, data = eg)
+anova(mod.eg.2)
+```
+
+#### Plots
+Eelgrass
+```{r}
+eg.sum <- eg %>% 
+  group_by(sea_otter_tr) %>% 
+  summarise(shoot_mass_m_mean = mean(shoot_mass_m),
+            shoot_mass_m_se = st.er(shoot_mass_m))
+```
+
 
 #### ANOVAS of sites and treatment
 Eelgrass
@@ -105,10 +112,62 @@ Convex hulls
 Trophic level
 
 ### Fatty Acids
-Similar to SI data there are two perspectives to analysis. 1) The whole community and 2) by species comparisons.
+Similar to SI data there are two perspectives to analysis. 1) The whole community and 2) by species comparisons. Along these line I will run a nested PERMANOVA for the effects of species and sea otter treatment. Then species that appear to have a strong sea otter effect will be analyzed seperatly
+
+#### FA data prep
+Subsets
+```{r fa subsets, echo = FALSE}
+## Consumers ##
+fa_con_1.0 <- fa_1.0 %>% 
+  filter(Species_common != "Eelgrass" & Species_common != "Eelgrass diatoms" & Species_common != "Fucus" & Species_common != "Particulate organic matter" & Species_common != "Sugar kelp" & Species_common != "Ulva")
+
+## Producers ##
+fa_pro_1.0 <- fa_1.0 %>%
+  filter(Species_common == "Eelgrass" | Species_common == "Eelgrass diatoms" | Species_common == "Fucus" | Species_common == "Particulate organic matter" | Species_common == "Sugar kelp" | Species_common == "Ulva")
+```
+
+Append metadata
+```{r}
+## Producers ##
+fa_pro_1.0 <- merge(fa_pro_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_pro_1.0 <- cbind(fa_pro_1.0[,c(69:76, 1, 3:67)])
+colnames(fa_pro_1.0)[6] <- "Species_common"
+colnames(fa_pro_1.0)[3] <- "Sea_otter_tr"
+```
+
+
+Transformations and standardizations
+I will use and arcsine sqrt transformation and standardize to FA (column) maximum
+```{r fa trans std, echo = FALSE}
+## Transformation ##
+fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 3:67]))
+fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 3:67]))
+
+## Standardization ##
+fa_con_1.0_trs_std <- scale(fa_con_1.0_trs, center = FALSE, scale = apply(fa_con_1.0_trs, 2, max))
+fa_pro_1.0_trs_std <- scale(fa_pro_1.0_trs, center = FALSE, scale = apply(fa_pro_1.0_trs, 2, max))
+```
 
 #### Whole community
-PERMANOVA and PERMDISP of site by treatment. We know/suspect that species will differ from each other. We should show this (to make sure) but really this is not the story. They story will more be on the within species by treatment comparisons. 
+PERMANOVA treatment nested by species. We know/suspect that species will differ from each other. We should show this (to make sure) but really this is not the story. They story will more be on the within species by treatment comparisons. This analysis will use all the data but will be split between consumers and producers. This will help seperate some variablility.
+
+##### NMDS
+```{r prod nmds, echo = FALSE}
+## Distances ##
+fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "bray")
+
+## NMDS ##
+fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
+```
+
+##### PERMANOVA
+Test for the effect of sea otter nested by species
+```{r permanova, echo = FLASE}
+perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr / sp_code, strata = "sp_code", data = fa_pro_1.0, perm = 9999) 
+perm.pro
+```
+
+
 
 #### Species specific
 PERMANOVA and PERMDISP by treatment
