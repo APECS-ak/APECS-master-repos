@@ -9,6 +9,7 @@ output: html_document
 library(readxl)
 library(tidyverse)
 require(reshape2)
+library(vegan)
 ```
 # Input Data
 ```{r}
@@ -60,8 +61,224 @@ sum_fish <- seak_fish %>%
 
 
 # long --> wide
-df_wide <- spread(data = sum_fish, key = Sp_ScientificName, value = abundance, fill = 0)
+# This includes ALL species (not just salmon). We'll leave this for now because it matches the
+# environmental dataframe. But eventually we'll have to remove the non-salmon species. BUT we want
+# retain the 0 where a seine was done but no salmon were caught. 
+df_wide <- dcast(sum_fish, SiteID + EventID + Date + Mon + Season + Year ~ SpCode, value.var = "abundance", fill = 0)
+
 
 # wide -- > long, convserves zeros and site/event ID information
-df_long <- gather(data = df_wide, key = "species", value = "abundance", -EventID, -SiteID, -Habitat, na.rm = TRUE,    factor_key = TRUE)
+
+df_long <- melt(df_wide, id = c("SiteID", "EventID", "Date", "Mon", "Season", "Year"), variable.name = "SpCode", value.name = "abundance" )
+
+sal_long <- df_long %>%
+  filter(SpCode == "SALCHUM" | SpCode == "SALCOHO"| 
+      SpCode == "SALSOCK"| SpCode == "SALCHIN"
+      | SpCode == "SALPINK")
+
+# keeping all the zeros go back to wide! 
+sal_wide <- dcast(sal_long, SiteID + EventID + Date + Mon + Season + Year ~ SpCode, value.var = "abundance", fill = 0) 
+
+# REMOVE ALL SEINES WHERE THEY CAUGHT LESS THAN 10 SALMON
+sal_wide <- sal_wide[which(rowSums(sal_wide[,7:11]) > 10),]
+sal_long <- melt(sal_wide, id = c("SiteID", "EventID", "Date", "Mon", "Season", "Year"), variable.name = "SpCode", value.name = "abundance" )
+```
+
+# Data Exploration
+We have two dataframes: sal_wide and sal_long have the seine information for salmon only abundance from all over southeast alaska (n = 615). env contains the environmental information: habitat type (categorical with 4 levels), temp, salinity, date, (and location)
+```{r}
+# species distribution
+# mainly chum and pink, with a few coho
+g <- ggplot(sal_long, aes(x = as.factor(EventID), y = abundance)) + geom_bar(stat = "identity")
+g + facet_wrap(~SpCode)
+
+# overall abundance, heavily zero-inflated! 
+hist(sal_long$abundance)
+# there are maybe over 500 occurences where salmon are present and over 2500 where they arent 
+hist(as.numeric(sal_long$abundance>0))
+
+# what if we transform our abundances
+# log transformation
+g <- ggplot(sal_long, aes(x = as.factor(EventID), y = log(abundance))) + geom_bar(stat = "identity")
+g + facet_wrap(~SpCode)
+# we can see the abundances now.... doesn't look normal
+
+# 4th root transformation
+g <- ggplot(sal_long, aes(x = as.factor(EventID), y = (abundance)^(0.25))) + geom_bar(stat = "identity")
+g + facet_wrap(~SpCode)
+# might be able to see more data if 4th root.... 
+
+# add tests of normality for the data (not residuals). Are the data above normal?, Sorta.... not really. 
+non <- qplot(sample = abundance, data = sal_long) + stat_qq_line()
+non + facet_wrap(vars(SpCode))
+
+p <- qplot(sample = log(abundance), data = sal_long) + stat_qq_line()
+p + facet_wrap(vars(SpCode)) + theme(strip.text = element_text(size = 20))
+
+frt <- qplot(sample = (abundance^0.25), data = sal_long) + stat_qq_line()
+frt + facet_wrap(vars(SpCode))
+```
+Alright so the data doens't look *great* Lets try transformation and scaling to get comparable data
+
+## Seine exploration - transformation / scaling 
+```{r}
+# what does boxcox recommend? Theory suggests 4th root
+require(MASS)
+Rmod <- lm(formula = abundance+1 ~ SpCode, data = sal_long)
+summary(Rmod)
+boxcox(Rmod) # doesn't really come up with anything. 
+
+# 4th root transformation 
+sal_long.tr <- sal_long %>%
+  group_by(SiteID, EventID, Date, Mon, Season, Year, SpCode) %>%
+  summarise(abundance.4 = abundance^(0.25))
+
+sal_wide.tr <- dcast(sal_long.tr, SiteID + EventID + Date + Mon + Season + Year ~ SpCode, value.var = "abundance.4", fill = 0)
+
+# lets considering scaling/standardizing the data. Theory suggests by SPECIES MAXIMUM. 
+# mean by column
+means <- colMeans(x = sal_wide.tr[,7:11], na.rm = TRUE)
+species <- colnames(sal_wide.tr)[7:11]
+df <- remove_rownames(data.frame(species, means))
+EventID <- pull(sal_wide.tr[2])
+SiteID <- pull(sal_wide.tr[1])
+Date <- pull(sal_wide.tr[3])
+Mon <- pull(sal_wide.tr[4])
+Season <- pull(sal_wide.tr[5])
+Year <- pull(sal_wide.tr[6])
+
+# add in habitat by EventID
+hab <- env[,c(2,8)]
+
+# 0 - 1 scale of means
+hist(df$means)
+ggplot(df, aes(species, means)) + geom_col(position = "dodge")
+
+# Scale to SPECIES MAXIMUM
+y <- sal_wide.tr[,7:11]/max(sal_wide.tr[,7:11])
+sal.sc <- cbind(SiteID, EventID, Date, Mon, Season, Year, y)
+sal.sc <- left_join(sal.sc, hab, by = "EventID")
+
+# After scaling & transformation, melt the dataframe back into long format to look at data distribution. 
+sal_long_sc <- melt(sal.sc, id = c("SiteID", "EventID", "Date", "Mon", "Season", "Year", "Habitat"), variable.name = "SpCode", value.name = "abundance" )
+
+# look at scaled and transformed distribution
+g <- ggplot(sal_long_sc, aes(x = as.factor(EventID), y = abundance, fill=Habitat)) + geom_bar(stat = "identity")
+g + facet_wrap(~SpCode)
+# looks like salmon are occurring in multiple habitats... 
+```
+
+Cool beans looks like our sal data is already to go. We now have to look at the environmental data and make sure we're comparing the different env variables on the same scale... may require transformation and scaling
+
+## Environmental data - transformation / scaling
+```{r}
+# change distance to anadromous stream to km 
+env1 <- env %>%
+  mutate(Dist_anad_km = Dist_anad_m/100) %>%
+  dplyr::select(-Dist_anad_m)
+
+env_long <- melt(env1, id = c ("SiteID", "EventID", "Date", "Year", "Latitude", "Longitude", "Habitat"), variable.name = "Environmental", value.name = "Value")
+
+# Hard to compare environmental when they use different units. 
+g <- ggplot(env_long,aes(x = reorder(as.factor(EventID), -Value), y = Value)) + geom_bar(stat = "identity")
+g + facet_wrap(~Environmental)
+
+# make sure habitat levels are correct:
+levels(as.factor(env1$Habitat)) # mistake with sand-gravel
+levels(env1$Habitat)[levels(env1$Habitat)=="Sand-Gravel"] <- "Sand-gravel"
+levels(as.factor(env1$Habitat)) # only 5 levels now! 
+
+# Scale data to mean 0 standard deviation 1 for only the cont. variables
+env2 <- data.frame(scale(env1[,c(5,6,10)]))
+env3 <- cbind(env2, env1$EventID)
+colnames(env3)[colnames(env3) == "env1$EventID"] <- "EventID"
+env.sc <- full_join(env1[,c(1:4,7:9)], env3, by = "EventID")
+```
+
+Lets look at what the species composition (of salmon) look like on a nmds plot
+We have 3 dataframes to use for this:
+Fish (both have been transformed and scaled) - sal.sc (wide) , sal_long_sc (long)
+Environment (scaled) - env.sc
+
+# Species biplot
+```{r}
+row.names(sal.sc) <- sal.sc$EventID
+sal.sc1 <- sal.sc[,-c(1:6, 12)]
+
+# now nmds and calculating dissimilarity index does not work if there are ENTIRE
+# ROWS that have zeros. So we can ONLY compute where salmon ARE PRESENT. Duh. 
+# So we have to remove all zero rows
+
+sal.present <- sal.sc1[which(rowSums(sal.sc1) > 0),]
+sal.EventID <- rownames(sal.present)
+
+# Need to create bray-curtis dissimilarity index:
+require(vegan)
+dist.bray <- vegdist(sal.present, method = "bray")
+round(dist.bray,2) # lower triangular matrix (vector of class 'dist')
+
+# computer the NMDS iteratively using metaMDS
+# based on the bray curtis distances found above: 
+sp.nmds <- metaMDS(dist.bray, k = 2, autotransform = FALSE, trymax = 500)
+
+# Examine output, which includes the two major ordination axes and Kruskal's stress value:
+sp.nmds$stress
+
+# How good did the nmds do? 
+sp.sh <- Shepard(dist.bray, sp.nmds$points)
+stressplot(sp.nmds)
+
+# plot the data
+ordiplot(sp.nmds, display="sites", type="t", cex=1)
+plot(sp.nmds$point, col = as.factor(env.sc.sub$Habitat))
+
+
+# redo the bray curtis: 
+dist.bray2 <- vegdist(sal.sub.sc2, method = "bray")
+round(dist.bray2, 2)
+sp.nmds <- metaMDS(dist.bray2, k = 2, autotransform = FALSE, trymax = 100)
+# replot the data
+ordiplot(sp.nmds, display="sites", type="t", cex=1)
+plot(sp.nmds$point, col = as.factor(env.sc.sub$Habitat))
+
+# filter your environmental information by where salmon present eventID
+env.sc.sub <- subset(env.sc, EventID %in% sal.EventID)
+
+plot(sp.nmds$points, col=as.factor(env.sc.sub$Habitat), pch=16, cex=1.5, asp=1);
+#ordispider(sp.nmds, env.sc.sub$Habitat, col=1:5, label=T);
+ordihull(sp.nmds, env.sc.sub$Habitat, col=1:5, lty=2);legend("topright", legend=levels(as.factor(env.sc.sub$Habitat)), pch=16, col=1:5, cex=0.5)
+
+```
+#Environmental biplots
+``` {r}
+require(corrgram)
+corrgram(env.sc.sub[,c(1,2,4,8:10)])
+
+row.names(env.sc.sub) <- env.sc.sub$EventID
+env.sc.sub1 <- env.sc.sub[,-c(1:7)]
+
+# Create euclidea based dist
+dist.env <- vegdist(env.sc.sub1, method = "euclidean", na.rm = T)
+env.mds <- metaMDS(dist.env, k = 2, autotransform = F)
+env.mds$stress
+
+ordiplot(env.mds, display="sites", type="t", cex=1)
+plot(env.mds$point, col = as.factor(env.sc.sub$Habitat)) # what does this plot show...?
+
+# ordination with environmental variables 
+ordisurf(sp.nmds, env.sc.sub$Temp, bubble=T, cex=5, 
+         main = "Ordination with Temperature", 
+         xlab = "nMDS1", ylab = "nMDS2")
+
+ordisurf(sp.nmds, env.sc.sub$Salinity, bubble=T, cex=5, 
+         main = "Ordination with Salinity", 
+         xlab = "nMDS1", ylab = "nMDS2")
+
+ordisurf(sp.nmds, env.sc.sub$Dist_anad_km, bubble=T, cex=5, 
+         main = "Ordination with Distance from anadromous stream (km)", 
+         xlab = "nMDS1", ylab = "nMDS2")
+
+ordisurf(sp.nmds, env.sc.sub$Habitat, bubble=T, cex=5, 
+         main = "Ordination with habitat", 
+         xlab = "nMDS1", ylab = "nMDS2")
 ```
