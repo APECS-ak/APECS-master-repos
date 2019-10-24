@@ -118,6 +118,7 @@ eg.bio$leaf_area9 <- (eg.bio$leaf_length9 * eg.bio$leaf_width9)
 eg.bio$leaf_area10 <- (eg.bio$leaf_length10 * eg.bio$leaf_width10)
 
 eg.bio$leaf_areaT <- rowSums(eg.bio[, 73:82], na.rm = TRUE)
+eg.bio$leaf_lengthT <- rowSums(eg.bio[, 12:21], na.rm = TRUE)
 
 ### Epiphytes, Rhizomes, and Shoots Mass ###
 ## Epiphyte Mass ##
@@ -155,7 +156,7 @@ eg.bio$gast_mass <- (eg.bio$gastropod_foil_dw - eg.bio$gastropod_foil)
 eg.bio$crab_mass <- (eg.bio$crab_foil_dw - eg.bio$crab_foil)
 
 ## Fill absent grazers with 0s so that cacluations below will work ##
-eg.bio[,89:94][is.na(eg.bio[,89:94])] <- 0
+eg.bio[,90:95][is.na(eg.bio[,90:95])] <- 0
 ```
 
 Taxamonic summaries of grazers.
@@ -186,6 +187,7 @@ quad.bio <- data.frame(
   eg.bio %>% 
     group_by(site, quadrat) %>% 
     summarise(s_shoot_area = mean(leaf_areaT, na.rm = TRUE),
+              s_shoot_length = mean(leaf_lengthT, na.rm = TRUE),
               s_epi_mass = mean(epi_mass, na.rm = TRUE),
               s_shoot_mass = mean(shoot_mass, na.rm = TRUE),
               s_rhi_mass = mean(rhi_mass, na.rm = TRUE),
@@ -204,7 +206,7 @@ Separating grazers. Since we pooled grazers at the quadrat level that data needs
 # Extract Grazer biomasses
 quad.graz <- data.frame(eg.bio[eg.bio$plant == 1,]) # extract just plant 1 which has all the grazer data
 quad.graz <- quad.graz[order(quad.graz[,1], quad.graz[,4]),] # order so that it matches everything else
-quad.graz <- data.frame(quad.graz[,c(1, 4, 89:97)]) # reduce to get grazer data only
+quad.graz <- data.frame(quad.graz[,c(1, 4, 90:98)]) # reduce to get grazer data only
 quad.graz[is.na(quad.graz)] <- 0 # turn NAs to 0s becasue if we sampled everything so if it was not there its a 0
 ```
 
@@ -228,6 +230,9 @@ site.quad$bg_mass <- (site.quad$eelgrass_shoots_msq * site.quad$s_rhi_mass)
 ## Epiphytes per eeglrass area ##
 site.quad$epimass_shootarea <- (site.quad$s_epi_mass / site.quad$s_shoot_area)
 
+## Epiphytes per total length ##
+site.quad$epimass_shootlength <- (site.quad$s_epi_mass / site.quad$s_shoot_length)
+
 ## Epiphytes per eelgrass mass ##
 site.quad$epimass_shootmass <- (site.quad$s_epi_mass / site.quad$s_shoot_mass)
 
@@ -236,6 +241,9 @@ site.quad$epimass_shootmass <- (site.quad$s_epi_mass / site.quad$s_shoot_mass)
 
 ## Grazer mass per eelgrass mass ##
 site.quad$grazmass_shootmass <- (site.quad$graz_massT / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
+
+## Grazer mass per total length ##
+site.quad$grazmass_shootlength <- (site.quad$graz_massT / site.quad$s_shoot_length)
 
 ## Crustacean mass per eelgrass mass ##
 site.quad$crustmass_shootmass <- (site.quad$crust_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
@@ -251,7 +259,7 @@ We can now take the intermediate data frame generated above to make a complied d
 ### Site Level Data ###
 tran.dat <- eg.tran %>% 
   group_by(site) %>% 
-  distinct(primary_obeserver, secondary_observer, transect_start_time, transect_end_time, depth_m)
+  distinct(primary_observer, secondary_observer, transect_start_time, transect_end_time, depth_m)
   
 ### Master - more will be added later ###
 dat <- data.frame(cbind(eg.site[, c(1:3, 32, 4:9)], tran.dat[, 2:5], so.index[, 12:16], eg.site[, 14:26]))
@@ -279,6 +287,8 @@ site.bio <- data.frame(
     group_by(site) %>% 
     summarise(shoot_area = (mean(s_shoot_area, na.rm = TRUE)),
               shoot_area_se = (st.er(s_shoot_area)),
+              shoot_length = (mean(s_shoot_length, na.rm = TRUE)),
+              shoot_length_se = (st.er(s_shoot_length, na.rm = TRUE)),
               epi_mass = (mean(s_epi_mass, na.rm = TRUE)),
               epi_mass_se = (st.er(s_epi_mass)),
               shoot_mass = (mean(s_shoot_mass, na.rm = TRUE)),
@@ -305,6 +315,8 @@ site.bio <- data.frame(
               blwgnd_mass_se = (st.er(bg_mass)),
               epiphmass_shootarea = (mean(epimass_shootarea, na.rm = TRUE)),
               epiphmass_shootarea_se = (st.er(epimass_shootarea)),
+              epiphmass_shootlength = (mean(epimass_shootlength, na.rm = TRUE)),
+              epiphmass_shootlength_se = (st.er(epimass_shootlength, na.rm = TRUE)),
               epiphmass_shootmass = (mean(epimass_shootmass, na.rm = TRUE)),
               epiphmass_shootmass_se = (st.er(epimass_shootmass)),
               grazer_mass = (mean(graz_massT, na.rm = TRUE)),
@@ -315,6 +327,8 @@ site.bio <- data.frame(
               gast_mass_se = (st.er(gastro_mass)),
               grazermass_shootmass = (mean(grazmass_shootmass, na.rm = TRUE)),
               grazermass_shootmass_se = (st.er(grazmass_shootmass)),
+              grazermass_shootlength = (mean(grazmass_shootlength, na.rm = TRUE)),
+              grazermass_shootlength_se = (st.er(grazmass_shootlength)),
               crusmass_shootmass = (mean(crustmass_shootmass, na.rm = TRUE)),
               crusmass_shootmass_se = (st.er(crustmass_shootmass)),
               gastmass_shootmass = (mean(gastromass_shootmass, na.rm = TRUE)),
