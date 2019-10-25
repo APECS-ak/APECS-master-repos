@@ -448,7 +448,7 @@ Another check after doing transfomarions etc.
 The suspect grazer v diatom relationships does not look that good at all. 
 ```{r multi check, echo = FALSE}
 ## Calculate correlations ##
-dat.cor <- dat[, c(4, 88, 92, 77, 69, 117, 19, 35, 37, 84, 116)]
+dat.cor <- dat[, c(4, 94, 99, 81, 73, 65, 19, 35, 37, 90, 123)]
 colnames(dat.cor) <- c("Julianday", "Crabs", "Fish", "Grazers", "Epiphytes", "Eelgrass", "SOI", "Macroalgae", "Diatoms", "Sediment", "Nitrate")
 
 ## Transform as necessary ##
@@ -851,65 +851,58 @@ Plots of major/significant results
 ```{r}
 ## Crabs and SOI ##
 ggplot(data = dat) +
-  geom_point(aes(x = sea_otter_index_tr, y = crab_mass), size = 1.5) +
-  geom_errorbar(aes(x = sea_otter_index_tr, ymin = round(crab_mass - crab_mass_se, 2), ymax = crab_mass + crab_mass_se), width = 0) +
-  labs(x = "Sea otter index", y = "Crab mass (g)") +
+  geom_point(aes(x = sea_otter_index_tr, y = sqrt(crab_mass)), size = 1.5) +
+  labs(x = "Sea otter index", y = "Square-root \n crab mass (g)") +
   scale_x_continuous(limits = c(-0.80, 1.20), breaks = seq(-0.80, 1.20, by = 0.40)) +
-  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 100)) +
+  scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, by = 5)) +
   theme(text = element_text(size = 10))
 
 ## Grazers and Crabs ##
 ggplot(data = dat) +
-  geom_point(aes(x = crab_mass, y = grazermass_shootmass), size = 1.5) +
-  geom_errorbar(aes(x = crab_mass, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), width = 0) +
-  labs(x = "Crab mass (g)", y = "Grazer load (g/g)") +
-  scale_x_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 50)) +
-  scale_y_continuous(limits = c(-0.0, 0.24), breaks = seq(0, 0.24, by = 0.04)) +
+  geom_point(aes(x = crab_mass, y = log(grazermass_shootmass + 1)), size = 1.5) +
+  labs(x = "Crab mass (g)", y = "Log \n Grazer load (g/g)") +
+  scale_x_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
+  scale_y_continuous(limits = c(0.0, 0.16), breaks = seq(0, 0.16, by = 0.04)) +
   theme(text = element_text(size = 10))
 
 ## Grazers and Epiphytes ##
 ggplot(data = dat) +
-  geom_point(aes(x = epiphmass_shootmass, y = grazermass_shootmass), size = 1.5) +
-  geom_errorbar(aes(x = epiphmass_shootmass, ymin = grazermass_shootmass - grazermass_shootmass_se, ymax = grazermass_shootmass + grazermass_shootmass_se), width = 0) +
-  labs(x = "Epiphyte load (g/g)", y = "Grazer load (g/g)") +
-  scale_x_continuous(limits = c(-0.0, 0.20), breaks = seq(0, 0.20, by = 0.04)) +
-  scale_y_continuous(limits = c(-0.0, 0.24), breaks = seq(0, 0.24, by = 0.04)) +
+  geom_point(aes(x = epiphmass_shootmass_dt, y = log(grazermass_shootmass + 1)), size = 1.5) +
+  labs(x = "Epiphyte load* (g/g)", y = "Log \n Grazer load (g/g)") +
+  scale_x_continuous(limits = c(-0.08, 0.09), breaks = seq(-0.08, 0.08, by = 0.04)) +
+  scale_y_continuous(limits = c(0.0, 0.16), breaks = seq(0, 0.16, by = 0.04)) +
   theme(text = element_text(size = 10))
 
 ## Epi and Nitrate ##
 ggplot(data = dat) +
-  geom_point(aes(x = NOx_site, y = epiphmass_shootmass), size = 1.5) +
-  geom_errorbar(aes(x = NOx_site, ymin = epiphmass_shootmass - epiphmass_shootmass_se, ymax = epiphmass_shootmass + epiphmass_shootmass_se), width = 0) +
-  labs(x = bquote("Nitrate ("*mu~'mol)'), y = "Epiphyte load (g/g)") +
+  geom_point(aes(x = NOx_site, y = epiphmass_shootmass_dt), size = 1.5) +
+  labs(x = bquote("Nitrate ("*mu~'mol)'), y = "Epiphyte load* (g/g)") +
   scale_x_continuous(limits = c(0.0, 3), breaks = seq(0, 3, by = 1)) +
-  scale_y_continuous(limits = c(0.0, 0.24), breaks = seq(0, 0.24, by = 0.04)) +
+  scale_y_continuous(limits = c(-0.07, 0.09), breaks = seq(-0.06, 0.09, by = 0.03)) +
   theme(text = element_text(size = 10))
 
 ## Eelgrass and SOI ##
 ggplot(data = dat) +
-  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass), size = 1.5) +
-  geom_errorbar(aes(x = sea_otter_index_tr, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), width = 0) +
-  labs(x = "Sea otter index", y = bquote('Eelgrass mass' ~(g/m^2))) +
+  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt), size = 1.5) +
+  labs(x = "Sea otter index", y = bquote('Eelgrass mass*' ~(g/m^2))) +
   scale_x_continuous(limits = c(-0.80, 1.20), breaks = seq(-0.80, 1.20, by = 0.40)) +
-  scale_y_continuous(limits = c(0.0, 200), breaks = seq(0, 200, by = 50)) +
+  scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
   theme(text = element_text(size = 10))
 
 ## Eelgrass and Nitrate ##
 ggplot(data = dat) +
-  geom_point(aes(x = NOx_site, y = abvgnd_mass), size = 1.5) +
-  geom_errorbar(aes(x = NOx_site, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), width = 0) +
-  labs(x = bquote("Nitrate ("*mu~'mol)'), y = bquote('Eelgrass mass' ~(g/m^2))) +
+  geom_point(aes(x = NOx_site, y = abvgnd_mass_dt), size = 1.5) +
+  labs(x = bquote("Nitrate ("*mu~'mol)'), y = bquote('Eelgrass mass*' ~(g/m^2))) +
   scale_x_continuous(limits = c(0.0, 3), breaks = seq(0, 3, by = 1)) +
-  scale_y_continuous(limits = c(0.0, 200), breaks = seq(0, 200, by = 50)) +
+  scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
   theme(text = element_text(size = 10))
 
 ## Eelgrass and Epiphytes ##
 ggplot(data = dat) +
-  geom_point(aes(x = epiphmass_shootmass, y = abvgnd_mass), size = 1.5) +
-  geom_errorbar(aes(x = epiphmass_shootmass, ymin = abvgnd_mass - abvgnd_mass_se, ymax = abvgnd_mass + abvgnd_mass_se), width = 0) +
-  labs(x = "Epiphyte load (g/g)", y = bquote('Eelgrass mass' ~(g/m^2))) +
-  scale_x_continuous(limits = c(0.0, 0.20), breaks = seq(0, 0.20, by = 0.04)) +
-  scale_y_continuous(limits = c(0.0, 200), breaks = seq(0, 200, by = 50)) +
+  geom_point(aes(x = epiphmass_shootmass_dt, y = abvgnd_mass_dt), size = 1.5) +
+  labs(x = "Epiphyte load* (g/g)", y = bquote('Eelgrass mass*' ~(g/m^2))) +
+  scale_x_continuous(limits = c(-0.08, 0.09), breaks = seq(-0.08, 0.08, by = 0.04)) +
+  scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
   theme(text = element_text(size = 10))
 ```
 
