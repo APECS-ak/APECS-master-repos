@@ -68,7 +68,8 @@ A critical piece for all analyses is testing the effect of site and sea otter tr
 ### Biomass
 Compare biomass of community members between sea otter treatments
 
-#### Eelgrass - biomass and shoot density tests
+#### ANOVAS of sites and treatment
+##### Eelgrass - biomass and shoot density tests
 ```{r eg site x treatment, echo = FALSE}
 mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + site + sea_otter_tr:site, data = eg)
 anova(mod.eg.1)
@@ -79,17 +80,6 @@ mod.eg.2 <- lm(eelgrass_shoots_m ~ sea_otter_tr * site, data = eg)
 anova(mod.eg.2)
 ```
 
-#### Plots
-Eelgrass
-```{r}
-eg.sum <- eg %>% 
-  group_by(sea_otter_tr) %>% 
-  summarise(shoot_mass_m_mean = mean(shoot_mass_m),
-            shoot_mass_m_se = st.er(shoot_mass_m))
-```
-
-
-#### ANOVAS of sites and treatment
 Eelgrass
 
 Epiphytes
@@ -99,6 +89,15 @@ Grazers
 Crabs
 
 Fish
+
+#### Plots
+Eelgrass
+```{r}
+eg.sum <- eg %>% 
+  group_by(sea_otter_tr) %>% 
+  summarise(shoot_mass_m_mean = mean(shoot_mass_m),
+            shoot_mass_m_se = st.er(shoot_mass_m))
+```
 
 ### Stable Isotopes
 There are two perspectives in analysis. 1) The whole community (all data) comparisons and 2) by species comparisons.
@@ -117,13 +116,13 @@ Similar to SI data there are two perspectives to analysis. 1) The whole communit
 #### FA data prep
 Subsets
 ```{r fa subsets, echo = FALSE}
-## Consumers ##
-fa_con_1.0 <- fa_1.0 %>% 
-  filter(Species_common != "Eelgrass" & Species_common != "Eelgrass diatoms" & Species_common != "Fucus" & Species_common != "Particulate organic matter" & Species_common != "Sugar kelp" & Species_common != "Ulva")
-
 ## Producers ##
 fa_pro_1.0 <- fa_1.0 %>%
   filter(Species_common == "Eelgrass" | Species_common == "Eelgrass diatoms" | Species_common == "Fucus" | Species_common == "Particulate organic matter" | Species_common == "Sugar kelp" | Species_common == "Ulva")
+
+## Consumers ##
+fa_con_1.0 <- fa_1.0 %>% 
+  filter(Species_common != "Eelgrass" & Species_common != "Eelgrass diatoms" & Species_common != "Fucus" & Species_common != "Particulate organic matter" & Species_common != "Sugar kelp" & Species_common != "Ulva")
 ```
 
 Append metadata
@@ -133,6 +132,12 @@ fa_pro_1.0 <- merge(fa_pro_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
 fa_pro_1.0 <- cbind(fa_pro_1.0[,c(69:76, 1, 3:67)])
 colnames(fa_pro_1.0)[6] <- "Species_common"
 colnames(fa_pro_1.0)[3] <- "Sea_otter_tr"
+
+## Consumers ##
+fa_con_1.0 <- merge(fa_con_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_con_1.0 <- cbind(fa_con_1.0[,c(69:76, 1, 3:67)])
+colnames(fa_con_1.0)[6] <- "Species_common"
+colnames(fa_con_1.0)[3] <- "Sea_otter_tr"
 ```
 
 
@@ -140,8 +145,8 @@ Transformations and standardizations
 I will use and arcsine sqrt transformation and standardize to FA (column) maximum
 ```{r fa trans std, echo = FALSE}
 ## Transformation ##
-fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 3:67]))
-fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 3:67]))
+fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 10:74]))
+fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 10:74]))
 
 ## Standardization ##
 fa_con_1.0_trs_std <- scale(fa_con_1.0_trs, center = FALSE, scale = apply(fa_con_1.0_trs, 2, max))
@@ -155,19 +160,54 @@ PERMANOVA treatment nested by species. We know/suspect that species will differ 
 ```{r prod nmds, echo = FALSE}
 ## Distances ##
 fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "bray")
+fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "bray")
 
 ## NMDS ##
 fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
+fa_con_1.0_mds <- metaMDS(fa_con_1.0_dist)
 ```
 
 ##### PERMANOVA
 Test for the effect of sea otter nested by species
 ```{r permanova, echo = FLASE}
+## Producers ##
 perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr / sp_code, strata = "sp_code", data = fa_pro_1.0, perm = 9999) 
 perm.pro
+
+## Consumers ##
+perm.con <- adonis2(fa_con_1.0_dist ~ Sea_otter_tr / sp_code, strata = "sp_code", data = fa_con_1.0, perm = 9999) 
+perm.con
 ```
 
+##### Plots
+Data Prep
+```{r}
+## Producers ##
+fa_pro_1.0_mds_dat <- as.data.frame(scores(fa_pro_1.0_mds))
+fa_pro_1.0_mds_dat$ID <- fa_pro_1.0$ID 
+fa_pro_1.0_mds_dat <- merge(fa_pro_1.0_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_pro_1.0_mds_dat$Species_common <- factor(fa_pro_1.0_mds_dat$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva"))
 
+## consumers ##
+fa_con_1.0_mds_dat <- as.data.frame(scores(fa_con_1.0_mds))
+fa_con_1.0_mds_dat$ID <- fa_con_1.0$ID 
+fa_con_1.0_mds_dat <- merge(fa_con_1.0_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_con_1.0_mds_dat$Species_common <- factor(fa_con_1.0_mds_dat$Species_common, levels = c("Shiner perch", "Snake prickleback", "Staghorn sculpin", "Dungeness crab", "Helmet crab", "Red rock crab", "Dock shrimp", "Macoma sp.", "Bentnose Macoma", "Pointed Macoma", "Butter clam", "Idotea", "Limpet"))
+```
+
+Plots
+```{r}
+## Producers ##
+ggplot(fa_pro_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
+  scale_color_manual(values = c("red", "deepskyblue3"))
+
+## Consumers ##
+ggplot(fa_con_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
+  scale_shape_manual(values = c(15:19, 1:8)) +
+  scale_color_manual(values = c("red", "deepskyblue3"))
+```
 
 #### Species specific
 PERMANOVA and PERMDISP by treatment
