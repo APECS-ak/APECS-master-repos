@@ -118,7 +118,7 @@ eg.bio$leaf_area9 <- (eg.bio$leaf_length9 * eg.bio$leaf_width9)
 eg.bio$leaf_area10 <- (eg.bio$leaf_length10 * eg.bio$leaf_width10)
 
 eg.bio$leaf_areaT <- rowSums(eg.bio[, 73:82], na.rm = TRUE)
-eg.bio$leaf_lengthT <- rowSums(eg.bio[, 12:21], na.rm = TRUE)
+eg.bio$leaf_max <- apply(eg.bio[, 12:21], 1, max, na.rm = TRUE)
 
 ### Epiphytes, Rhizomes, and Shoots Mass ###
 ## Epiphyte Mass ##
@@ -187,7 +187,7 @@ quad.bio <- data.frame(
   eg.bio %>% 
     group_by(site, quadrat) %>% 
     summarise(s_shoot_area = mean(leaf_areaT, na.rm = TRUE),
-              s_shoot_length = mean(leaf_lengthT, na.rm = TRUE),
+              s_shoot_max = mean(leaf_max, na.rm = TRUE),
               s_epi_mass = mean(epi_mass, na.rm = TRUE),
               s_shoot_mass = mean(shoot_mass, na.rm = TRUE),
               s_rhi_mass = mean(rhi_mass, na.rm = TRUE),
@@ -231,7 +231,7 @@ site.quad$bg_mass <- (site.quad$eelgrass_shoots_msq * site.quad$s_rhi_mass)
 site.quad$epimass_shootarea <- (site.quad$s_epi_mass / site.quad$s_shoot_area)
 
 ## Epiphytes per total length ##
-site.quad$epimass_shootlength <- (site.quad$s_epi_mass / site.quad$s_shoot_length)
+site.quad$epimass_shootmax <- (site.quad$s_epi_mass / site.quad$s_shoot_max)
 
 ## Epiphytes per eelgrass mass ##
 site.quad$epimass_shootmass <- (site.quad$s_epi_mass / site.quad$s_shoot_mass)
@@ -243,7 +243,7 @@ site.quad$epimass_shootmass <- (site.quad$s_epi_mass / site.quad$s_shoot_mass)
 site.quad$grazmass_shootmass <- (site.quad$graz_massT / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
 
 ## Grazer mass per total length ##
-site.quad$grazmass_shootlength <- (site.quad$graz_massT / site.quad$s_shoot_length)
+site.quad$grazmass_shootmax <- (site.quad$graz_massT / site.quad$s_shoot_max)
 
 ## Crustacean mass per eelgrass mass ##
 site.quad$crustmass_shootmass <- (site.quad$crust_mass / (site.quad$s_shoot_mass + site.quad$s_exshoot_mass))
@@ -287,8 +287,8 @@ site.bio <- data.frame(
     group_by(site) %>% 
     summarise(shoot_area = (mean(s_shoot_area, na.rm = TRUE)),
               shoot_area_se = (st.er(s_shoot_area)),
-              shoot_length = (mean(s_shoot_length, na.rm = TRUE)),
-              shoot_length_se = (st.er(s_shoot_length, na.rm = TRUE)),
+              shoot_max = (mean(s_shoot_max, na.rm = TRUE)),
+              shoot_max_se = (st.er(s_shoot_max, na.rm = TRUE)),
               epi_mass = (mean(s_epi_mass, na.rm = TRUE)),
               epi_mass_se = (st.er(s_epi_mass)),
               shoot_mass = (mean(s_shoot_mass, na.rm = TRUE)),
@@ -315,8 +315,8 @@ site.bio <- data.frame(
               blwgnd_mass_se = (st.er(bg_mass)),
               epiphmass_shootarea = (mean(epimass_shootarea, na.rm = TRUE)),
               epiphmass_shootarea_se = (st.er(epimass_shootarea)),
-              epiphmass_shootlength = (mean(epimass_shootlength, na.rm = TRUE)),
-              epiphmass_shootlength_se = (st.er(epimass_shootlength, na.rm = TRUE)),
+              epiphmass_shootmax = (mean(epimass_shootmax, na.rm = TRUE)),
+              epiphmass_shootmax_se = (st.er(epimass_shootmax, na.rm = TRUE)),
               epiphmass_shootmass = (mean(epimass_shootmass, na.rm = TRUE)),
               epiphmass_shootmass_se = (st.er(epimass_shootmass)),
               grazer_mass = (mean(graz_massT, na.rm = TRUE)),
@@ -327,8 +327,8 @@ site.bio <- data.frame(
               gast_mass_se = (st.er(gastro_mass)),
               grazermass_shootmass = (mean(grazmass_shootmass, na.rm = TRUE)),
               grazermass_shootmass_se = (st.er(grazmass_shootmass)),
-              grazermass_shootlength = (mean(grazmass_shootlength, na.rm = TRUE)),
-              grazermass_shootlength_se = (st.er(grazmass_shootlength)),
+              grazermass_shootmax = (mean(grazmass_shootmax, na.rm = TRUE)),
+              grazermass_shootmax_se = (st.er(grazmass_shootmax)),
               crusmass_shootmass = (mean(crustmass_shootmass, na.rm = TRUE)),
               crusmass_shootmass_se = (st.er(crustmass_shootmass)),
               gastmass_shootmass = (mean(gastromass_shootmass, na.rm = TRUE)),
