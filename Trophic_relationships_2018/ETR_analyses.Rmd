@@ -71,7 +71,7 @@ Compare biomass of community members between sea otter treatments
 #### ANOVAS of sites and treatment
 ##### Eelgrass - biomass and shoot density tests
 ```{r eg site x treatment, echo = FALSE}
-mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + site + sea_otter_tr:site, data = eg)
+mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + sea_otter_tr:site, data = eg)
 anova(mod.eg.1)
 
 t.test(eg$shoot_mass_m[eg$sea_otter_tr == "high"], eg$shoot_mass_m[eg$sea_otter_tr == "low"])
@@ -86,7 +86,27 @@ Epiphytes
 
 Grazers
 
-Crabs
+##### Crabs
+Sum total crab mass by string. Insert 0 data for strings with no crabs so averages are correct. Append site metadata
+```{r}
+## Summarize ##
+crb.sum <- crb %>%
+  group_by(site, string) %>% 
+  summarise(string_mass_g = sum(mass_g))
+
+## Insert zero data ## only missing one string
+crb.sum[24,] <- c(as.character("2018_H_01"), 4.0, 0.0)
+
+## Site data ##
+crb.sum <- merge(crb.sum, site[, c(1,5)], by = "site")
+
+crb.sum$string_mass_g <- as.numeric(crb.sum$string_mass_g)
+```
+
+```{r crb site x treatment, echo = FLASE}
+mod.crb.1 <- lm(string_mass_g ~ sea_otter_tr + sea_otter_tr:site, data = crb.sum)
+anova(mod.crb.1)
+```
 
 Fish
 
@@ -98,6 +118,21 @@ eg.sum <- eg %>%
   summarise(shoot_mass_m_mean = mean(shoot_mass_m),
             shoot_mass_m_se = st.er(shoot_mass_m))
 ```
+
+Crabs
+```{r}
+crb.sum2 <- crb.sum %>%
+  group_by(site) %>% 
+  summarise(mass_m = mean(string_mass_g),
+            mass_se = sd(string_mass_g) / sqrt(length(string_mass_g)))
+
+ggplot(crb.sum2) +
+  geom_col(aes(x = site, y = mass_m / 1000)) +
+  geom_errorbar(aes(x = site, ymin = (mass_m / 1000) - (mass_se / 1000), ymax = (mass_m / 1000) + (mass_se / 1000), width = 0)) +
+  labs(x = "Site", y = "Crab mass (kg)")
+```
+
+
 
 ### Stable Isotopes
 There are two perspectives in analysis. 1) The whole community (all data) comparisons and 2) by species comparisons.
