@@ -19,6 +19,9 @@ library(dplyr)
 #sex.prey <- read.csv("sex_prey.csv")
 #compare.prop <- read.csv("compare.csv")
 
+prop<-read.csv("Visual/SOFA/short_prop.csv")
+fo<-read.csv("Visual/SOFA/fo.csv")
+
 ## RAW DATA 
 forage<-read.csv("2018_Foraging.csv")
 
@@ -59,24 +62,42 @@ head(forage)
 
 
 #sort the data (using dplyr)
-all<-arrange(all, desc(prop))
-age.prop<-arrange(age.prop, desc(prop))
-s.prop<-arrange(s.prop, desc(prop))
-year.prop<-arrange(year.prop, desc(prop))
+#all<-arrange(all, desc(prop))
+#age.prop<-arrange(age.prop, desc(prop))
+#s.prop<-arrange(s.prop, desc(prop))
+#year.prop<-arrange(year.prop, desc(prop))
 
 # ALL Proportions BAR GRAPH #
-ggplot(data = all.prop) +
-  theme_classic() +
-  geom_col(mapping= aes(x = species, y = prop), fill="#0072B2") +
-  scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel", "star", 
-                            "chiton", "abalone")) +
+ggplot(data = prop) +
+  theme_few() +
+  geom_col(mapping= aes(x = species, y = prop, fill=species)) +
+  scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel")) +
   geom_errorbar(aes(x= species, ymin=prop-sd, ymax=prop+sd), width=.2) +
-  scale_y_continuous(labels = percent, breaks=c(0,.1,.2,.3,.4,.5,.6,.7)) +
-  labs(x= "", y= "Proportion of diet in biomass") +
+  scale_y_continuous(labels =scales::percent_format(accuracy = 1), breaks=c(0,.1,.2,.3,.4,.5,.6,.7)) +
+  labs(x= "", y= "Proportion of diet (in biomass)", tag="A") +
   theme(axis.text.y = element_text(size=12),
       axis.text.x = element_text(size=14, angle=45, hjust=1),
       axis.title.y=element_text(size=12))
   
+
+ggsave("prop_bar.png", device = "png", path = "Visual/", width = 8, 
+       height = 7, units = "in", dpi = 300)
+
+# Frequency of Occurance BAR GRAPH #
+ggplot(data = fo) +
+  theme_few() +
+  geom_col(mapping= aes(x = species, y = fo, fill=species)) +
+  scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel")) +
+  scale_y_continuous(labels =scales::percent_format(accuracy = 1), breaks=c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9)) +
+  labs(x= "", y= "Frequency of occurrence (in bouts)", tag="B") +
+  theme(axis.text.y = element_text(size=12),
+        axis.text.x = element_text(size=14, angle=45, hjust=1),
+        axis.title.y=element_text(size=12))
+
+
+ggsave("fo_bar.png", device = "png", path = "Visual/", width = 8, 
+       height = 7, units = "in", dpi = 300)
+
 # AGE BAR GRAPH #
 #ggplot(data = age.prop) +
 #  geom_col(mapping= aes(x = species, y = prop, fill = age),
@@ -215,3 +236,10 @@ chisq.test(ott.raw$PreySz, ott.raw$Occupation)
 
 hist(clam$Size)
 plot(clam$where)
+
+
+## Frequency of Occurance
+
+write.csv(forage, "forage.csv")
+
+

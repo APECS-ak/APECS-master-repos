@@ -1,0 +1,200 @@
+﻿N,C ,Species,PreyCat,Site,Season
+10.11,-15.12,apc,Cucumber,Soda Bay,Spring
+10.85,-15.18,apc,Cucumber,Soda Bay,Spring
+9.17,-16.08,apc,Cucumber,Soda Bay,Spring
+9.53,-13.49,apc,Cucumber,Soda Bay,Spring
+9.08,-13.68,apc,Cucumber,Soda Bay,Spring
+9.16,-15.25,apc,Cucumber,Soda Bay,Summer
+10.13,-16.31,apc,Cucumber,Soda Bay,Summer
+11.13,-15.8,apc,Cucumber,Soda Bay,Summer
+10.3,-16.19,apc,Cucumber,Soda Bay,Summer
+10.42,-15.35,apc,Cucumber,Soda Bay,Summer
+9.18,-15.41,apc,Cucumber,Soda Bay,Winter
+10.89,-15.62,apc,Cucumber,Soda Bay,Winter
+11.37,-15.14,apc,Cucumber,Soda Bay,Winter
+11.76,-15.51,apc,Cucumber,Soda Bay,Winter
+11.49,-15.64,apc,Cucumber,Soda Bay,Winter
+9.62,-14.2,cam,Crab,Soda Bay,Spring
+10.4,-15.26,cam,Crab,Soda Bay,Spring
+11.59,-15.45,cam,Crab,Soda Bay,Spring
+9.85,-15.8,cam,Crab,Soda Bay,Spring
+14.32,-14.2,cam,Crab,Soda Bay,Spring
+11.6,-14.47,cam,Crab,Soda Bay,Summer
+12.93,-14.03,cam,Crab,Soda Bay,Summer
+11.95,-12.55,cam,Crab,Soda Bay,Summer
+12.51,-17.16,cao,Crab,Craig,Spring
+12.83,-17.54,cao,Crab,Craig,Spring
+12.52,-18.08,cao,Crab,Craig,Summer
+13.33,-17.97,cao,Crab,Craig,Summer
+13.03,-15.17,cap,Crab,Soda Bay,Spring
+13.04,-13.98,cap,Crab,Soda Bay,Spring
+12.74,-14.78,cap,Crab,Soda Bay,Spring
+12.77,-14.82,cap,Crab,Soda Bay,Spring
+12.11,-14.16,cap,Crab,Soda Bay,Spring
+12.26,-16.62,cef,Snail,Craig,Spring
+11.41,-17.6,cef,Snail,Craig,Spring
+12.14,-17.21,cef,Snail,Craig,Spring
+11.93,-16.85,cef,Snail,Craig,Spring
+11.96,-17.1,cef,Snail,Craig,Spring
+7.85,-16.81,cln,Clam,Nossuk,Spring
+7.64,-17.6,cln,Clam,Nossuk,Spring
+7.92,-17.68,cln,Clam,Nossuk,Spring
+8.14,-16.85,cln,Clam,Nossuk,Spring
+9.78,-16.28,cln,Clam,Craig,Spring
+9.69,-16.34,cln,Clam,Craig,Spring
+10.07,-16.31,cln,Clam,Craig,Spring
+9.61,-16.3,cln,Clam,Craig,Spring
+9.8,-16.03,cln,Clam,Craig,Spring
+9.44,-16.42,cln,Clam,Craig,Summer
+9.49,-16.63,cln,Clam,Craig,Summer
+9.59,-16.71,cln,Clam,Craig,Summer
+9.64,-16.51,cln,Clam,Craig,Summer
+9.77,-16.34,cln,Clam,Craig,Summer
+8.32,-18.69,cln,Clam,Soda Bay,Winter
+8.65,-18.25,cln,Clam,Soda Bay,Winter
+8.38,-18.59,cln,Clam,Soda Bay,Winter
+8.93,-18.32,cln,Clam,Soda Bay,Summer
+9.04,-18.12,cln,Clam,Soda Bay,Summer
+8.42,-17.54,cln,Clam,Soda Bay,Summer
+9.6,-16.27,cln,Clam,Craig,Winter
+8.88,-16.86,cln,Clam,Soda Bay,Summer
+9.8,-19.39,evt,Star,Soda Bay,Summer
+11.49,-15.99,evt,Star,Soda Bay,Summer
+9.68,-17.48,mtr,Mussel,Craig,Spring
+9.57,-17.1,mtr,Mussel,Craig,Spring
+9.37,-17.41,mtr,Mussel,Craig,Spring
+9.67,-17.74,mtr,Mussel,Craig,Summer
+9.1,-18.04,mtr,Mussel,Craig,Summer
+9.26,-17.72,mtr,Mussel,Craig,Summer
+10.38,-17.29,mtr,Mussel,Craig,Winter
+9.38,-17.28,mtr,Mussel,Craig,Winter
+9.42,-16.91,mtr,Mussel,Craig,Winter
+9.3,-18.01,mtr,Mussel,Craig,Spring
+9.1,-18.27,mtr,Mussel,Craig,Spring
+9.31,-17.51,mtr,Mussel,Craig,Spring
+9.08,-18.18,mtr,Mussel,Craig,Winter
+9.41,-16.94,mtr,Mussel,Craig,Winter
+9.37,-17.39,mtr,Mussel,Craig,Winter
+7.78,-18.35,mtr,Mussel,Soda Bay,Spring
+8.6,-18.51,mtr,Mussel,Soda Bay,Spring
+7.56,-18.18,mtr,Mussel,Soda Bay,Spring
+8.35,-19.62,mtr,Mussel,Soda Bay,Summer
+8.27,-19.72,mtr,Mussel,Soda Bay,Summer
+8.19,-19.85,mtr,Mussel,Soda Bay,Summer
+8.59,-19.41,mtr,Mussel,Soda Bay,Winter
+8.31,-19.46,mtr,Mussel,Soda Bay,Winter
+8.3,-18.92,mtr,Mussel,Soda Bay,Winter
+8.24,-19.09,mtr,Mussel,Soda Bay,Winter
+8.08,-18.98,mtr,Mussel,Soda Bay,Winter
+12.46,-16.08,nul,Snail,Craig,Spring
+11.98,-16.21,nul,Snail,Craig,Spring
+11.98,-16.17,nul,Snail,Craig,Spring
+12.02,-16.2,nul,Snail,Craig,Spring
+11.8,-16.22,nul,Snail,Craig,Spring
+11.54,-16.39,nul,Snail,Craig,Summer
+11.6,-15.66,nul,Snail,Craig,Summer
+13.45,-16.05,nul,Snail,Craig,Summer
+11.14,-17.05,nul,Snail,Craig,Summer
+11.27,-17.52,nul,Snail,Craig,Summer
+11.4,-16.53,nul,Snail,Craig,Summer
+8.51,-21.58,pio,Star,Soda Bay,Summer
+11.11,-16.51,pio,Star,Soda Bay,Summer
+9.23,-19.19,pio,Star,Soda Bay,Summer
+8.03,-21.7,pio,Star,Soda Bay,Summer
+8.63,-19.98,pio,Star,Soda Bay,Summer
+10.64,-16.55,pio,Star,Soda Bay,Summer
+8.42,-21.63,pio,Star,Soda Bay,Summer
+9.05,-19.64,pio,Star,Soda Bay,Summer
+10.7,-16.25,pio,Star,Soda Bay,Summer
+9.82,-20.74,pio,Star,Craig,Spring
+9.63,-18.88,pio,Star,Craig,Spring
+9.27,-20.56,pio,Star,Craig,Winter
+8.89,-17.84,pio,Star,Craig,Winter
+10.94,-15.68,pio,Star,Craig,Winter
+8.93,-17.46,prs,Clam,Nossuk,Spring
+9.07,-17.77,prs,Clam,Nossuk,Spring
+8.63,-17.93,prs,Clam,Nossuk,Spring
+9.26,-17.24,prs,Clam,Nossuk,Spring
+11.37,-16.23,prs,Clam,Craig,Spring
+11.35,-16.34,prs,Clam,Craig,Spring
+10.47,-17.02,prs,Clam,Craig,Spring
+10.41,-16.95,prs,Clam,Craig,Spring
+11.35,-16.18,prs,Clam,Craig,Spring
+11.47,-16.68,prs,Clam,Craig,Summer
+11.65,-16.44,prs,Clam,Craig,Summer
+11.7,-16.67,prs,Clam,Craig,Summer
+11.64,-16.65,prs,Clam,Craig,Summer
+11.75,-16.6,prs,Clam,Craig,Summer
+9.2,-18.17,prs,Clam,Soda Bay,Spring
+9.72,-18.17,prs,Clam,Soda Bay,Spring
+9.13,-18.28,prs,Clam,Soda Bay,Spring
+9.32,-18.7,prs,Clam,Soda Bay,Spring
+9.39,-17.87,prs,Clam,Soda Bay,Spring
+9.47,-18.21,prs,Clam,Soda Bay,Winter
+9.34,-17.91,prs,Clam,Soda Bay,Winter
+9.41,-18.13,prs,Clam,Soda Bay,Winter
+9.47,-17.93,prs,Clam,Soda Bay,Winter
+11.46,-16.58,prs,Clam,Craig,Winter
+11.08,-16.82,prs,Clam,Craig,Winter
+11.08,-16.44,prs,Clam,Craig,Winter
+9.97,-17.04,prs,Clam,Craig,Winter
+10.49,-17.73,prs,Clam,Soda Bay,Summer
+10.08,-16.57,prs,Clam,Craig,Winter
+9.92,-17.27,prs,Clam,Soda Bay,Summer
+9.88,-17.72,prs,Clam,Soda Bay,Summer
+9.87,-17.72,prs,Clam,Soda Bay,Summer
+9.01,-18.09,prs,Clam,Soda Bay,Summer
+8.57,-18.04,sag,Clam,Soda Bay,Spring
+8.25,-18.25,sag,Clam,Soda Bay,Spring
+10.81,-16.56,sag,Clam,Craig,Spring
+11.11,-16.4,sag,Clam,Craig,Spring
+11.27,-16.35,sag,Clam,Craig,Spring
+10.6,-16.53,sag,Clam,Craig,Spring
+9.52,-16.22,sag,Clam,Craig,Spring
+11.11,-16.41,sag,Clam,Craig,Summer
+11.02,-17.06,sag,Clam,Craig,Summer
+11.37,-16.12,sag,Clam,Craig,Summer
+10.79,-16.87,sag,Clam,Craig,Summer
+11.39,-15.97,sag,Clam,Craig,Summer
+9.29,-16.38,sag,Clam,Nossuk,Spring
+9.27,-18.24,sag,Clam,Soda Bay,Spring
+8.67,-18.14,sag,Clam,Soda Bay,Spring
+9.83,-17.63,sag,Clam,Soda Bay,Spring
+8.94,-18.34,sag,Clam,Soda Bay,Winter
+10.71,-16.67,sag,Clam,Craig,Winter
+10.69,-16.49,sag,Clam,Craig,Winter
+10.87,-16.31,sag,Clam,Craig,Winter
+10.58,-16.95,sag,Clam,Craig,Winter
+9.64,-18.02,sag,Clam,Soda Bay,Summer
+9.61,-17.87,sag,Clam,Soda Bay,Summer
+9.55,-17.75,sag,Clam,Soda Bay,Summer
+10.78,-17.05,sag,Clam,Soda Bay,Summer
+9.65,-18.09,sag,Clam,Soda Bay,Summer
+10.31,-16.26,sag,Clam,Craig,Winter
+10.07,-17.83,std,Urchin,Craig,Spring
+9.78,-15.1,std,Urchin,Craig,Spring
+7.11,-17.57,std,Urchin,Soda Bay,Spring
+7.11,-16.61,std,Urchin,Soda Bay,Spring
+6.2,-17.94,std,Urchin,Soda Bay,Spring
+8.34,-16.63,std,Urchin,Soda Bay,Summer
+9.44,-18.23,std,Urchin,Craig,Summer
+9.9,-19.19,std,Urchin,Craig,Summer
+6.47,-18.24,stf,Urchin,,Spring
+6.72,-19.14,stf,Urchin,,Spring
+7.66,-17.15,stf,Urchin,Soda Bay,Summer
+7.77,-17.85,stf,Urchin,Soda Bay,Summer
+7.4,-16.37,stf,Urchin,Soda Bay,Winter
+7.92,-17.74,stf,Urchin,Soda Bay,Winter
+7.53,-17.43,stf,Urchin,Soda Bay,Summer
+11.64,-14.8,tec,Crab,Nossuk,Spring
+11.15,-13.8,tec,Crab,Nossuk,Spring
+11.2,-13.97,tec,Crab,Nossuk,Spring
+12.21,-14.23,tec,Crab,Nossuk,Spring
+12.29,-14.19,tec,Crab,Nossuk,Spring
+10.09,-13.91,tes,Snail,Craig,Spring
+9.79,-13.93,tes,Snail,Craig,Spring
+10.55,-13.65,tes,Snail,Craig,Spring
+9.72,-13.54,tes,Snail,Craig,Spring
+10.26,-13.28,tes,Snail,Craig,Spring
+9.92,-14.89,tes,Snail,Craig,Summer
+10.37,-14.06,tes,Snail,Craig,Winter
