@@ -171,6 +171,10 @@ fa_con_1.0 <- fa_1.0 %>%
 ## Crabs ##
 fa_crb_1.0 <- fa_1.0 %>% 
   filter(Species_common == "Helmet crab" | Species_common == "Dungeness crab" | Species_common == "Red rock crab")
+
+# Crabs - Dungeness #
+fa_dun_1.0 <- fa_1.0 %>% 
+  filter(Species_common == "Dungeness crab")
 ```
 
 Append metadata
@@ -192,6 +196,12 @@ fa_crb_1.0 <- merge(fa_crb_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
 fa_crb_1.0 <- cbind(fa_crb_1.0[,c(69:76, 1, 3:67)])
 colnames(fa_crb_1.0)[6] <- "Species_common"
 colnames(fa_crb_1.0)[3] <- "Sea_otter_tr"
+
+# Crabs - Dungeness #
+fa_dun_1.0 <- merge(fa_dun_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_dun_1.0 <- cbind(fa_dun_1.0[,c(69:76, 1, 3:67)])
+colnames(fa_dun_1.0)[6] <- "Species_common"
+colnames(fa_dun_1.0)[3] <- "Sea_otter_tr"
 ```
 
 
@@ -202,11 +212,13 @@ I will use and arcsine sqrt transformation and standardize to FA (column) maximu
 fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 10:74]))
 fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 10:74]))
 fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 10:74]))
+fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:74]))
 
 ## Standardization ##
 fa_con_1.0_trs_std <- scale(fa_con_1.0_trs, center = FALSE, scale = apply(fa_con_1.0_trs, 2, max))
 fa_pro_1.0_trs_std <- scale(fa_pro_1.0_trs, center = FALSE, scale = apply(fa_pro_1.0_trs, 2, max))
 fa_crb_1.0_trs_std <- scale(fa_crb_1.0_trs, center = FALSE, scale = apply(fa_crb_1.0_trs, 2, max))
+fa_dun_1.0_trs_std <- scale(fa_dun_1.0_trs, center = FALSE, scale = apply(fa_dun_1.0_trs, 2, max))
 ```
 
 #### Whole community
@@ -218,11 +230,13 @@ PERMANOVA treatment nested by species. We know/suspect that species will differ 
 fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "bray")
 fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "bray")
 fa_crb_1.0_dist <- vegdist(fa_crb_1.0_trs_std, method = "bray")
+fa_dun_1.0_dist <- vegdist(fa_dun_1.0_trs_std, method = "bray")
 
 ## NMDS ##
 fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
 fa_con_1.0_mds <- metaMDS(fa_con_1.0_dist)
 fa_crb_1.0_mds <- metaMDS(fa_crb_1.0_dist)
+fa_dun_1.0_mds <- metaMDS(fa_dun_1.0_dist)
 ```
 
 ##### PERMANOVA
@@ -242,6 +256,10 @@ anova(disper.crb)
 
 perm.crb <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_crb_1.0, perm = 9999) 
 perm.crb
+
+# Crabs - Dungeness #
+perm.dun <- adonis2(fa_dun_1.0_dist ~ Sea_otter_tr / Site, data = fa_dun_1.0, perm = 9999)
+perm.dun
 ```
 
 ##### Plots
@@ -265,6 +283,13 @@ fa_crb_1.0_mds_dat$ID <- fa_crb_1.0$ID
 fa_crb_1.0_mds_dat$Species_common <- fa_crb_1.0$Species_common
 fa_crb_1.0_mds_dat <- merge(fa_crb_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
 fa_crb_1.0_mds_dat$Species_common <- factor(fa_crb_1.0_mds_dat$Species_common, levels = c("Dungeness crab", "Helmet crab", "Red rock crab"))
+
+# Dungeness crabs #
+fa_dun_1.0_mds_dat <- as.data.frame(scores(fa_dun_1.0_mds))
+fa_dun_1.0_mds_dat$ID <- fa_dun_1.0$ID 
+fa_dun_1.0_mds_dat$Species_common <- fa_dun_1.0$Species_common
+fa_dun_1.0_mds_dat <- merge(fa_dun_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_dun_1.0_mds_dat$Species_common <- factor(fa_dun_1.0_mds_dat$Species_common, levels = c("Dungeness crab"))
 ```
 
 FA Vectors
@@ -312,6 +337,13 @@ ggplot(fa_crb_1.0_mds_dat) +
   scale_color_manual(values = c("red", "deepskyblue3")) +
   geom_segment(data = vec.crb.dat.sig, aes(x = 0, xend = MDS1, y = 0, yend = MDS2)) +
   geom_text(data = vec.crb.dat.sig, aes(x = MDS1,y = MDS2, label = FA, size = 2))
+
+# Dungeness crabs #
+ggplot(fa_dun_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
+  scale_shape_manual(values = 15) +
+  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
+  scale_color_manual(values = c("red", "deepskyblue3"))
 ```
 
 #### Species specific
