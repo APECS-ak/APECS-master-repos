@@ -237,6 +237,9 @@ df1 <- df %>%
   dplyr::select(quadrat_ID, avg_biomass) %>%
   distinct()
 
+# need to add back in site information
+
 df2 <- left_join(df1, dsty, by = "quadrat_ID")
-write.csv(df2, "../ALL_DATA/seagrass_biomass_conversions.csv") 
+df3 <- left_join(df2, hab_qrt[,1:2], by = "quadrat_ID")
+write.csv(df3, "../ALL_DATA/seagrass_biomass_conversions.csv") 
 ```

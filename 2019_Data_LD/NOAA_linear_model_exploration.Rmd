@@ -1,0 +1,89 @@
+---
+title: "NOAA_linear_model_exploration"
+author: "Lia Domke"
+date: "10/25/2019"
+output: html_document
+---
+
+# Data input
+```{r}
+sal.EventID <- read.csv("../ALL_DATA/Lia_fish/EventID_salmon_present_noaa.csv")
+seak_fish <- read.csv("../ALL_DATA/Lia_fish/noaa_seine_clean_dist.csv")
+```
+
+# Libraries
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(reshape2)
+library(lubridate)
+library(mgcv)
+```
+
+# Data cleaning
+Make seak_fish cleaned and useable:
+1. convert dist to km
+2. sum species by abundance and include only salmon
+3. calculate julian day
+```{r}
+# Just southeast Alaska and Beach seine 
+seak_fish <- seak_fish %>%
+  filter(Region == "southeastern Alaska", Gear == "BSEINE") %>%
+  rename(Dist_anad_m = NEAR_DIST, Latitude = Lat1, Longitude = Long1) %>%
+  mutate(Dist_anad_km = Dist_anad_m/100)
+
+# Calculate fish abundance
+seak_fish$abundance <- as.numeric(ifelse(is.na(seak_fish$Length), paste(seak_fish$Unmeasured), 1)) 
+
+# summarise abundance by site, seine event, and species
+# sum_fish contains all the summed information for ALL FISH. 
+sum_fish <- seak_fish %>%
+  group_by(SiteID, EventID, Date, Mon, Season, Year, SpCode, Sp_CommonName, Sp_ScientificName, Dist_anad_km, Habitat) %>% 
+  summarise(abundance = sum(abundance))
+
+# subset data for only salmon
+sum_fish$Date <- mdy(sum_fish$Date)
+is.Date(sum_fish$Date)
+sal <- sum_fish %>%
+  filter(SpCode == "SALCHUM" | SpCode == "SALCOHO"| 
+      SpCode == "SALSOCK"| SpCode == "SALCHIN"
+      | SpCode == "SALPINK") %>%
+  mutate(julian = yday(Date))
+
+# Go to wide dataframe
+sal_wide <- dcast(sal, SiteID + EventID + Date + Mon + Season + Year + Dist_anad_km + julian + Habitat ~ SpCode, value.var = "abundance", fill = 0) 
+# Keep only those that sum to over 10 salmon
+salmon <- sal_wide[which(rowSums(sal_wide[,10:14]) > 10),]
+# add back in abundance column
+salmon$abundance <- rowSums(salmon[,10:14])
+
+# fix habitat levels
+levels(as.factor(salmon$Habitat)) # mistake with sand-gravel
+levels(salmon$Habitat)[levels(salmon$Habitat)=="Sand-Gravel"] <- "Sand-gravel"
+```
+
+# Linear models
+Use data frame salmon to investigate patterns where salmon are present
+
+```{r}
+# Gam models 
+fit.gam <- gam(SALCOHO ~ s(Dist_anad_km, k = 6) + Habitat + s(julian, k = 6), family = nb(link = log), data = salmon)
+summary(fit.gam)
+visreg(fit.gam, scale = "response")
+
+fit.gam <- gam(SALCHUM ~ s(Dist_anad_km, k = 6) + Habitat + s(julian, k = 6), family = nb(link = log), data = salmon)
+summary(fit.gam)
+visreg(fit.gam, scale = "response")
+
+fit.gam <- gam(SALCHIN ~ s(Dist_anad_km, k = 6) + Habitat + s(julian, k = 6), family = nb(link = log), data = salmon)
+summary(fit.gam)
+visreg(fit.gam, scale = "response")
+
+fit.gam <- gam(SALSOCK ~ Dist_anad_km + Habitat + s(julian, k = 4), family = nb(link = log), data = salmon)
+summary(fit.gam)
+visreg(fit.gam, scale = "response")
+
+fit.gam <- gam(SALPINK ~ s(Dist_anad_km, k = 6) + Habitat + s(julian, k = 6), family = nb(link = log), data = salmon)
+summary(fit.gam)
+visreg(fit.gam, scale = "response")
+```

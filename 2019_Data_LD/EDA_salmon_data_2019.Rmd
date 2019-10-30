@@ -12,18 +12,28 @@ library(corrgram)
 library(MASS)
 library(pscl)
 library(visreg)
+library(readxl)
+library(lubridate)
+library(mgcv)
+library(reshape2)
+library(cowplot)
 ```
 
-# Data
+# Data Entry
 This file is based on the "DataCleaning_Seine_2019" R Markdown script. Extracted relevant salmon abundances (with zeros where we seined but caught no salmon), environmental information (from YSI meter), habitat information (i.e. shoot/flowering shoot density/m2), and otter density by site. 
+
+allsites - includes distance to anadramous stream for all noaa sites and 17/19 sites. 
 ```{r, echo = FALSE}
 dat <- read.csv("FISH604_combined_10-5-19.csv")
-
+allsites <- read_xls("../ALL_DATA/Lia_fish/dist2_anad_allsites_102319.xls", sheet = 1)
+biom <- read.csv("../ALL_DATA/seagrass_biomass_conversions.csv") 
+eel17 <- read.csv("..//ALL_DATA/seagrass_biometrics_CLEAN.csv")
+env17 <- read.csv("../ALL_DATA/eelgrass_bio_sed_transect_derived.csv")
+name <- read.csv("site_code_names.csv", header = TRUE)
 
 ```
-
-# Exploratory Analysis (EDA)
-
+# Data Clean up
+## Main data frame
 ```{r}
 # Take a look at data
 glimpse(dat)
@@ -31,19 +41,126 @@ glimpse(dat)
 # do some minor clean up 
 dat <- dat[-42,-1]
 dat$year <- as.factor(dat$year)
-dat[,25:29] <- data.frame(lapply(dat[,25:29], as.numeric), stringsAsFactors = FALSE)
-dat <- dat %>%
+dat[,21:25] <- data.frame(lapply(dat[,21:25], as.numeric), stringsAsFactors = FALSE) # make sure salmon abundance is numeric
+dat1 <- dat %>%
   rowwise() %>%
   mutate(abundance = sum(SALCHIN, SALCHUM, SALCOHO, SALPINK, SALSOCK))
 
-dat <- dat %>%
+dat2 <- dat1 %>%
   filter(juli_date < 180)
+```
 
+## Distance
+allsites needs to be combined with environmental information about the sites
+```{r}
+str(allsites)
+# 2017 2019 sites information is at the bottom
+dist <- allsites[616:661,-c(1:2,4:6,11)]
+
+dist17 <- dist %>%
+  filter(habitat == "eelgrass", year == "2017")%>%
+  rename(site = site_event) 
+
+dist19 <- dist %>%
+  filter(habitat == "eelgrass", year == "2019")%>%
+  rename(site = site_event) 
+
+names1 <- name %>%
+  dplyr::select(site, site_code)
+names1 <- names1[-c(22:30),]
+names1 <- data.frame(lapply(names1, as.character), stringsAsFactors = FALSE)
+colnames(names1) <- c("place", "site") # make sure what you are joining has the same column name
+dist17.2 <- left_join(dist17, names1, by = "site") %>% # join by site
+  dplyr::select(-site) %>%  # remove site code column
+  rename(site = place) # rename site name
+
+# slight changes to names on dist19
+levels(as.factor(dist19$site))
+dist19$site <- as.factor(dist19$site)
+levels(dist19$site)[levels(dist19$site)=="Naukati"] <- "Naukati Bay"
+levels(dist19$site)[levels(dist19$site)=="South Wadleigh"] <- "South Wadleigh Island"
+levels(dist19$site)[levels(dist19$site)=="Chusini"] <- "Chusini Cove"
+levels(dist19$site)[levels(dist19$site)=="Goats mouth Inlet"] <- "Goats mouth inlet"
+levels(dist19$site)[levels(dist19$site)=="Kaguk Bay"] <- "Kaguk Cove"
+
+dist_comb <-rbind(dist19, dist17.2)
+dist_all <- dist_comb %>%
+  mutate(dist_anad_km = NEAR_DIST/100) %>%
+  dplyr::select(-NEAR_DIST)
+
+# combine with total data
+dist_all$year <- as.factor(dist_all$year)
+
+dat3 <- left_join(dat2, dist_all)
+```
+
+## Seagrass biomass
+```{r}
+str(biom) 
+# 2019
+# convert biomass to g/m2 for both shoots and flowering shoots
+# note: flowering shoot estimation is likely an underestimation because 
+# flowering biomass is more (because they're taller) than normal shoots. 
+biom_site <- biom %>%
+  mutate(shoot_biomass_gm2 = (avg_biomass * density_m2)) %>% 
+  mutate(flowering_biomass_gm2 = (avg_biomass * flowering_m2)) %>%
+  mutate(total_biomass_gm2 = (flowering_biomass_gm2 + shoot_biomass_gm2)) %>%
+  group_by(site) %>%
+  summarise(avg_biom_site_gm2 = mean(total_biomass_gm2)) %>%
+  mutate(year = "2019")
+
+# 2017
+str(eel17)
+
+biom17 <- eel17 %>%
+  mutate(shoot_dw = shoot_foil_dw - shoot_foil, na.rm = T) %>%
+  group_by(site, quadrat) %>%
+  summarise(avg_shoot_dw = mean(shoot_dw))
+
+eel_hab17 <- env17 %>%
+  mutate(year = "2017") %>%
+  mutate(date = ymd(date)) %>%
+  dplyr::select(quadrat, site, date, year, date_julian,
+         eelgrass_shoots_msq,flowering_shoots_msq) %>%
+  na.omit()
+
+df <- left_join(eel_hab17, biom17) %>%
+  mutate(total_shoot_m2 = (eelgrass_shoots_msq + flowering_shoots_msq)) %>%
+  mutate(total_biomass_gm2 = total_shoot_m2 * avg_shoot_dw, na.rm = T) %>%
+  group_by(site) %>%
+  summarise(avg_biom_site_gm2 = mean(total_biomass_gm2, na.rm = T))
+
+# change site names in 2017 for df 
+names1 <- name %>%
+  dplyr::select(site, site_code)
+names1 <- names1[-c(22:30),]
+names1 <- data.frame(lapply(names1, as.character), stringsAsFactors = FALSE)
+colnames(names1) <- c("place", "site") # make sure what you are joining has the same column name
+df2 <- left_join(df, names1, by = "site") # join by site
+
+df3 <- df2 %>%
+  dplyr::select(-site) %>%  # remove site code column
+  rename(site = place) %>% # rename site name
+  mutate(year = "2017")
+
+# Combine 2017 and 2019 biomass, with e/ other and then the main df (dat)
+biom_all <- rbind(df3, biom_site)
+biom_all$year <- as.factor(biom_all$year)
+
+
+dat4 <- left_join(dat3, biom_all, by = c("site", "year"))
+```
+
+
+# Exploratory Analaysis (EDA)
+```{r}
 # visualize relationships among variables: scatterplot matricies
-corrgram(dat[,c(4,5,8,9,12:14,17:19,21,25:29)], lower.panel=panel.shade, upper.panel=panel.ellipse,
+dat <- dat4
+library(corrgram)
+corrgram(dat[,c(4,5,8,14,17,18,20,21,24:30,34:35)], lower.panel=panel.shade, upper.panel=panel.ellipse,
          diag.panel=panel.density)
 
-pairs(dat[,c(5,6,9,10,13:15,18:20,22,25:30)], lower.panel = panel.smooth)
+pairs(dat[,c(4,5,8,14,17,18,20,21,24:30,34:35)], lower.panel = panel.smooth)
 
 # is there a correlatino between sea otter density and seagrass density
 glimpse(dat)
@@ -89,6 +206,8 @@ plot((abundance > 0) ~ avg_density, data = dat)
 plot((abundance >0) ~ avg_shoot, data = dat)
 plot((abundance >0) ~ avg_flowering, data = dat)
 plot((abundance >0) ~ juli_date, data = dat)
+plot((abundance>0) ~ avg_biom_site_gm2, data = dat)
+plot((abundance>0) ~ dist_anad_km, data = dat)
 # hard to see any real patterns of presence of salmon with otter density or shoot density, flowering density
 # or julian date
 
@@ -107,6 +226,8 @@ plot(dat$juli_date, dat$binomial)
 
 ggplot(dat, aes(avg_density, binomial, color = year)) + geom_jitter(width = 0.5, height = 0.05) + facet_wrap(~year, ncol = 1)
 
+ggplot(dat, aes(dist_anad_km, binomial, color = year)) + geom_jitter(width = 0.5, height = 0.05) + facet_wrap(~year, ncol = 1)
+
 ggplot(data = dat, aes(x = reorder(site, -avg_density), y = avg_density, fill = year)) + geom_bar(stat = "identity") + theme(axis.text.x = element_text(angle = 90)) +facet_wrap(~year, ncol = 1)
 
 # finally lets look at a corrigram of the response variables
@@ -118,6 +239,8 @@ corrgram(dat[,c(1,6,8,19,21,24,30)], lower.panel=panel.shade, upper.panel=panel.
 
 ### Model fitting and selection
 Want to start by fitting a full model including interaction
+
+Haven't incorporated dist anad or biomass seagrass here yet
 ```{r}
 #Try a fit that includes sea otter density and date, including an interaction
 fit1 <- glm(binomial ~ avg_density*juli_date*year, family = binomial(link = logit), data = dat)
@@ -205,7 +328,7 @@ hist(dat$SALCOHO)
 # try to fit to a glm using poisson distribution
 # have to add a constant to abundance data because poisson doens't like zeros
 # this glm framework automatically transforms the data
-fit <- glm(abundance+1 ~ avg_density*year*juli_date*I(juli_date^2), data = dat, family = poisson)
+fit <- glm(abundance+1 ~ avg_density*year*juli_date*I(juli_date^2)*avg_biom_site_gm2*dist_anad_km, data = dat, family = poisson)
 summary(fit)
 
 # residuals vs fitted appear to show an increase in variance, check summary output
@@ -248,10 +371,155 @@ fit.hurdle <- hurdle(abundance ~ avg_density + juli_date + year, data = dat[-41,
 summary(fit.hurdle)
 
 
+###### try glm with cubic date
+fit.nb.linear <- glm.nb(abundance ~ year+juli_date+avg_density+I(juli_date^2), data = dat, control=glm.control(maxit = 50))
+
+summary(fit.nb.linear)
+
+fit.nb.linear.PNK <- glm.nb(SALPINK ~ year+juli_date+avg_density+I(juli_date^2)+avg_biom_site_gm2+dist_anad_km, data = dat,init.theta=0.535, control=glm.control(maxit = 5000))
+summary(fit.nb.linear.PNK)
+visreg(fit.nb.linear.PNK, scale = "response", partial = TRUE)
+```
+
+# GAM models
+```{r}
+
 # try something else out with more flexibility for the julian date
 library(mgcv)
-  fit.gam<- gam(abundance ~ s(juli_date, avg_density, bs = "tp", k = 6) +avg_density+ s(juli_date, k = 3) + year + avg_shoot + avg_flowering, data = dat, family = nb(link = "log"))
-summary(fit.gam)
-visreg(fit.gam, scale = "response")
-visreg(fit.gam)
+gam.all <- gam(abundance ~ s(juli_date, k = 4) + avg_density + year + avg_biom_site_gm2 + dist_anad_km, data = dat, family = nb(link = "log"))
+
+summary(gam.all)
+
+a1 <- visreg(gam.all, "juli_date", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab("Julian Date") + ylab(NULL) + 
+  geom_point() + coord_cartesian(ylim = c(0, 300))
+
+a2 <- visreg(gam.all, "avg_density", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Sea otter density (#/",km^2,")"))) + 
+  ylab(NULL) + geom_point() + coord_cartesian(ylim = c(0, 300))
+  
+a3 <- visreg(gam.all, "avg_biom_site_gm2", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Eelgrass density (g/",m^2,")"))) + 
+  ylab(NULL) + geom_point() + coord_cartesian(ylim = c(0, 300))
+
+a4 <- visreg(gam.all, "dist_anad_km", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Distance to anadromous stream (",km^2,")"))) + 
+  ylab(NULL) + geom_point() + coord_cartesian(ylim = c(0, 300))
+
+plot1 <- plot_grid(a1, a4, a2, a3, align = "hv", label_y = "Salmon abundance", vjust = 0)
+save_plot("WSNPlot1.jpg", plot1)
 ```
+
+
+## Gam by species
+```{r}
+#BY species
+gam.coho <- gam(SALCOHO ~ s(juli_date, k = 4) + avg_density + year + avg_biom_site_gm2 + dist_anad_km, data = dat, family = nb(link = "log"))
+
+# coho 
+summary(gam.coho)
+visreg(gam.coho, scale = "response")
+co.so <- visreg(gam.coho, "avg_density", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Sea otter density (#/",km^2,")"))) + 
+  ylab("Coho abundance") + geom_point() + coord_cartesian(ylim = c(0, 150))
+
+co.eel <- visreg(gam.coho, "avg_biom_site_gm2", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Eelgrass biomass (g/",m^2,")"))) + 
+  ylab("Coho abundance") + geom_point() +
+  coord_cartesian(ylim = c(0, 150))
+
+co.dist <- visreg(gam.coho, "dist_anad_km", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Distance from anadromous stream (",km^2,")"))) + 
+  ylab("Coho abundance") + geom_point() +
+  coord_cartesian(ylim = c(0, 150))  
+# Pink salmon
+gam.pink <- gam(SALPINK ~ s(juli_date, k = 4) + avg_density + year + avg_biom_site_gm2 + dist_anad_km, data = dat, family = nb(link = "log"))
+
+summary(gam.pink)
+visreg(gam.pink)
+
+p.so <- visreg(gam.pink, "avg_density", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Sea otter density (#/",km^2,")"))) + 
+  ylab("Pink abundance") + geom_point() + coord_cartesian(ylim = c(0, 150))
+
+p.eel <- visreg(gam.pink, "avg_biom_site_gm2", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Eelgrass density (g/",m^2,")"))) + 
+  ylab("Pink abundance") + geom_point() +
+  coord_cartesian(ylim = c(0, 150))
+
+p.dist <- visreg(gam.pink, "dist_anad_km", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(NULL) + 
+  ylab("Pink abundance") + geom_point() +
+  coord_cartesian(ylim = c(0, 150))  
+
+gam.chum <- gam(SALCHUM ~ s(juli_date, k = 4) + avg_density + year + avg_biom_site_gm2 + dist_anad_km, data = dat, family = nb(link = "log"))
+
+summary(gam.chum)
+visreg(gam.chum)
+#
+ch.so <- visreg(gam.chum, "avg_density", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Sea otter density (#/",km^2,")"))) + 
+  ylab("Chum abundance") + geom_point() + coord_cartesian(ylim = c(0, 150))
+
+ch.eel <- visreg(gam.chum, "avg_biom_site_gm2", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Eelgrass density (g/",m^2,")"))) + 
+  ylab("Chum abundance") + geom_point() +
+  coord_cartesian(ylim = c(0, 150))
+
+ch.dist <- visreg(gam.chum, "dist_anad_km", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(NULL) + 
+  ylab("Chum abundance") + geom_point() +
+  coord_cartesian(ylim = c(0, 150))  
+
+plot.dist <- plot_grid(p.dist, ch.dist, co.dist, align = "hv", vjust = 0)
+save_plot("WSN_dist_19.jpg", plot.dist)
+
+plot.hab <- plot_grid(p.eel, ch.eel, co.eel, align = "hv")
+save_plot("WSN_hab_19.jpg", plot.hab)
+
+plot.otts <- plot_grid(p.so, ch.so, co.so, align = "hv")
+save_plot("WSN_otts_19.jpg", plot.otts)
+```
+
+
+## GAM models with long df
+```{r}
+# convert to long dataframe
+# subset dataframe
+dat1 <- dat[, c(1,6,8,23:29,34,35)]
+dat_long <- melt(dat1, id = c("site", "avg_density", "year", "date", "juli_date", "dist_anad_km", "avg_biom_site_gm2"), variable.name = "SpCode", value.name = "abundance")
+
+q1 <- ggplot(dat_long, aes(x = juli_date, y = abundance)) + 
+  geom_point() +
+  theme_classic() + 
+  xlab("Julian Date") + ylab("Abundance")
+q1 + stat_smooth(data = dat_long, method = "gam", formula = y ~ s(x), se = TRUE)
+
+
+# make model
+model <- gam(abundance ~ s(juli_date, k = 4) + avg_density + year + avg_biom_site_gm2 + dist_anad_km + SpCode, data = dat_long, family = nb(link = "log"))
+
+g1 <- visreg(model, "juli_date", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab("Julian Date") + ylab("Salmon abundance")
+g1 + facet_wrap(SpCode)
+
+m1 <- gam(abundance ~ s(juli_date, k = 4) + avg_density + year + avg_biom_site_gm2 + dist_anad_km, data = dat, family = nb(link = "log"))
+
+
+
+```
+

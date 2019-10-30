@@ -5,14 +5,14 @@ date: "10/23/2019"
 output: html_document
 ---
 # Libraries
-```{r}
+```{r, include = FALSE}
 library(readxl)
 library(tidyverse)
 require(reshape2)
 library(vegan)
 ```
 # Input Data
-```{r}
+```{r, include = FALSE}
 allsites <- read_xls("../ALL_DATA/Lia_fish/dist2_anad_allsites_102319.xls", sheet = 1)
 fish <- read.csv("../ALL_DATA/noaa_seak_fish_atlas_CLEAN.csv")
 ```
@@ -39,6 +39,8 @@ seak_fish <- noaa %>%
   group_by(EventID) %>% # group by EventID first so that it will replicate dist for each row
   left_join(fish, noaa[,c(3,12)], by = "EventID") %>% # join the anadromous distance (in meters) to the       fish data frame by the EventID
   dplyr::select(SiteID, EventID, Date, Season, Mon, SeasonNoYear, Year, Gear, Temp, Salinity, NEAR_DIST, Region, Locale, Location.y, SubLocale.y, Nickname, Habitat, Lat1, Long1, SpCode, Sp_CommonName, Sp_ScientificName, Length, Unmeasured, taxon)
+#write this out so you can use it elsewhere
+#write.csv(seak_fish, "../ALL_DATA/Lia_fish/noaa_seine_clean_dist.csv")
 
 # double check to make sure we're only looking at SEAK and BSEINE gear
 seak_fish <- seak_fish %>%
@@ -82,6 +84,7 @@ sal_wide <- dcast(sal_long, SiteID + EventID + Date + Mon + Season + Year ~ SpCo
 # REMOVE ALL SEINES WHERE THEY CAUGHT LESS THAN 10 SALMON
 sal_wide <- sal_wide[which(rowSums(sal_wide[,7:11]) > 10),]
 sal_long <- melt(sal_wide, id = c("SiteID", "EventID", "Date", "Mon", "Season", "Year"), variable.name = "SpCode", value.name = "abundance" )
+
 ```
 
 # Data Exploration
@@ -211,6 +214,9 @@ sal.sc1 <- sal.sc[,-c(1:6, 12)]
 
 sal.present <- sal.sc1[which(rowSums(sal.sc1) > 0),]
 sal.EventID <- rownames(sal.present)
+# filter your environmental information by where salmon present eventID
+env.sc.sub <- subset(env.sc, EventID %in% sal.EventID)
+#write.csv(sal.EventID, "../ALL_DATA/Lia_fish/EventID_salmon_present_noaa.csv")
 
 # Need to create bray-curtis dissimilarity index:
 require(vegan)
@@ -232,23 +238,115 @@ stressplot(sp.nmds)
 ordiplot(sp.nmds, display="sites", type="t", cex=1)
 plot(sp.nmds$point, col = as.factor(env.sc.sub$Habitat))
 
-
-# redo the bray curtis: 
-dist.bray2 <- vegdist(sal.sub.sc2, method = "bray")
-round(dist.bray2, 2)
-sp.nmds <- metaMDS(dist.bray2, k = 2, autotransform = FALSE, trymax = 100)
-# replot the data
-ordiplot(sp.nmds, display="sites", type="t", cex=1)
-plot(sp.nmds$point, col = as.factor(env.sc.sub$Habitat))
-
-# filter your environmental information by where salmon present eventID
-env.sc.sub <- subset(env.sc, EventID %in% sal.EventID)
+### test of dispersion
+disp1 <- betadisper(dist.bray, env.sc.sub$Habitat)
+anova(disp1)
+adonis2(dist.bray ~ Habitat, data = env.sc.sub, by = "margin")
 
 plot(sp.nmds$points, col=as.factor(env.sc.sub$Habitat), pch=16, cex=1.5, asp=1);
 #ordispider(sp.nmds, env.sc.sub$Habitat, col=1:5, label=T);
 ordihull(sp.nmds, env.sc.sub$Habitat, col=1:5, lty=2);legend("topright", legend=levels(as.factor(env.sc.sub$Habitat)), pch=16, col=1:5, cex=0.5)
 
 ```
+## species biplot of just kelp and eel
+Lets look at just a biplot of kelp and eel 
+```{r}
+sal.sc.sub <- filter(sal.sc, Habitat == c("Kelp", "Eelgrass"))
+row.names(sal.sc.sub) <- sal.sc.sub$EventID
+sal.sc.sub1 <- sal.sc.sub[,-c(1:6, 12)]
+
+# now nmds and calculating dissimilarity index does not work if there are ENTIRE
+# ROWS that have zeros. So we can ONLY compute where salmon ARE PRESENT. Duh. 
+# So we have to remove all zero rows
+
+sal.present1 <- sal.sc.sub1[which(rowSums(sal.sc.sub1) > 0),]
+sal1.EventID <- rownames(sal.present1)
+# filter your environmental information by where salmon present eventID
+env.sc.sub1 <- subset(env.sc, EventID %in% sal1.EventID)
+#write.csv(sal.EventID, "../ALL_DATA/Lia_fish/EventID_salmon_present_noaa.csv")
+
+# Need to create bray-curtis dissimilarity index:
+require(vegan)
+dist.bray.sub <- vegdist(sal.present1, method = "bray")
+round(dist.bray.sub,2) # lower triangular matrix (vector of class 'dist')
+
+# computer the NMDS iteratively using metaMDS
+# based on the bray curtis distances found above: 
+sp.nmds.sub <- metaMDS(dist.bray.sub, k = 2, autotransform = FALSE, trymax = 500)
+
+# Examine output, which includes the two major ordination axes and Kruskal's stress value:
+sp.nmds.sub$stress
+
+# How good did the nmds do? 
+sp.sh <- Shepard(dist.bray.sub, sp.nmds.sub$points)
+stressplot(sp.nmds.sub)
+
+# plot the data
+ordiplot(sp.nmds.sub, display="sites", type="t", cex=1)
+plot(sp.nmds.sub$point, col = as.factor(env.sc.sub1$Habitat))
+
+
+### test of dispersion
+disp2 <- betadisper(dist.bray.sub, env.sc.sub1$Habitat)
+anova(disp2)
+adonis2(dist.bray.sub ~ Habitat, data = env.sc.sub1, by = "margin")
+
+plot(sp.nmds.sub$points, col=as.factor(env.sc.sub1$Habitat), pch=16, cex=1.5, asp=1);
+#ordispider(sp.nmds, env.sc.sub$Habitat, col=1:5, label=T);
+ordihull(sp.nmds.sub, env.sc.sub1$Habitat, col=1:2, lty=2);legend("topright", legend=levels(as.factor(env.sc.sub1$Habitat)), pch=16, col=1:2, cex=0.5)
+
+```
+
+
+## ggplot of species biplot all habitats
+```{r}
+scrs <- scores(sp.nmds, display = 'sites')
+scrs <- cbind(as.data.frame(scrs), Habitat = env.sc.sub$Habitat)
+cent <- aggregate(cbind(NMDS1, NMDS2) ~ Habitat, data = scrs, FUN = mean)
+segs <- merge(scrs, setNames(cent, c('Habitat','oNMDS1','oNMDS2')),
+              by = 'Habitat', sort = FALSE)
+
+ggplot(scrs, aes(x = NMDS1, y = NMDS2, colour = Habitat)) +
+  geom_segment(data = segs,
+               mapping = aes(xend = oNMDS1, yend = oNMDS2)) + # spiders
+  geom_point(data = cent, size = 5) +                         # centroids
+  geom_point() +                                              # sample scores
+  coord_fixed() +
+  xlab(label = "nMDS 1") + ylab(label = "nMDS 2") + theme_classic(base_size= 16)+
+  scale_color_manual(values = c("#333333", "#52854C", "#D16103", "330066", "FF00CC"))
+
+
+ggplot(scrs, aes(x=NMDS1, y=NMDS2, col=Habitat)) +
+ geom_point(size = 3) +
+ stat_ellipse(size = 1.5) +
+ xlab(label = "nMDS 1") + ylab(label = "nMDS 2") + theme_classic(base_size= 30) +
+  scale_color_manual(values = c("#333333", "#339900", "#D16103", "#3399FF"))
+```
+## ggplot of species biplot KELP EEL
+```{r}
+scrs.sub <- scores(sp.nmds.sub, display = 'sites')
+scrs.sub <- cbind(as.data.frame(scrs.sub), Habitat = env.sc.sub1$Habitat)
+cent.sub <- aggregate(cbind(NMDS1, NMDS2) ~ Habitat, data = scrs.sub, FUN = mean)
+segs.sub <- merge(scrs.sub, setNames(cent.sub, c('Habitat','oNMDS1','oNMDS2')),
+              by = 'Habitat', sort = FALSE)
+
+ggplot(scrs.sub, aes(x = NMDS1, y = NMDS2, colour = Habitat)) +
+  geom_segment(data = segs.sub,
+               mapping = aes(xend = oNMDS1, yend = oNMDS2)) + # spiders
+  geom_point(data = cent.sub, size = 5) +                         # centroids
+  geom_point() +                                              # sample scores
+  coord_fixed() +
+  xlab(label = "nMDS 1") + ylab(label = "nMDS 2") + theme_classic(base_size= 16)+
+  scale_color_manual(values = c("#333333", "#52854C", "#D16103", "330066", "FF00CC"))
+
+
+ggplot(scrs.sub, aes(x=NMDS1, y=NMDS2, col=Habitat)) +
+ geom_point(size = 3) +
+ stat_ellipse(size = 1.5) +
+ xlab(label = "nMDS 1") + ylab(label = "nMDS 2") + theme_classic(base_size= 30) +
+  scale_color_manual(values = c("#339900", "#D16103", "#3399FF"))
+```
+
 #Environmental biplots
 ``` {r}
 require(corrgram)
