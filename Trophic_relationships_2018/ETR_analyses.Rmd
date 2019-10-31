@@ -89,10 +89,16 @@ Grazers
 ##### Crabs
 Sum total crab mass by string. Insert 0 data for strings with no crabs so averages are correct. Append site metadata
 ```{r}
+crb <- merge(crb, site[, c(1,5)])
+
 ## Summarize ##
 crb.sum <- crb %>%
   group_by(site, string) %>% 
   summarise(string_mass_g = sum(mass_g))
+
+crb.sum.sp <- crb %>% 
+  group_by(sea_otter_tr, string, species_common) %>% 
+  summarise(mass_g = sum(mass_g))
 
 ## Insert zero data ## only missing one string
 crb.sum[24,] <- c(as.character("2018_H_01"), 4.0, 0.0)
@@ -126,6 +132,7 @@ eg.sum <- eg %>%
 
 Crabs
 ```{r}
+## All Species ##
 crb.sum2 <- crb.sum %>%
   group_by(site) %>% 
   summarise(mass_m = mean(string_mass_g),
@@ -138,7 +145,24 @@ ggplot(crb.sum2) +
   geom_errorbar(aes(x = site, ymin = (mass_m / 1000) - (mass_se / 1000), ymax = (mass_m / 1000) + (mass_se / 1000)), width = 0, size = 1) +
   scale_fill_manual(name = "Sea otters", values = c("red", "deepskyblue3")) +
   labs(x = "Site", y = "Crab mass (kg)")
-  
+
+## By species ##
+crb.sum.2 <- crb.sum.sp %>% 
+  group_by(sea_otter_tr, species_common) %>% 
+  summarise(mass_m = mean(mass_g),
+            mass_se = sd(mass_g) / sqrt(length(mass_g)))
+
+crb.sum.2[5,] <- c(as.character("high"), as.character("Red rock crab"), 0.0, 0.0)
+crb.sum.2[6,] <- c(as.character("low"), as.character("Helmet crab"), 0.0, 0.0)
+crb.sum.2$mass_m <- as.numeric(crb.sum.2$mass_m)
+crb.sum.2$mass_se <- as.numeric(crb.sum.2$mass_se)
+
+ggplot(crb.sum.2, aes(x = sea_otter_tr, y = mass_m/1000, fill = species_common)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  scale_fill_manual(values = c("chocolate4", "springgreen4", "firebrick")) +
+  geom_errorbar(aes(ymin = (mass_m / 1000) - (mass_se / 1000), ymax = (mass_m / 1000) + (mass_se / 1000)), size = 1, width = 0, position = position_dodge(0.9)) +
+  labs(x = "Site", y = "Crab mass (kg)") +
+  scale_y_continuous(limits = c(0, 5))
 ```
 
 
@@ -155,7 +179,7 @@ Convex hulls
 Trophic level
 
 ### Fatty Acids
-Similar to SI data there are two perspectives to analysis. 1) The whole community and 2) by species comparisons. Along these line I will run a nested PERMANOVA for the effects of species and sea otter treatment. Then species that appear to have a strong sea otter effect will be analyzed seperatly
+Similar to SI data there are two perspectives to analysis. 1) The whole community and 2) by species comparisons. Along these lines I will run a nested PERMANOVA for the effects of species and sea otter treatment. Then species that appear to have a strong sea otter effect will be analyzed seperatly
 
 #### FA data prep
 Subsets
@@ -282,15 +306,18 @@ perm.con
 disper.crb <- betadisper(fa_crb_1.0_dist, fa_crb_1.0$Sea_otter_tr, type = "centroid")
 anova(disper.crb)
 
-perm.crb <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_crb_1.0, perm = 9999) 
-perm.crb
+perm.crb.1 <- adonis2(fa_crb_1.0_dist ~  sp_code, data = fa_crb_1.0, perm = 9999) 
+perm.crb.1
+
+perm.crb.2 <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_crb_1.0, perm = 9999) 
+perm.crb.2
 
 # Crabs - Dungeness #
-perm.dun <- adonis2(fa_dun_1.0_dist ~ Sea_otter_tr / Site, data = fa_dun_1.0, perm = 9999)
+perm.dun <- adonis2(fa_dun_1.0_dist ~ Sea_otter_tr, data = fa_dun_1.0, perm = 9999)
 perm.dun
 
 # Crabs - Helmet #
-perm.hel <- adonis2(fa_hel_1.0_dist ~ Sea_otter_tr / Site, data = fa_hel_1.0, perm = 9999)
+perm.hel <- adonis2(fa_hel_1.0_dist ~ Sea_otter_tr, data = fa_hel_1.0, perm = 9999)
 perm.hel
 
 # Primary Comsumers #
@@ -374,8 +401,8 @@ vec.crb.dat$FA <- row.names(vec.crb.dat)
 vec.crb.dat$r2 <- vec.crb$vectors$r
 
 scalefactor <- min(max(fa_crb_1.0_mds_dat$NMDS1) - min(fa_crb_1.0_mds_dat$NMDS1), max(fa_crb_1.0_mds_dat$NMDS2) - min(fa_crb_1.0_mds_dat$NMDS2))
-vec.crb.dat$MDS1_sc <- vec.crb.dat$MDS1 * (scalefactor * vec.crb.dat$r2)
-vec.crb.dat$MDS2_sc <- vec.crb.dat$MDS2 * (scalefactor * vec.crb.dat$r2)
+vec.crb.dat$MDS1_sc <- vec.crb.dat$MDS1 * scalefactor
+vec.crb.dat$MDS2_sc <- vec.crb.dat$MDS2 * scalefactor 
 
 vec.crb.dat.sig <- vec.crb.dat %>% 
   filter(pvals < 0.005)
@@ -393,17 +420,17 @@ vec.dun.dat$FA <- row.names(vec.dun.dat)
 vec.dun.dat$r2 <- vec.dun$vectors$r
 
 scalefactor <- min(max(fa_dun_1.0_mds_dat$NMDS1) - min(fa_dun_1.0_mds_dat$NMDS1), max(fa_dun_1.0_mds_dat$NMDS2) - min(fa_dun_1.0_mds_dat$NMDS2))
-vec.dun.dat$MDS1_sc <- vec.dun.dat$MDS1 * (scalefactor * vec.dun.dat$r2)
-vec.dun.dat$MDS2_sc <- vec.dun.dat$MDS2 * (scalefactor * vec.dun.dat$r2)
+vec.dun.dat$MDS1_sc <- vec.dun.dat$MDS1 * scalefactor
+vec.dun.dat$MDS2_sc <- vec.dun.dat$MDS2 * scalefactor
 
 vec.dun.dat.sig <- vec.dun.dat %>% 
-  filter(pvals < 0.01)
+  filter(pvals < 0.05)
 
 arrow_angle <- 90 - ((atan2(vec.dun.dat.sig$MDS1_sc, vec.dun.dat.sig$MDS2_sc)* 180)/pi)
 arrow_angle <- ifelse(arrow_angle > 90 & arrow_angle < 270, arrow_angle + 180, arrow_angle)
 arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
 
-# Dungeness Crabs #
+# Helmet Crabs #
 vec.hel <- envfit(fa_hel_1.0_mds$points, fa_hel_1.0[, 10:74], perm = 9999)
 vec.hel.arrows <- scores(vec.hel, display = "vectors")
 vec.hel.dat <- data.frame(vec.hel.arrows)
@@ -412,11 +439,11 @@ vec.hel.dat$FA <- row.names(vec.hel.dat)
 vec.hel.dat$r2 <- vec.hel$vectors$r
 
 scalefactor <- min(max(fa_hel_1.0_mds_dat$NMDS1) - min(fa_hel_1.0_mds_dat$NMDS1), max(fa_hel_1.0_mds_dat$NMDS2) - min(fa_hel_1.0_mds_dat$NMDS2))
-vec.hel.dat$MDS1_sc <- vec.hel.dat$MDS1 * (scalefactor * vec.hel.dat$r2)
-vec.hel.dat$MDS2_sc <- vec.hel.dat$MDS2 * (scalefactor * vec.hel.dat$r2)
+vec.hel.dat$MDS1_sc <- vec.hel.dat$MDS1 * scalefactor
+vec.hel.dat$MDS2_sc <- vec.hel.dat$MDS2 * scalefactor
 
 vec.hel.dat.sig <- vec.hel.dat %>% 
-  filter(pvals < 0.0106)
+  filter(pvals < 0.05)
 
 arrow_angle <- 90 - ((atan2(vec.hel.dat.sig$MDS1_sc, vec.hel.dat.sig$MDS2_sc)* 180)/pi)
 arrow_angle <- ifelse(arrow_angle > 90 & arrow_angle < 270, arrow_angle + 180, arrow_angle)
@@ -445,12 +472,12 @@ ggplot(fa_con_1.0_mds_dat) +
 
 ## Crabs ##
 ggplot(fa_crb_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
+  geom_point(aes(x = NMDS1, y = NMDS2, shape = Species_common), size = 3.5) +
   scale_shape_manual(values = c(15:19, 1:8)) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-0.4, 0.4)) +
-  scale_y_continuous(limits = c(-0.4, 0.4))
+  #stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Species_common)) +
+  #scale_color_manual(values = c("red", "deepskyblue3")) +
+  scale_x_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1)) +
+  scale_y_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1))
 
 ggplot(fa_crb_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5, alpha = 0.5) +
@@ -459,8 +486,8 @@ ggplot(fa_crb_1.0_mds_dat) +
   scale_color_manual(values = c("red", "deepskyblue3")) +
   geom_segment(data = vec.crb.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
   geom_text(data = vec.crb.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust) +
-  scale_x_continuous(limits = c(-0.4, 0.4)) +
-  scale_y_continuous(limits = c(-0.4, 0.4))
+  scale_x_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1)) +
+  scale_y_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1))
 
 # Dungeness crabs #
 ggplot(fa_dun_1.0_mds_dat) +
@@ -468,18 +495,18 @@ ggplot(fa_dun_1.0_mds_dat) +
   scale_shape_manual(values = 15) +
   stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
   scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2)) +
-  scale_y_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2))
+  scale_x_continuous(limits = c(-2.5, 3.2), breaks = seq(-2, 3, by = 1)) +
+  scale_y_continuous(limits = c(-3, 2.2), breaks = seq(-3, 2, by = 1))
 
 ggplot(fa_dun_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5, alpha = 0.5) +
   scale_shape_manual(values = 15) +
   stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
   scale_color_manual(values = c("red", "deepskyblue3")) +
   geom_segment(data = vec.dun.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
   geom_text(data = vec.dun.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust) +
-  scale_x_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2)) +
-  scale_y_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2))
+  scale_x_continuous(limits = c(-2.5, 3.2), breaks = seq(-2, 3, by = 1)) +
+  scale_y_continuous(limits = c(-3, 2.2), breaks = seq(-3, 2, by = 1))
 
 # Helmet crabs #
 ggplot(fa_hel_1.0_mds_dat) +
@@ -487,18 +514,18 @@ ggplot(fa_hel_1.0_mds_dat) +
   scale_shape_manual(values = 16) +
   stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
   scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2)) +
-  scale_y_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2))
+  scale_x_continuous(limits = c(-3, 3), breaks = seq(-3, 3, by = 1)) +
+  scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, by = 1))
 
 ggplot(fa_hel_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5, alpha = 0.5) +
   scale_shape_manual(values = 16) +
   stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
   scale_color_manual(values = c("red", "deepskyblue3")) +
   geom_segment(data = vec.hel.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
   geom_text(data = vec.hel.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust) +
-  scale_x_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2)) +
-  scale_y_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2))
+  scale_x_continuous(limits = c(-3, 3), breaks = seq(-3, 3, by = 1)) +
+  scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, by = 1))
 
 ## Primary Consumers ##
 ggplot(fa_pcon_1.0_mds_dat) +
