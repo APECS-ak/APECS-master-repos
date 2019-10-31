@@ -19,7 +19,7 @@ library(DT)
 library(cowplot)
 library(RColorBrewer)
 library(vegan)
-
+library(DT)
 theme_set(theme_classic())
 ```
 
@@ -219,7 +219,7 @@ colnames(fa_pro_1.0)[3] <- "Sea_otter_tr"
 
 ## Consumers ##
 fa_con_1.0 <- merge(fa_con_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_con_1.0 <- cbind(fa_con_1.0[,c(69:76, 1, 3:67)])
+fa_con_1.0 <- cbind(fa_con_1.0[,c(82:89, 1, 3:80)])
 colnames(fa_con_1.0)[6] <- "Species_common"
 colnames(fa_con_1.0)[3] <- "Sea_otter_tr"
 
@@ -256,7 +256,7 @@ I will use and arcsine sqrt transformation and standardize to FA (column) maximu
 fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 10:74]))
 fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 10:74]))
 fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 10:74]))
-fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:74]))
+fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:87]))
 fa_hel_1.0_trs <- asin(sqrt(fa_hel_1.0[, 10:74]))
 fa_pcon_1.0_trs <- asin(sqrt(fa_pcon_1.0[, 10:74]))
 
@@ -541,6 +541,32 @@ ggplot(fa_pcon_1.0_mds_dat) +
 PERMANOVA and PERMDISP by treatment
 
 FA vectors
+
+##### SIMPER
+Calcualte on untransformed data
+
+Dungeness Crabs
+```{r}
+simp.dun <- simper(fa_dun_1.0[, 10:74], fa_dun_1.0$Sea_otter_tr, permutations = 9999)
+simp.dun.dat <- summary(simp.dun, ordered = TRUE, digits = 4)
+simp.dun.dat <- data.frame(simp.dun.dat$Low_High)
+simp.dun.dat$FA <- row.names(simp.dun.dat)
+simp.dun.dat$average_scaled <- simp.dun.dat$average / sum(simp.dun.dat$average)
+
+datatable(filter(simp.dun.dat, p < 0.05))
+```
+
+Helmet crabs
+```{r}
+simp.hel <- simper(fa_hel_1.0[, 10:74], fa_hel_1.0$Sea_otter_tr, permutations = 9999)
+simp.hel.dat <- summary(simp.hel, ordered = TRUE, digits = 4)
+simp.hel.dat <- data.frame(simp.hel.dat$Low_High)
+simp.hel.dat$FA <- row.names(simp.hel.dat)
+simp.hel.dat$average_scaled <- simp.hel.dat$average / sum(simp.hel.dat$average)
+
+datatable(filter(simp.hel.dat, p < 0.05))
+```
+
 
 SIMPER - what FAs are driving differences?
 
