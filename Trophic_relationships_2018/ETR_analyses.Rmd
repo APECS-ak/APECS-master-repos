@@ -248,7 +248,6 @@ colnames(fa_pcon_1.0)[6] <- "Species_common"
 colnames(fa_pcon_1.0)[3] <- "Sea_otter_tr"
 ```
 
-
 Transformations and standardizations
 I will use and arcsine sqrt transformation and standardize to FA (column) maximum
 ```{r fa trans std, echo = FALSE}
@@ -256,7 +255,7 @@ I will use and arcsine sqrt transformation and standardize to FA (column) maximu
 fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 10:74]))
 fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 10:74]))
 fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 10:74]))
-fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:87]))
+fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:74]))
 fa_hel_1.0_trs <- asin(sqrt(fa_hel_1.0[, 10:74]))
 fa_pcon_1.0_trs <- asin(sqrt(fa_pcon_1.0[, 10:74]))
 
@@ -269,29 +268,50 @@ fa_hel_1.0_trs_std <- scale(fa_hel_1.0_trs, center = FALSE, scale = apply(fa_hel
 fa_pcon_1.0_trs_std <- scale(fa_pcon_1.0_trs, center = FALSE, scale = apply(fa_pcon_1.0_trs, 2, max))
 ```
 
-#### Whole community
-PERMANOVA treatment nested by species. We know/suspect that species will differ from each other. We should show this (to make sure) but really this is not the story. They story will more be on the within species by treatment comparisons. This analysis will use all the data but will be split between consumers and producers. This will help seperate some variablility.
-
-##### NMDS
-```{r prod nmds, echo = FALSE}
-## Distances ##
+#### Ordination
+Calculate distances
+```{r dist, echo = FALSE}
+## Producers ##
 fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "euclidean")
-fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "euclidean")
-fa_crb_1.0_dist <- vegdist(fa_crb_1.0_trs_std, method = "euclidean")
-fa_dun_1.0_dist <- vegdist(fa_dun_1.0_trs_std, method = "euclidean")
-fa_hel_1.0_dist <- vegdist(fa_hel_1.0_trs_std, method = "euclidean")
-fa_pcon_1.0_dist <- vegdist(fa_pcon_1.0_trs_std, method = "euclidean")
 
-## NMDS ##
+## Consumers ##
+fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "euclidean")
+
+## All Crabs ##
+fa_crb_1.0_dist <- vegdist(fa_crb_1.0_trs_std, method = "euclidean")
+
+## Dungeness crabs ##
+fa_dun_1.0_dist <- vegdist(fa_dun_1.0_trs_std, method = "euclidean")
+
+## Helmet crabs ##
+fa_hel_1.0_dist <- vegdist(fa_hel_1.0_trs_std, method = "euclidean")
+
+## Primary consumers ##
+fa_pcon_1.0_dist <- vegdist(fa_pcon_1.0_trs_std, method = "euclidean")
+```
+
+Calculate NMDS 
+```{r MDS, echo = FALSE}
+## Producers ##
 fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
+
+## Consumers ##
 fa_con_1.0_mds <- metaMDS(fa_con_1.0_dist)
+
+## All Crabs ##
 fa_crb_1.0_mds <- metaMDS(fa_crb_1.0_dist)
+
+## Dungeness crabs ##
 fa_dun_1.0_mds <- metaMDS(fa_dun_1.0_dist)
+
+## Helmet crabs ##
 fa_hel_1.0_mds <- metaMDS(fa_hel_1.0_dist)
+
+## Primary consumers ##
 fa_pcon_1.0_mds <- metaMDS(fa_pcon_1.0_dist)
 ```
 
-##### PERMANOVA
+#### PERMANOVA
 Test for the effect of sea otter nested by species. Also include tests of multivariate dispersion 'betadisper'. 
 ```{r permanova, echo = FLASE}
 ## Producers ##
@@ -302,7 +322,7 @@ perm.pro
 perm.con <- adonis2(fa_con_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_con_1.0, perm = 9999) 
 perm.con
 
-## Crabs ##
+## All Crabs ##
 disper.crb <- betadisper(fa_crb_1.0_dist, fa_crb_1.0$Sea_otter_tr, type = "centroid")
 anova(disper.crb)
 
@@ -312,21 +332,46 @@ perm.crb.1
 perm.crb.2 <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_crb_1.0, perm = 9999) 
 perm.crb.2
 
-# Crabs - Dungeness #
+## Dungeness crabs ##
 perm.dun <- adonis2(fa_dun_1.0_dist ~ Sea_otter_tr, data = fa_dun_1.0, perm = 9999)
 perm.dun
 
-# Crabs - Helmet #
+## Helmet crabs ##
 perm.hel <- adonis2(fa_hel_1.0_dist ~ Sea_otter_tr, data = fa_hel_1.0, perm = 9999)
 perm.hel
 
-# Primary Comsumers #
+## Primary Comsumers ##
 perm.pcon <- adonis2(fa_pcon_1.0_dist ~ Sea_otter_tr / Site, data = fa_pcon_1.0, perm = 9999)
 perm.pcon
 ```
 
-##### Plots
-Data Prep
+#### SIMPER
+Calcualte on untransformed data
+
+Dungeness Crabs
+```{r}
+simp.dun <- simper(fa_dun_1.0[, 10:74], fa_dun_1.0$Sea_otter_tr, permutations = 9999)
+simp.dun.dat <- summary(simp.dun, ordered = TRUE, digits = 4)
+simp.dun.dat <- data.frame(simp.dun.dat$Low_High)
+simp.dun.dat$FA <- row.names(simp.dun.dat)
+simp.dun.dat$average_scaled <- simp.dun.dat$average / sum(simp.dun.dat$average)
+
+datatable(filter(simp.dun.dat, p < 0.05))
+```
+
+Helmet crabs
+```{r}
+simp.hel <- simper(fa_hel_1.0[, 10:74], fa_hel_1.0$Sea_otter_tr, permutations = 9999)
+simp.hel.dat <- summary(simp.hel, ordered = TRUE, digits = 4)
+simp.hel.dat <- data.frame(simp.hel.dat$Low_High)
+simp.hel.dat$FA <- row.names(simp.hel.dat)
+simp.hel.dat$average_scaled <- simp.hel.dat$average / sum(simp.hel.dat$average)
+
+datatable(filter(simp.hel.dat, p < 0.05))
+```
+
+#### NMDS Plots
+##### Data Prep
 ```{r}
 ## Producers ##
 fa_pro_1.0_mds_dat <- as.data.frame(scores(fa_pro_1.0_mds))
@@ -369,7 +414,7 @@ fa_pcon_1.0_mds_dat <- merge(fa_pcon_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.
 fa_pcon_1.0_mds_dat$Species_common <- factor(fa_pcon_1.0_mds_dat$Species_common, levels = c("Butter clam" , "Idotea" ,"Limpet" , "Macoma sp." , "Pointed Macoma" , "Bentnose Macoma"))
 ```
 
-FA Vectors
+##### FA Vectors
 ```{r fa vector, echo = FALSE, eval = FALSE}
 ## Primary producer Vectors ##
 vec.pro <- envfit(fa_pro_1.0_mds$points, fa_pro_1.0[, 10:74], perm = 9999)
@@ -450,13 +495,13 @@ arrow_angle <- ifelse(arrow_angle > 90 & arrow_angle < 270, arrow_angle + 180, a
 arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
 ```
 
-Plots
+##### Plots
 ```{r}
 ## Producers ##
 ggplot(fa_pro_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3"))
+  scale_color_manual(values = c("red", "deepskyblue3")) +
+  geom_text(aes(x = NMDS1, y = NMDS2), label = fa_pro_1.0_mds_dat$ID)
 
 ggplot(fa_pro_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
@@ -473,10 +518,10 @@ ggplot(fa_con_1.0_mds_dat) +
 ## Crabs ##
 ggplot(fa_crb_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, shape = Species_common), size = 3.5) +
-  scale_shape_manual(values = c(15:19, 1:8)) +
-  #stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Species_common)) +
+  scale_shape_manual(values = c(15, 16, 17)) +
+  #stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
   #scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1)) +
+  scale_x_continuous(limits = c(-2.5, 2.2), breaks = seq(-2, 2, by = 1)) +
   scale_y_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1))
 
 ggplot(fa_crb_1.0_mds_dat) +
@@ -493,10 +538,10 @@ ggplot(fa_crb_1.0_mds_dat) +
 ggplot(fa_dun_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
   scale_shape_manual(values = 15) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
+  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), type = "t") +
   scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-2.5, 3.2), breaks = seq(-2, 3, by = 1)) +
-  scale_y_continuous(limits = c(-3, 2.2), breaks = seq(-3, 2, by = 1))
+  scale_x_continuous(limits = c(-2.5, 4), breaks = seq(-2, 4, by = 1)) +
+  scale_y_continuous(limits = c(-3, 3), breaks = seq(-3, 3, by = 1))
 
 ggplot(fa_dun_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5, alpha = 0.5) +
@@ -512,10 +557,10 @@ ggplot(fa_dun_1.0_mds_dat) +
 ggplot(fa_hel_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
   scale_shape_manual(values = 16) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
+  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), type = "t") +
   scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-3, 3), breaks = seq(-3, 3, by = 1)) +
-  scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, by = 1))
+  scale_x_continuous(limits = c(-3, 2.5), breaks = seq(-3, 2, by = 1)) +
+  scale_y_continuous(limits = c(-4, 3.5), breaks = seq(-4, 3, by = 1))
 
 ggplot(fa_hel_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5, alpha = 0.5) +
@@ -530,44 +575,6 @@ ggplot(fa_hel_1.0_mds_dat) +
 ## Primary Consumers ##
 ggplot(fa_pcon_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
-  scale_shape_manual(values = 16) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2)) +
-  scale_y_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2))
+  scale_shape_manual(values = c(1:6)) +
+  scale_color_manual(values = c("red", "deepskyblue3")) 
 ```
-
-#### Species specific
-PERMANOVA and PERMDISP by treatment
-
-FA vectors
-
-##### SIMPER
-Calcualte on untransformed data
-
-Dungeness Crabs
-```{r}
-simp.dun <- simper(fa_dun_1.0[, 10:74], fa_dun_1.0$Sea_otter_tr, permutations = 9999)
-simp.dun.dat <- summary(simp.dun, ordered = TRUE, digits = 4)
-simp.dun.dat <- data.frame(simp.dun.dat$Low_High)
-simp.dun.dat$FA <- row.names(simp.dun.dat)
-simp.dun.dat$average_scaled <- simp.dun.dat$average / sum(simp.dun.dat$average)
-
-datatable(filter(simp.dun.dat, p < 0.05))
-```
-
-Helmet crabs
-```{r}
-simp.hel <- simper(fa_hel_1.0[, 10:74], fa_hel_1.0$Sea_otter_tr, permutations = 9999)
-simp.hel.dat <- summary(simp.hel, ordered = TRUE, digits = 4)
-simp.hel.dat <- data.frame(simp.hel.dat$Low_High)
-simp.hel.dat$FA <- row.names(simp.hel.dat)
-simp.hel.dat$average_scaled <- simp.hel.dat$average / sum(simp.hel.dat$average)
-
-datatable(filter(simp.hel.dat, p < 0.05))
-```
-
-
-SIMPER - what FAs are driving differences?
-
-Specific FA comparisons - What this looks like will likely depend on the results from multivariate analyses.
