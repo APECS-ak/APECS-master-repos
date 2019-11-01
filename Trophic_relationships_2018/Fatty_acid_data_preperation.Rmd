@@ -101,13 +101,13 @@ b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:50)[,3]
 b4_ac$Batch <- as.character(4)
 
 ## Batch 5 ##
-b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:62)
-b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:62)[,3]
+b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:60)
+b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:60)[,3]
 b5_ac$Batch <- as.character(5)
 
 ## Batch 6 ##
-b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:73)
-b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:73)[,3]
+b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:69)
+b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:69)[,3]
 b6_ac$Batch <- as.character(6)
 
 ## Batch 7 ##

@@ -19,7 +19,7 @@ library(DT)
 library(cowplot)
 library(RColorBrewer)
 library(vegan)
-library(DT)
+
 theme_set(theme_classic())
 ```
 
@@ -71,7 +71,7 @@ Compare biomass of community members between sea otter treatments
 #### ANOVAS of sites and treatment
 ##### Eelgrass - biomass and shoot density tests
 ```{r eg site x treatment, echo = FALSE}
-mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + sea_otter_tr:site, data = eg)
+mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + site + sea_otter_tr:site, data = eg)
 anova(mod.eg.1)
 
 t.test(eg$shoot_mass_m[eg$sea_otter_tr == "high"], eg$shoot_mass_m[eg$sea_otter_tr == "low"])
@@ -86,38 +86,7 @@ Epiphytes
 
 Grazers
 
-##### Crabs
-Sum total crab mass by string. Insert 0 data for strings with no crabs so averages are correct. Append site metadata
-```{r}
-crb <- merge(crb, site[, c(1,5)])
-
-## Summarize ##
-crb.sum <- crb %>%
-  group_by(site, string) %>% 
-  summarise(string_mass_g = sum(mass_g))
-
-crb.sum.sp <- crb %>% 
-  group_by(sea_otter_tr, string, species_common) %>% 
-  summarise(mass_g = sum(mass_g))
-
-## Insert zero data ## only missing one string
-crb.sum[24,] <- c(as.character("2018_H_01"), 4.0, 0.0)
-
-## Site data ##
-crb.sum <- merge(crb.sum, site[, c(1,5)], by = "site")
-
-crb.sum$string_mass_g <- as.numeric(crb.sum$string_mass_g)
-```
-
-```{r crb site x treatment, echo = FLASE}
-## Nested Anova ##
-mod.crb.1 <- lm(string_mass_g ~ sea_otter_tr + sea_otter_tr:site, data = crb.sum)
-anova(mod.crb.1)
-
-## Strait Anova ##
-mod.crb.2 <- lm(string_mass_g ~ sea_otter_tr, data = crb.sum)
-anova(mod.crb.2)
-```
+Crabs
 
 Fish
 
@@ -129,43 +98,6 @@ eg.sum <- eg %>%
   summarise(shoot_mass_m_mean = mean(shoot_mass_m),
             shoot_mass_m_se = st.er(shoot_mass_m))
 ```
-
-Crabs
-```{r}
-## All Species ##
-crb.sum2 <- crb.sum %>%
-  group_by(site) %>% 
-  summarise(mass_m = mean(string_mass_g),
-            mass_se = sd(string_mass_g) / sqrt(length(string_mass_g)))
-
-crb.sum2 <- merge(crb.sum2, site[, c(1, 2, 5)])
-
-ggplot(crb.sum2) +
-  geom_col(aes(x = site, y = mass_m / 1000, fill = sea_otter_tr)) +
-  geom_errorbar(aes(x = site, ymin = (mass_m / 1000) - (mass_se / 1000), ymax = (mass_m / 1000) + (mass_se / 1000)), width = 0, size = 1) +
-  scale_fill_manual(name = "Sea otters", values = c("red", "deepskyblue3")) +
-  labs(x = "Site", y = "Crab mass (kg)")
-
-## By species ##
-crb.sum.2 <- crb.sum.sp %>% 
-  group_by(sea_otter_tr, species_common) %>% 
-  summarise(mass_m = mean(mass_g),
-            mass_se = sd(mass_g) / sqrt(length(mass_g)))
-
-crb.sum.2[5,] <- c(as.character("high"), as.character("Red rock crab"), 0.0, 0.0)
-crb.sum.2[6,] <- c(as.character("low"), as.character("Helmet crab"), 0.0, 0.0)
-crb.sum.2$mass_m <- as.numeric(crb.sum.2$mass_m)
-crb.sum.2$mass_se <- as.numeric(crb.sum.2$mass_se)
-
-ggplot(crb.sum.2, aes(x = sea_otter_tr, y = mass_m/1000, fill = species_common)) +
-  geom_bar(position = position_dodge(), stat = "identity") +
-  scale_fill_manual(values = c("chocolate4", "springgreen4", "firebrick")) +
-  geom_errorbar(aes(ymin = (mass_m / 1000) - (mass_se / 1000), ymax = (mass_m / 1000) + (mass_se / 1000)), size = 1, width = 0, position = position_dodge(0.9)) +
-  labs(x = "Site", y = "Crab mass (kg)") +
-  scale_y_continuous(limits = c(0, 5))
-```
-
-
 
 ### Stable Isotopes
 There are two perspectives in analysis. 1) The whole community (all data) comparisons and 2) by species comparisons.
@@ -179,7 +111,7 @@ Convex hulls
 Trophic level
 
 ### Fatty Acids
-Similar to SI data there are two perspectives to analysis. 1) The whole community and 2) by species comparisons. Along these lines I will run a nested PERMANOVA for the effects of species and sea otter treatment. Then species that appear to have a strong sea otter effect will be analyzed seperatly
+Similar to SI data there are two perspectives to analysis. 1) The whole community and 2) by species comparisons. Along these line I will run a nested PERMANOVA for the effects of species and sea otter treatment. Then species that appear to have a strong sea otter effect will be analyzed seperatly
 
 #### FA data prep
 Subsets
@@ -191,22 +123,6 @@ fa_pro_1.0 <- fa_1.0 %>%
 ## Consumers ##
 fa_con_1.0 <- fa_1.0 %>% 
   filter(Species_common != "Eelgrass" & Species_common != "Eelgrass diatoms" & Species_common != "Fucus" & Species_common != "Particulate organic matter" & Species_common != "Sugar kelp" & Species_common != "Ulva")
-
-## Crabs ##
-fa_crb_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Helmet crab" | Species_common == "Dungeness crab" | Species_common == "Red rock crab")
-
-# Crabs - Dungeness #
-fa_dun_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Dungeness crab")
-
-# Crabs - Helmet #
-fa_hel_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Helmet crab")
-
-## Primary consumers ##
-fa_pcon_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Butter clam" | Species_common == "Idotea" | Species_common == "Limpet" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
 ```
 
 Append metadata
@@ -219,33 +135,9 @@ colnames(fa_pro_1.0)[3] <- "Sea_otter_tr"
 
 ## Consumers ##
 fa_con_1.0 <- merge(fa_con_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_con_1.0 <- cbind(fa_con_1.0[,c(82:89, 1, 3:80)])
+fa_con_1.0 <- cbind(fa_con_1.0[,c(69:76, 1, 3:67)])
 colnames(fa_con_1.0)[6] <- "Species_common"
 colnames(fa_con_1.0)[3] <- "Sea_otter_tr"
-
-## Crabs ##
-fa_crb_1.0 <- merge(fa_crb_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_crb_1.0 <- cbind(fa_crb_1.0[,c(69:76, 1, 3:67)])
-colnames(fa_crb_1.0)[6] <- "Species_common"
-colnames(fa_crb_1.0)[3] <- "Sea_otter_tr"
-
-# Crabs - Dungeness #
-fa_dun_1.0 <- merge(fa_dun_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_dun_1.0 <- cbind(fa_dun_1.0[,c(69:76, 1, 3:67)])
-colnames(fa_dun_1.0)[6] <- "Species_common"
-colnames(fa_dun_1.0)[3] <- "Sea_otter_tr"
-
-# Crabs - Helmet #
-fa_hel_1.0 <- merge(fa_hel_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_hel_1.0 <- cbind(fa_hel_1.0[,c(69:76, 1, 3:67)])
-colnames(fa_hel_1.0)[6] <- "Species_common"
-colnames(fa_hel_1.0)[3] <- "Sea_otter_tr"
-
-# Primary consumers #
-fa_pcon_1.0 <- merge(fa_pcon_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_pcon_1.0 <- cbind(fa_pcon_1.0[,c(69:76, 1, 3:67)])
-colnames(fa_pcon_1.0)[6] <- "Species_common"
-colnames(fa_pcon_1.0)[3] <- "Sea_otter_tr"
 ```
 
 
@@ -255,18 +147,10 @@ I will use and arcsine sqrt transformation and standardize to FA (column) maximu
 ## Transformation ##
 fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 10:74]))
 fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 10:74]))
-fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 10:74]))
-fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:87]))
-fa_hel_1.0_trs <- asin(sqrt(fa_hel_1.0[, 10:74]))
-fa_pcon_1.0_trs <- asin(sqrt(fa_pcon_1.0[, 10:74]))
 
 ## Standardization ##
 fa_con_1.0_trs_std <- scale(fa_con_1.0_trs, center = FALSE, scale = apply(fa_con_1.0_trs, 2, max))
 fa_pro_1.0_trs_std <- scale(fa_pro_1.0_trs, center = FALSE, scale = apply(fa_pro_1.0_trs, 2, max))
-fa_crb_1.0_trs_std <- scale(fa_crb_1.0_trs, center = FALSE, scale = apply(fa_crb_1.0_trs, 2, max))
-fa_dun_1.0_trs_std <- scale(fa_dun_1.0_trs, center = FALSE, scale = apply(fa_dun_1.0_trs, 2, max))
-fa_hel_1.0_trs_std <- scale(fa_hel_1.0_trs, center = FALSE, scale = apply(fa_hel_1.0_trs, 2, max))
-fa_pcon_1.0_trs_std <- scale(fa_pcon_1.0_trs, center = FALSE, scale = apply(fa_pcon_1.0_trs, 2, max))
 ```
 
 #### Whole community
@@ -275,54 +159,24 @@ PERMANOVA treatment nested by species. We know/suspect that species will differ 
 ##### NMDS
 ```{r prod nmds, echo = FALSE}
 ## Distances ##
-fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "euclidean")
-fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "euclidean")
-fa_crb_1.0_dist <- vegdist(fa_crb_1.0_trs_std, method = "euclidean")
-fa_dun_1.0_dist <- vegdist(fa_dun_1.0_trs_std, method = "euclidean")
-fa_hel_1.0_dist <- vegdist(fa_hel_1.0_trs_std, method = "euclidean")
-fa_pcon_1.0_dist <- vegdist(fa_pcon_1.0_trs_std, method = "euclidean")
+fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "bray")
+fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "bray")
 
 ## NMDS ##
 fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
 fa_con_1.0_mds <- metaMDS(fa_con_1.0_dist)
-fa_crb_1.0_mds <- metaMDS(fa_crb_1.0_dist)
-fa_dun_1.0_mds <- metaMDS(fa_dun_1.0_dist)
-fa_hel_1.0_mds <- metaMDS(fa_hel_1.0_dist)
-fa_pcon_1.0_mds <- metaMDS(fa_pcon_1.0_dist)
 ```
 
 ##### PERMANOVA
-Test for the effect of sea otter nested by species. Also include tests of multivariate dispersion 'betadisper'. 
+Test for the effect of sea otter nested by species
 ```{r permanova, echo = FLASE}
 ## Producers ##
-perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_pro_1.0, perm = 9999) 
+perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr / sp_code, strata = "sp_code", data = fa_pro_1.0, perm = 9999) 
 perm.pro
 
 ## Consumers ##
-perm.con <- adonis2(fa_con_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_con_1.0, perm = 9999) 
+perm.con <- adonis2(fa_con_1.0_dist ~ Sea_otter_tr / sp_code, strata = "sp_code", data = fa_con_1.0, perm = 9999) 
 perm.con
-
-## Crabs ##
-disper.crb <- betadisper(fa_crb_1.0_dist, fa_crb_1.0$Sea_otter_tr, type = "centroid")
-anova(disper.crb)
-
-perm.crb.1 <- adonis2(fa_crb_1.0_dist ~  sp_code, data = fa_crb_1.0, perm = 9999) 
-perm.crb.1
-
-perm.crb.2 <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_crb_1.0, perm = 9999) 
-perm.crb.2
-
-# Crabs - Dungeness #
-perm.dun <- adonis2(fa_dun_1.0_dist ~ Sea_otter_tr, data = fa_dun_1.0, perm = 9999)
-perm.dun
-
-# Crabs - Helmet #
-perm.hel <- adonis2(fa_hel_1.0_dist ~ Sea_otter_tr, data = fa_hel_1.0, perm = 9999)
-perm.hel
-
-# Primary Comsumers #
-perm.pcon <- adonis2(fa_pcon_1.0_dist ~ Sea_otter_tr / Site, data = fa_pcon_1.0, perm = 9999)
-perm.pcon
 ```
 
 ##### Plots
@@ -334,120 +188,11 @@ fa_pro_1.0_mds_dat$ID <- fa_pro_1.0$ID
 fa_pro_1.0_mds_dat <- merge(fa_pro_1.0_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
 fa_pro_1.0_mds_dat$Species_common <- factor(fa_pro_1.0_mds_dat$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva"))
 
-## Consumers ##
+## consumers ##
 fa_con_1.0_mds_dat <- as.data.frame(scores(fa_con_1.0_mds))
 fa_con_1.0_mds_dat$ID <- fa_con_1.0$ID 
 fa_con_1.0_mds_dat <- merge(fa_con_1.0_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
 fa_con_1.0_mds_dat$Species_common <- factor(fa_con_1.0_mds_dat$Species_common, levels = c("Shiner perch", "Snake prickleback", "Staghorn sculpin", "Dungeness crab", "Helmet crab", "Red rock crab", "Dock shrimp", "Macoma sp.", "Bentnose Macoma", "Pointed Macoma", "Butter clam", "Idotea", "Limpet"))
-
-## Crabs ##
-fa_crb_1.0_mds_dat <- as.data.frame(scores(fa_crb_1.0_mds))
-fa_crb_1.0_mds_dat$ID <- fa_crb_1.0$ID 
-fa_crb_1.0_mds_dat$Species_common <- fa_crb_1.0$Species_common
-fa_crb_1.0_mds_dat <- merge(fa_crb_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_crb_1.0_mds_dat$Species_common <- factor(fa_crb_1.0_mds_dat$Species_common, levels = c("Dungeness crab", "Helmet crab", "Red rock crab"))
-
-# Dungeness crabs #
-fa_dun_1.0_mds_dat <- as.data.frame(scores(fa_dun_1.0_mds))
-fa_dun_1.0_mds_dat$ID <- fa_dun_1.0$ID 
-fa_dun_1.0_mds_dat$Species_common <- fa_dun_1.0$Species_common
-fa_dun_1.0_mds_dat <- merge(fa_dun_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_dun_1.0_mds_dat$Species_common <- factor(fa_dun_1.0_mds_dat$Species_common, levels = c("Dungeness crab"))
-
-# Crabs - Helmet #
-fa_hel_1.0_mds_dat <- as.data.frame(scores(fa_hel_1.0_mds))
-fa_hel_1.0_mds_dat$ID <- fa_hel_1.0$ID 
-fa_hel_1.0_mds_dat$Species_common <- fa_hel_1.0$Species_common
-fa_hel_1.0_mds_dat <- merge(fa_hel_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_hel_1.0_mds_dat$Species_common <- factor(fa_hel_1.0_mds_dat$Species_common, levels = c("Helmet crab"))
-
-# Primary consumers #
-fa_pcon_1.0_mds_dat <- as.data.frame(scores(fa_pcon_1.0_mds))
-fa_pcon_1.0_mds_dat$ID <- fa_pcon_1.0$ID 
-fa_pcon_1.0_mds_dat$Species_common <- fa_pcon_1.0$Species_common
-fa_pcon_1.0_mds_dat <- merge(fa_pcon_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pcon_1.0_mds_dat$Species_common <- factor(fa_pcon_1.0_mds_dat$Species_common, levels = c("Butter clam" , "Idotea" ,"Limpet" , "Macoma sp." , "Pointed Macoma" , "Bentnose Macoma"))
-```
-
-FA Vectors
-```{r fa vector, echo = FALSE, eval = FALSE}
-## Primary producer Vectors ##
-vec.pro <- envfit(fa_pro_1.0_mds$points, fa_pro_1.0[, 10:74], perm = 9999)
-vec.pro.arrows <- scores(vec.pro, display = "vectors")
-vec.pro.dat <- data.frame(vec.pro.arrows)
-vec.pro.dat$pvals <- vec.pro$vectors$pvals
-vec.pro.dat$FA <- row.names(vec.pro.dat)
-vec.pro.dat$r2 <- vec.pro$vectors$r
-
-scalefactor <- min(max(fa_pro_1.0_mds_dat$NMDS1) - min(fa_pro_1.0_mds_dat$NMDS1), max(fa_pro_1.0_mds_dat$NMDS2) - min(fa_pro_1.0_mds_dat$NMDS2))
-vec.pro.dat$MDS1_sc <- vec.pro.dat$MDS1 * (scalefactor * vec.pro.dat$r2)
-vec.pro.dat$MDS2_sc <- vec.pro.dat$MDS2 * (scalefactor * vec.pro.dat$r2)
-
-vec.pro.dat.sig <- vec.pro.dat %>% 
-  filter(pvals < 0.001)
-
-arrow_angle <- 90 - ((atan2(vec.pro.dat.sig$MDS1_sc, vec.pro.dat.sig$MDS2_sc)* 180)/pi)
-arrow_angle <- ifelse(arrow_angle > 90 & arrow_angle < 270, arrow_angle + 180, arrow_angle)
-arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
-
-
-## Crabs vectors ##
-# All crabs #
-vec.crb <- envfit(fa_crb_1.0_mds$points, fa_crb_1.0[, 10:74], perm = 9999)
-vec.crb.arrows <- scores(vec.crb, display = "vectors")
-vec.crb.dat <- data.frame(vec.crb.arrows)
-vec.crb.dat$pvals <- vec.crb$vectors$pvals
-vec.crb.dat$FA <- row.names(vec.crb.dat)
-vec.crb.dat$r2 <- vec.crb$vectors$r
-
-scalefactor <- min(max(fa_crb_1.0_mds_dat$NMDS1) - min(fa_crb_1.0_mds_dat$NMDS1), max(fa_crb_1.0_mds_dat$NMDS2) - min(fa_crb_1.0_mds_dat$NMDS2))
-vec.crb.dat$MDS1_sc <- vec.crb.dat$MDS1 * scalefactor
-vec.crb.dat$MDS2_sc <- vec.crb.dat$MDS2 * scalefactor 
-
-vec.crb.dat.sig <- vec.crb.dat %>% 
-  filter(pvals < 0.005)
-
-arrow_angle <- 90 - ((atan2(vec.crb.dat.sig$MDS1_sc, vec.crb.dat.sig$MDS2_sc)* 180)/pi)
-arrow_angle <- ifelse(arrow_angle > 90 & arrow_angle < 270, arrow_angle + 180, arrow_angle)
-arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
-
-# Dungeness Crabs #
-vec.dun <- envfit(fa_dun_1.0_mds$points, fa_dun_1.0[, 10:74], perm = 9999)
-vec.dun.arrows <- scores(vec.dun, display = "vectors")
-vec.dun.dat <- data.frame(vec.dun.arrows)
-vec.dun.dat$pvals <- vec.dun$vectors$pvals
-vec.dun.dat$FA <- row.names(vec.dun.dat)
-vec.dun.dat$r2 <- vec.dun$vectors$r
-
-scalefactor <- min(max(fa_dun_1.0_mds_dat$NMDS1) - min(fa_dun_1.0_mds_dat$NMDS1), max(fa_dun_1.0_mds_dat$NMDS2) - min(fa_dun_1.0_mds_dat$NMDS2))
-vec.dun.dat$MDS1_sc <- vec.dun.dat$MDS1 * scalefactor
-vec.dun.dat$MDS2_sc <- vec.dun.dat$MDS2 * scalefactor
-
-vec.dun.dat.sig <- vec.dun.dat %>% 
-  filter(pvals < 0.05)
-
-arrow_angle <- 90 - ((atan2(vec.dun.dat.sig$MDS1_sc, vec.dun.dat.sig$MDS2_sc)* 180)/pi)
-arrow_angle <- ifelse(arrow_angle > 90 & arrow_angle < 270, arrow_angle + 180, arrow_angle)
-arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
-
-# Helmet Crabs #
-vec.hel <- envfit(fa_hel_1.0_mds$points, fa_hel_1.0[, 10:74], perm = 9999)
-vec.hel.arrows <- scores(vec.hel, display = "vectors")
-vec.hel.dat <- data.frame(vec.hel.arrows)
-vec.hel.dat$pvals <- vec.hel$vectors$pvals
-vec.hel.dat$FA <- row.names(vec.hel.dat)
-vec.hel.dat$r2 <- vec.hel$vectors$r
-
-scalefactor <- min(max(fa_hel_1.0_mds_dat$NMDS1) - min(fa_hel_1.0_mds_dat$NMDS1), max(fa_hel_1.0_mds_dat$NMDS2) - min(fa_hel_1.0_mds_dat$NMDS2))
-vec.hel.dat$MDS1_sc <- vec.hel.dat$MDS1 * scalefactor
-vec.hel.dat$MDS2_sc <- vec.hel.dat$MDS2 * scalefactor
-
-vec.hel.dat.sig <- vec.hel.dat %>% 
-  filter(pvals < 0.05)
-
-arrow_angle <- 90 - ((atan2(vec.hel.dat.sig$MDS1_sc, vec.hel.dat.sig$MDS2_sc)* 180)/pi)
-arrow_angle <- ifelse(arrow_angle > 90 & arrow_angle < 270, arrow_angle + 180, arrow_angle)
-arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
 ```
 
 Plots
@@ -455,118 +200,19 @@ Plots
 ## Producers ##
 ggplot(fa_pro_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
   scale_color_manual(values = c("red", "deepskyblue3"))
 
-ggplot(fa_pro_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_segment(data = vec.pro.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
-  geom_text(data = vec.pro.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust)
-  
 ## Consumers ##
 ggplot(fa_con_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
   scale_shape_manual(values = c(15:19, 1:8)) +
   scale_color_manual(values = c("red", "deepskyblue3"))
-
-## Crabs ##
-ggplot(fa_crb_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, shape = Species_common), size = 3.5) +
-  scale_shape_manual(values = c(15:19, 1:8)) +
-  #stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Species_common)) +
-  #scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1)) +
-  scale_y_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1))
-
-ggplot(fa_crb_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5, alpha = 0.5) +
-  scale_shape_manual(values = c(15:19, 1:8)) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_segment(data = vec.crb.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
-  geom_text(data = vec.crb.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust) +
-  scale_x_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1)) +
-  scale_y_continuous(limits = c(-2.2, 2.2), breaks = seq(-2, 2, by = 1))
-
-# Dungeness crabs #
-ggplot(fa_dun_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
-  scale_shape_manual(values = 15) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-2.5, 3.2), breaks = seq(-2, 3, by = 1)) +
-  scale_y_continuous(limits = c(-3, 2.2), breaks = seq(-3, 2, by = 1))
-
-ggplot(fa_dun_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5, alpha = 0.5) +
-  scale_shape_manual(values = 15) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_segment(data = vec.dun.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
-  geom_text(data = vec.dun.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust) +
-  scale_x_continuous(limits = c(-2.5, 3.2), breaks = seq(-2, 3, by = 1)) +
-  scale_y_continuous(limits = c(-3, 2.2), breaks = seq(-3, 2, by = 1))
-
-# Helmet crabs #
-ggplot(fa_hel_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
-  scale_shape_manual(values = 16) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-3, 3), breaks = seq(-3, 3, by = 1)) +
-  scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, by = 1))
-
-ggplot(fa_hel_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5, alpha = 0.5) +
-  scale_shape_manual(values = 16) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_segment(data = vec.hel.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
-  geom_text(data = vec.hel.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust) +
-  scale_x_continuous(limits = c(-3, 3), breaks = seq(-3, 3, by = 1)) +
-  scale_y_continuous(limits = c(-4, 4), breaks = seq(-4, 4, by = 1))
-
-## Primary Consumers ##
-ggplot(fa_pcon_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
-  scale_shape_manual(values = 16) +
-  stat_ellipse(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  scale_x_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2)) +
-  scale_y_continuous(limits = c(-0.49, 0.49), breaks = seq(-0.4, 0.4, by = 0.2))
 ```
 
 #### Species specific
 PERMANOVA and PERMDISP by treatment
 
 FA vectors
-
-##### SIMPER
-Calcualte on untransformed data
-
-Dungeness Crabs
-```{r}
-simp.dun <- simper(fa_dun_1.0[, 10:74], fa_dun_1.0$Sea_otter_tr, permutations = 9999)
-simp.dun.dat <- summary(simp.dun, ordered = TRUE, digits = 4)
-simp.dun.dat <- data.frame(simp.dun.dat$Low_High)
-simp.dun.dat$FA <- row.names(simp.dun.dat)
-simp.dun.dat$average_scaled <- simp.dun.dat$average / sum(simp.dun.dat$average)
-
-datatable(filter(simp.dun.dat, p < 0.05))
-```
-
-Helmet crabs
-```{r}
-simp.hel <- simper(fa_hel_1.0[, 10:74], fa_hel_1.0$Sea_otter_tr, permutations = 9999)
-simp.hel.dat <- summary(simp.hel, ordered = TRUE, digits = 4)
-simp.hel.dat <- data.frame(simp.hel.dat$Low_High)
-simp.hel.dat$FA <- row.names(simp.hel.dat)
-simp.hel.dat$average_scaled <- simp.hel.dat$average / sum(simp.hel.dat$average)
-
-datatable(filter(simp.hel.dat, p < 0.05))
-```
-
 
 SIMPER - what FAs are driving differences?
 
