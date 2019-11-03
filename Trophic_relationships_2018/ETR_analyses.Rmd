@@ -23,6 +23,14 @@ library(DT)
 theme_set(theme_classic())
 ```
 
+```{r st.er, echo = FALSE}
+st.er <- function(x, na.rm = TRUE) {
+  stopifnot(is.numeric(x))
+  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
+}
+```
+
+
 ## Data
 Data falls under three broad categories. Biomass, stable isotopes, and fatty acids. Biomass data files are broken up by sampling type but can easily be combined. In addition, biomarker (SI and FA) metadata is useful to match those data with site, date, treatment, etc. data.
 Biomass and oceanography
@@ -58,7 +66,25 @@ bimrk <- read.csv("../ALL_DATA/Biomarker_collections_2018_RAW.csv", header = TRU
 ### Data managemnet
 Clean up files. Make sure appropriate columns are there.
 ```{r data clean up, echo=FALSE}
-eg <- merge(eg, site[, c(1,5)], by = "site")
+eg <- merge(eg, site[, c(1, 5)], by = "site")
+
+## Clams! ##
+clm <- merge(clm, site[, c(1, 5)], by = "site")
+clm$quadrat <- as.factor(clm$quadrat)
+clm$species_common <- ifelse(clm$species_common == "Macoma", "Macoma sp.", clm$species_common)
+
+clm$species_common <- ifelse(clm$species_common == "Pointed macoma", "Macoma sp.", clm$species_common)
+
+clm$species_common <- ifelse(clm$species_common == "Bentnose macoma", "Macoma sp.", clm$species_common)
+
+clm.site.quad <- clm %>%
+  group_by(site, quadrat) %>% 
+  summarize(mass_g = sum(mass_g))
+clm.site.quad <- merge(clm.site.quad, site[, c(1, 5)], by = "site")
+
+clm.site.quad.sp <- clm %>%
+  group_by(site, quadrat, species_common) %>% 
+  summarize(mass_g = sum(mass_g))
 ```
 
 
@@ -70,21 +96,49 @@ Compare biomass of community members between sea otter treatments
 
 #### ANOVAS of sites and treatment
 ##### Eelgrass - biomass and shoot density tests
+Eelgrass
 ```{r eg site x treatment, echo = FALSE}
-mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + sea_otter_tr:site, data = eg)
+mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + sea_otter_tr/site, data = eg)
 anova(mod.eg.1)
 
-t.test(eg$shoot_mass_m[eg$sea_otter_tr == "high"], eg$shoot_mass_m[eg$sea_otter_tr == "low"])
+t.eg.1 <- t.test(eg$shoot_mass_m[eg$sea_otter_tr == "high"], eg$shoot_mass_m[eg$sea_otter_tr == "low"])
 
 mod.eg.2 <- lm(eelgrass_shoots_m ~ sea_otter_tr * site, data = eg)
 anova(mod.eg.2)
 ```
 
-Eelgrass
-
 Epiphytes
+```{r epi site X treatment, echo = FALSE}
+mod.ep.1 <- lm(epi_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
+anova(mod.ep.1)
+
+t.ep.1 <- t.test(eg$epi_load[eg$sea_otter_tr == "high"],  eg$epi_load[eg$sea_otter_tr == "low"])
+t.ep.1
+```
 
 Grazers
+```{r grz site X treatment, echo = FALSE}
+## All Grazers ##
+mod.gr.1 <- lm(grazer_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
+anova(mod.gr.1)
+
+t.gr.1 <- t.test(eg$grazer_load[eg$sea_otter_tr == "high"],  eg$grazer_load[eg$sea_otter_tr == "low"])
+t.gr.1
+
+## Idotea ##
+mod.id.1 <- lm(idotea_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
+anova(mod.id.1)
+
+t.id.1 <- t.test(eg$idotea_load[eg$sea_otter_tr == "high"],  eg$idotea_load[eg$sea_otter_tr == "low"])
+t.id.1
+
+## Limpet ##
+mod.lp.1 <- lm(limpet_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
+anova(mod.lp.1)
+
+t.lp.1 <- t.test(eg$limpet_load[eg$sea_otter_tr == "high"],  eg$limpet_load[eg$sea_otter_tr == "low"])
+t.lp.1
+```
 
 ##### Crabs
 Sum total crab mass by string. Insert 0 data for strings with no crabs so averages are correct. Append site metadata
@@ -119,15 +173,39 @@ mod.crb.2 <- lm(string_mass_g ~ sea_otter_tr, data = crb.sum)
 anova(mod.crb.2)
 ```
 
-Fish
+##### Clams
+We also have species to think about...
+```{r clm site}
+## All Clams ##
+mod.clm.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = clm.site.quad)
+anova(mod.clm.1)
+
+mod.clm.2 <-lm(mass_g ~ sea_otter_tr + species_common %in% sea_otter_tr, data = clm)
+anova(mod.clm.2)
+
+## Butter Clams ##
+clm.but <- filter(clm, species_common == "Butter clam")
+mod.but.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = clm.but)
+anova(mod.but.1)
+```
+
 
 #### Plots
+##### Data prep
 Eelgrass
-```{r}
+```{r eg site X treatment summaries, echo = FALSE}
 eg.sum <- eg %>% 
-  group_by(sea_otter_tr) %>% 
+  group_by(sea_otter_tr, site) %>% 
   summarise(shoot_mass_m_mean = mean(shoot_mass_m),
-            shoot_mass_m_se = st.er(shoot_mass_m))
+            shoot_mass_m_se = st.er(shoot_mass_m),
+            epi_load_mean = mean(epi_load),
+            epi_load_se = st.er(epi_load),
+            grz_load_mean = mean(grazer_load),
+            grz_load_se = st.er(grazer_load),
+            ido_load_mean = mean(idotea_load),
+            ido_load_se = st.er(idotea_load ),
+            lmp_load_mean = mean(limpet_load),
+            lmp_load_se = st.er(limpet_load))
 ```
 
 Crabs
@@ -165,6 +243,43 @@ ggplot(crb.sum.2, aes(x = sea_otter_tr, y = mass_m/1000, fill = species_common))
   scale_y_continuous(limits = c(0, 5))
 ```
 
+##### Plots
+```{r}
+## Eelgrass ##
+ggplot(eg.sum) +
+  geom_bar(aes(x = site, y = shoot_mass_m_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = shoot_mass_m_mean - shoot_mass_m_se, ymax = shoot_mass_m_mean + shoot_mass_m_se), width = 0) +
+  scale_fill_manual(values = c("red", "deepskyblue3")) +
+  scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100))
+
+## Epiphyte Load ##
+ggplot(eg.sum) +
+  geom_bar(aes(x = site, y = epi_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = epi_load_mean - epi_load_se, ymax = epi_load_mean + epi_load_se), width = 0) +
+  scale_fill_manual(values = c("red", "deepskyblue3")) +
+  scale_y_continuous(limits = c(0, 0.01), breaks = seq(0, 0.01, by = 0.0025))
+
+## Grazer Load ##
+ggplot(eg.sum) +
+  geom_bar(aes(x = site, y = grz_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = grz_load_mean - grz_load_se, ymax = grz_load_mean + grz_load_se), width = 0) +
+  scale_fill_manual(values = c("red", "deepskyblue3")) +
+  scale_y_continuous(limits = c(0, 0.25), breaks = seq(0, 0.25, by = 0.05))
+
+## Idotea Load ##
+ggplot(eg.sum) +
+  geom_bar(aes(x = site, y = ido_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = ido_load_mean - ido_load_se, ymax = ido_load_mean + ido_load_se), width = 0) +
+  scale_fill_manual(values = c("red", "deepskyblue3")) +
+  scale_y_continuous(limits = c(0, 0.15), breaks = seq(0, 0.15, by = 0.03))
+
+## Limpet Load ##
+ggplot(eg.sum) +
+  geom_bar(aes(x = site, y = lmp_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = lmp_load_mean - lmp_load_se, ymax = lmp_load_mean + lmp_load_se), width = 0) +
+  scale_fill_manual(values = c("red", "deepskyblue3")) +
+  scale_y_continuous(limits = c(0, 0.03), breaks = seq(0, 0.03, by = 0.01))
+```
 
 
 ### Stable Isotopes
