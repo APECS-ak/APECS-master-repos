@@ -446,11 +446,23 @@ fa_pcon_1.0_trs <- asin(sqrt(fa_pcon_1.0[, 10:74]))
 
 ## Standardization ##
 fa_con_1.0_trs_std <- scale(fa_con_1.0_trs, center = FALSE, scale = apply(fa_con_1.0_trs, 2, max))
+
+
 fa_pro_1.0_trs_std <- scale(fa_pro_1.0_trs, center = FALSE, scale = apply(fa_pro_1.0_trs, 2, max))
+fa_pro_1.0_trs_std[is.nan(fa_pro_1.0_trs_std)] <- 0
+
 fa_crb_1.0_trs_std <- scale(fa_crb_1.0_trs, center = FALSE, scale = apply(fa_crb_1.0_trs, 2, max))
+fa_crb_1.0_trs_std[is.nan(fa_crb_1.0_trs_std)] <- 0
+
 fa_dun_1.0_trs_std <- scale(fa_dun_1.0_trs, center = FALSE, scale = apply(fa_dun_1.0_trs, 2, max))
+fa_dun_1.0_trs_std[is.nan(fa_dun_1.0_trs_std)] <- 0
+
 fa_hel_1.0_trs_std <- scale(fa_hel_1.0_trs, center = FALSE, scale = apply(fa_hel_1.0_trs, 2, max))
+fa_hel_1.0_trs_std[is.nan(fa_hel_1.0_trs_std)] <- 0
+
 fa_pcon_1.0_trs_std <- scale(fa_pcon_1.0_trs, center = FALSE, scale = apply(fa_pcon_1.0_trs, 2, max))
+
+
 ```
 
 #### Ordination
@@ -500,7 +512,7 @@ fa_pcon_1.0_mds <- metaMDS(fa_pcon_1.0_dist)
 Test for the effect of sea otter nested by species. Also include tests of multivariate dispersion 'betadisper'. 
 ```{r permanova, echo = FLASE}
 ## Producers ##
-perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_pro_1.0, perm = 9999) 
+perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr + sp_code %in% Sea_otter_tr, data = fa_pro_1.0, perm = 9999) 
 perm.pro
 
 ## Consumers ##
@@ -514,7 +526,7 @@ anova(disper.crb)
 perm.crb.1 <- adonis2(fa_crb_1.0_dist ~  sp_code, data = fa_crb_1.0, perm = 9999) 
 perm.crb.1
 
-perm.crb.2 <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_crb_1.0, perm = 9999) 
+perm.crb.2 <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr + sp_code %in% Sea_otter_tr, data = fa_crb_1.0, perm = 9999) 
 perm.crb.2
 
 ## Dungeness crabs ##
