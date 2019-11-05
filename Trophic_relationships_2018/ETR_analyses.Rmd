@@ -128,6 +128,12 @@ clm.site.quad.sp[is.na(clm.site.quad.sp)] <- 0
 clm.site.quad.sp <- merge(clm.site.quad.sp, site[, c(1,5)], by = "site")
 ```
 
+Fish
+```{r}
+fsh <- merge(fsh, site[, c(1, 5)], by = "site")
+```
+
+
 ## Analyses
 A critical piece for all analyses is testing the effect of site and sea otter treatment. Within each sea otter treatment three different sites were sampled.
 
@@ -230,6 +236,25 @@ mod.mac.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = subset(cl
 anova(mod.mac.1)
 ```
 
+##### Fish
+```{r}
+## Total mass ##
+mod.fsh.1 <- lm(total_fish_mass ~ sea_otter_tr, data = fsh)
+anova(mod.fsh.1)
+
+## Stags ##
+mod.stg.1 <- lm(SCULPSTG ~ sea_otter_tr, data = fsh)
+anova(mod.stg.1)
+
+## Shiners ##
+mod.shn.1 <- lm(PERCHSH ~ sea_otter_tr, data = fsh)
+anova(mod.shn.1)
+
+## Snake Prickle bach ##
+mod.snk.1 <- lm(PRICKSN ~ sea_otter_tr, data = fsh)
+anova(mod.snk.1)
+```
+
 #### Plots
 ##### Data prep
 Eelgrass
@@ -291,6 +316,15 @@ clm.sum.2 <- clm.site.quad.sp %>%
 clm.sum.2 <- merge(clm.sum.2, site[, c(1, 5)], by = "site")
 ```
 
+Fish
+```{r}
+fsh.sum.1 <- fsh %>%
+  group_by(sea_otter_tr) %>% 
+  summarise(mass_kg_mean = mean(total_fish_mass / 1000),
+           mass_kg_se = st.er(total_fish_mass / 1000))
+```
+
+
 ##### Plots
 ```{r}
 ## Eelgrass ##
@@ -349,8 +383,14 @@ ggplot(clm.sum.2, aes(x = site, y = mass_g_mean, fill = species_common)) +
   geom_errorbar(aes(ymin = mass_g_mean - mass_g_se, ymax = mass_g_mean + mass_g_se), width = 0, position=position_dodge(.9)) +
   scale_fill_brewer(palette = "Set1") +
   scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 100))
-```
 
+## Fish site ##
+ggplot(fsh.sum.1) +
+  geom_bar(aes(x = sea_otter_tr, y = mass_kg_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = sea_otter_tr, ymin = mass_kg_mean - mass_kg_se, ymax = mass_kg_mean + mass_kg_se), width = 0) +
+  scale_fill_manual(values = c("red", "deepskyblue3"))
+  
+```
 
 ### Stable Isotopes
 There are two perspectives in analysis. 1) The whole community (all data) comparisons and 2) by species comparisons.
