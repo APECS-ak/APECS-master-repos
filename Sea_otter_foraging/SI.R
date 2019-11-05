@@ -4,19 +4,19 @@ setwd("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging")
 
 
 #load programs
-library(ggplot2)
-library(lattice)
-library(dplyr)
-
-library(car)
-library(compute.es)
-library(effects)
-library(multcomp)
+library(ggplot2) #always
+library(lattice) #always
+library(dplyr) #always
+library(ggthemes) #for graphs 
+library(car) #for stats
+library(compute.es) #for stats
+library(effects) 
+library(multcomp) #for stats
 library(pastecs)
-library(HH)
+library(HH) #for Anova (not normal one)
 library(psych)
-library(RVAideMemoire)
-library(rcompanion)
+library(RVAideMemoire) # for moods
+library(rcompanion) #for moods
 
 #load files
 si.test <- read.csv("SI/SI.csv")
@@ -123,6 +123,13 @@ ggplot(data= si.crab, aes(x=C, y=N)) +
 #URCHIN - Not enough data, but very different by site
 ggplot(data= si.urch, aes(x=C, y=N)) +
   geom_point(aes(color=Season, shape=Site)) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" ))) +
+  theme_classic()
+
+#SNAIL
+ggplot(data= si.snail, aes(x=C, y=N)) +
+  geom_point(aes(color=Species, shape=Season)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
   theme_classic()
@@ -349,7 +356,7 @@ whis.mean<-whisker %>%
 #TDF for otters changes to 2/3.5 makes a better looking graph
 whis.mean$TDFC<-NA; whis.mean$TDFN<-NA
 whis.mean$TDFC <- whis.mean$Cmean-2
-whis.mean$TDFN <- whis.mean$Nmean-2.5
+whis.mean$TDFN <- whis.mean$Nmean-2.8
 
 
 ggplot(data= whis.mean, aes(x=TDFC, y=TDFN)) +
@@ -444,18 +451,34 @@ ggsave("whis_nitrogen.png", device = "png", path = "SI/", width = 7,
 #Now all otters in their own plot
 #creating a secondary axis = sec.axis
 ggplot(data=whisker) +
-  geom_line(aes(x=distance, y=N, color="N")) +
-  geom_line(aes(x=distance, y=C+28, color="C")) +
+  geom_line(aes(x=distance, y=N), colour="tomato") +
+  geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
   labs(x= "Distance from root (cm)", 
        y=expression(paste(delta^15, "N (\u2030)" )), 
        colour = "Isotope")  +
-  scale_y_continuous(sec.axis = sec_axis(~.-28, 
+  scale_y_continuous(sec.axis = sec_axis(~.-25, 
        name = expression(paste(delta^13, "C (\u2030)" )))) +
   facet_wrap(vars(OtterID), nrow=5) +
   theme_light()
 
 ggsave("whiskers.png", device = "png", path = "SI/", width = 8, 
        height = 6, units = "in", dpi = 300)
+
+#sub sample of otters for WSN poster
+
+wsn<-filter(whisker, OtterID=="163520" | OtterID=="163521" | OtterID=="163536")
+ggplot(data=wsn) +   theme_few() +
+  geom_line(aes(x=distance, y=N), colour="tomato") + 
+  geom_line(aes(x=distance, y=C+28), colour="lightseagreen") +
+  labs(x= "Distance from root (cm)", y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_y_continuous(sec.axis = sec_axis(~.-28, name = expression(paste(delta^13, "C (\u2030)" )))) +
+  facet_wrap(vars(OtterID), nrow=1) +
+  theme(axis.title = element_text(size=18))
+
+
+ggsave("wsn.png", device = "png", path = "SI/", width = 10, 
+       height = 3, units = "in", dpi = 300)
+
 
 #Looking at seasonality
 ggplot(data=whisker) +
@@ -494,11 +517,11 @@ summary(season.aov)
 #  Season:OtterID 45  16.41   0.365   1.721 0.01402 *  
 #  Residuals      94  19.92   0.212 
 
-Cdistance.lm <-lm(C~factor(OtterID)*distance, data = whisker)
+Cdistance.aov <-aov(C~factor(OtterID), data = whisker)
 sum<-summary(Cdistance.lm)
 Cdistance.aov <- aov(Cdistance.lm)
 summary(Cdistance.aov)
-
+TukeyHSD(Cdistance.aov)
 
 #                   Df Sum Sq Mean Sq F value   Pr(>F)    
 #  distance          1   0.21   0.214   0.371 0.54364     
@@ -507,7 +530,7 @@ summary(Cdistance.aov)
 #  Residuals       125  72.18   0.577 
 
 Anova(distance.aov, type="III") 
-posth=glht(distance.aov, linfct=mcp(factorvariable="Tukey"))  ##gives the post-hoc Tukey analysis
+posth=glht(Cdistance.aov, linfct=mcp(factorvariable="Tukey"))  ##gives the post-hoc Tukey analysis
 summary(posth)
 
 ancova(C~OtterID*distance, whisker)
@@ -805,18 +828,25 @@ Nnotsig<-filter(whisker, OtterID != "163520" & OtterID != "163523" & OtterID != 
 Nsig<-filter(whisker, OtterID == "163520" | OtterID == "163523" | OtterID == "160479" | 
                   OtterID == "163535" | OtterID == "163526" | OtterID == "163528" | OtterID == "77281")
 
+
+
+MEANS<-whisker%>%
+  group_by(OtterID)%>%
+  summarise(MC=mean(C),
+            MN=mean(N))
+MEANS
+
+whisky<-left_join(whisker, MEANS, by="OtterID")
+whisky$Cr<-whisky$C-whisky$MC
+whisky$Nr<-whisky$N-whisky$MN
+
+ffit<-lm(Cr~distance, whisker.short)
+summary(ffit)
+
 #Shortening to only 8cm max
-whisker.short<-filter(whisker, distance <= 8)
+whisker.short<-filter(whisky, distance <= 8)
 
-ggplot(data=whisker.short, aes(x=distance, y=C)) +
-  geom_line(aes(group=OtterID)) +
-  geom_smooth(aes(color=Csig), size=2, span=0.5, se= FALSE) 
-
-ggplot(data=whisker.short, aes(x=distance, y=N)) +
-  geom_line(aes(group=OtterID)) +
-  geom_smooth(aes(color=Nsig), size=2, span=0.5, se= FALSE) 
-
-
+#plot of whisker with means overlaid
 ggplot(data=whisker.short, aes(x=distance, y=C)) +
   geom_line(aes(group=OtterID), color = "Gray81") +
   geom_smooth(aes(color=Csig), size=3, span=0.8, se= FALSE, show.legend = FALSE) +
@@ -836,3 +866,36 @@ ggplot(data=whisker.short, aes(x=distance, y=N)) +
 
 ggsave("N_sig.png", device = "png", path = "SI/", width = 9, 
        height = 5, units = "in", dpi = 300)
+
+#plot of residuals with mean overlay
+ggplot(data=whisker.short, aes(x=distance, y=Nr)) +   theme_few() +
+  geom_line(aes(group=OtterID), color = "Gray81") +
+  geom_smooth(size=3, span=0.5, show.legend = FALSE) +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste("Residual from mean ",delta^15, "N" )), tag = "B")
+#plot of residuals with mean overlay
+ggplot(data=whisker.short, aes(x=distance, y=N)) +   theme_few() +
+  geom_point() +
+  geom_smooth(size=2, span=0.5, show.legend = FALSE, colour="tomato") +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste(delta^15, "N(\u2030)" )), tag = "B") +
+  theme(axis.title = element_text(size=18))
+
+ggsave("N_residuals2.png", device = "png", path = "SI/", width = 10, 
+       height = 4, units = "in", dpi = 300)
+
+ggplot(data=whisker.short, aes(x=distance, y=C)) +   theme_few() +
+  geom_point() +
+  geom_smooth(size=2, span=0.5, show.legend = FALSE, colour="lightseagreen") +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste(delta^13, "C(\u2030)" )), tag = "A") +
+  theme(axis.title = element_text(size=18))
+
+ggsave("C_residuals2.png", device = "png", path = "SI/", width = 10, 
+       height = 4, units = "in", dpi = 300)
+
+fit <- lm(Nr~poly(distance,2,raw=TRUE), data=whisker.short)
+summary(fit) #R^2 = .1623
+
+
+

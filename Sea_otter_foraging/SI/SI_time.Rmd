@@ -1,0 +1,71 @@
+---
+title: "Stable Isotopes - Time"
+author: "Nicole LaRoche"
+date: "11/4/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Introduction
+I am working on sea otter whisker analysis over time from the root to the tip of the whisker. As my analysis is not complete, this is includes 20 sea otters as a population between Klawock and Naukati on Prince of Wales Island. Sea otter whiskers were collected from June 26- August 6, 2019. 
+
+# Analysis
+
+First, I want to load the correct programs and files. I am loading ggplot to print some nice graphs, and load the stable isotope whisker data. Otter ID should be read as a factor.
+
+```{r, message= FALSE}
+library(ggplot2)
+library(dplyr)
+
+#load whisker data
+whisker <- read.csv("whiskers.csv")
+whisker$OtterID<-as.character(whisker$OtterID)
+
+```
+
+#### Data Cleaning
+
+Otter 163532 has very odd values, while it is being re-run I have seperated out the values and am going to make the whisker file without this sea otter.
+```{r}
+
+# for right now, I want to separate 163532 because it is an odd otter
+oddotter<- filter(whisker, OtterID=="163532")
+whisker<- filter(whisker, OtterID != "163532")
+```
+
+
+# Results 
+Here is each individual sea otter from the root to the tip for Carbon in Teal and Nitrogen in Red. 
+
+```{r, echo= FALSE}
+ggplot(data=whisker) +
+  geom_line(aes(x=distance, y=N), colour="tomato") +
+  geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste(delta^15, "N (\u2030)" )), 
+       colour = "Isotope")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, 
+       name = expression(paste(delta^13, "C (\u2030)" )))) +
+  facet_wrap(vars(OtterID), nrow=5) +
+  theme_light()
+```
+
+##### Odd otter graph - for reference
+I want to make a new column that has which run the values were a part of. 
+```{r, echo= FALSE}
+
+ggplot(data=oddotter) + theme_classic() +
+  geom_line(aes(x=SIN, y=N), colour="tomato") +
+  geom_line(aes(x=SIN, y=C+25), colour="lightseagreen") +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste(delta^15, "N (\u2030)" )), 
+       colour = "Isotope")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, 
+       name = expression(paste(delta^13, "C (\u2030)" ))))
+
+```
+
