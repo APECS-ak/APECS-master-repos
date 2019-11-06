@@ -57,7 +57,7 @@ You will need data on.
 ```{r data}
 ## Sites ##
 # for 2019
-sites <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", layer = "Otter_survey_sites_2019_UTM_10-2-19")
+sites <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "Otter_survey_sites_2019_UTM_10-2-19")
 # for 2017
 # sites <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", layer = "Otter_Survey_Sites_2017_All_UTM")
 
@@ -66,7 +66,7 @@ sites.eg <- subset(sites, site_type %in% "eelgrass")
 
 ## Sea otters that where observed ##
 # for 2019
-otts <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", 
+otts <- readOGR(dsn = "../ALL_DATA/spatial_data", 
                 layer = "so_survey_2019_UTM_10-2-19")
 
 # for 2017: 
@@ -75,7 +75,7 @@ otts <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data",
 otts@data$n_otters <- as.numeric(as.character(otts@data$n_otters)) # data is imported as a factor
 
 ## Prince of Wales Water Polygon
-h2o.utm <- readOGR(dsn = "../APECS Master repo/ALL_DATA/spatial_data", layer = "POW_water_UTM")
+h2o.utm <- readOGR(dsn = "../ALL_DATA/spatial_data", layer = "POW_water_UTM")
 h2o.latlong <- spTransform(h2o.utm, CRS("+init=epsg:4326"))
 ```
 
