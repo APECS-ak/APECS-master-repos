@@ -320,7 +320,8 @@ ggplot(scrs, aes(x=NMDS1, y=NMDS2, col=Habitat)) +
  geom_point(size = 3) +
  stat_ellipse(size = 1.5) +
  xlab(label = "nMDS 1") + ylab(label = "nMDS 2") + theme_classic(base_size= 30) +
-  scale_color_manual(values = c("#333333", "#339900", "#D16103", "#3399FF"))
+  scale_color_manual(values = c("#333333", "#339900", "#D16103", "#3399FF")) +
+  annotate("text", x = 0.15, y = 0.55, label = "Stress = 0.184", col = "black", hjust = 0, size = 7) 
 ```
 ## ggplot of species biplot KELP EEL
 ```{r}
@@ -344,7 +345,8 @@ ggplot(scrs.sub, aes(x=NMDS1, y=NMDS2, col=Habitat)) +
  geom_point(size = 3) +
  stat_ellipse(size = 1.5) +
  xlab(label = "nMDS 1") + ylab(label = "nMDS 2") + theme_classic(base_size= 30) +
-  scale_color_manual(values = c("#339900", "#D16103", "#3399FF"))
+  scale_color_manual(values = c("#339900", "#D16103", "#3399FF")) +
+  annotate("text", x = 0.15, y = 0.55, label = "Stress = 0.181", col = "black", hjust = 0, size = 7) 
 ```
 
 #Environmental biplots

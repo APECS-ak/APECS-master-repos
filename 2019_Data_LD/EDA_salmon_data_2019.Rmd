@@ -390,28 +390,34 @@ gam.all <- gam(abundance ~ s(juli_date, k = 4) + avg_density + year + avg_biom_s
 
 summary(gam.all)
 
-a1 <- visreg(gam.all, "juli_date", scale = "response", gg = TRUE, partial = TRUE) + 
+a1 <- visreg(gam.all, "juli_date", scale = "response", gg = TRUE, partial = TRUE, alpha = .05) + 
   theme_classic() +
-  xlab("Julian Date") + ylab(NULL) + 
+  xlab("Julian Date") + ylab("Salmon Abundance") + 
+  geom_point() + coord_cartesian(ylim = c(0, 300))
+a1.1 <- visreg(gam.all, "juli_date", scale = "response", gg = TRUE, partial = TRUE, alpha = .1) + 
+  theme_classic() +
+  xlab("Julian Date") + ylab("Salmon Abundance") + 
   geom_point() + coord_cartesian(ylim = c(0, 300))
 
 a2 <- visreg(gam.all, "avg_density", scale = "response", gg = TRUE, partial = TRUE) + 
   theme_classic() +
   xlab(expression(paste("Sea otter density (#/",km^2,")"))) + 
-  ylab(NULL) + geom_point() + coord_cartesian(ylim = c(0, 300))
+  ylab("Salmon Abundance") + geom_point() + coord_cartesian(ylim = c(0, 300))
   
 a3 <- visreg(gam.all, "avg_biom_site_gm2", scale = "response", gg = TRUE, partial = TRUE) + 
   theme_classic() +
   xlab(expression(paste("Eelgrass density (g/",m^2,")"))) + 
-  ylab(NULL) + geom_point() + coord_cartesian(ylim = c(0, 300))
+  ylab("Salmon Abundance") + geom_point() + coord_cartesian(ylim = c(0, 300))
 
 a4 <- visreg(gam.all, "dist_anad_km", scale = "response", gg = TRUE, partial = TRUE) + 
   theme_classic() +
   xlab(expression(paste("Distance to anadromous stream (",km^2,")"))) + 
-  ylab(NULL) + geom_point() + coord_cartesian(ylim = c(0, 300))
+  ylab("Salmon Abundance") + geom_point() + coord_cartesian(ylim = c(0, 300))
 
-plot1 <- plot_grid(a1, a4, a2, a3, align = "hv", label_y = "Salmon abundance", vjust = 0)
+plot1 <- plot_grid(a1, a4, a3, a2, align = "hv", label_y = "Salmon abundance", vjust = 0)
 save_plot("WSNPlot1.jpg", plot1)
+
+plot_grid(a1, a1.1)
 ```
 
 
