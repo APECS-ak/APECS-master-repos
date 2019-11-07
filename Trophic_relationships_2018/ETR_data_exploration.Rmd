@@ -47,7 +47,7 @@ oce <- read.csv("../ALL_DATA/Site_oceanography_2018_RAW.csv", header = TRUE, str
 
 Stable Isotope - preliminary
 ```{r dat iso, echo = FALSE}
-si <- read.csv("E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/SI_prelim_2018.csv", header = TRUE, stringsAsFactors = FALSE)
+si <- read.csv("C:/Users/Wendubs/Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/SI_prelim_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Fatty Acid
@@ -237,6 +237,11 @@ ggplot(si) +
 
 ggplot(si) +
   geom_point(aes(x = del_C, y = del_N, color = Sea_otter_region), size = 3)
+
+si.limp <- filter(si, Species_common == "Limpet")
+
+ggplot(si.limp) +
+  geom_point(aes(x = del_C, y = del_N, color = Collection_Date), size = 3)
 ```
 
 ### Fatty acids
