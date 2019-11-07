@@ -20,6 +20,7 @@ library(cowplot)
 library(RColorBrewer)
 library(vegan)
 library(DT)
+library(datatable)
 theme_set(theme_classic())
 ```
 
@@ -29,7 +30,6 @@ st.er <- function(x, na.rm = TRUE) {
   return(sd(x, na.rm = na.rm)/sqrt(length(x)))
 }
 ```
-
 
 ## Data
 Data falls under three broad categories. Biomass, stable isotopes, and fatty acids. Biomass data files are broken up by sampling type but can easily be combined. In addition, biomarker (SI and FA) metadata is useful to match those data with site, date, treatment, etc. data.
@@ -389,7 +389,6 @@ ggplot(fsh.sum.1) +
   geom_bar(aes(x = sea_otter_tr, y = mass_kg_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = sea_otter_tr, ymin = mass_kg_mean - mass_kg_se, ymax = mass_kg_mean + mass_kg_se), width = 0) +
   scale_fill_manual(values = c("red", "deepskyblue3"))
-  
 ```
 
 ### Stable Isotopes
@@ -432,6 +431,9 @@ fa_hel_1.0 <- fa_1.0 %>%
 ## Primary consumers ##
 fa_pcon_1.0 <- fa_1.0 %>% 
   filter(Species_common == "Butter clam" | Species_common == "Idotea" | Species_common == "Limpet" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
+
+fa_ido_1.0 <- fa_1.0 %>% 
+  filter(Species_common == "Idotea")
 ```
 
 Append metadata
@@ -471,6 +473,12 @@ fa_pcon_1.0 <- merge(fa_pcon_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
 fa_pcon_1.0 <- cbind(fa_pcon_1.0[,c(69:76, 1, 3:67)])
 colnames(fa_pcon_1.0)[6] <- "Species_common"
 colnames(fa_pcon_1.0)[3] <- "Sea_otter_tr"
+
+# Idotea #
+fa_ido_1.0 <- merge(fa_ido_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_ido_1.0 <- cbind(fa_ido_1.0[,c(69:76, 1, 3:67)])
+colnames(fa_ido_1.0)[6] <- "Species_common"
+colnames(fa_ido_1.0)[3] <- "Sea_otter_tr"
 ```
 
 Transformations and standardizations
@@ -483,25 +491,7 @@ fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 10:74]))
 fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:74]))
 fa_hel_1.0_trs <- asin(sqrt(fa_hel_1.0[, 10:74]))
 fa_pcon_1.0_trs <- asin(sqrt(fa_pcon_1.0[, 10:74]))
-
-## Standardization ##
-fa_con_1.0_trs_std <- scale(fa_con_1.0_trs, center = FALSE, scale = apply(fa_con_1.0_trs, 2, max))
-
-
-fa_pro_1.0_trs_std <- scale(fa_pro_1.0_trs, center = FALSE, scale = apply(fa_pro_1.0_trs, 2, max))
-fa_pro_1.0_trs_std[is.nan(fa_pro_1.0_trs_std)] <- 0
-
-fa_crb_1.0_trs_std <- scale(fa_crb_1.0_trs, center = FALSE, scale = apply(fa_crb_1.0_trs, 2, max))
-fa_crb_1.0_trs_std[is.nan(fa_crb_1.0_trs_std)] <- 0
-
-fa_dun_1.0_trs_std <- scale(fa_dun_1.0_trs, center = FALSE, scale = apply(fa_dun_1.0_trs, 2, max))
-fa_dun_1.0_trs_std[is.nan(fa_dun_1.0_trs_std)] <- 0
-
-fa_hel_1.0_trs_std <- scale(fa_hel_1.0_trs, center = FALSE, scale = apply(fa_hel_1.0_trs, 2, max))
-fa_hel_1.0_trs_std[is.nan(fa_hel_1.0_trs_std)] <- 0
-
-fa_pcon_1.0_trs_std <- scale(fa_pcon_1.0_trs, center = FALSE, scale = apply(fa_pcon_1.0_trs, 2, max))
-
+fa_ido_1.0_trs <- asin(sqrt(fa_ido_1.0[, 10:74]))
 
 ```
 
@@ -509,7 +499,7 @@ fa_pcon_1.0_trs_std <- scale(fa_pcon_1.0_trs, center = FALSE, scale = apply(fa_p
 Calculate distances
 ```{r dist, echo = FALSE}
 ## Producers ##
-fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "euclidean")
+fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs, method = "euclidean")
 
 ## Consumers ##
 fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "euclidean")
@@ -518,13 +508,16 @@ fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "euclidean")
 fa_crb_1.0_dist <- vegdist(fa_crb_1.0_trs_std, method = "euclidean")
 
 ## Dungeness crabs ##
-fa_dun_1.0_dist <- vegdist(fa_dun_1.0_trs_std, method = "euclidean")
+fa_dun_1.0_dist <- vegdist(fa_dun_1.0_trs, method = "euclidean")
 
 ## Helmet crabs ##
-fa_hel_1.0_dist <- vegdist(fa_hel_1.0_trs_std, method = "euclidean")
+fa_hel_1.0_dist <- vegdist(fa_hel_1.0_trs, method = "euclidean")
 
 ## Primary consumers ##
-fa_pcon_1.0_dist <- vegdist(fa_pcon_1.0_trs_std, method = "euclidean")
+fa_pcon_1.0_dist <- vegdist(fa_pcon_1.0_trs, method = "euclidean")
+
+## Idotea ##
+fa_ido_1.0_dist <- vegdist(fa_ido_1.0_trs, method = "euclidean")
 ```
 
 Calculate NMDS 
@@ -546,13 +539,16 @@ fa_hel_1.0_mds <- metaMDS(fa_hel_1.0_dist)
 
 ## Primary consumers ##
 fa_pcon_1.0_mds <- metaMDS(fa_pcon_1.0_dist)
+
+## Idotea ##
+fa_ido_1.0_mds <- metaMDS(fa_ido_1.0_dist)
 ```
 
 #### PERMANOVA
 Test for the effect of sea otter nested by species. Also include tests of multivariate dispersion 'betadisper'. 
 ```{r permanova, echo = FLASE}
 ## Producers ##
-perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr + sp_code %in% Sea_otter_tr, data = fa_pro_1.0, perm = 9999) 
+perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr + Site %in% Sea_otter_tr, data = fa_pro_1.0, perm = 9999) 
 perm.pro
 
 ## Consumers ##
@@ -580,6 +576,10 @@ perm.hel
 ## Primary Comsumers ##
 perm.pcon <- adonis2(fa_pcon_1.0_dist ~ Sea_otter_tr / Site, data = fa_pcon_1.0, perm = 9999)
 perm.pcon
+
+## Idotea ##
+perm.ido <- adonis2(fa_ido_1.0_dist ~ Sea_otter_tr, data = fa_ido_1.0, perm = 9999)
+perm.ido
 ```
 
 #### SIMPER
@@ -649,6 +649,14 @@ fa_pcon_1.0_mds_dat$ID <- fa_pcon_1.0$ID
 fa_pcon_1.0_mds_dat$Species_common <- fa_pcon_1.0$Species_common
 fa_pcon_1.0_mds_dat <- merge(fa_pcon_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
 fa_pcon_1.0_mds_dat$Species_common <- factor(fa_pcon_1.0_mds_dat$Species_common, levels = c("Butter clam" , "Idotea" ,"Limpet" , "Macoma sp." , "Pointed Macoma" , "Bentnose Macoma"))
+
+# Idotea #
+fa_ido_1.0_mds_dat <- as.data.frame(scores(fa_ido_1.0_mds))
+fa_ido_1.0_mds_dat$ID <- fa_ido_1.0$ID 
+fa_ido_1.0_mds_dat$Species_common <- fa_ido_1.0$Species_common
+fa_ido_1.0_mds_dat <- merge(fa_ido_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_ido_1.0_mds_dat$Species_common <- factor(fa_ido_1.0_mds_dat$Species_common, levels = c("Idotea"))
+
 ```
 
 ##### FA Vectors
@@ -813,5 +821,11 @@ ggplot(fa_hel_1.0_mds_dat) +
 ggplot(fa_pcon_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
   scale_shape_manual(values = c(1:6)) +
-  scale_color_manual(values = c("red", "deepskyblue3")) 
+  scale_color_manual(values = c("red", "deepskyblue3"))
+
+## Idotea ##
+ggplot(fa_ido_1.0_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 3.5) +
+  scale_color_manual(values = c("red", "deepskyblue3")) +
+  geom_text(aes(x = NMDS1, y = NMDS2), label = fa_ido_1.0_mds_dat$ID)
 ```
