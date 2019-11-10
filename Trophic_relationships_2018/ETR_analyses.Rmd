@@ -583,11 +583,16 @@ perm.ido
 ```
 
 #### SIMPER
-Calcualte on untransformed data
+Calcualte on untransformed data. Also remove the undetermined FAs because the are sums of multiple FAs
 
 Dungeness Crabs
+-- remove undetermined FA
 ```{r}
-simp.dun <- simper(fa_dun_1.0[, 10:74], fa_dun_1.0$Sea_otter_tr, permutations = 9999)
+dun_simp <- fa_dun_1.0[, c(10:15, 17:19, 21:23, 25:26, 28:29, 31:32, 34:35, 37:38, 40:41, 43, 45:46, 51, 53:57, 59, 61:63, 65:74)]
+```
+
+```{r}
+simp.dun <- simper(dun_simp, fa_dun_1.0$Sea_otter_tr, permutations = 9999)
 simp.dun.dat <- summary(simp.dun, ordered = TRUE, digits = 4)
 simp.dun.dat <- data.frame(simp.dun.dat$Low_High)
 simp.dun.dat$FA <- row.names(simp.dun.dat)
@@ -597,8 +602,12 @@ datatable(filter(simp.dun.dat, p < 0.05))
 ```
 
 Helmet crabs
+-- remove undetermined FA
 ```{r}
-simp.hel <- simper(fa_hel_1.0[, 10:74], fa_hel_1.0$Sea_otter_tr, permutations = 9999)
+hel_simp <- fa_hel_1.0[, c(10:15, 17:19, 21:23, 25:26, 28:29, 31:32, 34:35, 37:38, 40:41, 43, 45:46, 51, 53:57, 59, 61:63, 65:74)]
+```
+```{r}
+simp.hel <- simper(hel_simp, fa_hel_1.0$Sea_otter_tr, permutations = 9999)
 simp.hel.dat <- summary(simp.hel, ordered = TRUE, digits = 4)
 simp.hel.dat <- data.frame(simp.hel.dat$Low_High)
 simp.hel.dat$FA <- row.names(simp.hel.dat)
