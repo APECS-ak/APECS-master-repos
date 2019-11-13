@@ -683,7 +683,7 @@ vec.pro.dat$MDS1_sc <- vec.pro.dat$MDS1 * (scalefactor * vec.pro.dat$r2)
 vec.pro.dat$MDS2_sc <- vec.pro.dat$MDS2 * (scalefactor * vec.pro.dat$r2)
 
 vec.pro.dat.sig <- vec.pro.dat %>% 
-  filter(pvals < 0.001)
+  filter(pvals < 0.01)
 
 arrow_angle <- 90 - ((atan2(vec.pro.dat.sig$MDS1_sc, vec.pro.dat.sig$MDS2_sc)* 180)/pi)
 arrow_angle <- ifelse(arrow_angle > 90 & arrow_angle < 270, arrow_angle + 180, arrow_angle)
