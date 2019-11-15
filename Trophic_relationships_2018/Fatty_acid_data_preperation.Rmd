@@ -256,19 +256,6 @@ FA_prop_1.0[is.na(FA_prop_1.0)] <- 0
 
 ```
 
-New summary with zeros
-```{r wide to tall zero, echo=FALSE}
-sp_prop_summary_1.0.2 <- FA_prop_1.0 %>% 
-  gather(key = "FA", value = "Prop", 3:67) %>% 
-  group_by(Species_common, FA) %>% 
-  summarise(n = n(),
-            mean_prop_corr = mean(Prop),
-            sd_prop_corr = sd(Prop),
-            min_prop_corr = min(Prop),
-            max_prop_corr = max(Prop))
-```
-
-
 ### Export wide data
 ```{r export wide, echo = FALSE}
 ## 0.5% filter ##

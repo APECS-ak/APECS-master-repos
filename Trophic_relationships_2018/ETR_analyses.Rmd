@@ -20,15 +20,7 @@ library(cowplot)
 library(RColorBrewer)
 library(vegan)
 library(DT)
-library(datatable)
 theme_set(theme_classic())
-```
-
-```{r st.er, echo = FALSE}
-st.er <- function(x, na.rm = TRUE) {
-  stopifnot(is.numeric(x))
-  return(sd(x, na.rm = na.rm)/sqrt(length(x)))
-}
 ```
 
 ## Data
@@ -66,71 +58,7 @@ bimrk <- read.csv("../ALL_DATA/Biomarker_collections_2018_RAW.csv", header = TRU
 ### Data managemnet
 Clean up files. Make sure appropriate columns are there.
 ```{r data clean up, echo=FALSE}
-## Eelgrass Transect #3
-eg <- merge(eg, site[, c(1, 5)], by = "site")
-
-## Crabs ##
-crb <- merge(crb, site[, c(1,5)])
-
-# site and string #
-crb.site.string <- crb %>%
-  group_by(site, string) %>% 
-  summarise(mass_g = sum(mass_g))
-
-# Insert zero data ## only missing one string
-crb.site.string[24,] <- c(as.character("2018_H_01"), 4.0, 0.0)
-crb.site.string <- merge(crb.site.string, site[, c(1,5)], by = "site")
-crb.site.string$string_mass_g <- as.numeric(crb.site.string$string_mass_g)
-
-crb.site.string <- merge(crb.site.string, site[, c(1, 5)], by = "site")
-
-# Site string and sp #
-d <- expand.grid(species_common = c("Dungeness crab", "Helmet crab", "Red rock crab"), site = unique(crb$site), string = unique(crb$string))
-
-crb.site.string.sp <- crb %>% 
-  group_by(site, string, species_common) %>% 
-  summarise(mass_g = sum(mass_g))
-
-crb.site.string.sp <- merge(d, crb.site.string.sp, by = c("site", "string", "species_common"), all.x  = TRUE)
-
-crb.site.string.sp[is.na(crb.site.string.sp)] <- 0
-
-crb.site.string.sp <- merge(crb.site.string.sp, site[, c(1,5)], by = "site")
-
-## Clams! ##
-clm <- merge(clm, site[, c(1, 5)], by = "site")
-clm$quadrat <- as.factor(clm$quadrat)
-
-# clean up species #
-clm$species_common <- ifelse(clm$species_common == "Macoma", "Macoma sp.", clm$species_common)
-
-clm$species_common <- ifelse(clm$species_common == "Pointed macoma", "Macoma sp.", clm$species_common)
-
-clm$species_common <- ifelse(clm$species_common == "Bentnose macoma", "Macoma sp.", clm$species_common)
-
-# site and quadrat summary #
-clm.site.quad <- clm %>%
-  group_by(site, quadrat) %>% 
-  summarize(mass_g = sum(mass_g))
-clm.site.quad <- merge(clm.site.quad, site[, c(1, 5)], by = "site")
-
-# site quadrat and species summary #
-d <- expand.grid(species_common = c("Butter clam", "Cockle", "Macoma sp.", "Soft-shell clam", "Steamer clam"), site = unique(clm$site), quadrat = unique(clm$quadrat))
-
-clm.site.quad.sp <- clm %>%
-  group_by(site, quadrat, species_common) %>% 
-  summarize(mass_g = sum(mass_g))
-
-clm.site.quad.sp <- merge(d, clm.site.quad.sp, by = c("site", "quadrat", "species_common"), all.x  = TRUE)
-
-clm.site.quad.sp[is.na(clm.site.quad.sp)] <- 0
-
-clm.site.quad.sp <- merge(clm.site.quad.sp, site[, c(1,5)], by = "site")
-```
-
-Fish
-```{r}
-fsh <- merge(fsh, site[, c(1, 5)], by = "site")
+eg <- merge(eg, site[, c(1,5)], by = "site")
 ```
 
 
@@ -142,135 +70,64 @@ Compare biomass of community members between sea otter treatments
 
 #### ANOVAS of sites and treatment
 ##### Eelgrass - biomass and shoot density tests
-Eelgrass
 ```{r eg site x treatment, echo = FALSE}
-mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + sea_otter_tr/site, data = eg)
+mod.eg.1 <- lm(shoot_mass_m ~ sea_otter_tr + sea_otter_tr:site, data = eg)
 anova(mod.eg.1)
 
-t.eg.1 <- t.test(eg$shoot_mass_m[eg$sea_otter_tr == "high"], eg$shoot_mass_m[eg$sea_otter_tr == "low"])
+t.test(eg$shoot_mass_m[eg$sea_otter_tr == "high"], eg$shoot_mass_m[eg$sea_otter_tr == "low"])
 
 mod.eg.2 <- lm(eelgrass_shoots_m ~ sea_otter_tr * site, data = eg)
 anova(mod.eg.2)
 ```
 
-Epiphytes
-```{r epi site X treatment, echo = FALSE}
-mod.ep.1 <- lm(epi_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
-anova(mod.ep.1)
+Eelgrass
 
-t.ep.1 <- t.test(eg$epi_load[eg$sea_otter_tr == "high"],  eg$epi_load[eg$sea_otter_tr == "low"])
-t.ep.1
-```
+Epiphytes
 
 Grazers
-```{r grz site X treatment, echo = FALSE}
-## All Grazers ##
-mod.gr.1 <- lm(grazer_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
-anova(mod.gr.1)
-
-t.gr.1 <- t.test(eg$grazer_load[eg$sea_otter_tr == "high"],  eg$grazer_load[eg$sea_otter_tr == "low"])
-t.gr.1
-
-## Idotea ##
-mod.id.1 <- lm(idotea_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
-anova(mod.id.1)
-
-t.id.1 <- t.test(eg$idotea_load[eg$sea_otter_tr == "high"],  eg$idotea_load[eg$sea_otter_tr == "low"])
-t.id.1
-
-## Limpet ##
-mod.lp.1 <- lm(limpet_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
-anova(mod.lp.1)
-
-t.lp.1 <- t.test(eg$limpet_load[eg$sea_otter_tr == "high"],  eg$limpet_load[eg$sea_otter_tr == "low"])
-t.lp.1
-```
 
 ##### Crabs
 Sum total crab mass by string. Insert 0 data for strings with no crabs so averages are correct. Append site metadata
+```{r}
+crb <- merge(crb, site[, c(1,5)])
+
+## Summarize ##
+crb.sum <- crb %>%
+  group_by(site, string) %>% 
+  summarise(string_mass_g = sum(mass_g))
+
+crb.sum.sp <- crb %>% 
+  group_by(sea_otter_tr, string, species_common) %>% 
+  summarise(mass_g = sum(mass_g))
+
+## Insert zero data ## only missing one string
+crb.sum[24,] <- c(as.character("2018_H_01"), 4.0, 0.0)
+
+## Site data ##
+crb.sum <- merge(crb.sum, site[, c(1,5)], by = "site")
+
+crb.sum$string_mass_g <- as.numeric(crb.sum$string_mass_g)
+```
+
 ```{r crb site x treatment, echo = FLASE}
 ## Nested Anova ##
-mod.crb.1 <- lm(mass_g ~ sea_otter_tr + sea_otter_tr:site, data = crb.site.string)
+mod.crb.1 <- lm(string_mass_g ~ sea_otter_tr + sea_otter_tr:site, data = crb.sum)
 anova(mod.crb.1)
 
 ## Strait Anova ##
-mod.crb.2 <- lm(mass_g ~ sea_otter_tr, data = crb.sum)
+mod.crb.2 <- lm(string_mass_g ~ sea_otter_tr, data = crb.sum)
 anova(mod.crb.2)
-
-## By species ##
-# Overall #
-mod.crb.3 <- lm(mass_g ~ sea_otter_tr + species_common %in% sea_otter_tr, data = crb.site.string.sp)
-anova(mod.crb.3)
-
-# Dungeness #
-mod.dun.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = subset(crb.site.string.sp, species_common == "Dungeness crab"))
-anova(mod.dun.1)
-
-# Helmet #
-mod.hel.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = subset(crb.site.string.sp, species_common == "Helmet crab"))
-anova(mod.hel.1)
-
-# Red rock #
-mod.roc.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = subset(crb.site.string.sp, species_common == "Red rock crab"))
-anova(mod.roc.1)
 ```
 
-##### Clams
-We also have species to think about...
-```{r clm site}
-## All Clams ##
-mod.clm.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = clm.site.quad)
-anova(mod.clm.1)
-
-## By species ##
-# Overall #
-mod.clm.2 <-lm(mass_g ~ sea_otter_tr + species_common %in% sea_otter_tr, data = clm.site.quad.sp)
-anova(mod.clm.2)
-
-# Butter clams #
-mod.but.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = subset(clm.site.quad.sp, species_common == "Butter clam"))
-anova(mod.but.1)
-
-# Macoma sp. ##
-mod.mac.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = subset(clm.site.quad.sp, species_common == "Macoma sp."))
-anova(mod.mac.1)
-```
-
-##### Fish
-```{r}
-## Total mass ##
-mod.fsh.1 <- lm(total_fish_mass ~ sea_otter_tr, data = fsh)
-anova(mod.fsh.1)
-
-## Stags ##
-mod.stg.1 <- lm(SCULPSTG ~ sea_otter_tr, data = fsh)
-anova(mod.stg.1)
-
-## Shiners ##
-mod.shn.1 <- lm(PERCHSH ~ sea_otter_tr, data = fsh)
-anova(mod.shn.1)
-
-## Snake Prickle bach ##
-mod.snk.1 <- lm(PRICKSN ~ sea_otter_tr, data = fsh)
-anova(mod.snk.1)
-```
+Fish
 
 #### Plots
-##### Data prep
 Eelgrass
-```{r eg site X treatment summaries, echo = FALSE}
+```{r}
 eg.sum <- eg %>% 
-  group_by(sea_otter_tr, site) %>% 
+  group_by(sea_otter_tr) %>% 
   summarise(shoot_mass_m_mean = mean(shoot_mass_m),
-            shoot_mass_m_se = st.er(shoot_mass_m),
-            epi_load_mean = mean(epi_load),
-            epi_load_se = st.er(epi_load),
-            grz_load_mean = mean(grazer_load),
-            grz_load_se = st.er(grazer_load),
-            ido_load_mean = mean(idotea_load),
-            ido_load_se = st.er(idotea_load ),
-            lmp_load_mean = mean(limpet_load),
-            lmp_load_se = st.er(limpet_load))
+            shoot_mass_m_se = st.er(shoot_mass_m))
 ```
 
 Crabs
@@ -299,97 +156,16 @@ crb.sum.2[5,] <- c(as.character("high"), as.character("Red rock crab"), 0.0, 0.0
 crb.sum.2[6,] <- c(as.character("low"), as.character("Helmet crab"), 0.0, 0.0)
 crb.sum.2$mass_m <- as.numeric(crb.sum.2$mass_m)
 crb.sum.2$mass_se <- as.numeric(crb.sum.2$mass_se)
-```
 
-Clams
-```{r}
-clm.sum.1 <- clm.site.quad %>% 
-  group_by(site) %>% 
-  summarise(mass_g_mean = mean(mass_g),
-            mass_g_se = st.er(mass_g))
-clm.sum.1 <- merge(clm.sum.1, site[, c(1, 5)], by = "site")
-
-clm.sum.2 <- clm.site.quad.sp %>% 
-  group_by(site, species_common) %>% 
-  summarise(mass_g_mean = mean(mass_g),
-            mass_g_se = st.er(mass_g))
-clm.sum.2 <- merge(clm.sum.2, site[, c(1, 5)], by = "site")
-```
-
-Fish
-```{r}
-fsh.sum.1 <- fsh %>%
-  group_by(sea_otter_tr) %>% 
-  summarise(mass_kg_mean = mean(total_fish_mass / 1000),
-           mass_kg_se = st.er(total_fish_mass / 1000))
-```
-
-
-##### Plots
-```{r}
-## Eelgrass ##
-ggplot(eg.sum) +
-  geom_bar(aes(x = site, y = shoot_mass_m_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = shoot_mass_m_mean - shoot_mass_m_se, ymax = shoot_mass_m_mean + shoot_mass_m_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3")) +
-  scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100))
-
-## Epiphyte Load ##
-ggplot(eg.sum) +
-  geom_bar(aes(x = site, y = epi_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = epi_load_mean - epi_load_se, ymax = epi_load_mean + epi_load_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3")) +
-  scale_y_continuous(limits = c(0, 0.01), breaks = seq(0, 0.01, by = 0.0025))
-
-## Grazer Load ##
-ggplot(eg.sum) +
-  geom_bar(aes(x = site, y = grz_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = grz_load_mean - grz_load_se, ymax = grz_load_mean + grz_load_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3")) +
-  scale_y_continuous(limits = c(0, 0.25), breaks = seq(0, 0.25, by = 0.05))
-
-## Idotea Load ##
-ggplot(eg.sum) +
-  geom_bar(aes(x = site, y = ido_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = ido_load_mean - ido_load_se, ymax = ido_load_mean + ido_load_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3")) +
-  scale_y_continuous(limits = c(0, 0.15), breaks = seq(0, 0.15, by = 0.03))
-
-## Limpet Load ##
-ggplot(eg.sum) +
-  geom_bar(aes(x = site, y = lmp_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = lmp_load_mean - lmp_load_se, ymax = lmp_load_mean + lmp_load_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3")) +
-  scale_y_continuous(limits = c(0, 0.03), breaks = seq(0, 0.03, by = 0.01))
-
-## Crabs site sp ##
 ggplot(crb.sum.2, aes(x = sea_otter_tr, y = mass_m/1000, fill = species_common)) +
   geom_bar(position = position_dodge(), stat = "identity") +
   scale_fill_manual(values = c("chocolate4", "springgreen4", "firebrick")) +
   geom_errorbar(aes(ymin = (mass_m / 1000) - (mass_se / 1000), ymax = (mass_m / 1000) + (mass_se / 1000)), size = 1, width = 0, position = position_dodge(0.9)) +
   labs(x = "Site", y = "Crab mass (kg)") +
   scale_y_continuous(limits = c(0, 5))
-
-## Clams site ##
-ggplot(clm.sum.1) +
-  geom_bar(aes(x = site, y = mass_g_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = mass_g_mean - mass_g_se, ymax = mass_g_mean + mass_g_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3")) +
-  scale_y_continuous(limits = c(0, 700), breaks = seq(0, 700, by = 100))
-
-## Clams site sp ##
-ggplot(clm.sum.2, aes(x = site, y = mass_g_mean, fill = species_common)) +
-  geom_bar(position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(ymin = mass_g_mean - mass_g_se, ymax = mass_g_mean + mass_g_se), width = 0, position=position_dodge(.9)) +
-  scale_fill_brewer(palette = "Set1") +
-  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 100))
-
-## Fish site ##
-ggplot(fsh.sum.1) +
-  geom_bar(aes(x = sea_otter_tr, y = mass_kg_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = sea_otter_tr, ymin = mass_kg_mean - mass_kg_se, ymax = mass_kg_mean + mass_kg_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3"))
 ```
+
+
 
 ### Stable Isotopes
 There are two perspectives in analysis. 1) The whole community (all data) comparisons and 2) by species comparisons.
@@ -431,9 +207,6 @@ fa_hel_1.0 <- fa_1.0 %>%
 ## Primary consumers ##
 fa_pcon_1.0 <- fa_1.0 %>% 
   filter(Species_common == "Butter clam" | Species_common == "Idotea" | Species_common == "Limpet" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
-
-fa_ido_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Idotea")
 ```
 
 Append metadata
@@ -473,12 +246,6 @@ fa_pcon_1.0 <- merge(fa_pcon_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
 fa_pcon_1.0 <- cbind(fa_pcon_1.0[,c(69:76, 1, 3:67)])
 colnames(fa_pcon_1.0)[6] <- "Species_common"
 colnames(fa_pcon_1.0)[3] <- "Sea_otter_tr"
-
-# Idotea #
-fa_ido_1.0 <- merge(fa_ido_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_ido_1.0 <- cbind(fa_ido_1.0[,c(69:76, 1, 3:67)])
-colnames(fa_ido_1.0)[6] <- "Species_common"
-colnames(fa_ido_1.0)[3] <- "Sea_otter_tr"
 ```
 
 Transformations and standardizations
@@ -491,15 +258,21 @@ fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 10:74]))
 fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:74]))
 fa_hel_1.0_trs <- asin(sqrt(fa_hel_1.0[, 10:74]))
 fa_pcon_1.0_trs <- asin(sqrt(fa_pcon_1.0[, 10:74]))
-fa_ido_1.0_trs <- asin(sqrt(fa_ido_1.0[, 10:74]))
 
+## Standardization ##
+fa_con_1.0_trs_std <- scale(fa_con_1.0_trs, center = FALSE, scale = apply(fa_con_1.0_trs, 2, max))
+fa_pro_1.0_trs_std <- scale(fa_pro_1.0_trs, center = FALSE, scale = apply(fa_pro_1.0_trs, 2, max))
+fa_crb_1.0_trs_std <- scale(fa_crb_1.0_trs, center = FALSE, scale = apply(fa_crb_1.0_trs, 2, max))
+fa_dun_1.0_trs_std <- scale(fa_dun_1.0_trs, center = FALSE, scale = apply(fa_dun_1.0_trs, 2, max))
+fa_hel_1.0_trs_std <- scale(fa_hel_1.0_trs, center = FALSE, scale = apply(fa_hel_1.0_trs, 2, max))
+fa_pcon_1.0_trs_std <- scale(fa_pcon_1.0_trs, center = FALSE, scale = apply(fa_pcon_1.0_trs, 2, max))
 ```
 
 #### Ordination
 Calculate distances
 ```{r dist, echo = FALSE}
 ## Producers ##
-fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs, method = "euclidean")
+fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs_std, method = "euclidean")
 
 ## Consumers ##
 fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "euclidean")
@@ -508,16 +281,13 @@ fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "euclidean")
 fa_crb_1.0_dist <- vegdist(fa_crb_1.0_trs_std, method = "euclidean")
 
 ## Dungeness crabs ##
-fa_dun_1.0_dist <- vegdist(fa_dun_1.0_trs, method = "euclidean")
+fa_dun_1.0_dist <- vegdist(fa_dun_1.0_trs_std, method = "euclidean")
 
 ## Helmet crabs ##
-fa_hel_1.0_dist <- vegdist(fa_hel_1.0_trs, method = "euclidean")
+fa_hel_1.0_dist <- vegdist(fa_hel_1.0_trs_std, method = "euclidean")
 
 ## Primary consumers ##
-fa_pcon_1.0_dist <- vegdist(fa_pcon_1.0_trs, method = "euclidean")
-
-## Idotea ##
-fa_ido_1.0_dist <- vegdist(fa_ido_1.0_trs, method = "euclidean")
+fa_pcon_1.0_dist <- vegdist(fa_pcon_1.0_trs_std, method = "euclidean")
 ```
 
 Calculate NMDS 
@@ -539,16 +309,13 @@ fa_hel_1.0_mds <- metaMDS(fa_hel_1.0_dist)
 
 ## Primary consumers ##
 fa_pcon_1.0_mds <- metaMDS(fa_pcon_1.0_dist)
-
-## Idotea ##
-fa_ido_1.0_mds <- metaMDS(fa_ido_1.0_dist)
 ```
 
 #### PERMANOVA
 Test for the effect of sea otter nested by species. Also include tests of multivariate dispersion 'betadisper'. 
 ```{r permanova, echo = FLASE}
 ## Producers ##
-perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr + Site %in% Sea_otter_tr, data = fa_pro_1.0, perm = 9999) 
+perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_pro_1.0, perm = 9999) 
 perm.pro
 
 ## Consumers ##
@@ -562,7 +329,7 @@ anova(disper.crb)
 perm.crb.1 <- adonis2(fa_crb_1.0_dist ~  sp_code, data = fa_crb_1.0, perm = 9999) 
 perm.crb.1
 
-perm.crb.2 <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr + sp_code %in% Sea_otter_tr, data = fa_crb_1.0, perm = 9999) 
+perm.crb.2 <- adonis2(fa_crb_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_crb_1.0, perm = 9999) 
 perm.crb.2
 
 ## Dungeness crabs ##
@@ -576,23 +343,14 @@ perm.hel
 ## Primary Comsumers ##
 perm.pcon <- adonis2(fa_pcon_1.0_dist ~ Sea_otter_tr / Site, data = fa_pcon_1.0, perm = 9999)
 perm.pcon
-
-## Idotea ##
-perm.ido <- adonis2(fa_ido_1.0_dist ~ Sea_otter_tr, data = fa_ido_1.0, perm = 9999)
-perm.ido
 ```
 
 #### SIMPER
-Calcualte on untransformed data. Also remove the undetermined FAs because the are sums of multiple FAs
+Calcualte on untransformed data
 
 Dungeness Crabs
--- remove undetermined FA
 ```{r}
-dun_simp <- fa_dun_1.0[, c(10:15, 17:19, 21:23, 25:26, 28:29, 31:32, 34:35, 37:38, 40:41, 43, 45:46, 51, 53:57, 59, 61:63, 65:74)]
-```
-
-```{r}
-simp.dun <- simper(dun_simp, fa_dun_1.0$Sea_otter_tr, permutations = 9999)
+simp.dun <- simper(fa_dun_1.0[, 10:74], fa_dun_1.0$Sea_otter_tr, permutations = 9999)
 simp.dun.dat <- summary(simp.dun, ordered = TRUE, digits = 4)
 simp.dun.dat <- data.frame(simp.dun.dat$Low_High)
 simp.dun.dat$FA <- row.names(simp.dun.dat)
@@ -602,12 +360,8 @@ datatable(filter(simp.dun.dat, p < 0.05))
 ```
 
 Helmet crabs
--- remove undetermined FA
 ```{r}
-hel_simp <- fa_hel_1.0[, c(10:15, 17:19, 21:23, 25:26, 28:29, 31:32, 34:35, 37:38, 40:41, 43, 45:46, 51, 53:57, 59, 61:63, 65:74)]
-```
-```{r}
-simp.hel <- simper(hel_simp, fa_hel_1.0$Sea_otter_tr, permutations = 9999)
+simp.hel <- simper(fa_hel_1.0[, 10:74], fa_hel_1.0$Sea_otter_tr, permutations = 9999)
 simp.hel.dat <- summary(simp.hel, ordered = TRUE, digits = 4)
 simp.hel.dat <- data.frame(simp.hel.dat$Low_High)
 simp.hel.dat$FA <- row.names(simp.hel.dat)
@@ -658,14 +412,6 @@ fa_pcon_1.0_mds_dat$ID <- fa_pcon_1.0$ID
 fa_pcon_1.0_mds_dat$Species_common <- fa_pcon_1.0$Species_common
 fa_pcon_1.0_mds_dat <- merge(fa_pcon_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
 fa_pcon_1.0_mds_dat$Species_common <- factor(fa_pcon_1.0_mds_dat$Species_common, levels = c("Butter clam" , "Idotea" ,"Limpet" , "Macoma sp." , "Pointed Macoma" , "Bentnose Macoma"))
-
-# Idotea #
-fa_ido_1.0_mds_dat <- as.data.frame(scores(fa_ido_1.0_mds))
-fa_ido_1.0_mds_dat$ID <- fa_ido_1.0$ID 
-fa_ido_1.0_mds_dat$Species_common <- fa_ido_1.0$Species_common
-fa_ido_1.0_mds_dat <- merge(fa_ido_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_ido_1.0_mds_dat$Species_common <- factor(fa_ido_1.0_mds_dat$Species_common, levels = c("Idotea"))
-
 ```
 
 ##### FA Vectors
@@ -830,11 +576,5 @@ ggplot(fa_hel_1.0_mds_dat) +
 ggplot(fa_pcon_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3.5) +
   scale_shape_manual(values = c(1:6)) +
-  scale_color_manual(values = c("red", "deepskyblue3"))
-
-## Idotea ##
-ggplot(fa_ido_1.0_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 3.5) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2), label = fa_ido_1.0_mds_dat$ID)
+  scale_color_manual(values = c("red", "deepskyblue3")) 
 ```
