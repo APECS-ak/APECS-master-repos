@@ -259,7 +259,11 @@ FA_prop_1.0[is.na(FA_prop_1.0)] <- 0
 New summary with zeros
 ```{r wide to tall zero, echo=FALSE}
 sp_prop_summary_1.0.2 <- FA_prop_1.0 %>% 
+<<<<<<< HEAD
   gather(key = "FA", value = "Prop", 4:69) %>% 
+=======
+  gather(key = "FA", value = "Prop", 4:68) %>% 
+>>>>>>> 98dbdf30636ac3ad9c14528f3f1cc88e9a7f3f7d
   group_by(Species_common, FA) %>% 
   summarise(n = n(),
             mean_prop_corr = mean(Prop),
