@@ -233,10 +233,17 @@ pal <- colorRampPalette(brewer.pal(9, "Paired"))
 ggplot(si) +
   geom_point(aes(x = del_C, y = del_N, color = Species_common, shape = Species_common), size = 3) +
   scale_color_manual(values = pal(19))+
-  scale_shape_manual(values = rep(c(15:19), 4))
+  scale_shape_manual(values = rep(c(15:19), 4)) +
+  scale_y_continuous(limits = c(10, 14)) +
+  scale_x_continuous(limits = c(-20, -7))
 
 ggplot(si) +
   geom_point(aes(x = del_C, y = del_N, color = Sea_otter_region), size = 3)
+
+si.limp <- filter(si, Species_common == "Limpet")
+
+ggplot(si.limp) +
+  geom_point(aes(x = del_C, y = del_N, color = Collection_Date), size = 3)
 ```
 
 ### Fatty acids
