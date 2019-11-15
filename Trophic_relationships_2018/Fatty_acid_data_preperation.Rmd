@@ -81,28 +81,28 @@ samp_mass_redu <- samp_mass %>%
 Combine all batch data and convert to tall format. Preserve batch number identity for claculations and figuring out any data issues. Clean up sample names.
 ```{r combine, echo = FALSE}
 ## Batch 1 ##
-b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:56)
-b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:56)[,3]
+b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:59)
+b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:59)[,3]
 b1_ac$Batch <- as.character(1)
 
 ## Batch 2 ##
-b2_ac <- gather(b2_area, key = "FA", value = "Area", 2:61)
-b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:61)[,3]
+b2_ac <- gather(b2_area, key = "FA", value = "Area", 2:60)
+b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:60)[,3]
 b2_ac$Batch <- as.character(2)
 
 ## Batch 3 ##
-b3_ac <- gather(b3_area, key = "FA", value = "Area", 2:55)
-b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:55)[,3]
+b3_ac <- gather(b3_area, key = "FA", value = "Area", 2:53)
+b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:53)[,3]
 b3_ac$Batch <- as.character(3)
 
 ## Batch 4 ##
-b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:50)
-b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:50)[,3]
+b4_ac <- gather(b4_area, key = "FA", value = "Area", 2:51)
+b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:51)[,3]
 b4_ac$Batch <- as.character(4)
 
 ## Batch 5 ##
-b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:60)
-b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:60)[,3]
+b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:61)
+b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:61)[,3]
 b5_ac$Batch <- as.character(5)
 
 ## Batch 6 ##
@@ -111,13 +111,13 @@ b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:69)[,3]
 b6_ac$Batch <- as.character(6)
 
 ## Batch 7 ##
-b7_ac <- gather(b7_area, key = "FA", value = "Area", 2:56)
-b7_ac$Conc <- gather(b7_conc, key = "FA", value = "Conc", 2:56)[,3]
+b7_ac <- gather(b7_area, key = "FA", value = "Area", 2:57)
+b7_ac$Conc <- gather(b7_conc, key = "FA", value = "Conc", 2:57)[,3]
 b7_ac$Batch <- as.character(7)
 
 ## Batch 8 ##
-b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:57)
-b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:57)[,3]
+b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:58)
+b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:58)[,3]
 b8_ac$Batch <- as.character(8)
 
 ## Combine all batches together ##
@@ -250,11 +250,24 @@ FA_prop_0.5 <- spread(FA_ac_0.5[, c(1, 4, 9, 13)], key = FA, value = Prop_area_0
 FA_prop_0.5[is.na(FA_prop_0.5)] <- 0
 
 ## 1.0 % filter data ##
-FA_prop_1.0 <- spread(FA_ac_1.0[, c(1, 4, 9, 13)], key = FA, value = Prop_area_1.0)
+FA_prop_1.0 <- spread(FA_ac_1.0[, c(1, 3, 4, 9, 13)], key = FA, value = Prop_area_1.0)
 
 FA_prop_1.0[is.na(FA_prop_1.0)] <- 0
 
 ```
+
+New summary with zeros
+```{r wide to tall zero, echo=FALSE}
+sp_prop_summary_1.0.2 <- FA_prop_1.0 %>% 
+  gather(key = "FA", value = "Prop", 4:69) %>% 
+  group_by(Species_common, FA) %>% 
+  summarise(n = n(),
+            mean_prop_corr = mean(Prop),
+            sd_prop_corr = sd(Prop),
+            min_prop_corr = min(Prop),
+            max_prop_corr = max(Prop))
+```
+
 
 ### Export wide data
 ```{r export wide, echo = FALSE}
