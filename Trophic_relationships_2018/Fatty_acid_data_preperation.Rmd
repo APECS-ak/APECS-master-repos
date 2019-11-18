@@ -15,7 +15,7 @@ library(tidyverse)
 ```
 
 ## Data
-Import all FA area/concentration data and dry weight data
+Import all FA area/concentration data and dry weight data. **NOTE** Batch 2 does not need to be imported. I transfered the samples in that batch to batch 1 because of weird values. 
 
 ### Area and concentration data
 Naming will follow the convension of
@@ -27,11 +27,6 @@ example: b1_area is batch 1 area data
 b1_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_1_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 b1_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_1_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
-
-## Batch 2 ##
-b2_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_2_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
-
-b2_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_2_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
 ## Batch 3 ##
 b3_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_3_Area_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -85,11 +80,6 @@ b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:59)
 b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:59)[,3]
 b1_ac$Batch <- as.character(1)
 
-## Batch 2 ##
-b2_ac <- gather(b2_area, key = "FA", value = "Area", 2:61)
-b2_ac$Conc <- gather(b2_conc, key = "FA", value = "Conc", 2:61)[,3]
-b2_ac$Batch <- as.character(2)
-
 ## Batch 3 ##
 b3_ac <- gather(b3_area, key = "FA", value = "Area", 2:55)
 b3_ac$Conc <- gather(b3_conc, key = "FA", value = "Conc", 2:55)[,3]
@@ -101,8 +91,8 @@ b4_ac$Conc <- gather(b4_conc, key = "FA", value = "Conc", 2:51)[,3]
 b4_ac$Batch <- as.character(4)
 
 ## Batch 5 ##
-b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:61)
-b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:61)[,3]
+b5_ac <- gather(b5_area, key = "FA", value = "Area", 2:60)
+b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:60)[,3]
 b5_ac$Batch <- as.character(5)
 
 ## Batch 6 ##
@@ -116,12 +106,12 @@ b7_ac$Conc <- gather(b7_conc, key = "FA", value = "Conc", 2:57)[,3]
 b7_ac$Batch <- as.character(7)
 
 ## Batch 8 ##
-b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:58)
-b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:58)[,3]
+b8_ac <- gather(b8_area, key = "FA", value = "Area", 2:57)
+b8_ac$Conc <- gather(b8_conc, key = "FA", value = "Conc", 2:57)[,3]
 b8_ac$Batch <- as.character(8)
 
 ## Combine all batches together ##
-FA_ac <- rbind(b1_ac, b2_ac, b3_ac, b4_ac, b5_ac, b6_ac, b7_ac, b8_ac)
+FA_ac <- rbind(b1_ac, b3_ac, b4_ac, b5_ac, b6_ac, b7_ac, b8_ac)
 
 ## Add ID column ##
 FA_ac$ID <- substr(FA_ac$Sample, 1, 5)
@@ -259,7 +249,7 @@ FA_prop_1.0[is.na(FA_prop_1.0)] <- 0
 New summary with zeros
 ```{r wide to tall zero, echo=FALSE}
 sp_prop_summary_1.0.2 <- FA_prop_1.0 %>% 
-  gather(key = "FA", value = "Prop", 4:69) %>% 
+  gather(key = "FA", value = "Prop", 4:68) %>% 
   group_by(Species_common, FA) %>% 
   summarise(n = n(),
             mean_prop_corr = mean(Prop),
