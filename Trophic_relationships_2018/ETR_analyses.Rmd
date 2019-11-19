@@ -20,7 +20,7 @@ library(cowplot)
 library(RColorBrewer)
 library(vegan)
 library(DT)
-library(datatable)
+library(data.table)
 theme_set(theme_classic())
 ```
 
@@ -55,7 +55,7 @@ Fatty Acid
 ```{r dat fa, echo = FALSE}
 #fa_0.5 <- read.csv("../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
-fa_1.0 <- read.csv("../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+fa <- read.csv("../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Biomarker metadata
@@ -572,99 +572,230 @@ Similar to SI data there are two perspectives to analysis. 1) The whole communit
 
 #### FA data prep
 Subsets
+
+##### Primary Producers
 ```{r fa subsets, echo = FALSE}
-## Producers ##
-fa_pro_1.0 <- fa_1.0 %>%
+## All Producers ##
+fa_pro <- fa %>%
   filter(Species_common == "Eelgrass" | Species_common == "Eelgrass diatoms" | Species_common == "Fucus" | Species_common == "Particulate organic matter" | Species_common == "Sugar kelp" | Species_common == "Ulva")
 
-## Consumers ##
-fa_con_1.0 <- fa_1.0 %>% 
-  filter(Species_common != "Eelgrass" & Species_common != "Eelgrass diatoms" & Species_common != "Fucus" & Species_common != "Particulate organic matter" & Species_common != "Sugar kelp" & Species_common != "Ulva")
+# Eelgrass #
+fa_eg <- fa %>%
+  filter(Species_common == "Eelgrass")
 
-## Crabs ##
-fa_crb_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Helmet crab" | Species_common == "Dungeness crab" | Species_common == "Red rock crab")
+# Eelgrass diatoms / epiphytes #
+fa_ep <- fa %>%
+  filter(Species_common == "Eelgrass diatoms")
 
-# Crabs - Dungeness #
-fa_dun_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Dungeness crab")
+# Fucus #
+fa_fu <- fa %>%
+  filter(Species_common == "Fucus")
 
-# Crabs - Helmet #
-fa_hel_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Helmet crab")
+# POM #
+fa_pm <- fa %>%
+  filter(Species_common == "Particulate organic matter")
 
-## Primary consumers ##
-fa_pcon_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Butter clam" | Species_common == "Idotea" | Species_common == "Limpet" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
+# Sugar Kelp #
+fa_sk <- fa %>%
+  filter(Species_common == "Sugar kelp")
 
-fa_ido_1.0 <- fa_1.0 %>% 
-  filter(Species_common == "Idotea")
+# Ulva #
+fa_ul <- fa %>%
+  filter(Species_common == "Ulva")
 ```
 
 Append metadata
 ```{r}
-## Producers ##
-fa_pro_1.0 <- merge(fa_pro_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_pro_1.0 <- cbind(fa_pro_1.0[,c(71:75, 1, 3:69)])
-colnames(fa_pro_1.0)[7] <- "Species_common"
-colnames(fa_pro_1.0)[3] <- "Sea_otter_tr"
+## All producers ##
+fa_pro <- merge(fa_pro, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_pro <- cbind(fa_pro[,c(70:77, 1:2, 4:68)])
+colnames(fa_pro)[6] <- "Species_common"
+colnames(fa_pro)[3] <- "Sea_otter_tr"
+
+# Eelgrass #
+fa_eg <- merge(fa_eg, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_eg <- cbind(fa_eg[,c(70:77, 1:2, 4:68)])
+colnames(fa_eg)[6] <- "Species_common"
+colnames(fa_eg)[3] <- "Sea_otter_tr"
+
+# Eelgrass diatoms / epiphytes #
+fa_ep <- merge(fa_ep, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_ep <- cbind(fa_ep[,c(70:77, 1:2, 4:68)])
+colnames(fa_ep)[6] <- "Species_common"
+colnames(fa_ep)[3] <- "Sea_otter_tr"
+
+# Fucus #
+fa_fu <- merge(fa_fu, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_fu <- cbind(fa_fu[,c(70:77, 1:2, 4:68)])
+colnames(fa_fu)[6] <- "Species_common"
+colnames(fa_fu)[3] <- "Sea_otter_tr"
+
+# POM #
+fa_pm <- merge(fa_pm, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_pm <- cbind(fa_pm[,c(70:77, 1:2, 4:68)])
+colnames(fa_pm)[6] <- "Species_common"
+colnames(fa_pm)[3] <- "Sea_otter_tr"
+
+# Sugar Kelp #
+fa_sk <- merge(fa_sk, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_sk <- cbind(fa_sk[,c(70:77, 1:2, 4:68)])
+colnames(fa_sk)[6] <- "Species_common"
+colnames(fa_sk)[3] <- "Sea_otter_tr"
+
+# Ulva #
+fa_ul <- merge(fa_ul, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_ul <- cbind(fa_ul[,c(70:77, 1:2, 4:68)])
+colnames(fa_ul)[6] <- "Species_common"
+colnames(fa_ul)[3] <- "Sea_otter_tr"
+```
+
+##### Primary Consumers
+```{r}
+## Primary consumers ##
+fa_pcon <- fa %>% 
+  filter(Species_common == "Butter clam" | Species_common == "Idotea" | Species_common == "Limpet" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
+
+# Idotea #
+fa_ido <- fa %>% 
+  filter(Species_common == "Idotea")
+
+# Limpet #
+fa_lmp <- fa %>% 
+  filter(Species_common == "Limpet")
+
+# Butter Clams ##
+fa_but <- fa %>% 
+  filter(Species_common == "Butter clam")
+
+# Macoma Clams #
+fa_mac <- fa %>% 
+  filter(Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
+```
+
+Append metadata
+```{r}
+# Primary consumers #
+fa_pcon <- merge(fa_pcon, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_pcon <- cbind(fa_pcon[, c(70:77, 1:2, 4:68)])
+colnames(fa_pcon)[6] <- "Species_common"
+colnames(fa_pcon)[3] <- "Sea_otter_tr"
+
+# Idotea #
+fa_ido <- merge(fa_ido, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_ido <- cbind(fa_ido[, c(70:77, 1:2, 4:68)])
+colnames(fa_ido)[6] <- "Species_common"
+colnames(fa_ido)[3] <- "Sea_otter_tr"
+
+# Limpet #
+fa_lmp <- merge(fa_lmp, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_lmp <- cbind(fa_lmp[, c(70:77, 1:2, 4:68)])
+colnames(fa_lmp)[6] <- "Species_common"
+colnames(fa_lmp)[3] <- "Sea_otter_tr"
+
+# Butter Clams #
+fa_but <- merge(fa_but, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_but <- cbind(fa_but[, c(70:77, 1:2, 4:68)])
+colnames(fa_but)[6] <- "Species_common"
+colnames(fa_but)[3] <- "Sea_otter_tr"
+
+# Macoma clams #
+fa_mac <- merge(fa_mac, bimrk, by.x = "ID", by.y = "Biomarker_ID")
+fa_mac <- cbind(fa_mac[, c(70:77, 1:2, 4:68)])
+colnames(fa_mac)[6] <- "Species_common"
+colnames(fa_mac)[3] <- "Sea_otter_tr"
+```
+
+
+```{r}
+## Consumers ##
+fa_pcon <- fa %>% 
+  filter(Species_common != "Eelgrass" & Species_common != "Eelgrass diatoms" & Species_common != "Fucus" & Species_common != "Particulate organic matter" & Species_common != "Sugar kelp" & Species_common != "Ulva")
+
+## Crabs ##
+fa_crb <- fa %>% 
+  filter(Species_common == "Helmet crab" | Species_common == "Dungeness crab" | Species_common == "Red rock crab")
+
+# Crabs - Dungeness #
+fa_dun <- fa %>% 
+  filter(Species_common == "Dungeness crab")
+
+# Crabs - Helmet #
+fa_hel <- fa %>% 
+  filter(Species_common == "Helmet crab")
+
 
 ## Consumers ##
 fa_con_1.0 <- merge(fa_con_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_con_1.0 <- cbind(fa_con_1.0[,c(82:89, 1, 3:80)])
-colnames(fa_con_1.0)[7] <- "Species_common"
+fa_con_1.0 <- cbind(fa_con_1.0[,c(70:77, 1:2, 4:68)])
+colnames(fa_con_1.0)[6] <- "Species_common"
 colnames(fa_con_1.0)[3] <- "Sea_otter_tr"
 
 ## Crabs ##
 fa_crb_1.0 <- merge(fa_crb_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_crb_1.0 <- cbind(fa_crb_1.0[,c(69:76, 1, 3:67)])
+fa_crb_1.0 <- cbind(fa_crb_1.0[,c(70:77, 1:2, 4:68)])
 colnames(fa_crb_1.0)[6] <- "Species_common"
 colnames(fa_crb_1.0)[3] <- "Sea_otter_tr"
 
 # Crabs - Dungeness #
 fa_dun_1.0 <- merge(fa_dun_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_dun_1.0 <- cbind(fa_dun_1.0[,c(69:76, 1, 3:67)])
+fa_dun_1.0 <- cbind(fa_dun_1.0[,c(70:77, 1:2, 4:68)])
 colnames(fa_dun_1.0)[6] <- "Species_common"
 colnames(fa_dun_1.0)[3] <- "Sea_otter_tr"
 
 # Crabs - Helmet #
 fa_hel_1.0 <- merge(fa_hel_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_hel_1.0 <- cbind(fa_hel_1.0[,c(69:76, 1, 3:67)])
+fa_hel_1.0 <- cbind(fa_hel_1.0[,c(70:77, 1:2, 4:68)])
 colnames(fa_hel_1.0)[6] <- "Species_common"
 colnames(fa_hel_1.0)[3] <- "Sea_otter_tr"
 
-# Primary consumers #
-fa_pcon_1.0 <- merge(fa_pcon_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_pcon_1.0 <- cbind(fa_pcon_1.0[,c(69:76, 1, 3:67)])
-colnames(fa_pcon_1.0)[6] <- "Species_common"
-colnames(fa_pcon_1.0)[3] <- "Sea_otter_tr"
 
-# Idotea #
-fa_ido_1.0 <- merge(fa_ido_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_ido_1.0 <- cbind(fa_ido_1.0[,c(69:76, 1, 3:67)])
-colnames(fa_ido_1.0)[6] <- "Species_common"
-colnames(fa_ido_1.0)[3] <- "Sea_otter_tr"
 ```
 
-Transformations and standardizations
-I will use and arcsine sqrt transformation and standardize to FA (column) maximum
+Transformations
+I will use and arcsine sqrt transformation.
 ```{r fa trans std, echo = FALSE}
-## Transformation ##
-fa_pro_1.0_trs <- asin(sqrt(fa_pro_1.0[, 8:73]))
-fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 8:73]))
-fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 10:74]))
-fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 10:74]))
-fa_hel_1.0_trs <- asin(sqrt(fa_hel_1.0[, 10:74]))
-fa_pcon_1.0_trs <- asin(sqrt(fa_pcon_1.0[, 10:74]))
-fa_ido_1.0_trs <- asin(sqrt(fa_ido_1.0[, 10:74]))
+## Primary Producers ##
+fa_pro_trs <- asin(sqrt(fa_pro[, 11:75]))
+fa_eg_trs <- asin(sqrt(fa_eg[, 11:75]))
+fa_ep_trs <- asin(sqrt(fa_ep[, 11:75]))
+fa_fu_trs <- asin(sqrt(fa_fu[, 11:75]))
+fa_pm_trs <- asin(sqrt(fa_pm[, 11:75]))
+fa_sk_trs <- asin(sqrt(fa_sk[, 11:75]))
+fa_ul_trs <- asin(sqrt(fa_ul[, 11:75]))
+
+## Primary Consumers ##
+fa_pcon_trs <- asin(sqrt(fa_pcon[, 11:75]))
+fa_ido_trs <- asin(sqrt(fa_ido[, 11:75]))
+fa_lmp_trs <- asin(sqrt(fa_lmp[, 11:75]))
+fa_but_trs <- asin(sqrt(fa_but[, 11:75]))
+fa_mac_trs <- asin(sqrt(fa_mac[, 11:75]))
+
+## Secondary consumers ##
+fa_con_1.0_trs <- asin(sqrt(fa_con_1.0[, 11:75]))
+fa_crb_1.0_trs <- asin(sqrt(fa_crb_1.0[, 11:75]))
+fa_dun_1.0_trs <- asin(sqrt(fa_dun_1.0[, 11:75]))
+fa_hel_1.0_trs <- asin(sqrt(fa_hel_1.0[, 11:75]))
 
 ```
 
 #### Ordination
 Calculate distances
 ```{r dist, echo = FALSE}
-## Producers ##
-fa_pro_1.0_dist <- vegdist(fa_pro_1.0_trs, method = "euclidean")
+## Primary Producers ##
+fa_pro_dist <- vegdist(fa_pro_trs, method = "euclidean")
+fa_eg_dist <- vegdist(fa_eg_trs, method = "euclidean")
+fa_ep_dist <- vegdist(fa_ep_trs, method = "euclidean")
+fa_fu_dist <- vegdist(fa_fu_trs, method = "euclidean")
+fa_pm_dist <- vegdist(fa_pm_trs, method = "euclidean")
+fa_sk_dist <- vegdist(fa_sk_trs, method = "euclidean")
+fa_ul_dist <- vegdist(fa_ul_trs, method = "euclidean")
+
+## Primary Consumers ##
+fa_pcon_dist <- vegdist(fa_pcon_trs, method = "euclidean")
+fa_ido_dist <- vegdist(fa_ido_trs, method = "euclidean")
+fa_lmp_dist <- vegdist(fa_lmp_trs, method = "euclidean")
+fa_but_dist <- vegdist(fa_but_trs, method = "euclidean")
+fa_mac_dist <- vegdist(fa_mac_trs, method = "euclidean")
 
 ## Consumers ##
 fa_con_1.0_dist <- vegdist(fa_con_1.0_trs_std, method = "euclidean")
@@ -685,37 +816,66 @@ fa_pcon_1.0_dist <- vegdist(fa_pcon_1.0_trs, method = "euclidean")
 fa_ido_1.0_dist <- vegdist(fa_ido_1.0_trs, method = "euclidean")
 ```
 
-Calculate NMDS 
-```{r MDS, echo = FALSE}
-## Producers ##
-fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
-
-## Consumers ##
-fa_con_1.0_mds <- metaMDS(fa_con_1.0_dist)
-
-## All Crabs ##
-fa_crb_1.0_mds <- metaMDS(fa_crb_1.0_dist)
-
-## Dungeness crabs ##
-fa_dun_1.0_mds <- metaMDS(fa_dun_1.0_dist)
-
-## Helmet crabs ##
-fa_hel_1.0_mds <- metaMDS(fa_hel_1.0_dist)
-
-## Primary consumers ##
-fa_pcon_1.0_mds <- metaMDS(fa_pcon_1.0_dist)
-
-## Idotea ##
-fa_ido_1.0_mds <- metaMDS(fa_ido_1.0_dist)
-```
-
 #### PERMANOVA
-Test for the effect of sea otter nested by species. Also include tests of multivariate dispersion 'betadisper'. 
+Test for the effect of sea otter nested by species. Then within species sea otter tests.
+
+##### Primary Producers
 ```{r permanova, echo = FLASE}
 ## Producers ##
-perm.pro <- adonis2(fa_pro_1.0_dist ~ Sea_otter_tr + Site %in% Sea_otter_tr, data = fa_pro_1.0, perm = 9999) 
+perm.pro <- adonis2(fa_pro_dist ~ Sea_otter_tr + sp_code %in% Sea_otter_tr, data = fa_pro, perm = 9999) 
 perm.pro
 
+# Eelgrass #
+perm.eg <- adonis2(fa_eg_dist ~ Sea_otter_tr, data = fa_eg, perm = 9999) 
+perm.eg
+
+# Epiphytes #
+perm.ep <- adonis2(fa_ep_dist ~ Sea_otter_tr, data = fa_ep, perm = 9999) 
+perm.ep
+
+# Fucus #
+perm.fu <- adonis2(fa_fu_dist ~ Sea_otter_tr, data = fa_fu, perm = 9999)
+perm.fu
+
+# POM #
+perm.pm <- adonis2(fa_pm_dist ~ Sea_otter_tr, data = fa_pm, perm = 9999)
+perm.pm
+
+# Sugar kelp #
+perm.sk <- adonis2(fa_sk_dist ~ Sea_otter_tr, data = fa_sk, perm = 9999)
+perm.sk
+
+# Ulva #
+perm.ul <- adonis2(fa_ul_dist ~ Sea_otter_tr, data = fa_ul, perm = 9999)
+perm.ul
+```
+
+##### Primary Consumers
+```{r}
+## All primary consumers ##
+perm.pcon <- adonis2(fa_pcon_dist ~ Sea_otter_tr + sp_code %in% Sea_otter_tr, data = fa_pcon, perm = 9999)
+perm.pcon
+
+# Idotea #
+perm.ido <- adonis2(fa_ido_dist ~ Sea_otter_tr, data = fa_ido, perm = 9999)
+perm.ido
+
+# Limpet #
+perm.lmp <- adonis2(fa_lmp_dist ~ Sea_otter_tr, data = fa_lmp, perm = 9999)
+perm.lmp
+
+# Butter clam #
+perm.but <- adonis2(fa_but_dist ~ Sea_otter_tr, data = fa_but, perm = 9999)
+perm.but
+
+# Macoma clam #
+perm.mac <- adonis2(fa_mac_dist ~ Sea_otter_tr, data = fa_mac, perm = 9999)
+perm.mac
+```
+
+
+
+```{r}
 ## Consumers ##
 perm.con <- adonis2(fa_con_1.0_dist ~ Sea_otter_tr / sp_code, data = fa_con_1.0, perm = 9999) 
 perm.con
@@ -782,6 +942,31 @@ datatable(filter(simp.hel.dat, p < 0.05))
 ```
 
 #### NMDS Plots
+##### Ordination
+Calculate NMDS 
+```{r MDS, echo = FALSE}
+## Producers ##
+fa_pro_1.0_mds <- metaMDS(fa_pro_1.0_dist)
+
+## Consumers ##
+fa_con_1.0_mds <- metaMDS(fa_con_1.0_dist)
+
+## All Crabs ##
+fa_crb_1.0_mds <- metaMDS(fa_crb_1.0_dist)
+
+## Dungeness crabs ##
+fa_dun_1.0_mds <- metaMDS(fa_dun_1.0_dist)
+
+## Helmet crabs ##
+fa_hel_1.0_mds <- metaMDS(fa_hel_1.0_dist)
+
+## Primary consumers ##
+fa_pcon_1.0_mds <- metaMDS(fa_pcon_1.0_dist)
+
+## Idotea ##
+fa_ido_1.0_mds <- metaMDS(fa_ido_1.0_dist)
+```
+
 ##### Data Prep
 ```{r}
 ## Producers ##
@@ -919,8 +1104,7 @@ arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
 ## Producers ##
 ggplot(fa_pro_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red3", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2), label = fa_pro_1.0_mds_dat$ID)
+  scale_color_manual(values = c("red3", "deepskyblue3"))
 
 ggplot(fa_pro_1.0_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
