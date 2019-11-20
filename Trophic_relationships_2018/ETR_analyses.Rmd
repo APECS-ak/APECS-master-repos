@@ -796,24 +796,35 @@ colnames(fa_mac)[6] <- "Species_common"
 colnames(fa_mac)[3] <- "Sea_otter_tr"
 ```
 
-
+##### Secondary Consumers
 ```{r}
-## Consumers ##
-fa_pcon <- fa %>% 
-  filter(Species_common != "Eelgrass" & Species_common != "Eelgrass diatoms" & Species_common != "Fucus" & Species_common != "Particulate organic matter" & Species_common != "Sugar kelp" & Species_common != "Ulva")
+## All Secondary Consumers ##
+fa_scon <- fa %>% 
+  filter(Species_common == "Dock shrimp" | Species_common == "Helmet crab" | Species_common == "Graceful crab" | Species_common == "Shiner perch" | Species_common == "Snake prickleback" | Species_common == "Staghorn sculpin")
 
-## Crabs ##
-fa_crb <- fa %>% 
-  filter(Species_common == "Helmet crab" | Species_common == "Dungeness crab" | Species_common == "Red rock crab")
+# Dock Shrimp #
+fa_dsh <- fa %>% 
+  filter(Species_common == "Dock shrimp")
 
-# Crabs - Dungeness #
-fa_dun <- fa %>% 
-  filter(Species_common == "Dungeness crab")
-
-# Crabs - Helmet #
+# Helmet crabs #
 fa_hel <- fa %>% 
   filter(Species_common == "Helmet crab")
 
+# Graceful crabs #
+fa_dun <- fa %>% 
+  filter(Species_common == "Graceful crab")
+
+# Shiner Perch #
+fa_shn <- fa %>% 
+  filter(Species_common == "Shiner perch")
+
+# Snake prickleback #
+fa_snk <- fa %>% 
+  filter(Species_common = "Snake prickleback")
+
+# Staghorn sculpin #
+fa_stg <- fa %>% 
+  filter(Species_common = "Staghorn sculpin")
 
 ## Consumers ##
 fa_con_1.0 <- merge(fa_con_1.0, bimrk, by.x = "ID", by.y = "Biomarker_ID")
