@@ -1,0 +1,73 @@
+---
+title: "SI - Loading data and visualizations"
+author: "Nicole LaRoche"
+date: "11/14/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, libraries, echo=FALSE}
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+library(car)
+
+```
+
+
+```{r, load prey, echo=FALSE}
+si.test <- read.csv("SI/SI.csv")
+#until final data is run, delete rows 205-272
+si.test<-si.test[-c(205:272), ] 
+
+#make new line with overall prey cat
+si.test$PreyCat <- NA
+si.test$PreyCat <- ifelse(si.test$Species == "apc", "Cucumber", 
+                   ifelse(si.test$Species == "cln" | si.test$Species == "prs" | si.test$Species == 
+                            "sag", "Clam", 
+                   ifelse(si.test$Species == "cam" | si.test$Species == "cap" | si.test$Species == "cao"                              | si.test$Species == "tec", "Crab", 
+                   ifelse(si.test$Species == "cef" | si.test$Species == "tes" | si.test$Species == 
+                            "nul", "Snail",
+                   ifelse(si.test$Species == "pio" | si.test$Species == "evt", "Star",
+                   ifelse(si.test$Species == "std" | si.test$Species == "stf", "Urchin",
+                   ifelse(si.test$Species == "mtr", "Mussel","")))))))
+```
+
+```{r, carbon norm, echo=FALSE}
+### Fixing C for high fat critters. Anything above 3.5:1 ratio
+si.test$Cnorm <- NA
+si.test$Cnorm<- ifelse(si.test$CN >= 3.5, si.test$C-3.32+(0.99*si.test$CN), si.test$C)
+si.test$SiteNumber<-as.character(si.test$SiteNumber)
+```
+
+```{r, single prey cats, echo=FALSE}
+si.clam<- filter(si.test, Species== "cln" | Species == "sag" | Species == "prs")
+si.crab<- filter(si.test, Species== "cam" | Species == "cao" | Species== "cap" | Species== "tec")
+si.snail<- filter(si.test, Species =="tes" | Species == "cef" | Species == "nul")
+si.urch<- filter(si.test, Species =="std" | Species == "stf")
+si.star<- filter(si.test, Species =="pio" | Species == "evt")
+si.mus<- filter(si.test, Species =="mtr")
+```
+
+```{r, load whiskers, echo=FALSE}
+whisker <- read.csv("SI/whiskers.csv")
+whisker$OtterID<-as.character(whisker$OtterID)
+
+# for right now, I want to remove 163532. I removed 160478 and 77298 from the CSV
+oddotter<- filter(whisker, OtterID=="163532")
+whisker<- filter(whisker, OtterID != "163532")
+
+#right now, removing last row because it only has one obs
+whisker<-whisker[-286, ] 
+
+#Shortening to only 8cm max for graphs
+whisker.short<-filter(whisker, distance <= 8)
+```
+
+First, I want to look at wisker ranges in SD and niche width
+
+
+

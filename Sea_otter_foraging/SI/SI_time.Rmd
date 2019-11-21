@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # Introduction
-I am working on sea otter whisker analysis over time from the root to the tip of the whisker. As my analysis is not complete, this is includes 20 sea otters as a population between Klawock and Naukati on Prince of Wales Island. Sea otter whiskers were collected from June 26- August 6, 2019. 
+I am working on sea otter whisker analysis over time from the root to the tip of the whisker. As my analysis is not complete, this is includes 27 sea otters as a population between Klawock and Naukati on Prince of Wales Island. Sea otter whiskers were collected from June 26- August 6, 2019. 
 
 # Analysis
 
@@ -20,6 +20,7 @@ First, I want to load the correct programs and files. I am loading ggplot to pri
 ```{r, message= FALSE}
 library(ggplot2)
 library(dplyr)
+library(ggthemes)
 
 #load whisker data
 whisker <- read.csv("whiskers.csv")
