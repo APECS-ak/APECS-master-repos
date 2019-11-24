@@ -1,6 +1,8 @@
 ---
 title: "Sea otter seasonal diet composition in Southeast Alaska"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -245,7 +247,7 @@ ggplot() +
                aes(x=C), alpha=.5, fill= "darkgoldenrod1") +
   geom_density(data=filter(si.test, Season == "Winter"), 
                aes(x=C), alpha=.5, fill = "lightseagreen") +
-  labs(x=expression(paste(delta^15, "N (\u2030)" ))) +
+  labs(x=expression(paste(delta^13, "C (\u2030)" ))) +
   theme(axis.title = element_text(size=14))
 ```
 

@@ -515,18 +515,19 @@ ggsave("whiskers.png", device = "png", path = "SI/", width = 8,
 
 #sub sample of otters for WSN poster
 
-wsn<-filter(whisker, OtterID=="163520" | OtterID=="163521" | OtterID=="163536")
+wsn<-filter(whisker, OtterID=="163520" | OtterID=="163521" | OtterID=="163536" | OtterID == "163526")
 ggplot(data=wsn) +   theme_few() +
   geom_line(aes(x=distance, y=N), colour="tomato") + 
   geom_line(aes(x=distance, y=C+28), colour="lightseagreen") +
   labs(x= "Distance from root (cm)", y=expression(paste(delta^15, "N (\u2030)" )))  +
   scale_y_continuous(sec.axis = sec_axis(~.-28, name = expression(paste(delta^13, "C (\u2030)" )))) +
-  facet_wrap(vars(OtterID), nrow=1) +
-  theme(axis.title = element_text(size=18))
+  facet_wrap(vars(OtterID), nrow=2) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"), legend.position = "none", legend.title = element_blank()) 
 
 
-ggsave("wsn.png", device = "png", path = "SI/", width = 10, 
-       height = 3, units = "in", dpi = 300)
+ggsave("wsn.png", device = "png", path = "SI/", width = 8, 
+       height = 8, units = "in", dpi = 300)
 
 
 #Looking at seasonality
@@ -729,14 +730,36 @@ ggplot() +
                aes(x=N), alpha=.4, fill = "paleturquoise1") +
   labs(x=expression(paste(delta^15, "N" ))) 
 
-#Summer/spring vs fall/winter
+#Summer/spring vs fall/winter - Nitrogen
 ggplot() +   
   theme_few() +
-  geom_density(data=filter(whisker.short, Season == "Fall" | Season == "Winter"), 
-               aes(x=N), alpha=.5, fill= "lightseagreen") +
+  geom_density(data=filter(whisker, Season == "Fall" | Season == "Winter"), 
+               aes(x=N, colour= "Fall/Winter"), alpha=.5, fill= "lightseagreen") +
   geom_density(data=filter(whisker.short, Season == "Spring"| Season =="Summer"), 
-               aes(x=N), alpha=.5, fill= "darkgoldenrod1") +
-  labs(x=expression(paste(delta^15, "N" ))) 
+               aes(x=N, colour = "Spring/Summer"), alpha=.5, fill= "darkgoldenrod1") +
+  scale_colour_manual(name='', values=c("Fall/Winter"="lightseagreen", 
+                                        "Spring/Summer"="darkgoldenrod1")) +
+  theme(axis.title = element_blank(), axis.text= element_text(size = 16, face= "bold"), 
+        legend.position = "none", legend.title = element_blank()) 
+
+
+ggsave("N_whisker_seasons.png", device = "png", path = "SI/", width = 8, 
+       height = 6.5, units = "in", dpi = 300)
+
+#carbon
+ggplot() +   
+  theme_few() +
+  geom_density(data=filter(whisker, Season == "Fall" | Season == "Winter"), 
+               aes(x=C, colour= "Fall/Winter"), alpha=.5, fill= "lightseagreen") +
+  geom_density(data=filter(whisker.short, Season == "Spring"| Season =="Summer"), 
+               aes(x=C, colour = "Spring/Summer"), alpha=.5, fill= "darkgoldenrod1") +
+  scale_colour_manual(name='', values=c("Fall/Winter"="lightseagreen", 
+                                        "Spring/Summer"="darkgoldenrod1")) +
+  theme(axis.title = element_blank(), 
+        axis.text= element_text(size = 16, face= "bold"), legend.position = "none", legend.title = element_blank()) 
+
+ggsave("C_whisker_seasons.png", device = "png", path = "SI/", width = 8, 
+       height = 6.5, units = "in", dpi = 300)
 
 #now look at the prey - mussel
 ggplot() +   
@@ -784,8 +807,29 @@ ggplot() +
 #all prey with spring and summer combined
 ggplot() +   
   theme_few() +
-  geom_density(data=filter(si.test, Season == "Summer"| Season == "Spring"), 
-               aes(x=N), alpha=.5, fill= "darkgoldenrod1") +
   geom_density(data=filter(si.test, Season == "Winter"), 
-               aes(x=N), alpha=.5, fill = "lightseagreen") +
-  labs(x=expression(paste(delta^15, "N" ))) 
+               aes(x=N, colour = "Winter"), alpha=.5, fill = "lightseagreen") +
+  geom_density(data=filter(si.test, Season == "Summer"| Season == "Spring"), 
+               aes(x=N, colour= "Spring/Summer"), alpha=.5, fill = "darkgoldenrod1") +
+  labs(y = "Density", x=expression(paste(delta^15, "N (\u2030)" ))) +
+  scale_colour_manual(name='', values=c("Winter"="lightseagreen", "Spring/Summer"="darkgoldenrod1")) +
+  theme(axis.title = element_text(size=20, face = "bold"),  
+        axis.text= element_text(size = 14, face= "bold"), legend.position = "bottom", 
+        legend.title = element_blank(), legend.text = element_text(size = 14, face = "bold")) 
+
+ggsave("N_prey_seasons.png", device = "png", path = "SI/", width = 8, 
+       height = 7, units = "in", dpi = 300)
+
+ggplot() +   
+  theme_few() +
+  geom_density(data=filter(si.test, Season == "Winter"), 
+               aes(x=C, colour = "Winter"), alpha=.5, fill = "lightseagreen") +
+  geom_density(data=filter(si.test, Season == "Summer"| Season == "Spring"), 
+               aes(x=C, colour= "Spring/Summer"), alpha=.5, fill = "darkgoldenrod1") +
+  labs(y= "Denisty", x=expression(paste(delta^13, "C (\u2030)" ))) +
+  scale_colour_manual(name='', values=c("Spring/Summer"="darkgoldenrod1", "Winter"="lightseagreen"))+
+  theme(axis.title = element_text(size=20, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"), legend.position = "none", legend.title = element_blank()) 
+
+ggsave("C_prey_seasons.png", device = "png", path = "SI/", width = 8, 
+       height = 6.4, units = "in", dpi = 300)

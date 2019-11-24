@@ -88,11 +88,12 @@ ggplot(data = fo) +
   theme_few() +
   geom_col(mapping= aes(x = species, y = fo, fill=species)) +
   scale_x_discrete(limits=c("clam","crab","snail","cucumber", "urchin", "mussel")) +
-  scale_y_continuous(labels =scales::percent_format(accuracy = 1), breaks=c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9)) +
-  labs(x= "", y= "Frequency of occurrence (in bouts)", tag="B") +
-  theme(axis.text.y = element_text(size=12),
-        axis.text.x = element_text(size=14, angle=45, hjust=1),
-        axis.title.y=element_text(size=12))
+  scale_y_continuous(labels =scales::percent_format(accuracy = 1), breaks=c(0,.1,.2,.3,.4,.5,.6,.7,.8,.9, 1)) +
+  expand_limits(y = c(0, 1)) +
+  labs(x= "", y= "Frequency of occurrence (foraging bouts)") +
+  theme(axis.text.y = element_text(size=14, face = "bold"),
+        axis.text.x = element_text(size=18, angle=45, hjust=1, face = "bold"),
+        axis.title.y=element_text(size=18, face = "bold"), legend.position = "none")
 
 
 ggsave("fo_bar.png", device = "png", path = "Visual/", width = 8, 
