@@ -38,7 +38,6 @@ shape.pal <- c(15, 16, 17)
 so.pal <- (c("red3", "deepskyblue3"))
 ```
 
-
 ## Data
 Data falls under three broad categories. Biomass, stable isotopes, and fatty acids. Biomass data files are broken up by sampling type but can easily be combined. In addition, biomarker (SI and FA) metadata is useful to match those data with site, date, treatment, etc. data.
 Biomass and oceanography
@@ -699,43 +698,43 @@ Append metadata
 ```{r}
 ## All producers ##
 fa_pro <- merge(fa_pro, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_pro <- cbind(fa_pro[,c(70:77, 1:2, 4:68)])
+fa_pro <- cbind(fa_pro[,c(58:66, 1:2, 4:56)])
 colnames(fa_pro)[6] <- "Species_common"
 colnames(fa_pro)[3] <- "Sea_otter_tr"
 
 # Eelgrass #
 fa_eg <- merge(fa_eg, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_eg <- cbind(fa_eg[,c(70:77, 1:2, 4:68)])
+fa_eg <- cbind(fa_eg[,c(58:66, 1:2, 4:56)])
 colnames(fa_eg)[6] <- "Species_common"
 colnames(fa_eg)[3] <- "Sea_otter_tr"
 
 # Eelgrass diatoms / epiphytes #
 fa_ep <- merge(fa_ep, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_ep <- cbind(fa_ep[,c(70:77, 1:2, 4:68)])
+fa_ep <- cbind(fa_ep[,c(58:66, 1:2, 4:56)])
 colnames(fa_ep)[6] <- "Species_common"
 colnames(fa_ep)[3] <- "Sea_otter_tr"
 
 # Fucus #
 fa_fu <- merge(fa_fu, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_fu <- cbind(fa_fu[,c(70:77, 1:2, 4:68)])
+fa_fu <- cbind(fa_fu[,c(58:66, 1:2, 4:56)])
 colnames(fa_fu)[6] <- "Species_common"
 colnames(fa_fu)[3] <- "Sea_otter_tr"
 
 # POM #
 fa_pm <- merge(fa_pm, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_pm <- cbind(fa_pm[,c(70:77, 1:2, 4:68)])
+fa_pm <- cbind(fa_pm[,c(58:66, 1:2, 4:56)])
 colnames(fa_pm)[6] <- "Species_common"
 colnames(fa_pm)[3] <- "Sea_otter_tr"
 
 # Sugar Kelp #
 fa_sk <- merge(fa_sk, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_sk <- cbind(fa_sk[,c(70:77, 1:2, 4:68)])
+fa_sk <- cbind(fa_sk[,c(58:66, 1:2, 4:56)])
 colnames(fa_sk)[6] <- "Species_common"
 colnames(fa_sk)[3] <- "Sea_otter_tr"
 
 # Ulva #
 fa_ul <- merge(fa_ul, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_ul <- cbind(fa_ul[,c(70:77, 1:2, 4:68)])
+fa_ul <- cbind(fa_ul[,c(58:66, 1:2, 4:56)])
 colnames(fa_ul)[6] <- "Species_common"
 colnames(fa_ul)[3] <- "Sea_otter_tr"
 ```
@@ -767,31 +766,31 @@ Append metadata
 ```{r}
 # Primary consumers #
 fa_pcon <- merge(fa_pcon, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_pcon <- cbind(fa_pcon[, c(70:77, 1:2, 4:68)])
+fa_pcon <- cbind(fa_pcon[, c(58:66, 1:2, 4:56)])
 colnames(fa_pcon)[6] <- "Species_common"
 colnames(fa_pcon)[3] <- "Sea_otter_tr"
 
 # Idotea #
 fa_ido <- merge(fa_ido, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_ido <- cbind(fa_ido[, c(70:77, 1:2, 4:68)])
+fa_ido <- cbind(fa_ido[, c(58:66, 1:2, 4:56)])
 colnames(fa_ido)[6] <- "Species_common"
 colnames(fa_ido)[3] <- "Sea_otter_tr"
 
 # Limpet #
 fa_lmp <- merge(fa_lmp, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_lmp <- cbind(fa_lmp[, c(70:77, 1:2, 4:68)])
+fa_lmp <- cbind(fa_lmp[, c(58:66, 1:2, 4:56)])
 colnames(fa_lmp)[6] <- "Species_common"
 colnames(fa_lmp)[3] <- "Sea_otter_tr"
 
 # Butter Clams #
 fa_but <- merge(fa_but, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_but <- cbind(fa_but[, c(70:77, 1:2, 4:68)])
+fa_but <- cbind(fa_but[, c(58:66, 1:2, 4:56)])
 colnames(fa_but)[6] <- "Species_common"
 colnames(fa_but)[3] <- "Sea_otter_tr"
 
 # Macoma clams #
 fa_mac <- merge(fa_mac, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_mac <- cbind(fa_mac[, c(70:77, 1:2, 4:68)])
+fa_mac <- cbind(fa_mac[, c(58:66, 1:2, 4:56)])
 colnames(fa_mac)[6] <- "Species_common"
 colnames(fa_mac)[3] <- "Sea_otter_tr"
 ```
@@ -830,43 +829,43 @@ fa_stg <- fa %>%
 ```{r}
 ## All secondary consumers ##
 fa_scon <- merge(fa_scon, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_scon <- cbind(fa_scon[, c(70:77, 1:2, 4:68)])
+fa_scon <- cbind(fa_scon[, c(58:66, 1:2, 4:56)])
 colnames(fa_scon)[6] <- "Species_common"
 colnames(fa_scon)[3] <- "Sea_otter_tr"
 
 # Doch shrimp #
 fa_dsh <- merge(fa_dsh, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_dsh <- cbind(fa_dsh[, c(70:77, 1:2, 4:68)])
+fa_dsh <- cbind(fa_dsh[, c(58:66, 1:2, 4:56)])
 colnames(fa_dsh)[6] <- "Species_common"
 colnames(fa_dsh)[3] <- "Sea_otter_tr"
 
 # Helmet crabs #
 fa_hel <- merge(fa_hel, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_hel <- cbind(fa_hel[, c(70:77, 1:2, 4:68)])
+fa_hel <- cbind(fa_hel[, c(58:66, 1:2, 4:56)])
 colnames(fa_hel)[6] <- "Species_common"
 colnames(fa_hel)[3] <- "Sea_otter_tr"
 
 # Graceful crabs #
 fa_grc <- merge(fa_grc, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_grc <- cbind(fa_grc[, c(70:77, 1:2, 4:68)])
+fa_grc <- cbind(fa_grc[, c(58:66, 1:2, 4:56)])
 colnames(fa_grc)[6] <- "Species_common"
 colnames(fa_grc)[3] <- "Sea_otter_tr"
 
 # Shiner Perch #
 fa_shn <- merge(fa_shn, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_shn <- cbind(fa_shn[, c(70:77, 1:2, 4:68)])
+fa_shn <- cbind(fa_shn[, c(58:66, 1:2, 4:56)])
 colnames(fa_shn)[6] <- "Species_common"
 colnames(fa_shn)[3] <- "Sea_otter_tr"
 
 # Snake pricklback #
 fa_snk <- merge(fa_snk, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_snk <- cbind(fa_snk[, c(70:77, 1:2, 4:68)])
+fa_snk <- cbind(fa_snk[, c(58:66, 1:2, 4:56)])
 colnames(fa_snk)[6] <- "Species_common"
 colnames(fa_snk)[3] <- "Sea_otter_tr"
 
 # Staghorn sculpin #
 fa_stg <- merge(fa_stg, bimrk, by.x = "ID", by.y = "Biomarker_ID")
-fa_stg <- cbind(fa_stg[, c(70:77, 1:2, 4:68)])
+fa_stg <- cbind(fa_stg[, c(58:66, 1:2, 4:56)])
 colnames(fa_stg)[6] <- "Species_common"
 colnames(fa_stg)[3] <- "Sea_otter_tr"
 ```
@@ -875,29 +874,29 @@ Transformations
 I will use and arcsine sqrt transformation.
 ```{r fa trans std, echo = FALSE}
 ## Primary Producers ##
-fa_pro_trs <- asin(sqrt(fa_pro[, 11:75]))
-fa_eg_trs <- asin(sqrt(fa_eg[, 11:75]))
-fa_ep_trs <- asin(sqrt(fa_ep[, 11:75]))
-fa_fu_trs <- asin(sqrt(fa_fu[, 11:75]))
-fa_pm_trs <- asin(sqrt(fa_pm[, 11:75]))
-fa_sk_trs <- asin(sqrt(fa_sk[, 11:75]))
-fa_ul_trs <- asin(sqrt(fa_ul[, 11:75]))
+fa_pro_trs <- asin(sqrt(fa_pro[, 12:64]))
+fa_eg_trs <- asin(sqrt(fa_eg[, 12:64]))
+fa_ep_trs <- asin(sqrt(fa_ep[, 12:64]))
+fa_fu_trs <- asin(sqrt(fa_fu[, 12:64]))
+fa_pm_trs <- asin(sqrt(fa_pm[, 12:64]))
+fa_sk_trs <- asin(sqrt(fa_sk[, 12:64]))
+fa_ul_trs <- asin(sqrt(fa_ul[, 12:64]))
 
 ## Primary Consumers ##
-fa_pcon_trs <- asin(sqrt(fa_pcon[, 11:75]))
-fa_ido_trs <- asin(sqrt(fa_ido[, 11:75]))
-fa_lmp_trs <- asin(sqrt(fa_lmp[, 11:75]))
-fa_but_trs <- asin(sqrt(fa_but[, 11:75]))
-fa_mac_trs <- asin(sqrt(fa_mac[, 11:75]))
+fa_pcon_trs <- asin(sqrt(fa_pcon[, 12:64]))
+fa_ido_trs <- asin(sqrt(fa_ido[, 12:64]))
+fa_lmp_trs <- asin(sqrt(fa_lmp[, 12:64]))
+fa_but_trs <- asin(sqrt(fa_but[, 12:64]))
+fa_mac_trs <- asin(sqrt(fa_mac[, 12:64]))
 
 ## Secondary consumers ##
-fa_scon_trs <- asin(sqrt(fa_scon[, 11:75]))
-fa_dsh_trs <- asin(sqrt(fa_dsh[, 11:75]))
-fa_hel_trs <- asin(sqrt(fa_hel[, 11:75]))
-fa_grc_trs <- asin(sqrt(fa_grc[, 11:75]))
-fa_shn_trs <- asin(sqrt(fa_shn[, 11:75]))
-fa_snk_trs <- asin(sqrt(fa_snk[, 11:75]))
-fa_stg_trs <- asin(sqrt(fa_stg[, 11:75]))
+fa_scon_trs <- asin(sqrt(fa_scon[, 12:64]))
+fa_dsh_trs <- asin(sqrt(fa_dsh[, 12:64]))
+fa_hel_trs <- asin(sqrt(fa_hel[, 12:64]))
+fa_grc_trs <- asin(sqrt(fa_grc[, 12:64]))
+fa_shn_trs <- asin(sqrt(fa_shn[, 12:64]))
+fa_snk_trs <- asin(sqrt(fa_snk[, 12:64]))
+fa_stg_trs <- asin(sqrt(fa_stg[, 12:64]))
 ```
 
 #### Ordination
@@ -1056,7 +1055,7 @@ datatable(filter(simp.hel.dat, p < 0.05))
 Calculate NMDS 
 ```{r MDS, echo = FALSE}
 ## Primary Producers ##
-
+fa_pro_mds <- metaMDS(fa_pro_dist)
 
 ## Primary Consumers
 
@@ -1070,10 +1069,10 @@ fa_grc_mds <- metaMDS(fa_grc_dist)
 ##### Data Prep
 ```{r}
 ## Producers ##
-fa_pro_1.0_mds_dat <- as.data.frame(scores(fa_pro_1.0_mds))
-fa_pro_1.0_mds_dat$ID <- fa_pro_1.0$ID 
-fa_pro_1.0_mds_dat <- merge(fa_pro_1.0_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pro_1.0_mds_dat$Species_common <- factor(fa_pro_1.0_mds_dat$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva"))
+fa_pro_mds_dat <- as.data.frame(scores(fa_pro_mds))
+fa_pro_mds_dat$ID <- fa_pro$ID 
+fa_pro_mds_dat <- merge(fa_pro_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_pro_mds_dat$Species_common <- factor(fa_pro_mds_dat$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva"))
 
 ## Consumers ##
 fa_con_1.0_mds_dat <- as.data.frame(scores(fa_con_1.0_mds))
@@ -1202,11 +1201,11 @@ arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
 ##### Plots
 ```{r}
 ## Producers ##
-ggplot(fa_pro_1.0_mds_dat) +
+ggplot(fa_pro_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
   scale_color_manual(values = c("red3", "deepskyblue3"))
 
-ggplot(fa_pro_1.0_mds_dat) +
+ggplot(fa_pro_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
   scale_color_manual(values = c("red", "deepskyblue3")) +
   geom_segment(data = vec.pro.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
