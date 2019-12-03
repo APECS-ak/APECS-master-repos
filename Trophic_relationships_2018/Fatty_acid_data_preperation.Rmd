@@ -59,6 +59,12 @@ b8_area <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_8_Area_RAW.csv", stri
 b8_conc <- read.csv("../ALL_DATA/Fatty_acid_RAW_data/Batch_8_Conc_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 ```
 
+Biomarker metadata
+```{r dat biomarker, echo = FALSE}
+bimrk <- read.csv("../ALL_DATA/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+
 ### Dry sample mass data
 ```{r data mass, echo = FALSE}
 samp_mass <- read.csv("../ALL_DATA/Biomarker_extraction_mass_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
@@ -76,8 +82,8 @@ samp_mass_redu <- samp_mass %>%
 Combine all batch data and convert to tall format. Preserve batch number identity for claculations and figuring out any data issues. Clean up sample names.
 ```{r combine, echo = FALSE}
 ## Batch 1 ##
-b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:59)
-b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:59)[,3]
+b1_ac <- gather(b1_area, key = "FA", value = "Area", 2:57)
+b1_ac$Conc <- gather(b1_conc, key = "FA", value = "Conc", 2:57)[,3]
 b1_ac$Batch <- as.character(1)
 
 ## Batch 3 ##
@@ -127,12 +133,27 @@ FA_ac$Conc <- as.numeric(FA_ac$Conc)
 ## Calculate proportion by area
 For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample. NOTE that C19 is removed for this calculation. NOTE any area and concentration data that is imported at a negative number will be converted to a zero.
 
+1) Starting with data in proportions, melt wide-format FA so each sample's measure for each FA has its own row.
+2) Aggregate data by sample type, Lz presence, and FA (in your case probs tissue and FA).
+   Here, you should have a data frame with the means of each FA by each tissue type
+3) Subset the data frame by each tissue type and where the mean is >1% (e.g. df_crab=subset(df, dftissue=="crab" & dfmean >1) ).  I'm sure there's a better way to do this part...
+   Here, you should have J number of data frames, where J is the number of tissue types you have
+4) Create a list of FA with >1% by combining the FA listed in each new df.
+   e.g. FA_list=as.list(as.character(df_crabFA), as.character(df_slugFA), as.character(df_CornishGameHen$FA)) and whatnot
+5) Pare that list down to unique FA (e.g. FA_list=unique(FA_list) )
+6) Use the list to subset your melted data frame, only including FA on the list (e.g. df_final=df[df$FA %in% FA_list,] )
+7) Cast the final data frame into wide format to use for multivariate analyses.
+
 ```{r calc, prop, echo = FALSE}
 ## Convert neg to zero ##
 FA_ac$Area <- ifelse(FA_ac$Area < 0, 0, FA_ac$Area) 
 FA_ac$Conc <- ifelse(FA_ac$Conc < 0, 0, FA_ac$Conc) 
 
 ## Calcualte proportion of total sample area ##
+# Append metadat #
+FA_ac <- merge(FA_ac, bimrk[, 7:11], by.x = "ID", by.y = "Biomarker_ID")
+
+# Calculate total area by sample #
 FA_ac <- FA_ac %>% 
   filter(str_detect(ID, "^B_")) %>%
   filter(FA != "C19.0") %>% 
@@ -140,6 +161,19 @@ FA_ac <- FA_ac %>%
   mutate(Total_area = sum(Area))
 
 FA_ac$Prop_area <- FA_ac$Area / FA_ac$Total_area
+
+# Calcualte mean proportion my tissue #
+FA_a <- FA_ac %>% 
+  group_by(FA, Species_common) %>% 
+  summarise(mean_prop = mean(Prop_area),
+            sd_prop = sd(Prop_area),
+            min_prop = min(Prop_area),
+            max_prop = max(Prop_area))
+
+FA_a_1.0 <- FA_a %>%
+  filter(mean_prop >= 0.01)
+
+FA_ac_1.0$Prop_area_1.0 <- FA_ac_1.0$Area / FA_ac_1.0$Total_area_1.0
 ```
 
 ## C19 standard data
