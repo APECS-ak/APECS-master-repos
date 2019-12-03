@@ -133,24 +133,23 @@ FA_ac$Conc <- as.numeric(FA_ac$Conc)
 ## Calculate proportion by area
 For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample. NOTE that C19 is removed for this calculation. NOTE any area and concentration data that is imported at a negative number will be converted to a zero.
 
-1) Starting with data in proportions, melt wide-format FA so each sample's measure for each FA has its own row.
-2) Aggregate data by sample type, Lz presence, and FA (in your case probs tissue and FA).
-   Here, you should have a data frame with the means of each FA by each tissue type
-3) Subset the data frame by each tissue type and where the mean is >1% (e.g. df_crab=subset(df, dftissue=="crab" & dfmean >1) ).  I'm sure there's a better way to do this part...
-   Here, you should have J number of data frames, where J is the number of tissue types you have
-4) Create a list of FA with >1% by combining the FA listed in each new df.
-   e.g. FA_list=as.list(as.character(df_crabFA), as.character(df_slugFA), as.character(df_CornishGameHen$FA)) and whatnot
-5) Pare that list down to unique FA (e.g. FA_list=unique(FA_list) )
-6) Use the list to subset your melted data frame, only including FA on the list (e.g. df_final=df[df$FA %in% FA_list,] )
-7) Cast the final data frame into wide format to use for multivariate analyses.
+1. Convert negative values to zero
+2. Append metadata from biomarker data
+3. Filter for tissue samples and remove C19 and calcualte total area by sample
+4. Calcualte raw proportion
+5. Calcualte mean proportion by tissue type
+6. Filter data to include only mean proportions >= 1% by each tissue type
+7. Extract unique FA from filtered dataset
+8. Subset original full dataframe by FAs identified above
+9. Re calculate proportion based of new total areas given subsetted dataset
 
 ```{r calc, prop, echo = FALSE}
 ## Convert neg to zero ##
 FA_ac$Area <- ifelse(FA_ac$Area < 0, 0, FA_ac$Area) 
 FA_ac$Conc <- ifelse(FA_ac$Conc < 0, 0, FA_ac$Conc) 
 
-## Calcualte proportion of total sample area ##
-# Append metadat #
+## Calculate proportion of total sample area of FA with mean >1% ##
+# Append metadata #
 FA_ac <- merge(FA_ac, bimrk[, 7:11], by.x = "ID", by.y = "Biomarker_ID")
 
 # Calculate total area by sample #
@@ -170,10 +169,21 @@ FA_a <- FA_ac %>%
             min_prop = min(Prop_area),
             max_prop = max(Prop_area))
 
+# Filter those FAs < 1% #
 FA_a_1.0 <- FA_a %>%
   filter(mean_prop >= 0.01)
 
-FA_ac_1.0$Prop_area_1.0 <- FA_ac_1.0$Area / FA_ac_1.0$Total_area_1.0
+# Unique FAs #
+FAs <- unique(FA_a_1.0$FA)
+FAs
+
+# Filter Master FA data by unique FA >= 1% #
+FA_ac_filt <- FA_ac %>%
+  filter(FA %in% FAs) %>% 
+  group_by(ID) %>%
+  mutate(Total_filt_area = sum(Area))
+
+FA_ac_filt$Prop_filt_area <- FA_ac_filt$Area / FA_ac_filt$Total_filt_area
 ```
 
 ## C19 standard data
@@ -189,7 +199,6 @@ C19 <- samp_mass_redu %>%
 ## Calcualte concentration ##
 C19$C19_conc_mgL <- C19$sample_extracted_mass_mg / c(6.5, 10, 10)
 ```
-
 
 ### Assign C19 concentrations standards to extraction days
 DIffernet C19 solutions were used on different extraction days. 
@@ -216,74 +225,32 @@ FA_C19_recov <- FA_ac %>%
 FA_C19_recov$Recovery <- (FA_C19_recov$Conc  / (((FA_C19_recov$C19_conc * 1000 * 70) / 1500) * 0.666667))
 ```
 
-## Remove small FAs
-We will filter out all FAs that constitute less than 0.5% or less than 1.0% of a samples total FA area. We will then examine how many FAs are lost in these two methods.
-```{r reduce, echo = FALSE}
-## Filter out less than 0.5% ##
-FA_ac_0.5 <- FA_ac %>%
-  filter(Prop_area >= 0.005) %>% 
-  group_by(ID) %>%
-  mutate(Total_area_0.5 = sum(Area))
-
-FA_ac_0.5$Prop_area_0.5 <- FA_ac_0.5$Area / FA_ac_0.5$Total_area_0.5
-
-## Filter out less than 1.0% ##
-FA_ac_1.0 <- FA_ac %>%
-  filter(Prop_area >= 0.01) %>% 
-  group_by(ID) %>%
-  mutate(Total_area_1.0 = sum(Area))
-
-FA_ac_1.0$Prop_area_1.0 <- FA_ac_1.0$Area / FA_ac_1.0$Total_area_1.0
-```
-
-
 ## Examine area proportion
 Compute summary proporional data to identify outliers.
 
 ```{r prop exam, echo = FALSE}
-## Sum n samples by tissue ##
-FA_samps <- data.frame(unique(FA_ac[, c(1,9)]))
-FA_samps.n <- FA_samps %>% 
-  group_by(Species_common) %>% 
-  summarise(n_all_sp = n())
-
-sp_prop_summary_0.5 <- FA_ac_0.5 %>%
+sp_prop_summary_1.0 <- FA_ac_filt %>%
   group_by(Species_common, FA) %>% 
   summarise(n = n(),
-            mean_prop_corr = mean(Prop_area_0.5),
-            sd_prop_corr = sd(Prop_area_0.5),
-            min_prop_corr = min(Prop_area_0.5),
-            max_prop_corr = max(Prop_area_0.5))
-
-sp_prop_summary_1.0 <- FA_ac_1.0 %>%
-  group_by(Species_common, FA) %>% 
-  summarise(n = n(),
-            mean_prop_corr = mean(Prop_area_1.0),
-            sd_prop_corr = sd(Prop_area_1.0),
-            min_prop_corr = min(Prop_area_1.0),
-            max_prop_corr = max(Prop_area_1.0))
+            mean_prop_corr = mean(Prop_filt_area),
+            sd_prop_corr = sd(Prop_filt_area),
+            min_prop_corr = min(Prop_filt_area),
+            max_prop_corr = max(Prop_filt_area))
 ```
 
 ## Prep for multivariate analysis
 Convert tall data to wide for multivarite analysis. General structure will be sample data columns followed by FA columns with zeros filling instances when a sample did not have a FA that other samples did.
 
 ```{r tall to wide, echo = FALSE}
-## 0.5% filter data ##
-FA_prop_0.5 <- spread(FA_ac_0.5[, c(1, 4, 9, 13)], key = FA, value = Prop_area_0.5)
+FA_prop <- spread(FA_ac_filt[, c(1, 3, 4, 7, 8, 9, 10, 14)], key = FA, value = Prop_filt_area)
 
-FA_prop_0.5[is.na(FA_prop_0.5)] <- 0
-
-## 1.0 % filter data ##
-FA_prop_1.0 <- spread(FA_ac_1.0[, c(1, 3, 4, 9, 13)], key = FA, value = Prop_area_1.0)
-
-FA_prop_1.0[is.na(FA_prop_1.0)] <- 0
-
+FA_prop[is.na(FA_prop)] <- 0
 ```
 
-New summary with zeros
+New summary with zeros *throwing error?*
 ```{r wide to tall zero, echo=FALSE}
-sp_prop_summary_1.0.2 <- FA_prop_1.0 %>% 
-  gather(key = "FA", value = "Prop", 4:56) %>% 
+sp_prop_summary_1.0.2 <- FA_prop %>% 
+  gather(key = "FA", value = "Prop", 6:38) %>% 
   group_by(Species_common, FA) %>% 
   summarise(n = n(),
             mean_prop_corr = mean(Prop),
@@ -295,10 +262,7 @@ sp_prop_summary_1.0.2 <- FA_prop_1.0 %>%
 
 ### Export wide data
 ```{r export wide, echo = FALSE}
-## 0.5% filter ##
-write.csv(FA_prop_0.5, "../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", row.names = FALSE)
-
 ## 1.0% filter ##
-write.csv(FA_prop_1.0, "../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", row.names = FALSE)
+write.csv(FA_prop, "../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", row.names = FALSE)
 ```
 
