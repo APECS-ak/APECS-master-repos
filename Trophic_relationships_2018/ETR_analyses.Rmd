@@ -1058,7 +1058,7 @@ Calculate NMDS
 fa_pro_mds <- metaMDS(fa_pro_dist)
 
 ## Primary Consumers
-
+fa_pcon_mds <- metaMDS(fa_pcon_dist)
 
 ## Secondary consumers ##
 fa_scon_mds <- metaMDS(fa_scon_dist)
@@ -1102,11 +1102,11 @@ fa_hel_1.0_mds_dat <- merge(fa_hel_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x 
 fa_hel_1.0_mds_dat$Species_common <- factor(fa_hel_1.0_mds_dat$Species_common, levels = c("Helmet crab"))
 
 # Primary consumers #
-fa_pcon_1.0_mds_dat <- as.data.frame(scores(fa_pcon_1.0_mds))
-fa_pcon_1.0_mds_dat$ID <- fa_pcon_1.0$ID 
-fa_pcon_1.0_mds_dat$Species_common <- fa_pcon_1.0$Species_common
-fa_pcon_1.0_mds_dat <- merge(fa_pcon_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pcon_1.0_mds_dat$Species_common <- factor(fa_pcon_1.0_mds_dat$Species_common, levels = c("Butter clam" , "Idotea" ,"Limpet" , "Macoma sp." , "Pointed Macoma" , "Bentnose Macoma"))
+fa_pcon_mds_dat <- as.data.frame(scores(fa_pcon_mds))
+fa_pcon_mds_dat$ID <- fa_pcon$ID 
+fa_pcon_mds_dat$Species_common <- fa_pcon$Species_common
+fa_pcon_mds_dat <- merge(fa_pcon_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
+fa_pcon_mds_dat$Species_common <- factor(fa_pcon_mds_dat$Species_common, levels = c("Butter clam" , "Idotea" ,"Limpet" , "Macoma sp." , "Pointed Macoma" , "Bentnose Macoma"))
 
 # Idotea #
 fa_ido_1.0_mds_dat <- as.data.frame(scores(fa_ido_1.0_mds))
@@ -1211,10 +1211,9 @@ ggplot(fa_pro_mds_dat) +
   geom_segment(data = vec.pro.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
   geom_text(data = vec.pro.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust)
   
-## Consumers ##
-ggplot(fa_con_1.0_mds_dat) +
+## Primary Consumers ##
+ggplot(fa_pcon_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_shape_manual(values = c(15:19, 1:8)) +
   scale_color_manual(values = c("red", "deepskyblue3"))
 
 ## Crabs ##
