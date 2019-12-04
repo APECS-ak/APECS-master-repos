@@ -247,18 +247,6 @@ FA_prop <- spread(FA_ac_filt[, c(1, 3, 4, 7, 8, 9, 10, 14)], key = FA, value = P
 FA_prop[is.na(FA_prop)] <- 0
 ```
 
-New summary with zeros *throwing error?*
-```{r wide to tall zero, echo=FALSE}
-sp_prop_summary_1.0.2 <- FA_prop %>% 
-  gather(key = "FA", value = "Prop", 6:38) %>% 
-  group_by(Species_common, FA) %>% 
-  summarise(n = n(),
-            mean_prop_corr = mean(Prop),
-            sd_prop_corr = sd(Prop),
-            min_prop_corr = min(Prop),
-            max_prop_corr = max(Prop))
-```
-
 
 ### Export wide data
 ```{r export wide, echo = FALSE}
