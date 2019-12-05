@@ -781,10 +781,13 @@ colnames(fa_mac)[5] <- "Sea_otter_tr"
 ```
 
 ##### Secondary Consumers
+Omitting B_271 - Shiner and B_277 Staghorn due to strange values.
 ```{r}
 ## All Secondary Consumers ##
 fa_scon <- fa %>% 
-  filter(Species_common == "Dock shrimp" | Species_common == "Helmet crab" | Species_common == "Graceful crab" | Species_common == "Shiner perch" | Species_common == "Snake prickleback" | Species_common == "Staghorn sculpin")
+  filter(Species_common == "Dock shrimp" | Species_common == "Helmet crab" | Species_common == "Graceful crab" | Species_common == "Shiner perch" | Species_common == "Snake prickleback" | Species_common == "Staghorn sculpin") %>% 
+  filter(ID != "B_271") %>% 
+  filter(ID != "B_277")
 
 # Dock Shrimp #
 fa_dsh <- fa %>% 
@@ -800,7 +803,7 @@ fa_grc <- fa %>%
 
 # Shiner Perch #
 fa_shn <- fa %>% 
-  filter(Species_common == "Shiner perch")
+  filter(Species_common == "Shiner perch" & ID != "B_271")
 
 # Snake prickleback #
 fa_snk <- fa %>% 
@@ -808,7 +811,7 @@ fa_snk <- fa %>%
 
 # Staghorn sculpin #
 fa_stg <- fa %>% 
-  filter(Species_common == "Staghorn sculpin")
+  filter(Species_common == "Staghorn sculpin" & ID != "B_277")
 ```
 
 ```{r}
@@ -995,7 +998,13 @@ perm.stg
 ```
 
 #### SIMPER
-Calcualte on untransformed data. Also remove the undetermined FAs because the are sums of multiple FAs
+Calcualte on untransformed data. Also remove the undetermined FAs because the are sums of multiple FAs.
+
+Identify any undetermined FAs
+```{r}
+colnames(fa[, 7:37])
+```
+
 
 Dungeness Crabs
 -- remove undetermined FA
@@ -1080,7 +1089,7 @@ fa_lmp_mds_dat <- as.data.frame(scores(fa_lmp_mds))
 fa_lmp_mds_dat$ID <- fa_lmp$ID 
 fa_lmp_mds_dat <- merge(fa_lmp_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
 
-## Consumers ##
+## Secondary Consumers ##
 fa_scon_mds_dat <- as.data.frame(scores(fa_scon_mds))
 fa_scon_mds_dat$ID <- fa_scon$ID 
 fa_scon_mds_dat <- merge(fa_scon_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
