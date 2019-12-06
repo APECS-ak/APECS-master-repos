@@ -579,7 +579,7 @@ cowplot::plot_grid(elg.m, epi.m, ido.m, lmp.m, but.m, mac.m, grc.m, hel.m, rrc.m
 There are two perspectives in analysis. 1) The whole community (all data) comparisons and 2) by species comparisons.
 
 #### SI data prep
-Filter out NA data duplicate QA/QC samples
+Filter out NA data duplicate QA/QC samples. 
 ```{r si data prep, echo = FALSE}
 si <- si %>% 
   na.omit() %>% 
@@ -628,12 +628,12 @@ high.c.area <- convexhull(si.sum$del_C_mean[si.sum$Sea_otter_tr == "High"], si.s
 low.c.area <- convexhull(si.sum$del_C_mean[si.sum$Sea_otter_tr == "Low"], si.sum$del_N_mean[si.sum$Sea_otter_tr == "Low"])
 ```
 
-
 ##### Plots
 ```{r plots si all, echo = FALSE}
 ## All data ##
 ggplot(si) +
-  geom_point(aes(x = del_C, y = del_N, color = Sea_otter_tr), size = 3)
+  geom_point(aes(x = del_C, y = del_N, color = Sea_otter_tr), size = 3) +
+  scale_color_manual(values = so.pal)
 
 ## Mean values and hulls ##
 ggplot() +
@@ -650,9 +650,190 @@ ggplot() +
 ```
 
 #### Species specific
-Convex hulls
+##### Subsets
+```{r}
+## Primary Producers ##
+# Eelgrass #
+si_eg <- si %>%
+  filter(Species_common == "Eelgrass")
 
-Trophic level
+# Eelgrass diatoms / epiphytes #
+si_ep <- si %>%
+  filter(Species_common == "Eelgrass diatoms")
+
+# Fucus #
+si_fu <- si %>%
+  filter(Species_common == "Fucus")
+
+# POM #
+si_pm <- si %>%
+  filter(Species_common == "Particulate organic matter")
+
+# Sugar Kelp #
+si_sk <- si %>%
+  filter(Species_common == "Sugar kelp")
+
+# Ulva #
+si_ul <- si %>%
+  filter(Species_common == "Ulva")
+
+## Primary Consumers ##
+# Idotea #
+si_ido <- si %>% 
+  filter(Species_common == "Idotea")
+
+# Butter Clams ##
+si_but <- si %>% 
+  filter(Species_common == "Butter clam")
+
+# Macoma Clams #
+si_mac <- si %>% 
+  filter(Species_common == "Macoma sp.")
+
+## Secondary Consumers ##
+# Dock Shrimp #
+si_dsh <- si %>% 
+  filter(Species_common == "Dock shrimp")
+
+# Helmet crabs #
+si_hel <- si %>% 
+  filter(Species_common == "Helmet crab")
+
+# Graceful crabs #
+si_grc <- si %>% 
+  filter(Species_common == "Graceful crab")
+
+# Shiner Perch #
+si_shn <- si %>% 
+  filter(Species_common == "Shiner perch")
+
+# Snake prickleback #
+si_snk <- si %>% 
+  filter(Species_common == "Snake prickleback")
+
+# Staghorn sculpin #
+si_stg <- si %>% 
+  filter(Species_common == "Staghorn sculpin")
+```
+
+##### ANOVAs of treatment
+```{r}
+## Primary Producers ##
+# Eelgrass #
+mod.c.eg.1 <- lm(del_C ~ Sea_otter_tr, data = si_eg)
+anova(mod.c.eg.1)
+
+mod.n.eg.1 <- lm(del_N ~ Sea_otter_tr, data = si_eg)
+anova(mod.n.eg.1)
+
+# Epiphytes #
+mod.c.ep.1 <- lm(del_C ~ Sea_otter_tr, data = si_ep)
+anova(mod.c.ep.1)
+
+mod.n.ep.1 <- lm(del_N ~ Sea_otter_tr, data = si_ep)
+anova(mod.n.ep.1)
+
+# Fucus #
+mod.c.fu.1 <- lm(del_C ~ Sea_otter_tr, data = si_fu)
+anova(mod.c.fu.1)
+
+mod.n.fu.1 <- lm(del_N ~ Sea_otter_tr, data = si_fu)
+anova(mod.n.fu.1)
+
+# POM #
+mod.c.pm.1 <- lm(del_C ~ Sea_otter_tr, data = si_pm)
+anova(mod.c.pm.1)
+
+mod.n.pm.1 <- lm(del_N ~ Sea_otter_tr, data = si_pm)
+anova(mod.n.pm.1)
+
+# Sugar kelp #
+mod.c.sk.1 <- lm(del_C ~ Sea_otter_tr, data = si_sk)
+anova(mod.c.sk.1)
+
+mod.n.sk.1 <- lm(del_N ~ Sea_otter_tr, data = si_sk)
+anova(mod.n.sk.1)
+
+# Ulva #
+mod.c.ul.1 <- lm(del_C ~ Sea_otter_tr, data = si_ul)
+anova(mod.c.ul.1)
+
+mod.n.ul.1 <- lm(del_N ~ Sea_otter_tr, data = si_ul)
+anova(mod.n.ul.1)
+
+## Primary consumers ##
+# Idotea #
+mod.c.ido.1 <- lm(del_C ~ Sea_otter_tr, data = si_ido)
+anova(mod.c.ido.1)
+
+mod.n.ido.1 <- lm(del_N ~ Sea_otter_tr, data = si_ido)
+anova(mod.n.ido.1)
+
+# Butter Clams #
+mod.c.but.1 <- lm(del_C ~ Sea_otter_tr, data = si_but)
+anova(mod.c.but.1)
+
+mod.n.but.1 <- lm(del_N ~ Sea_otter_tr, data = si_but)
+anova(mod.n.but.1)
+
+# Macoma sp. clams #
+mod.c.mac.1 <- lm(del_C ~ Sea_otter_tr, data = si_mac)
+anova(mod.c.mac.1)
+
+mod.n.mac.1 <- lm(del_N ~ Sea_otter_tr, data = si_mac)
+anova(mod.n.mac.1)
+
+## Seconday consumers ##
+# Dock Shrimp #
+mod.c.dsh.1 <- lm(del_C ~ Sea_otter_tr, data = si_dsh)
+anova(mod.c.dsh.1)
+
+mod.n.dsh.1 <- lm(del_N ~ Sea_otter_tr, data = si_dsh)
+anova(mod.n.dsh.1)
+
+# Helmet crabs #
+mod.c.hel.1 <- lm(del_C ~ Sea_otter_tr, data = si_hel)
+anova(mod.c.hel.1)
+
+mod.n.hel.1 <- lm(del_N ~ Sea_otter_tr, data = si_hel)
+anova(mod.n.hel.1)
+
+# Graceful crabs #
+mod.c.grc.1 <- lm(del_C ~ Sea_otter_tr, data = si_grc)
+anova(mod.c.grc.1)
+
+mod.n.grc.1 <- lm(del_N ~ Sea_otter_tr, data = si_grc)
+anova(mod.n.grc.1)
+
+# Shiner perch #
+mod.c.shn.1 <- lm(del_C ~ Sea_otter_tr, data = si_shn)
+anova(mod.c.shn.1)
+
+mod.n.shn.1 <- lm(del_N ~ Sea_otter_tr, data = si_shn)
+anova(mod.n.shn.1)
+
+# Snake prickleback #
+mod.c.snk.1 <- lm(del_C ~ Sea_otter_tr, data = si_snk)
+anova(mod.c.snk.1)
+
+mod.n.snk.1 <- lm(del_N ~ Sea_otter_tr, data = si_snk)
+anova(mod.n.snk.1)
+
+# Staghorn sculpin #
+mod.c.stg.1 <- lm(del_C ~ Sea_otter_tr, data = si_stg)
+anova(mod.c.stg.1)
+
+mod.n.stg.1 <- lm(del_N ~ Sea_otter_tr, data = si_stg)
+anova(mod.n.stg.1)
+```
+
+
+plots
+```{r}
+ggplot(si_eg) +
+  geom_point(aes(x = del_C, y = del_N, color = si_eg$Sea_otter_tr), size = 3) +
+  scale_color_manual(values = so.pal, "Sea otter region")
+```
 
 ### Fatty Acids
 Similar to SI data there are two perspectives to analysis. 1) The whole community and 2) by species comparisons. Along these lines I will run a nested PERMANOVA for the effects of species and sea otter treatment. Then species that appear to have a strong sea otter effect will be analyzed seperatly
@@ -915,6 +1096,7 @@ Test for the effect of sea otter nested by species. Then within species sea otte
 ##### Primary Producers
 ```{r permanova, echo = FLASE}
 ## Producers ##
+betadisper(fa_pro_dist, Sea_otter_tr)
 perm.pro <- adonis2(fa_pro_dist ~ Sea_otter_tr + sp_code %in% Sea_otter_tr, data = fa_pro, perm = 9999) 
 perm.pro
 
@@ -931,8 +1113,8 @@ perm.fu <- adonis2(fa_fu_dist ~ Sea_otter_tr, data = fa_fu, perm = 9999)
 perm.fu
 
 # POM #
-perm.pm <- adonis2(fa_pm_dist ~ Sea_otter_tr, data = fa_pm, perm = 9999)
-perm.pm
+perm.sk <- adonis2(fa_sk_dist ~ Sea_otter_tr, data = fa_sk, perm = 9999)
+perm.sk
 
 # Sugar kelp #
 perm.sk <- adonis2(fa_sk_dist ~ Sea_otter_tr, data = fa_sk, perm = 9999)
@@ -1000,26 +1182,101 @@ perm.stg
 #### SIMPER
 Calcualte on untransformed data. Also remove the undetermined FAs because the are sums of multiple FAs.
 
-Identify any undetermined FAs
+Identify any undetermined FAs. 17:3w is the only undetermined FA. Turns our it only occurs in POM. 
 ```{r}
 colnames(fa[, 7:37])
 ```
 
-
-Dungeness Crabs
--- remove undetermined FA
+##### Data prep
+Remove undetermined FA from *untranformed* FA data. * NOTE * Run initial FA data preperation lines BEFORE these so that the correct subset is used.
 ```{r}
-dun_simp <- fa_dun_1.0[, c(10:15, 17:19, 21:23, 25:26, 28:29, 31:32, 34:35, 37:38, 40:41, 43, 45:46, 51, 53:57, 59, 61:63, 65:74)]
+## Primary Producers ##
+# Eelgrass #
+fa_eg_simp <- fa_eg %>%
+  dplyr::select(- C17.3w)
+
+# Eelgrass diatoms / epiphytes #
+fa_ep_simp <- fa_ep %>%
+  dplyr::select(- C17.3w)
+
+# Fucus #
+fa_fu_simp <- fa_fu %>%
+  dplyr::select(- C17.3w)
+
+# POM #
+fa_pm_simp <- fa_pm %>%
+  dplyr::select(- C17.3w)
+
+# Sugar Kelp #
+fa_sk_simp <- fa_sk %>%
+  dplyr::select(- C17.3w)
+
+# Ulva #
+fa_ul_simp <- fa_ul %>%
+  dplyr::select(- C17.3w)
+
+## Primary Consumers ##
+# Idotea #
+fa_ido_simp <- fa_ido %>%
+  dplyr::select(- C17.3w)
+
+# Limpet #
+fa_lmp_simp <- fa_lmp %>%
+  dplyr::select(- C17.3w)
+
+# Butter Clams ##
+fa_but_simp <- fa_but %>%
+  dplyr::select(- C17.3w)
+
+# Macoma Clams #
+fa_mac_simp <- fa_mac %>%
+  dplyr::select(- C17.3w)
+
+## Secondary Consumers ##
+# Dock Shrimp #
+fa_dsh_simp <- fa_dsh %>%
+  dplyr::select(- C17.3w)
+
+# Helmet crabs #
+fa_hel_simp <- fa_hel %>%
+  dplyr::select(- C17.3w)
+
+# Graceful crabs #
+fa_grc_simp <- fa_grc %>%
+  dplyr::select(- C17.3w)
+
+# Shiner Perch #
+fa_shn_simp <- fa_shn %>%
+  dplyr::select(- C17.3w)
+
+# Snake prickleback #
+fa_snk_simp <- fa_snk %>%
+  dplyr::select(- C17.3w)
+
+# Staghorn sculpin #
+fa_stg_simp <- fa_stg %>%
+  dplyr::select(- C17.3w)
 ```
 
+###### Eelgrass
 ```{r}
-simp.dun <- simper(dun_simp, fa_dun_1.0$Sea_otter_tr, permutations = 9999)
-simp.dun.dat <- summary(simp.dun, ordered = TRUE, digits = 4)
-simp.dun.dat <- data.frame(simp.dun.dat$Low_High)
-simp.dun.dat$FA <- row.names(simp.dun.dat)
-simp.dun.dat$average_scaled <- simp.dun.dat$average / sum(simp.dun.dat$average)
+simp.eg <- simper(fa_eg_simp[, 11:40], fa_eg_simp$Sea_otter_tr, permutations = 9999)
+simp.eg.dat <- summary(simp.eg, ordered = TRUE, digits = 4)
+simp.eg.dat <- data.frame(simp.eg.dat$Low_High)
+simp.eg.dat$FA <- row.names(simp.eg.dat)
+simp.eg.dat$average_scaled <- simp.eg.dat$average / sum(simp.eg.dat$average)
 
-datatable(filter(simp.dun.dat, p < 0.05))
+simp.eg.redu <- simp.eg.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100)
+
+  
 ```
 
 Helmet crabs
@@ -1225,8 +1482,7 @@ arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
 ## Producers ##
 ggplot(fa_pro_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red3", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
+  scale_color_manual(values = so.pal)
 
 ggplot(fa_ul_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
