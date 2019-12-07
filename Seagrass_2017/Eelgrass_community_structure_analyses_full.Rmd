@@ -448,12 +448,23 @@ Another check after doing transfomarions etc.
 The suspect grazer v diatom relationships does not look that good at all. 
 ```{r multi check, echo = FALSE}
 ## Calculate correlations ##
-dat.cor <- dat[, c(4, 94, 99, 81, 73, 65, 19, 35, 37, 90, 123)]
-colnames(dat.cor) <- c("Julianday", "Crabs", "Fish", "Grazers", "Epiphytes", "Eelgrass", "SOI", "Macroalgae", "Diatoms", "Sediment", "Nitrate")
+dat.cor <- dat[, c(4, 19, 94, 81, 125, 124, 123, 99, 35, 37, 90)]
+colnames(dat.cor) <- c("Julianday", "SOI", "Crabs", "Epifauna", "Epiphytes*", "Eelgrass*", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
 
 ## Transform as necessary ##
-dat.cor <- as.data.frame(cbind(dat.cor$Julianday, dat.cor$SOI, sqrt(dat.cor$Crabs), log(dat.cor$Grazers), dat.cor$Epiphytes, dat.cor$Eelgrass, dat.cor$Nitrate, log(dat.cor$Fish), asin(sqrt(dat.cor$Macroalgae / 100)), asin(sqrt(dat.cor$Diatoms / 100)), dat.cor$Sediment))
-colnames(dat.cor) <- c("Julian day", "SOI", "Crabs", "Grazers", "Epiphytes", "Eelgrass", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
+dat.cor <- as.data.frame(cbind(dat.cor$Julianday, 
+                               dat.cor$SOI, 
+                               sqrt(dat.cor$Crabs), 
+                               log(dat.cor$Epifauna), 
+                               dat.cor$Epiphytes, 
+                               dat.cor$Eelgrass, 
+                               dat.cor$Nitrate, 
+                               log(dat.cor$Fish), 
+                               asin(sqrt(dat.cor$Macroalgae / 100)), 
+                               asin(sqrt(dat.cor$Diatoms / 100)), 
+                               dat.cor$Sediment))
+
+colnames(dat.cor) <- c("Julian day", "SOI", "Crabs", "Epifauna", "Epiphytes*", "Eelgrass*", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
 
 correl <- cor(dat.cor)
 
@@ -962,5 +973,14 @@ ggplot(dat) +
   scale_x_continuous(limits = c(1, 21), breaks = seq(1, 21, by = 1)) +
   scale_y_continuous(limits = c(-0.8, 1.2), breaks = seq(-0.8, 1.2, by = 0.2)) +
   theme(text = element_text(size = 10))
+
+## Sediment and Eelgrass ##
+ggplot(dat) +
+  geom_point(aes(x = sed_inside_prim, y = abvgnd_mass)) +
+  labs(x = "Sediment", y = "Eelgrass")
+
+ggplot(dat) +
+  geom_point(aes(x = sed_inside_prim, y = abvgnd_mass_dt)) +
+  labs(x = "Sediment", y = "Eelgrass - detrended")
 ```
 
