@@ -22,6 +22,7 @@ library(RColorBrewer)
 library(vegan)
 library(stringr)
 library(siar)
+library(ggrepel)
 
 theme_set(theme_classic())
 ```
@@ -657,6 +658,9 @@ ggplot(si) +
   geom_point(aes(x = del_C, y = del_N, color = Sea_otter_tr), size = 3) +
   scale_color_manual(values = so.pal)
 
+## new names ##
+si.names <- c("BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "SHN", "SNK", "STG", "SK", "UL", "BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "RRC", "SHN", "SNK", "STG", "SK", "UL")
+
 ## Mean values and hulls ##
 ggplot() +
   geom_point(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, shape = si.sum$sp_group, color = si.sum$Sea_otter_tr), size = 3) +
@@ -666,7 +670,7 @@ ggplot() +
   geom_polygon(aes(x = low.c.area$xcoords, y = low.c.area$ycoords), fill = so.pal[2], alpha = 0.5) +
   scale_x_continuous(limits = c(-20, -6), breaks = seq(-20, -6, by = 2)) +
   scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
-  geom_text(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, label = si.sum$sp_code), size = 3, vjust = -0.8, hjust = -0.1) +
+  geom_text_repel(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, label = si.names), size = 3, vjust = -0.8, hjust = -0.1) +
   xlab(expression({delta}^13*C~'\u2030')) +
   ylab(expression({delta}^15*N~'\u2030'))
 ```
@@ -1643,9 +1647,35 @@ simp.sum <- rbind(simp.eg.dat,
                   simp.snk.dat,
                   simp.stg.dat)
 
-# Export #
+## Export ##
 write.csv(simp.sum, "../ALL_DATA/FA_SIMPER_output.csv", row.names = FALSE)
+
+## Read in ##
+simp.sum <- read.csv("../ALL_DATA/FA_SIMPER_output.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
+
+Looking for SIMPER patterns
+```{r simp pat}
+## Filter top FAs ##
+simp.top <- simp.sum %>% 
+  filter(cumsum < 0.9) %>% 
+  group_by(taxa) %>% 
+  top_n(-5, cumsum) %>% 
+  mutate(FA = FA) %>% 
+  mutate(cumsum = cumsum) 
+
+
+## Top summaries ##
+simp.top.sum <- simp.top %>% 
+  filter(taxa == "Eelgrass" | taxa == "Fucus" | taxa == "POM" | taxa == "Sugar kelp" | taxa == "Ulva" | taxa == "Idotea" | taxa == "Limpet" | taxa == "Butter clam" | taxa == "Dock shrimp" | taxa == "Graceful crab" | taxa == "Staghorn sculpin") %>% 
+  group_by(FA) %>% 
+  summarize(n = n())
+
+simp.top$taxa[simp.top$FA == "C20.5w3"]
+
+## 
+```
+
 
 
 Helmet crabs
@@ -1709,7 +1739,9 @@ fa_pcon_mds_dat <- as.data.frame(scores(fa_pcon_mds))
 fa_pcon_mds_dat$ID <- fa_pcon$ID 
 fa_pcon_mds_dat$Species_common <- fa_pcon$Species_common
 fa_pcon_mds_dat <- merge(fa_pcon_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pcon_mds_dat$Species_common <- factor(fa_pcon_mds_dat$Species_common, levels = c("Butter clam" , "Idotea" ,"Limpet" , "Macoma sp." , "Pointed Macoma" , "Bentnose Macoma"))
+fa_pcon_mds_dat$Species_common <- ifelse(fa_pcon_mds_dat$Species_common == "Pointed Macoma", "Macoma sp.", fa_pcon_mds_dat$Species_common)
+fa_pcon_mds_dat$Species_common <- ifelse(fa_pcon_mds_dat$Species_common == "Bentnose Macoma", "Macoma sp.", fa_pcon_mds_dat$Species_common)
+fa_pcon_mds_dat$Species_common <- factor(fa_pcon_mds_dat$Species_common, levels = c("Butter clam" , "Idotea" ,"Limpet" , "Macoma sp."))
 
 fa_lmp_mds_dat <- as.data.frame(scores(fa_lmp_mds))
 fa_lmp_mds_dat$ID <- fa_lmp$ID 
@@ -1848,61 +1880,27 @@ arrow_hjust <- ifelse(arrow_angle > 90, 1, 0)
 
 ##### Plots
 ```{r}
-## Producers ##
-ggplot(fa_pro_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = so.pal)
-
-ggplot(fa_ul_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red3", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
-
-ggplot(fa_eg_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red3", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
-
-ggplot(fa_sk_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red3", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
-
-ggplot(fa_pro_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_segment(data = vec.pro.dat.sig, aes(x = 0, xend = MDS1_sc, y = 0, yend = MDS2_sc)) +
-  geom_text(data = vec.pro.dat.sig, aes(x = MDS1_sc, y = MDS2_sc, label = FA), size = 4, angle = arrow_angle, hjust = arrow_hjust)
+## Primary Producers ##
+nmds.pro <- ggplot(fa_pro_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 2) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  scale_shape_manual(values = c(0:6), labels = c("Eelgrass", "Epiphytes", "Fucus", "POM", "Sugar kelp", "Ulva"), "Species")
   
 ## Primary Consumers ##
-ggplot(fa_pcon_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
+nmds.pcon <- ggplot(fa_pcon_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 2) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  scale_shape_manual(values = c(7:10), labels = c("Butter clam", "Idotea", "Limpet", "Macoma sp."), "Species")
 
-ggplot(fa_lmp_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
-
-## Secondary consumers ##
-ggplot(fa_scon_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
-
-ggplot(fa_shn_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
-
-ggplot(fa_stg_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
-
-ggplot(fa_snk_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = Species_common), size = 3) +
-  scale_color_manual(values = c("red", "deepskyblue3")) +
-  geom_text(aes(x = NMDS1, y = NMDS2, label = ID))
+## Secondary Consumers ##
+nmds.scon <- ggplot(fa_scon_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region, shape = sp_code), size = 2) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  scale_shape_manual(values = c(11:16), labels = c("Graceful crab", "Helmet crab", "Shiner perch", "Staghorn sculpin", "Dock shrimp", "Snake prickleback"), "Species")
 ```
+
+##### Panel - FA
+```{r}
+cowplot::plot_grid(nmds.pro, nmds.pcon, nmds.scon, nrow = 3, ncol = 1, labels = c("a", "b", "c"), label_size = 10)
+```
+
