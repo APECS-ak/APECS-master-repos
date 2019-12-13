@@ -51,6 +51,8 @@ clm <- read.csv("../ALL_DATA/eelgrass_clam_all_2018_derived.csv", header = TRUE,
 
 fsh <- read.csv("../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
+nut <- read.csv("../ALL_DATA/Water_nutrients_eelgrass_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+
 site <- read.csv("../ALL_DATA/Eelgrass_trophic_relationships_site_metadata_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
@@ -139,6 +141,60 @@ fsh <- merge(fsh, site[, c(1, 5)], by = "site")
 
 ## Analyses
 A critical piece for all analyses is testing the effect of site and sea otter treatment. Within each sea otter treatment three different sites were sampled.
+
+### Nutrients
+```{r nuts, echo = FALSE}
+## Add some metadata ##
+nut <- merge(nut, site[, c(1, 5)], by.x = "Site", by.y = "site")
+nut$Depth_m <- as.character(nut$Depth_m)
+
+## Convert neg values to 0 ##
+nut$Nitrate_um.L <- ifelse(nut$Nitrate_um.L < 0 , 0, nut$Nitrate_um.L)
+
+## Summarise ##
+nut.sum <- nut %>% 
+  filter(Replicate != "C") %>% 
+  group_by(Site, Depth_m) %>% 
+  summarise(Nitrate_m = mean(Nitrate_um.L),
+            Nitrate_sd = sd(Nitrate_um.L),
+            Nrate_Nrite_m = mean(NitrateNitrite_um.L),
+            Nrate_Nrite_sd = sd(NitrateNitrite_um.L),
+            Phos_m = mean(Phos_um.L),
+            Phos_sd = sd(Phos_um.L))
+
+nut.sum.tr <- nut %>%
+  filter(Replicate != "C") %>% 
+  group_by(sea_otter_tr, Depth_m) %>% 
+  summarise(Nitrate_m = mean(Nitrate_um.L),
+            Nitrate_sd = sd(Nitrate_um.L),
+            Nrate_Nrite_m = mean(NitrateNitrite_um.L),
+            Nrate_Nrite_sd = sd(NitrateNitrite_um.L),
+            Phos_m = mean(Phos_um.L),
+            Phos_sd = sd(Phos_um.L))
+
+## Tests ##
+nut <- nut %>% 
+  filter(Replicate != "C")
+
+mod.nox1.1 <- lm(Nitrate_um.L ~ sea_otter_tr, data = subset(nut, Depth_m == "1"))
+anova(mod.nox1.1)
+
+mod.nox5.1 <- lm(Nitrate_um.L ~ sea_otter_tr, data = subset(nut, Depth_m == "5"))
+anova(mod.nox5.1)
+
+mod.pox1.1 <- lm(Phos_um.L ~ sea_otter_tr, data = subset(nut, Depth_m == "1"))
+anova(mod.pox1.1)
+
+mod.pox5.1 <- lm(Phos_um.L ~ sea_otter_tr, data = subset(nut, Depth_m == "5"))
+anova(mod.pox5.1)
+
+## Plots ##
+ggplot(nut.sum.tr, aes(x = sea_otter_tr, y = Nitrate_m, fill = Depth_m)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(ymin = Nitrate_m - Nitrate_sd, ymax = Nitrate_m + Nitrate_sd), position = position_dodge(.9), width = 0) +
+  scale_fill_manual("Depth", labels = c("1m", "5m"), values = c("grey", "darkgrey"))
+```
+
 
 ### Biomarker Metadata
 ```{r bimrk metadata, echo = FALSE}
