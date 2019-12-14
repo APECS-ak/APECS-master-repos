@@ -90,8 +90,6 @@ crb.site.string[24,] <- c(as.character("2018_H_01"), 4.0, 0.0)
 crb.site.string <- merge(crb.site.string, site[, c(1,5)], by = "site")
 crb.site.string$mass_g <- as.numeric(crb.site.string$mass_g)
 
-crb.site.string <- merge(crb.site.string, site[, c(1, 5)], by = "site")
-
 # Site string and sp #
 d <- expand.grid(species_common = c("Dungeness crab", "Graceful crab", "Helmet crab", "Red rock crab"), site = unique(crb$site), string = unique(crb$string))
 
@@ -304,10 +302,10 @@ t.ep.1
 Grazers
 ```{r grz site X treatment, echo = FALSE}
 ## All Grazers ##
-mod.gr.1 <- lm(grazer_load ~ sea_otter_tr + sea_otter_tr/site, data = eg)
+mod.gr.1 <- lm(grazer_load ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
 anova(mod.gr.1)
 
-t.gr.1 <- t.test(eg$grazer_load[eg$sea_otter_tr == "high"],  eg$grazer_load[eg$sea_otter_tr == "low"])
+t.gr.1 <- t.test(grazer_load ~ sea_otter_tr, data = eg)
 t.gr.1
 
 ## Idotea ##
@@ -329,7 +327,7 @@ t.lp.1
 Sum total crab mass by string. Insert 0 data for strings with no crabs so averages are correct. Append site metadata
 ```{r crb site x treatment, echo = FLASE}
 ## Nested Anova ##
-mod.crb.1 <- lm(mass_g ~ sea_otter_tr + sea_otter_tr:site, data = crb.site.string)
+mod.crb.1 <- lm(mass_g / 1000 ~ sea_otter_tr + sea_otter_tr %in% site, data = crb.site.string)
 anova(mod.crb.1)
 
 ## Strait Anova ##
@@ -358,12 +356,12 @@ anova(mod.roc.1)
 We also have species to think about...
 ```{r clm site}
 ## All Clams ##
-mod.clm.1 <- lm(mass_g ~ sea_otter_tr + site %in% sea_otter_tr, data = clm.site.quad)
+mod.clm.1 <- lm(mass_g / 1000 ~ sea_otter_tr + site %in% sea_otter_tr, data = clm.site.quad)
 anova(mod.clm.1)
 
 ## By species ##
 # Overall #
-mod.clm.2 <-lm(mass_g ~ sea_otter_tr + species_common %in% sea_otter_tr, data = clm.site.quad.sp)
+mod.clm.2 <-lm(mass_g/1000 ~ sea_otter_tr + species_common %in% sea_otter_tr, data = clm.site.quad.sp)
 anova(mod.clm.2)
 
 # Butter clams #
@@ -378,20 +376,44 @@ anova(mod.mac.1)
 ##### Fish
 ```{r}
 ## Total mass ##
-mod.fsh.1 <- lm(total_fish_mass ~ sea_otter_tr, data = fsh)
-anova(mod.fsh.1)
+t.fsh.1 <- t.test(total_fish_mass / 1000 ~ sea_otter_tr, data = fsh)
+t.fsh.1
+
+mean(fsh$total_fish_mass[fsh$sea_otter_tr == "high"])
+sd(fsh$total_fish_mass[fsh$sea_otter_tr == "high"])
+
+mean(fsh$total_fish_mass[fsh$sea_otter_tr == "low"])
+sd(fsh$total_fish_mass[fsh$sea_otter_tr == "low"])
 
 ## Stags ##
-mod.stg.1 <- lm(SCULPSTG / 1000 ~ sea_otter_tr, data = fsh)
-anova(mod.stg.1)
+t.stg.1 <- t.test(SCULPSTG / 1000 ~ sea_otter_tr, data = fsh)
+t.stg.1
+
+mean(fsh$SCULPSTG[fsh$sea_otter_tr == "high"])
+sd(fsh$SCULPSTG[fsh$sea_otter_tr == "high"])
+
+mean(fsh$SCULPSTG[fsh$sea_otter_tr == "low"])
+sd(fsh$SCULPSTG[fsh$sea_otter_tr == "low"])
 
 ## Shiners ##
-mod.shn.1 <- lm(PERCHSH / 1000 ~ sea_otter_tr, data = fsh)
-anova(mod.shn.1)
+t.shn.1 <- t.test(PERCHSH / 1000 ~ sea_otter_tr, data = fsh)
+t.shn.1
+
+mean(fsh$PERCHSH[fsh$sea_otter_tr == "high"])
+sd(fsh$PERCHSH[fsh$sea_otter_tr == "high"])
+
+mean(fsh$PERCHSH[fsh$sea_otter_tr == "low"])
+sd(fsh$PERCHSH[fsh$sea_otter_tr == "low"])
 
 ## Snake Prickleback ##
-mod.snk.1 <- lm(PRICKSN / 1000 ~ sea_otter_tr, data = fsh)
-anova(mod.snk.1)
+t.snk.1 <- t.test(PRICKSN / 1000 ~ sea_otter_tr, data = fsh)
+t.snk.1
+
+mean(fsh$PRICKSN[fsh$sea_otter_tr == "high"])
+sd(fsh$PRICKSN[fsh$sea_otter_tr == "high"])
+
+mean(fsh$PRICKSN[fsh$sea_otter_tr == "low"])
+sd(fsh$PRICKSN[fsh$sea_otter_tr == "low"])
 ```
 
 #### Plots
@@ -718,18 +740,45 @@ ggplot(si) +
 si.names <- c("BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "SHN", "SNK", "STG", "SK", "UL", "BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "RRC", "SHN", "SNK", "STG", "SK", "UL")
 
 ## Mean values and hulls ##
-ggplot() +
+si.all <- ggplot() +
   geom_point(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, shape = si.sum$sp_group, color = si.sum$Sea_otter_tr), size = 3) +
-  scale_color_manual(values = so.pal, "Sea otter region") +
-  scale_shape_manual(values = shape.pal, "Trophic position", labels = c("Primary consumer", "Primary producer", "Secondary Consumer")) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   geom_polygon(aes(x = high.c.area$xcoords, y = high.c.area$ycoords), fill = so.pal[1], alpha = 0.5) +
   geom_polygon(aes(x = low.c.area$xcoords, y = low.c.area$ycoords), fill = so.pal[2], alpha = 0.5) +
   scale_x_continuous(limits = c(-20, -6), breaks = seq(-20, -6, by = 2)) +
   scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
-  geom_text_repel(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, label = si.names), size = 3, vjust = -0.8, hjust = -0.1) +
+  geom_text_repel(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, label = si.names), size = 3) +
   xlab(expression({delta}^13*C~'\u2030')) +
   ylab(expression({delta}^15*N~'\u2030'))
+
+## N ranks ##
+si.sum$N_rank <- NA
+order.N <- order(si.sum$del_N_mean)
+si.sum$N_rank[order.N] <- 1:nrow(si.sum)
+
+si.n <- ggplot(si.sum) +
+    geom_errorbar(aes(x = N_rank, ymin = del_N_mean - del_N_sd, ymax = del_N_mean + del_N_sd), width = 0) +
+  geom_point(aes(x = N_rank, y = del_N_mean, shape = sp_group, color = Sea_otter_tr), size = 3) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_text_repel(aes(x = N_rank, y = del_N_mean, label = si.names), size = 3) +
+  scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
+  xlab(expression({delta}^15*N~'\u2030')) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  theme(legend.position = "none")
+  
 ```
+
+##### Panel - SI
+```{r}
+legend <- get_legend(si.all)
+
+si.pan1 <- cowplot::plot_grid(si.all + theme(legend.position="none"), si.n, labels = c("a", "b"), nrow = 1, ncol = 2, label_size = 10, rel_widths = c(1, 1.4))
+
+cowplot::plot_grid(si.pan1, legend, rel_widths = c(3, 1))
+```
+
 
 #### Species specific
 ##### Subsets
@@ -802,111 +851,81 @@ si_stg <- si %>%
 ```{r}
 ## Primary Producers ##
 # Eelgrass #
-mod.c.eg.1 <- lm(del_C ~ Sea_otter_tr, data = si_eg)
-anova(mod.c.eg.1)
+t.test(del_C ~ Sea_otter_tr, data = si_eg)
 
-mod.n.eg.1 <- lm(del_N ~ Sea_otter_tr, data = si_eg)
-anova(mod.n.eg.1)
+t.test(del_N ~ Sea_otter_tr, data = si_eg)
 
 # Epiphytes #
-mod.c.ep.1 <- lm(del_C ~ Sea_otter_tr, data = si_ep)
-anova(mod.c.ep.1)
+t.test(del_C ~ Sea_otter_tr, data = si_ep)
 
-mod.n.ep.1 <- lm(del_N ~ Sea_otter_tr, data = si_ep)
-anova(mod.n.ep.1)
+t.test(del_N ~ Sea_otter_tr, data = si_ep)
 
 # Fucus #
-mod.c.fu.1 <- lm(del_C ~ Sea_otter_tr, data = si_fu)
-anova(mod.c.fu.1)
+t.test(del_C ~ Sea_otter_tr, data = si_fu)
 
-mod.n.fu.1 <- lm(del_N ~ Sea_otter_tr, data = si_fu)
-anova(mod.n.fu.1)
+t.test(del_N ~ Sea_otter_tr, data = si_fu)
 
 # POM #
-mod.c.pm.1 <- lm(del_C ~ Sea_otter_tr, data = si_pm)
-anova(mod.c.pm.1)
+t.test(del_C ~ Sea_otter_tr, data = si_pm)
 
-mod.n.pm.1 <- lm(del_N ~ Sea_otter_tr, data = si_pm)
-anova(mod.n.pm.1)
+t.test(del_N ~ Sea_otter_tr, data = si_pm)
 
 # Sugar kelp #
-mod.c.sk.1 <- lm(del_C ~ Sea_otter_tr, data = si_sk)
-anova(mod.c.sk.1)
+t.test(del_C ~ Sea_otter_tr, data = si_sk)
 
-mod.n.sk.1 <- lm(del_N ~ Sea_otter_tr, data = si_sk)
-anova(mod.n.sk.1)
+t.test(del_N ~ Sea_otter_tr, data = si_sk)
 
 # Ulva #
-mod.c.ul.1 <- lm(del_C ~ Sea_otter_tr, data = si_ul)
-anova(mod.c.ul.1)
+t.test(del_C ~ Sea_otter_tr, data = si_ul)
 
-mod.n.ul.1 <- lm(del_N ~ Sea_otter_tr, data = si_ul)
-anova(mod.n.ul.1)
+t.test(del_N ~ Sea_otter_tr, data = si_ul)
 
 ## Primary consumers ##
 # Idotea #
-mod.c.ido.1 <- lm(del_C ~ Sea_otter_tr, data = si_ido)
-anova(mod.c.ido.1)
+t.test(del_C ~ Sea_otter_tr, data = si_ido)
 
-mod.n.ido.1 <- lm(del_N ~ Sea_otter_tr, data = si_ido)
-anova(mod.n.ido.1)
+t.test(del_N ~ Sea_otter_tr, data = si_ido)
 
 # Butter Clams #
-mod.c.but.1 <- lm(del_C ~ Sea_otter_tr, data = si_but)
-anova(mod.c.but.1)
+t.test(del_C ~ Sea_otter_tr, data = si_but)
 
-mod.n.but.1 <- lm(del_N ~ Sea_otter_tr, data = si_but)
-anova(mod.n.but.1)
+t.test(del_N ~ Sea_otter_tr, data = si_but)
 
 # Macoma sp. clams #
-mod.c.mac.1 <- lm(del_C ~ Sea_otter_tr, data = si_mac)
-anova(mod.c.mac.1)
+t.test(del_C ~ Sea_otter_tr, data = si_mac)
 
-mod.n.mac.1 <- lm(del_N ~ Sea_otter_tr, data = si_mac)
-anova(mod.n.mac.1)
+t.test(del_N ~ Sea_otter_tr, data = si_mac)
 
 ## Seconday consumers ##
 # Dock Shrimp #
-mod.c.dsh.1 <- lm(del_C ~ Sea_otter_tr, data = si_dsh)
-anova(mod.c.dsh.1)
+t.test(del_C ~ Sea_otter_tr, data = si_dsh)
 
-mod.n.dsh.1 <- lm(del_N ~ Sea_otter_tr, data = si_dsh)
-anova(mod.n.dsh.1)
+t.test(del_N ~ Sea_otter_tr, data = si_dsh)
 
 # Helmet crabs #
-mod.c.hel.1 <- lm(del_C ~ Sea_otter_tr, data = si_hel)
-anova(mod.c.hel.1)
+t.test(del_C ~ Sea_otter_tr, data = si_hel)
 
-mod.n.hel.1 <- lm(del_N ~ Sea_otter_tr, data = si_hel)
-anova(mod.n.hel.1)
+t.test(del_N ~ Sea_otter_tr, data = si_hel)
 
 # Graceful crabs #
-mod.c.grc.1 <- lm(del_C ~ Sea_otter_tr, data = si_grc)
-anova(mod.c.grc.1)
+t.test(del_C ~ Sea_otter_tr, data = si_grc)
 
-mod.n.grc.1 <- lm(del_N ~ Sea_otter_tr, data = si_grc)
-anova(mod.n.grc.1)
+t.test(del_N ~ Sea_otter_tr, data = si_grc)
 
 # Shiner perch #
-mod.c.shn.1 <- lm(del_C ~ Sea_otter_tr, data = si_shn)
-anova(mod.c.shn.1)
+t.test(del_C ~ Sea_otter_tr, data = si_shn)
 
-mod.n.shn.1 <- lm(del_N ~ Sea_otter_tr, data = si_shn)
-anova(mod.n.shn.1)
+t.test(del_N ~ Sea_otter_tr, data = si_shn)
 
 # Snake prickleback #
-mod.c.snk.1 <- lm(del_C ~ Sea_otter_tr, data = si_snk)
-anova(mod.c.snk.1)
+t.test(del_C ~ Sea_otter_tr, data = si_snk)
 
-mod.n.snk.1 <- lm(del_N ~ Sea_otter_tr, data = si_snk)
-anova(mod.n.snk.1)
+t.test(del_N ~ Sea_otter_tr, data = si_snk)
 
 # Staghorn sculpin #
-mod.c.stg.1 <- lm(del_C ~ Sea_otter_tr, data = si_stg)
-anova(mod.c.stg.1)
+t.test(del_C ~ Sea_otter_tr, data = si_stg)
 
-mod.n.stg.1 <- lm(del_N ~ Sea_otter_tr, data = si_stg)
-anova(mod.n.stg.1)
+t.test(del_N ~ Sea_otter_tr, data = si_stg)
 ```
 
 
