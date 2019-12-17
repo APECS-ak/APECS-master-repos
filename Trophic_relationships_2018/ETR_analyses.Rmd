@@ -64,6 +64,8 @@ si <- read.csv("../ALL_DATA/Isotopes_eelgrass_comm_2018_RAW.csv", header = TRUE,
 Fatty Acid
 ```{r dat fa, echo = FALSE}
 fa <- read.csv("../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
+famrk <- read.csv("../ALL_DATA/Marker_FA_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 Biomarker metadata
@@ -442,13 +444,7 @@ crb.sum <- crb.site.string.sp %>%
   summarise(mass_m = mean(mass_g),
             mass_se = sd(mass_g) / sqrt(length(mass_g)))
 
-crb.sum2 <- merge(crb.sum2, site[, c(1, 2, 5)])
-
-ggplot(crb.sum2) +
-  geom_col(aes(x = site, y = mass_m / 1000, fill = sea_otter_tr)) +
-  geom_errorbar(aes(x = site, ymin = (mass_m / 1000) - (mass_se / 1000), ymax = (mass_m / 1000) + (mass_se / 1000)), width = 0, size = 1) +
-  scale_fill_manual(name = "Sea otters", values = c("red", "deepskyblue3")) +
-  labs(x = "Site", y = "Crab mass (kg)")
+crb.sum <- merge(crb.sum, site[, c(1, 2, 5)])
 
 ## By species ##
 crb.sum.2 <-  crb.site.string.sp %>% 
@@ -476,6 +472,7 @@ clm.sum.2 <- merge(clm.sum.2, site[, c(1, 5)], by = "site")
 
 Fish
 ```{r}
+## Basic summary ##
 fsh.sum.1 <- fsh %>%
   group_by(sea_otter_tr) %>% 
   summarise(mass_kg_mean = mean(total_fish_mass / 1000),
@@ -495,6 +492,18 @@ snk.sum.1 <- fsh %>%
   group_by(sea_otter_tr) %>% 
   summarise(mass_kg_mean = mean(PRICKSN / 1000),
             mass_kg_se = st.er(PRICKSN / 1000))
+
+## Proportion ##
+fsh.prop <- fsh[, 2:30] / fsh$total_fish_mass
+fsh.prop <- cbind(fsh[, c(1, 31, 32)], fsh.prop)
+
+fsh.prop <- fsh.prop %>% 
+  gather(key = "Species", value = "mass_prop", 4:32)
+
+fsh.prop.sum <- fsh.prop %>% 
+  group_by(sea_otter_tr, Species) %>% 
+  summarise(prop_m = mean(mass_prop),
+            prop_se = st.er(mass_prop))
 ```
 
 
@@ -506,7 +515,7 @@ so.pal <- (c("red3", "deepskyblue3"))
 elg.m <- ggplot(eg.sum) +
   geom_bar(aes(x = site, y = shoot_mass_m_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = site, ymin = shoot_mass_m_mean - shoot_mass_m_se, ymax = shoot_mass_m_mean + shoot_mass_m_se), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  scale_fill_manual("Sea otter\ntreatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
   ylab(bquote("Eelgrass mass" ~(g/m^-2))) +
@@ -517,7 +526,7 @@ elg.m <- ggplot(eg.sum) +
 epi.m <- ggplot(eg.sum) +
   geom_bar(aes(x = site, y = epi_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = site, ymin = epi_load_mean - epi_load_se, ymax = epi_load_mean + epi_load_se), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 0.01), breaks = seq(0, 0.01, by = 0.0025)) +
   ylab("Epiphyte load (g/g)") +
@@ -525,17 +534,21 @@ epi.m <- ggplot(eg.sum) +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Grazer Load ##
-ggplot(eg.sum) +
+grz.all <- ggplot(eg.sum) +
   geom_bar(aes(x = site, y = grz_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = site, ymin = grz_load_mean - grz_load_se, ymax = grz_load_mean + grz_load_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3")) +
-  scale_y_continuous(limits = c(0, 0.25), breaks = seq(0, 0.25, by = 0.05))
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
+  scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
+  scale_y_continuous(limits = c(0, 0.25), breaks = seq(0, 0.25, by = 0.05)) +
+  ylab("Epifauna load (g/g)") +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 8))
 
 ## Idotea Load ##
 ido.m <- ggplot(eg.sum) +
   geom_bar(aes(x = site, y = ido_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = site, ymin = ido_load_mean - ido_load_se, ymax = ido_load_mean + ido_load_se), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 0.15), breaks = seq(0, 0.15, by = 0.03)) +
   ylab("Idotea load (g/g)") +
@@ -546,7 +559,7 @@ ido.m <- ggplot(eg.sum) +
 lmp.m <- ggplot(eg.sum) +
   geom_bar(aes(x = site, y = lmp_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = site, ymin = lmp_load_mean - lmp_load_se, ymax = lmp_load_mean + lmp_load_se), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 0.03), breaks = seq(0, 0.03, by = 0.01)) +
   ylab("Limpet load (g/g)") +
@@ -554,85 +567,92 @@ lmp.m <- ggplot(eg.sum) +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Clams site ##
-ggplot(clm.sum.1) +
+clm.all <- ggplot(clm.sum.1) +
   geom_bar(aes(x = site, y = mass_g_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = site, ymin = mass_g_mean - mass_g_se, ymax = mass_g_mean + mass_g_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3")) +
-  scale_y_continuous(limits = c(0, 700), breaks = seq(0, 700, by = 100))
-
-## Clams site sp ##
-ggplot(clm.sum.2, aes(x = site, y = mass_g_mean, fill = species_common)) +
-  geom_bar(position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(ymin = mass_g_mean - mass_g_se, ymax = mass_g_mean + mass_g_se), width = 0, position=position_dodge(.9)) +
-  scale_fill_brewer(palette = "Set1") +
-  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 100))
+  scale_fill_manual(values = so.pal) +
+  scale_y_continuous(limits = c(0, 650), breaks = seq(0, 650, by = 200)) +
+  scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
+  ylab(bquote("Clam mass" ~(g/m^-2))) +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 8))
 
 ## Butter clams ##
 but.m <- ggplot(subset(clm.sum.2, species_common == "Butter clam")) +
-  geom_bar(aes(x = site, y = mass_g_mean / 1000, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = mass_g_mean / 1000 - mass_g_se / 1000, ymax = mass_g_mean / 1000 + mass_g_se / 1000), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  geom_bar(aes(x = site, y = mass_g_mean , fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = mass_g_mean  - mass_g_se , ymax = mass_g_mean  + mass_g_se ), width = 0) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
-  ylab(bquote("Butter clam" ~(kg/m^-2))) +
+  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 100)) +
+  ylab(bquote("Butter clam" ~(g/m^-2))) +
   xlab("Site") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Macoma sp. clams ##
 mac.m <- ggplot(subset(clm.sum.2, species_common == "Macoma sp.")) +
-  geom_bar(aes(x = site, y = mass_g_mean / 1000, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = mass_g_mean / 1000 - mass_g_se / 1000, ymax = mass_g_mean / 1000 + mass_g_se / 1000), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  geom_bar(aes(x = site, y = mass_g_mean , fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = mass_g_mean  - mass_g_se , ymax = mass_g_mean  + mass_g_se ), width = 0) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
-  ylab(bquote("Macoma sp. clams" ~(kg/m^-2))) +
+  scale_y_continuous(limits = c(0, 400), breaks = seq(0, 400, by = 100)) +
+  ylab(bquote("Macoma sp. clams" ~(g/m^-2))) +
   xlab("Site") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Crabs site sp ##
-ggplot(crb.sum.2, aes(x = sea_otter_tr, y = mass_m/1000, fill = species_common)) +
-  geom_bar(position = position_dodge(), stat = "identity") +
-  scale_fill_manual(values = c("chocolate4", "springgreen4", "firebrick")) +
-  geom_errorbar(aes(ymin = (mass_m / 1000) - (mass_se / 1000), ymax = (mass_m / 1000) + (mass_se / 1000)), size = 1, width = 0, position = position_dodge(0.9)) +
-  labs(x = "Site", y = "Crab mass (kg)") +
-  scale_y_continuous(limits = c(0, 5))
+crb.all <- ggplot(crb.sum) +
+  geom_col(aes(x = site, y = mass_m , fill = sea_otter_tr)) +
+  geom_errorbar(aes(x = site, ymin = mass_m  - mass_se , ymax = mass_m  + mass_se ), width = 0) +
+  scale_fill_manual(name = "Sea otters", values = so.pal) +
+  scale_y_continuous(limits = c(0, 600), breaks = seq(0, 600, by = 100)) +
+  scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
+  ylab("Crab (g/string)") +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 8))
 
 ## Gracefuil crabs ##
 grc.m <- ggplot(subset(crb.sum.2, species_common == "Graceful crab")) +
-  geom_bar(aes(x = site, y = mass_m / 1000, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = mass_m / 1000 - mass_se / 1000, ymax = mass_m / 1000 + mass_se / 1000), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  geom_bar(aes(x = site, y = mass_m , fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = mass_m  - mass_se , ymax = mass_m  + mass_se ), width = 0) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
-  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
-  ylab("Graceful crab (kg/string)") +
+  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 100)) +
+  ylab("Graceful crab (g/string)") +
   xlab("Site") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Helmet crabs ##
 hel.m <- ggplot(subset(crb.sum.2, species_common == "Helmet crab")) +
-  geom_bar(aes(x = site, y = mass_m / 1000, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = mass_m / 1000 - mass_se / 1000, ymax = mass_m / 1000 + mass_se / 1000), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  geom_bar(aes(x = site, y = mass_m , fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = mass_m  - mass_se, ymax = mass_m  + mass_se ), width = 0) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
-  scale_y_continuous(limits = c(0, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
-  ylab("Helmet crab (kg/string)") +
+  scale_y_continuous(limits = c(0, 200), breaks = seq(0, 200, by = 50)) +
+  ylab("Helmet crab (g/string)") +
   xlab("Site") +
   theme(legend.position = "none" , text = element_text(size = 8))
 
 ## Red rock crabs ##
 rrc.m <- ggplot(subset(crb.sum.2, species_common == "Red rock crab")) +
-  geom_bar(aes(x = site, y = mass_m / 1000, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = mass_m / 1000 - mass_se / 1000, ymax = mass_m / 1000 + mass_se / 1000), width = 0) +
-  scale_fill_manual("Sea otter region", labels = c("High", "Low"), values = so.pal) +
+  geom_bar(aes(x = site, y = mass_m , fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = mass_m  - mass_se , ymax = mass_m  + mass_se ), width = 0) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
-  scale_y_continuous(limits = c(0, 2.0), breaks = seq(0, 2.0, by = 0.5)) +
-  ylab("Red rock crab (kg/string)") +
+  scale_y_continuous(limits = c(0, 2000), breaks = seq(0, 2000, by = 500)) +
+  ylab("Red rock crab (g/string)") +
   xlab("Site") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Fish site ##
-ggplot(fsh.sum.1) +
+fsh.all <- ggplot(fsh.sum.1) +
   geom_bar(aes(x = sea_otter_tr, y = mass_kg_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = sea_otter_tr, ymin = mass_kg_mean - mass_kg_se, ymax = mass_kg_mean + mass_kg_se), width = 0) +
-  scale_fill_manual(values = c("red", "deepskyblue3"))
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
+  scale_x_discrete(labels = c("high", "Low")) +
+  scale_y_continuous(limits = c(0, 35), breaks = seq(0, 35, by = 10)) +
+  ylab("Fish (kg/site)") +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 8))
   
 ## Staghorn ##
 stg.m <- ggplot(stg.sum.1) +
@@ -666,11 +686,22 @@ snk.m <- ggplot(snk.sum.1) +
   ylab("Snake prickleback (kg/set)") +
   xlab("Site") +
   theme(legend.position = "none", text = element_text(size = 8))
+
+## Fish proportions ##
+ggplot(subset(fsh.prop.sum, sea_otter_tr == "high")) +
+  geom_bar(aes(x = reorder(Species, - prop_m), y = prop_m), stat = "identity") +
+  geom_errorbar(aes(x = reorder(Species, - prop_m), ymin = prop_m - prop_se, ymax = prop_m + prop_se), width = 0) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+ggplot(subset(fsh.prop.sum, sea_otter_tr == "low")) +
+  geom_bar(aes(x = reorder(Species, - prop_m), y = prop_m), stat = "identity") +
+  geom_errorbar(aes(x = reorder(Species, - prop_m), ymin = prop_m - prop_se, ymax = prop_m + prop_se), width = 0) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 ```
 
 ##### Panel - biomass
 ```{r}
-cowplot::plot_grid(elg.m, epi.m, ido.m, lmp.m, but.m, mac.m, grc.m, hel.m, rrc.m, stg.m, shn.m, snk.m, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"), nrow = 4, ncol = 3, label_size = 10)
+cowplot::plot_grid(elg.m, epi.m, grz.all, ido.m, lmp.m, clm.all, but.m, mac.m, crb.all, grc.m, hel.m, rrc.m, fsh.all, stg.m, shn.m, snk.m, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"), nrow = 4, ncol = 4, label_size = 10, align = "v")
 ```
 
 ### Stable Isotopes
@@ -1133,7 +1164,54 @@ fa_stg <- cbind(fa_stg[, c(1, 38:41, 2:37)])
 colnames(fa_stg)[5] <- "Sea_otter_tr"
 ```
 
-###### Transformations
+##### Marker FA
+Filter data for FA which have known sources.
+```{r}
+## Specific Markers ##
+fa_mrk <- merge(bimrk[, c(1, 2, 3, 4, 7)], fa, by.x = "Biomarker_ID", by.y = "ID")
+
+# clean up species #
+fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Pointed Macoma", "Macoma sp.", fa_mrk$Species_common)
+fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Bentnose Macoma", "Macoma sp.", fa_mrk$Species_common)
+
+fa_mrk <- fa_mrk  %>% 
+  gather(key = "FA", value = "prop", 11:41) %>% 
+  filter(FA %in% famrk$FA) %>%
+  filter(Species_common != "Red rock crab") %>% 
+  group_by(FA, Sea_otter_region, Species_common) %>% 
+  summarize(prop_m = mean(prop),
+            prop_sd = sd(prop))
+
+fa_mrk <- merge(fa_mrk, fa[, c(3,6)], by = "Species_common")
+
+fa_mrk$Species_common <- factor(fa_mrk$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
+
+ggplot(fa_mrk, aes(x = Species_common, y = prop_m, fill = Sea_otter_region)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = Species_common, ymin = prop_m - prop_sd, ymax = prop_m + prop_sd), width = 0, position = position_dodge(.9)) +
+  scale_fill_manual("Sea otter treatment", c("High", "Low"), values = so.pal) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Species") +
+  ylab("Mean Proportion") +
+  facet_wrap(~FA) 
+
+```
+
+###### FA groups
+LC-PUFAs, 18C EFA, omega-3 and omega-6, PUFA, Bacterial
+
+```{r}
+## Make groups ##
+LCPUFA <- c("C20.5w3", "C22.6w3", "C20.4w6")
+C18EFA <- c("C18.2w6", "C18.3w3", "C18.3w6", "C18.4w3")
+OM3 <- names(fa[str_detect(names(fa), "w3")])
+OM6 <- names(fa[str_detect(names(fa), "w6")])
+PUFA <- 
+```
+
+
+
+##### Transformations
 I will use and arcsine sqrt transformation.
 ```{r fa trans std, echo = FALSE}
 ## Primary Producers ##
