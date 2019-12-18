@@ -17,6 +17,7 @@ library(lubridate)
 library(mgcv)
 library(reshape2)
 library(cowplot)
+library(lmtest)
 ```
 
 # Data Entry
@@ -34,6 +35,7 @@ name <- read.csv("site_code_names.csv", header = TRUE)
 ```
 # Data Clean up
 ## Main data frame
+NOTE!! removed Julian day > 180 filter
 ```{r}
 # Take a look at data
 glimpse(dat)
@@ -41,13 +43,11 @@ glimpse(dat)
 # do some minor clean up 
 dat <- dat[-42,-1]
 dat$year <- as.factor(dat$year)
-dat[,21:25] <- data.frame(lapply(dat[,21:25], as.numeric), stringsAsFactors = FALSE) # make sure salmon abundance is numeric
+dat[,25:29] <- data.frame(lapply(dat[,25:29], as.numeric), stringsAsFactors = FALSE) # make sure salmon abundance is numeric
 dat1 <- dat %>%
   rowwise() %>%
   mutate(abundance = sum(SALCHIN, SALCHUM, SALCOHO, SALPINK, SALSOCK))
 
-dat2 <- dat1 %>%
-  filter(juli_date < 180)
 ```
 
 ## Distance
@@ -91,7 +91,7 @@ dist_all <- dist_comb %>%
 # combine with total data
 dist_all$year <- as.factor(dist_all$year)
 
-dat3 <- left_join(dat2, dist_all)
+dat3 <- left_join(dat1, dist_all)
 ```
 
 ## Seagrass biomass
@@ -153,40 +153,60 @@ dat4 <- left_join(dat3, biom_all, by = c("site", "year"))
 
 
 # Exploratory Analaysis (EDA)
+12/12/19 use dat4
 ```{r}
 # visualize relationships among variables: scatterplot matricies
-dat <- dat4
 library(corrgram)
-corrgram(dat[,c(4,5,8,14,17,18,20,21,24:30,34:35)], lower.panel=panel.shade, upper.panel=panel.ellipse,
-         diag.panel=panel.density)
+ corrgram(dat4[,c(26,28,6,8,34,35,24)], lower.panel= panel.shade,
+          upper.panel=panel.cor, diag.panel=panel.density, 
+          labels = c("chum_abun", "pink_abun", "so_dens", "anad_dist", 
+                     "eel_biom", "julian"))
 
-pairs(dat[,c(4,5,8,14,17,18,20,21,24:30,34:35)], lower.panel = panel.smooth)
+#pairs(dat[,c(4,5,8,14,17,18,20,21,24:30,34:35)], lower.panel = panel.smooth)
 
 # is there a correlatino between sea otter density and seagrass density
-glimpse(dat)
-cor(dat$avg_density, dat$avg_shoot, use = "complete.obs")
+glimpse(dat4)
+cor(dat4$avg_density, dat4$avg_shoot, use = "complete.obs")
 # based on pearson correlation there is a slight negative correlation. Is it statistical?
-plot(dat$avg_density, dat$avg_shoot)
-summary(lm(avg_shoot ~ avg_density + juli_date, data = dat))
+plot(dat4$avg_density, dat4$avg_shoot)
+summary(lm(avg_shoot ~ avg_density + juli_date, data = dat4))
 # nope, should probably include them together in the models...
 
 # graph abundance data 
-dat$site <- reorder(dat$site, -dat$avg_density)
-dat %>%
-  group_by(site, avg_density, year) %>%
+dat4$site <- reorder(dat4$site, -dat4$avg_density)
+dat4 %>%
+ group_by(site, avg_density, year) %>%
   summarise(abundance = as.numeric(sum(SALCHIN, SALCHUM, SALCOHO, SALPINK, SALSOCK))) %>%
-  ggplot() + geom_bar(aes(x = site, y = abundance, fill = year), stat = "identity", position = "dodge") + theme(axis.text.x = element_text(angle = 90))
+  ggplot() + 
+  geom_bar(aes(x = site, y = abundance, fill = year), stat = "identity", position = "dodge") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
-# look at the sites against the average sea otter density
-ggplot(data = dat) + geom_bar(aes(x = site, y = avg_density, fill = year), stat = "identity") + theme(axis.text.x = element_text(angle = 90))
+# graph sea otter density against abundance of salmon
+dat4 %>%
+  group_by(site, avg_density, year) %>% 
+  summarise(abundance = as.numeric(sum(SALCHIN, SALCHUM, SALCOHO, SALPINK, SALSOCK))) %>% 
+  ggplot() +
+  theme_classic() +
+  geom_point(aes(x = avg_density, y = abundance, shape = year, colour = year), size = 5) +
+  scale_colour_manual(values = c('#FFCC00', '#663399')) +
+  scale_shape_manual(values = c(17, 19)) +
+  xlab(expression(paste("Sea otter density (#/",km^2,")"))) +
+  ylab("Total salmon abundance (5 species)") +
+  theme(text = element_text(size = 20))
+  
+  
+# look at the sites against the average sea otter density, i.e. which sites had the most sea otters
+ggplot(data = dat4) + 
+  geom_bar(aes(x = site, y = avg_density, fill = year), stat = "identity") + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 
 # visualize distribution of salmon abundance
-hist(x = dat$abundance)
-boxplot(dat$abundance)
+#hist(x = dat$abundance)
+#boxplot(dat$abundance)
 # distribution of abundances
 # Can see that there are a lot of zeros and a few low, some mid, and only a few high abundances
-plot(table(dat$abundance))
+#plot(table(dat$abundance))
 
 
 ```
@@ -198,6 +218,8 @@ plot(table(dat$abundance))
 (3) Logit link (because its the binomial family)
 ### Graphical exploration
 ```{r}
+dat <- dat4
+
 hist(as.numeric(dat$abundance > 0))
 dat$year <- as.factor(dat$year)
 summary(dat)
@@ -306,29 +328,30 @@ Okay so we looked at the data using a strictly binomial model (i.e. presence abs
 Can we try to model the salmon abundance (this makes the assumption that all salmon species are influenced by the same conditions)
 ### Graphical exploration of salmon abundance
 ```{r}
-table(dat$SALCHIN); table(dat$SALCHUM); table(dat$SALCOHO); table(dat$SALPINK); table(dat$SALSOCK)
-table(dat$SALCHIN>0); table(dat$SALCHUM>0); table(dat$SALCOHO>0); table(dat$SALPINK>0); table(dat$SALSOCK>0)
+table(dat4$SALCHIN); table(dat4$SALCHUM); table(dat4$SALCOHO); table(dat4$SALPINK); table(dat4$SALSOCK)
+table(dat4$SALCHIN>0); table(dat4$SALCHUM>0); table(dat4$SALCOHO>0); table(dat4$SALPINK>0); table(dat4$SALSOCK>0)
 # Notice that there are many more zeros than positive numbers. 
-table(dat$abundance>0)
-prop.table(table(dat$abundance>0))
+table(dat4$abundance>0)
+prop.table(table(dat4$abundance>0))
 # 68% of the data has a positive abundance
-prop.table(table(dat$SALCHUM>0))
-prop.table(table(dat$SALPINK>0))
+prop.table(table(dat4$SALCHUM>0))
+prop.table(table(dat4$SALPINK>0))
+prop.table(table(dat4$SALCOHO>0))
 # more positive abundances of chum than pink, but we'll include all salmon together in the model using
 # abundance
 
-hist(dat$abundance)
-hist(dat$SALCHUM)
-hist(dat$SALPINK)
-hist(dat$SALCOHO)
+hist(dat4$abundance)
+hist(dat4$SALCHUM)
+hist(dat4$SALPINK)
+hist(dat4$SALCOHO)
 # yup a lot of zeros but some positive values. 
 ```
-
+Poisson and all salmon species modeled together
 ```{r, echo = FALSE}
 # try to fit to a glm using poisson distribution
 # have to add a constant to abundance data because poisson doens't like zeros
 # this glm framework automatically transforms the data
-fit <- glm(abundance+1 ~ avg_density*year*juli_date*I(juli_date^2)*avg_biom_site_gm2*dist_anad_km, data = dat, family = poisson)
+fit <- glm(abundance+1 ~ avg_density*year*juli_date*I(juli_date^2)*avg_biom_site_gm2*dist_anad_km, data = dat4, family = poisson)
 summary(fit)
 
 # residuals vs fitted appear to show an increase in variance, check summary output
@@ -339,7 +362,7 @@ summary(fit)
 # the residual deviance is greater than the df--this could indicate that there is overdispersion in the data
 
 # try fitting a quasi poission model to better account for the overdispersion
-fit.qp <- glm(abundance+1 ~ avg_density*year*juli_date*I(juli_date^2), data = dat, family = quasipoisson)
+fit.qp <- glm(abundance+1 ~ avg_density*year*juli_date*I(juli_date^2), data = dat4, family = quasipoisson)
 summary(fit.qp)
 #year, date and their interactions appear to be significant. Residual deviance is extremely higher than
 # than df.... overdispersion. data looks weird
@@ -349,11 +372,11 @@ plot(fit.qp)
 
 # try even better accounting for the overdispersion through fitting a negative binomial with includes
 # another parameter (theta) to better account for increasing variance
-fit.nb <- glm.nb(abundance ~ year*juli_date*avg_density+I(juli_date^2), data = dat, init.theta=0.535, control=glm.control(maxit = 50))
+fit.nb <- glm.nb(abundance ~ year*juli_date*avg_density+I(juli_date^2), data = dat4, init.theta=0.535, control=glm.control(maxit = 50))
 summary(fit.nb)
 # for some reason can't run the glm.nb including *I(juli_date^2) it says that the algorithm does not converge.... even if you use the initial theta of the model without the parameter.have to add it in
 
-fit.nb2 <- glm.nb(abundance ~ year:juli_date + juli_date:avg_density + year:avg_density + juli_date + avg_density + year, data = dat)
+fit.nb2 <- glm.nb(abundance ~ year:juli_date + juli_date:avg_density + year:avg_density + juli_date + avg_density + year, data = dat4)
 summary(fit.nb2)
 library(lmtest)
 # Which model is better?
@@ -361,22 +384,22 @@ lrtest(fit.nb2, fit.nb) # there isn't a significant reduction of deviance by inc
 AIC(fit.nb2); AIC(fit.nb) # basically the same AIC value 
 
 # Out of curiosity lets look at if we drop all interaction terms aside form julday:year
-fit.nb3 <- glm.nb(abundance ~ avg_density + juli_date + year + juli_date*year, data = dat)
+fit.nb3 <- glm.nb(abundance ~ avg_density + juli_date + year + juli_date*year, data = dat4)
 summary(fit.nb3)
 lrtest(fit.nb3, fit.nb2)
 
 # Since we know there is a high abundance of zero in the data try and fit the hurdle model
 library(pscl)
-fit.hurdle <- hurdle(abundance ~ avg_density + juli_date + year, data = dat[-41,], dist = "negbin")
+fit.hurdle <- hurdle(abundance ~ avg_density + juli_date + year, data = dat4[-41,], dist = "negbin")
 summary(fit.hurdle)
 
 
 ###### try glm with cubic date
-fit.nb.linear <- glm.nb(abundance ~ year+juli_date+avg_density+I(juli_date^2), data = dat, control=glm.control(maxit = 50))
+fit.nb.linear <- glm.nb(abundance ~ year+juli_date+avg_density+I(juli_date^2), data = dat4, control=glm.control(maxit = 50))
 
 summary(fit.nb.linear)
 
-fit.nb.linear.PNK <- glm.nb(SALPINK ~ year+juli_date+avg_density+I(juli_date^2)+avg_biom_site_gm2+dist_anad_km, data = dat,init.theta=0.535, control=glm.control(maxit = 5000))
+fit.nb.linear.PNK <- glm.nb(SALPINK ~ year+juli_date+avg_density+I(juli_date^2)+avg_biom_site_gm2+dist_anad_km, data = dat4,init.theta=0.535, control=glm.control(maxit = 5000))
 summary(fit.nb.linear.PNK)
 visreg(fit.nb.linear.PNK, scale = "response", partial = TRUE)
 ```
@@ -500,9 +523,166 @@ plot.otts <- plot_grid(p.so, ch.so, co.so, align = "hv")
 save_plot("WSN_otts_19.jpg", plot.otts)
 ```
 
+# GLM PINK, negbin
+If we allow for quadrat data model does it make more sense to use glm by species?
+```{r}
+fit.nb.pink <- glm.nb(SALPINK ~ year*juli_date*avg_density+
+                        I(juli_date^2)*avg_biom_site_gm2*dist_anad_km, 
+                      data = dat4, init.theta=0.535, control = glm.control(maxit = 100))
+summary(fit.nb.pink)
+
+pink.nb2 <- glm.nb(SALPINK ~ year + juli_date + avg_density + I(juli_date^2) * dist_anad_km +
+                     avg_biom_site_gm2, 
+                   data = dat4, init.theta = 0.353, control = glm.control(maxit = 100))
+summary(pink.nb2)
+
+pink.nb3 <- glm.nb(SALPINK ~ year + juli_date + I(juli_date^2) + dist_anad_km + avg_density +
+                     avg_biom_site_gm2, data = dat4, init.theta = 0.469, control = glm.control(maxit = 100))
+summary(pink.nb3)
+
+pink.nb4 <- glm.nb(SALPINK ~ year + juli_date + I(juli_date^2) + dist_anad_km + avg_density,
+                   data = dat4, init.theta = 0.469, control = glm.control(maxit = 100))
+summary(pink.nb4)
+
+pink.nb5 <- glm.nb(SALPINK ~ year + juli_date + I(juli_date^2) + avg_density,
+                   data = dat4, init.theta = 0.469, control = glm.control(maxit = 100))
+
+anova(pink.nb3, pink.nb4, test = "Chisq")
+anova(pink.nb4, pink.nb5, test = "Chisq")
+AICc(pink.nb2);AICc(pink.nb3);AICc(pink.nb4);AICc(pink.nb5)
+AICc(pink.nb3) - AICc(pink.nb4)
+
+anova(fit.nb.pink, test = "Chisq")
+anova(fit.nb.pink, nb.pink2, test = "chisq")
+par(mfrow=c(2,2))
+plot(pink.nb4, which = 1:4)
+```
+
+# GLM with CHUM salmon
+```{r}
+nb.chum <- glm.nb(SALCHUM ~ year*juli_date*avg_density+I(juli_date^2)*avg_biom_site_gm2*dist_anad_km, 
+                  data = dat4, init.theta=0.535, control = glm.control(maxit = 100))
+summary(nb.chum)
+
+nb.chum2 <- glm.nb(SALCHUM ~ year*juli_date + avg_density + I(juli_date^2) + avg_biom_site_gm2 + dist_anad_km, 
+                  data = dat4, init.theta=0.7, control = glm.control(maxit = 100))
+summary(nb.chum2)
+
+nb.chum3 <- glm.nb(SALCHUM ~ year + juli_date + avg_density + I(juli_date^2) + avg_biom_site_gm2 + dist_anad_km, 
+                  data = dat4, init.theta=0.7, control = glm.control(maxit = 100))
+summary(nb.chum3)
+
+nb.chum4 <- glm.nb(SALCHUM ~ year + juli_date + avg_density + I(juli_date^2) + avg_biom_site_gm2, 
+                   data = dat4, init.theta=0.7, control = glm.control(maxit = 100))
+summary(nb.chum4)
+
+nb.chum5 <- glm.nb(SALCHUM ~ year + juli_date + avg_density + I(juli_date^2), 
+                   data = dat4, init.theta=0.7, control = glm.control(maxit = 100))
+
+
+nb.chum6 <- glm.nb(SALCHUM ~ year + juli_date + I(juli_date^2), 
+                   data = dat4, init.theta=0.7, control = glm.control(maxit = 100))
+  
+summary(nb.chum5)
+
+anova(nb.chum3, nb.chum4, test = "Chisq")
+anova(nb.chum4, nb.chum5, test = "Chisq")
+anova(nb.chum5, nb.chum6, test = "Chisq")
+anova(nb.chum3, nb.chum5, test = "Chisq")
+library(AICcmodavg)
+AICc(nb.chum3);AICc(nb.chum4);AICc(nb.chum5);AICc(nb.chum6)
+# Evaluation model fit
+par(mfrow=c(2,2))
+plot(nb.chum3, which = 1:4)
+
+plot(nb.chum3, which = 1:4)
+```
+
+# Zero inflated with COHO SALMON
+```{r}
+zin.coho <- zeroinfl(SALCOHO ~ year*juli_date*avg_density+I(juli_date^2)*avg_biom_site_gm2*dist_anad_km, 
+         data = dat4, dist = "negbin")
+summary(zin.coho)
+
+zin.coho2 <- zeroinfl(SALCOHO ~ year + juli_date + avg_biom_site_gm2,
+                      data = dat4, dist = "negbin")
+summary(zin.coho2)
+
+hurdle.coho <- hurdle(SALCOHO ~ year + juli_date + avg_biom_site_gm2,
+                      data = dat4, dist = "negbin")
+summary(hurdle.coho)
+
+nb.coho <- glm.nb(SALCOHO ~ year + juli_date + avg_biom_site_gm2,
+                      data = dat4)
+summary(nb.coho)
+
+vuong(nb.coho, zin.coho2)
+library(lmtest)
+lrtest(nb.coho, zin.coho2)
+lrtest(nb.coho, hurdle.coho)
+
+visreg(zin.coho2)
+
+```
+
+## Visualizing CHUM models
+Selected model, y = year + julian + julian2 + so_density
+nb.chum5
+```{r}
+visreg(nb.chum5)
+
+chum1 <- visreg(nb.chum5, "juli_date", scale = "response", gg = TRUE, partial = TRUE, alpha = .05) + 
+  theme_classic() +
+  xlab("Julian Date") + ylab("Chum Abundance") + 
+  geom_point() + coord_cartesian(ylim = c(0, 200)) +
+  theme(text = element_text(size = 28))
+
+chum2 <- visreg(nb.chum5, "avg_density", scale = "response", gg = TRUE, partial = TRUE, alpha = .05) + 
+  theme_classic() +
+  xlab(expression(paste("Sea otter density (#/",km^2,")"))) +
+  ylab(NULL) + 
+  geom_point() + coord_cartesian(ylim = c(0, 200)) +
+  theme(text = element_text(size = 28))
+
+summary(nb.chum5)
+plot.chum <- plot_grid(chum1, chum2)
+
+```
+
+## Visualizing PINK models
+Selected model, y = year + julian + julian2 + so_density
+nb.pink4
+```{r}
+visreg(pink.nb4)
+
+pink1 <- visreg(pink.nb4, "juli_date", scale = "response", gg = TRUE, partial = TRUE, alpha = .05) + 
+  theme_classic() +
+  xlab("Julian Date") + ylab("Pink Abundance") + 
+  geom_point() + coord_cartesian(ylim = c(0, 300)) +
+  theme(text = element_text(size = 28))
+
+pink2 <- visreg(pink.nb4, "dist_anad_km", scale = "response", gg = TRUE, partial = TRUE) + 
+  theme_classic() +
+  xlab(expression(paste("Distance from anadromous stream (",km^2,")"))) + 
+  ylab(NULL) + geom_point() +
+  coord_cartesian(ylim = c(0, 200)) +
+  theme(text = element_text(size = 28))
+
+pink3 <- visreg(pink.nb4, "avg_density", scale = "response", gg = TRUE, partial = TRUE, alpha = .05) + 
+  theme_classic() +
+  xlab(expression(paste("Sea otter density (#/",km^2,")"))) +
+  ylab("Pink Abundance") + 
+  geom_point() + coord_cartesian(ylim = c(0, 200)) +
+  theme(text = element_text(size = 28))
+
+plot.pink <- plot_grid(pink1, pink2, pink3)
+summary(pink.nb4)
+```
+
+
 
 ## GAM models with long df
-```{r}
+{r}
 # convert to long dataframe
 # subset dataframe
 dat1 <- dat[, c(1,6,8,23:29,34,35)]
