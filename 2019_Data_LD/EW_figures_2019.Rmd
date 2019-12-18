@@ -1,0 +1,100 @@
+---
+title: "EW stats/figures 2019"
+author: "Lia Domke"
+date: "11/18/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Interested in looking at community composition of the beach seine data from just 2019 to provide some summary figures for the Earthwatch final report. How many fish did we catch at each site? 
+
+libraries that I will use
+```{r}
+library(scales)
+```
+
+
+1. review cleaned fish data
+input source data
+```{r}
+source("2019_data_cleaning.R")
+```
+
+Sum abundance of each fish by species and site
+```{r}
+glimpse(fish19)
+
+fish19$count <- as.numeric(ifelse(is.na(fish19$fork_length), paste(fish19$unmeasured), 1))
+fish_abn <- fish19 %>% 
+  dplyr::group_by(site) %>%
+  dplyr::summarize(abundance = sum(count))
+
+# sum up salmon caught at each site and in zeros
+sal <- fish19 %>%
+  dplyr::group_by(site, date, sp_code) %>%
+  dplyr::summarize(abundance = sum(count)) %>%
+  pivot_wider(names_from = sp_code, values_from = abundance)
+sal[is.na(sal)] <- "0"
+
+#  filter by salmon only
+sal2 <- sal %>%
+  pivot_longer(cols = -c(site, date), names_to = "sp_code", values_to = "abundance") %>%
+  filter(sp_code == "SALCHUM" | sp_code == "SALCOHO" | sp_code == "SALPINK" |
+           sp_code == "SALCHIN" | sp_code == "SALSOCK")
+
+```
+
+Join fish with otter abundance and add in missing otter density values
+```{r}
+fishotts <- left_join(fish_abn, otts19, by = "site")
+fishotts[2,8] <- "3.98959237"
+fishotts[4,8] <- "0.750577367205543"
+fishotts[15,8] <- "0.750577367205543"
+fishotts[10,8] <- "4.87804878"
+fishotts[21,8] <- "5.56107249"
+fishotts[22,8] <- "5.56107249"
+fishotts$avg_density <- as.numeric(fishotts$avg_density)
+
+#left join with just salmon
+salotts <- left_join(sal2, otts19, by = "site")
+salotts[5:8,"avg_density"] <- salotts[1, "avg_density"]
+salotts[c(13:16, 57:60),"avg_density"] <- salotts[61, "avg_density"]
+salotts[85:92,"avg_density"] <- salotts[85,8]
+salotts[37:40,"avg_density"] <- salotts[36, "avg_density"]
+salotts$avg_density <- as.numeric(salotts$avg_density)
+salotts$abundance <- as.numeric(salotts$abundance)
+```
+
+Graph fish
+```{r}
+ggplot(fish_abn, mapping = aes(x = reorder(site, y = abundance)) +
+  geom_col() +
+  scale_y_continuous(labels = comma) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  
+# graph fish in order of otter presence 
+ggplot(fishotts, mapping = aes(x = reorder(site, -avg_density), y = abundance)) +
+  geom_col() +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size=20)) +
+  xlab("Site names by order of otter density") +
+  ylab("Total fish abundance")
+
+# graph salmon in order of otter presence
+library(scales)
+library(RColorBrewer)
+
+p <- ggplot(salotts, mapping = aes(x = reorder(site, -avg_density), y = abundance, fill = sp_code)) +
+  geom_col() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), text = element_text(size=20)) +
+  xlab("Site names by order of otter density") +
+  ylab("Salmon abundance") + 
+  scale_fill_discrete(name = "Salmon Species", labels = c("Chum", "Coho", "Pink", "Sockeye")) 
+
+p + scale_fill_brewer(palette = "Dark2")  
+```
+
+
