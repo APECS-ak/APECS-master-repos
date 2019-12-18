@@ -80,7 +80,7 @@ fish17 <- fish17 %>%
   rename(site = place) # rename site name
 
 # adjust capitals/symantics for 2019 and 2017 sitenames to match
-names2 <- select(names, site, names_2019)
+names2 <- dplyr::select(name, site, names_2019)
 names2 <- data.frame(lapply(names2, as.character), stringsAsFactors = FALSE)
 colnames(names2) <- c("place", "site")
 fish2 <- left_join(fish19, names2, by = "site")
