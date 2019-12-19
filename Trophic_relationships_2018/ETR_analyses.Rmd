@@ -193,6 +193,12 @@ ggplot(nut.sum.tr, aes(x = sea_otter_tr, y = Nitrate_m, fill = Depth_m)) +
   geom_bar(position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(ymin = Nitrate_m - Nitrate_sd, ymax = Nitrate_m + Nitrate_sd), position = position_dodge(.9), width = 0) +
   scale_fill_manual("Depth", labels = c("1m", "5m"), values = c("grey", "darkgrey"))
+
+## Sediment ##
+sed <- eg %>% 
+  group_by(site) %>% 
+  summarise(sed_m = mean(primary_sediment_score),
+            sed_sd = sd(primary_sediment_score))
 ```
 
 
@@ -338,11 +344,11 @@ anova(mod.crb.2)
 
 ## By species ##
 # Overall #
-mod.crb.3 <- lm(mass_g ~ sea_otter_tr + species_common %in% sea_otter_tr, data = crb.site.string.sp)
+mod.crb.3 <- lm(mass_g / 1000 ~ sea_otter_tr + species_common %in% sea_otter_tr, data = crb.site.string.sp)
 anova(mod.crb.3)
 
 # Graceful #
-mod.dun.1 <- lm(mass_g / 1000 ~ sea_otter_tr + site %in% sea_otter_tr, data = subset(crb.site.string.sp, species_common == "Graceful crab"))
+mod.dun.1 <- lm(mass_g  ~ sea_otter_tr + site %in% sea_otter_tr, data = subset(crb.site.string.sp, species_common == "Graceful crab"))
 anova(mod.dun.1)
 
 # Helmet #
@@ -1030,6 +1036,14 @@ colnames(fa_fu)[5] <- "Sea_otter_tr"
 fa_pm <- merge(fa_pm, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
 fa_pm <- cbind(fa_pm[, c(1, 38:41, 2:37)])
 colnames(fa_pm)[5] <- "Sea_otter_tr"
+
+fa_pm %>% 
+  filter(ID != "B_226") %>%
+  dplyr::select(Sea_otter_tr, C22.6w3) %>% 
+  group_by(Sea_otter_tr) %>% 
+  summarize(m = mean(C22.6w3),
+            s = sd(C22.6w3))
+
 
 # Sugar Kelp #
 fa_sk <- merge(fa_sk, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
