@@ -95,7 +95,7 @@ eg.tran <- eg.tran[, c(1:20, 24:25)] # remove extra columns
 dat.full <- merge(eg.tran, eg.bio[, c(1, 6:45)], by = c("site", "quadrat"))
 
 ## Reduce to only include columns used in analyses  - like get rid of pantins mass ##
-dat.full <- dat.full[, c(1:12, 21:22, 28, 32, 36, 40, 44, 49:61)]
+dat.full <- dat.full[, c(1:12, 17:22, 28, 32, 36, 40, 44, 49:61)]
 ```
 
 
