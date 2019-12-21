@@ -54,6 +54,8 @@ fsh <- read.csv("../ALL_DATA/Fish_mass_site_2018_derived.csv", header = TRUE, st
 
 nut <- read.csv("../ALL_DATA/Water_nutrients_eelgrass_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 
+pom <- read.csv("../ALL_DATA/POM_filter_mass_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+
 site <- read.csv("../ALL_DATA/Eelgrass_trophic_relationships_site_metadata_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
@@ -138,6 +140,13 @@ clm.site.quad.sp <- merge(clm.site.quad.sp, site[, c(1,5)], by = "site")
 
 ## Fish ##
 fsh <- merge(fsh, site[, c(1, 5)], by = "site")
+
+## POM ##
+pom$dry_POM <- pom$dry_mass_g - (pom$pan_mass_g + pom$pre_dry_mass_g)
+pom$burn_POM <- pom$burn_dry_mass_g - (pom$pan_mass_g + pom$pre_dry_mass_g)
+pom$om_POM <- pom$dry_mass_g - pom$burn_dry_mass_g
+pom$pc_om_POM <- (pom$om_POM / pom$dry_mass_g) * 100 
+pom <- merge(pom, site[, c(1, 5)], by = "site")
 ```
 
 ## Analyses
@@ -202,7 +211,6 @@ sed <- eg %>%
             sed_sd = sd(primary_sediment_score))
 ```
 
-
 ### Biomarker Metadata
 ```{r bimrk metadata, echo = FALSE}
 ## Filter out ones we did not use ##
@@ -257,6 +265,12 @@ ggplot(eg) +
 
 ## Idotea load ##
 hist(sqrt(eg$idotea_load))
+ggplot(eg) +
+  geom_histogram(aes(idotea_load), binwidth = 0.01) +
+  xlab("idotea_load g/g") +
+  ylab("Count") +
+  scale_y_continuous(limits = c(0, 8))
+
 
 ## limpet load ##
 hist(eg$limpet_load)
@@ -295,9 +309,8 @@ ggplot(eg) +
   geom_histogram(aes(y = ))
 ```
 
-
 #### ANOVAS of sites and treatment
-##### Eelgrass - biomass and shoot density tests
+##### Eelgrass things
 Eelgrass
 ```{r eg site x treatment, echo = FALSE}
 mod.eg.1 <- lm(log(shoot_mass_m) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
@@ -316,6 +329,12 @@ anova(mod.ep.1)
 
 t.ep.1 <- t.test(eg$epi_load[eg$sea_otter_tr == "high"],  eg$epi_load[eg$sea_otter_tr == "low"])
 t.ep.1
+```
+
+POM
+```{r}
+mod.pm.1 <- lm(pc_om_POM ~ sea_otter_tr + sea_otter_tr %in% site, data = pom)
+anova(mod.pm.1)
 ```
 
 Grazers
@@ -453,6 +472,14 @@ eg.sum <- eg %>%
             lmp_load_se = st.er(limpet_load))
 ```
 
+POM
+```{r}
+pom.sum <- pom %>%
+  group_by(sea_otter_tr, site) %>% 
+  summarise(pc_om_m = mean(pc_om_POM),
+            pc_om_se = st.er(pc_om_POM))
+```
+
 Crabs
 ```{r}
 ## All Species ##
@@ -526,8 +553,6 @@ fsh.prop.sum <- fsh.prop %>%
 
 ##### Plots
 ```{r}
-so.pal <- (c("red3", "deepskyblue3"))
-
 ## Eelgrass ##
 elg.m <- ggplot(eg.sum) +
   geom_bar(aes(x = site, y = shoot_mass_m_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
@@ -537,7 +562,7 @@ elg.m <- ggplot(eg.sum) +
   scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
   ylab(bquote("Eelgrass mass" ~(g/m^-2))) +
   xlab("Site") +
-  theme(legend.position = c(0.8, 0.8), text = element_text(size = 8))
+  theme(legend.position = "none", text = element_text(size = 8))
 
 ## Epiphyte Load ##
 epi.m <- ggplot(eg.sum) +
@@ -547,6 +572,17 @@ epi.m <- ggplot(eg.sum) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 0.01), breaks = seq(0, 0.01, by = 0.0025)) +
   ylab("Epiphyte load (g/g)") +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 8))
+
+## POM ##
+pom.m <- ggplot(pom.sum) +
+  geom_bar(aes(x = site, y = pc_om_m, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(x = site, ymin = pc_om_m - pc_om_se, ymax = pc_om_m + pc_om_se), width = 0) +
+  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
+  scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
+  scale_y_continuous(limits = c(0, 3.2), breaks = seq(0, 3, by = 1)) +
+  ylab("Percent organic matter") +
   xlab("Site") +
   theme(legend.position = "none", text = element_text(size = 8))
 
@@ -642,12 +678,12 @@ grc.m <- ggplot(subset(crb.sum.2, species_common == "Graceful crab")) +
 hel.m <- ggplot(subset(crb.sum.2, species_common == "Helmet crab")) +
   geom_bar(aes(x = site, y = mass_m , fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = site, ymin = mass_m  - mass_se, ymax = mass_m  + mass_se ), width = 0) +
-  scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
+  scale_fill_manual("Sea otter\ntreatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 200), breaks = seq(0, 200, by = 50)) +
   ylab("Helmet crab (g/string)") +
   xlab("Site") +
-  theme(legend.position = "none" , text = element_text(size = 8))
+  theme(legend.position = c(0.8, 0.5), text = element_text(size = 8))
 
 ## Red rock crabs ##
 rrc.m <- ggplot(subset(crb.sum.2, species_common == "Red rock crab")) +
@@ -665,7 +701,7 @@ fsh.all <- ggplot(fsh.sum.1) +
   geom_bar(aes(x = sea_otter_tr, y = mass_kg_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = sea_otter_tr, ymin = mass_kg_mean - mass_kg_se, ymax = mass_kg_mean + mass_kg_se), width = 0) +
   scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
-  scale_x_discrete(labels = c("high", "Low")) +
+  scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(0, 35), breaks = seq(0, 35, by = 10)) +
   ylab("Fish (kg/site)") +
   xlab("Site") +
@@ -718,7 +754,7 @@ ggplot(subset(fsh.prop.sum, sea_otter_tr == "low")) +
 
 ##### Panel - biomass
 ```{r}
-cowplot::plot_grid(elg.m, epi.m, grz.all, ido.m, lmp.m, clm.all, but.m, mac.m, crb.all, grc.m, hel.m, rrc.m, fsh.all, stg.m, shn.m, snk.m, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"), nrow = 4, ncol = 4, label_size = 10, align = "v")
+cowplot::plot_grid(elg.m, epi.m, pom.m, grz.all, ido.m, lmp.m, clm.all, but.m, mac.m, crb.all, grc.m, hel.m, rrc.m, fsh.all, stg.m, shn.m, snk.m, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q"), nrow = 6, ncol = 3, label_size = 10, align = "v", label_x = 0.23)
 ```
 
 ### Stable Isotopes
@@ -782,7 +818,7 @@ low.c.area <- convexhull(si.sum$del_C_mean[si.sum$Sea_otter_tr == "Low"], si.sum
 ## All data ##
 si.raw <- ggplot(si) +
   geom_point(aes(x = del_C, y = del_N, shape = sp_group, color = Sea_otter_tr), size = 3) +
-  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  scale_color_manual(values = so.pal, "Sea otter region") +
   scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer"))
 
 ## new names ##
@@ -794,7 +830,7 @@ si.sum.h <- subset(si.sum, Sea_otter_tr == "High")
 
 si.high.all <- ggplot() +
   geom_point(aes(x = si.sum.h$del_C_mean, y = si.sum.h$del_N_mean, shape = si.sum.h$sp_group, color = si.sum.h$Sea_otter_tr), size = 2) +
-  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  scale_color_manual(values = so.pal, "Sea otter region") +
   scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   geom_polygon(aes(x = high.c.area$xcoords, y = high.c.area$ycoords), fill = so.pal[1], alpha = 0.4) +
   scale_x_continuous(limits = c(-20, -6), breaks = seq(-20, -6, by = 2)) +
@@ -808,7 +844,7 @@ si.sum.l <- subset(si.sum, Sea_otter_tr == "Low")
 
 si.low.all <- ggplot() +
   geom_point(aes(x = si.sum.l$del_C_mean, y = si.sum.l$del_N_mean, shape = si.sum.l$sp_group, color = si.sum.l$Sea_otter_tr), size = 2) +
-  scale_color_manual(values = so.pal[2], "Sea otter treatment") +
+  scale_color_manual(values = so.pal[2], "Sea otter region") +
   scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   geom_polygon(aes(x = low.c.area$xcoords, y = low.c.area$ycoords), fill = so.pal[2], alpha = 0.4) +
   scale_x_continuous(limits = c(-20, -6), breaks = seq(-20, -6, by = 2)) +
@@ -830,24 +866,24 @@ si.sum.l$N_rank[order.N.l] <- 1:nrow(si.sum.l)
 si.high.n <- ggplot(si.sum.h) +
   geom_errorbar(aes(x = N_rank, ymin = del_N_mean - del_N_sd, ymax = del_N_mean + del_N_sd), width = 0) +
   geom_point(aes(x = N_rank, y = del_N_mean, shape = sp_group, color = Sea_otter_tr), size = 2) +
-  scale_color_manual(values = so.pal[1], "Sea otter treatment") +
+  scale_color_manual(values = so.pal[1], "Sea otter region") +
   scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   geom_text_repel(aes(x = N_rank, y = del_N_mean, label = si.names), size = 2) +
   scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
   scale_x_continuous(limits = c(1, 15), breaks = seq(1, 15, by = 1)) +
-  xlab(expression(paste({delta}^15*N~'\u2030', "rank"))) +
+  xlab(expression(paste({delta}^15*N~'\u2030', " rank"))) +
   ylab(expression({delta}^15*N~'\u2030')) +
   theme(legend.position = "none")
 
 si.low.n <- ggplot(si.sum.l) +
   geom_errorbar(aes(x = N_rank, ymin = del_N_mean - del_N_sd, ymax = del_N_mean + del_N_sd), width = 0) +
   geom_point(aes(x = N_rank, y = del_N_mean, shape = sp_group, color = Sea_otter_tr), size = 2) +
-  scale_color_manual(values = so.pal[2], "Sea otter treatment") +
+  scale_color_manual(values = so.pal[2], "Sea otter region") +
   scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   geom_text_repel(aes(x = N_rank, y = del_N_mean, label = si.names), size = 2) +
   scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
    scale_x_continuous(limits = c(1, 16), breaks = seq(1, 16, by = 1)) +
-  xlab(expression(paste({delta}^15*N~'\u2030', "rank"))) +
+  xlab(expression(paste({delta}^15*N~'\u2030', " rank"))) +
   ylab(expression({delta}^15*N~'\u2030')) +
   theme(legend.position = "none")
   
@@ -857,7 +893,7 @@ si.low.n <- ggplot(si.sum.l) +
 ```{r}
 legend <- get_legend(si.raw)
 
-si.pan1 <- cowplot::plot_grid(si.high.all, si.low.all, si.high.n, si.low.n, labels = c("a", "b", "c", "d"), nrow = 2, ncol = 2, label_size = 10)
+si.pan1 <- cowplot::plot_grid(si.high.all, si.low.all, si.high.n, si.low.n, labels = c("a", "b", "c", "d"), nrow = 2, ncol = 2, label_size = 10, label_x = 0.2)
 
 cowplot::plot_grid(si.pan1, legend, rel_widths = c(3, 1))
 ```
@@ -1242,19 +1278,7 @@ fa_mrk <- fa_mrk  %>%
   summarize(prop_m = mean(prop),
             prop_sd = sd(prop))
 
-fa_mrk <- merge(fa_mrk, fa[, c(3,6)], by = "Species_common")
-
 fa_mrk$Species_common <- factor(fa_mrk$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
-
-ggplot(fa_mrk, aes(x = Species_common, y = prop_m, fill = Sea_otter_region)) +
-  geom_bar(position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = Species_common, ymin = prop_m - prop_sd, ymax = prop_m + prop_sd), width = 0, position = position_dodge(.9)) +
-  scale_fill_manual("Sea otter treatment", c("High", "Low"), values = so.pal) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  xlab("Species") +
-  ylab("Mean Proportion") +
-  facet_wrap(~FA) 
-
 ```
 
 ###### FA groups
@@ -1275,6 +1299,12 @@ BAC <- c("C16.1w7", "C18.1w7", "a.C17.0", "i.C17.0")
 
 Make comparisons
 ```{r}
+fa_mrk <- merge(bimrk[, c(1, 2, 3, 4, 7)], fa, by.x = "Biomarker_ID", by.y = "ID")
+
+# clean up species #
+fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Pointed Macoma", "Macoma sp.", fa_mrk$Species_common)
+fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Bentnose Macoma", "Macoma sp.", fa_mrk$Species_common)
+
 fa_tll <- fa_mrk  %>% 
   gather(key = "FA", value = "prop", 11:41) %>% 
   filter(Species_common != "Red rock crab")
@@ -1469,6 +1499,12 @@ fa_grp_ttest_p$p.value <- round(fa_grp_ttest_p$p.value, 3)
 fa_grp_ttest_p$FA_grp <- factor(fa_grp_ttest_p$FA_grp, levels = c("BAC", "C18EEL", "C18PUFA", "PUFA", "ARA", "EPA", "DHA"))
 fa_grp_ttest_p$Species_common <- factor(fa_grp_ttest_p$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
 fa_grp_ttest_p <- tidyr::spread(fa_grp_ttest_p, key = FA_grp, value = p.value)
+
+fa_grp_ttest_t <- fa_grp_ttest[, c(1, 5, 12)]
+fa_grp_ttest_t$statistic <- round(fa_grp_ttest_t$statistic, 3)
+fa_grp_ttest_t$FA_grp <- factor(fa_grp_ttest_t$FA_grp, levels = c("BAC", "C18EEL", "C18PUFA", "PUFA", "ARA", "EPA", "DHA"))
+fa_grp_ttest_t$Species_common <- factor(fa_grp_ttest_t$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
+fa_grp_ttest_t <- tidyr::spread(fa_grp_ttest_t, key = FA_grp, value = statistic)
 ```
 
 
