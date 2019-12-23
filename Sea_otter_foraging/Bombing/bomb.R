@@ -11,7 +11,7 @@ library(dplyr)
 
 #load files
 bomb.test <- read.csv("Bombing/bomb_test.csv")
-summary <- read.csv("Bombing/summary.csv")
+#summary <- read.csv("Bombing/summary.csv")
 
 #add prey catagory
 bomb.test$PreyCat <- NA
@@ -28,6 +28,9 @@ bomb.test$PreyCat <- ifelse(bomb.test$Species == "apc", "Cucumber",
                      ifelse(bomb.test$Species == "hak", "Abalone", 
                      ifelse(bomb.test$Species == "crs", "Chiton" ,
                      ifelse(bomb.test$Species == "crg" | bomb.test$Species == "pom" | bomb.test$Species == "chr", "Scallop", NA))))))))))
+
+#removing squid eggs
+bomb.test<- filter(bomb.test, PreyCat != is.na(PreyCat))
 
 #STARS and CRABS - Want to only look at whole parts in total bomb.test analysis
 bomb.star<-filter(bomb.test, PreyCat == "Star")
@@ -51,6 +54,12 @@ ggplot(data=bomb.test, aes(x=KJ)) +
   geom_histogram(binwidth = 1) +
   facet_wrap(vars(Species))
 
+#Histogram of all KJ by PreyCat - 
+# hard to really see what is going on
+ggplot(data=bomb.test, aes(x=KJ)) + 
+  geom_histogram(binwidth = 1) +
+  facet_wrap(vars(PreyCat))
+
 #Graph of KJ by season separated by species and prey cat 
 # (not a good depiction of this)
 ggplot(data= bomb.test) +
@@ -58,21 +67,44 @@ ggplot(data= bomb.test) +
   labs(x="Season", y="KJ (g)") +
   theme_classic()
 
-#Graph of KJ by season only by prey cat 
-# (Still not a good depiction of the data)
+#Boxplot of KJ by season separated by prey cat - this is better
 ggplot(data= bomb.test) +
-  geom_point(aes(x=Season, y=KJ, color=PreyCat, shape=PreyCat)) +
+  geom_boxplot(aes(x=Season, y=KJ, color=PreyCat)) +
   labs(x="Season", y="KJ (g)") +
   theme_classic()
 
-#### In this graph I want to draw a red line with the averages and the light bands for the SD?
+#box plot only by season
+ggplot(data= bomb.test) +
+  geom_boxplot(aes(x=Season, y=KJ)) +
+  labs(x="Season", y="KJ (g)") +
+  theme_classic()
+
+
+#### In this graph I want to draw a line with the averages and the light bands for the SD?
 #KJ for each species by season
+
+#Making season a factor to be able to add line
+bomb.test$Season<-factor(bomb.test$Season , levels=c("Spring", "Summer", "Winter"))
+
 ggplot(data= bomb.test, aes(y=KJ, x=Season)) +
   geom_point() +
+  stat_smooth(aes(x=as.numeric(Season), y=KJ)) +
   labs(x="Season", y="KJ (g)") +
   facet_wrap(vars(Species))
 
 ggsave("bomb_all.png", device = "png", path = "Bombing/", width = 8, 
+       height = 6, units = "in", dpi = 300)
+
+#now by PreyCat - also removing Ab, Chiton, Scallop and Mussel
+bomb.test2<-filter(bomb.test, PreyCat != "Abalone" & PreyCat != "Chiton" & 
+                     PreyCat != "Mussel" & PreyCat != "Scallop")
+ggplot(data= bomb.test2, aes(y=KJ, x=Season)) +
+  geom_point() +
+  stat_smooth(aes(x=as.numeric(Season), y=KJ)) +
+  labs(x="Season", y="KJ (g)") +
+  facet_wrap(vars(PreyCat))
+
+ggsave("KJ_PreyCat_season.png", device = "png", path = "Bombing/", width = 8, 
        height = 6, units = "in", dpi = 300)
 
 ####

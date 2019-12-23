@@ -49,7 +49,7 @@ whisker$OtterID<-as.factor(whisker$OtterID)
 oddotter<- filter(whisker, OtterID=="163532")
 whisker<- filter(whisker, OtterID != "163532")
 #remove first 299, since only one right now - Temp
-whisker<-whisker[-286, ] 
+#whisker<-whisker[-286, ] 
 
 #Shortening to only 8cm max for graphs
 whisker.short<-filter(whisker, distance <= 8)
@@ -386,11 +386,25 @@ whis.mean<-whisker %>%
             Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
             Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
 
+#Whiskers mean for each season group
+whisker$Season2 <- NA
+whisker$Season2 <- ifelse(whisker$Season=="Fall", "Winter", 
+                          ifelse(whisker$Season=="Winter", "Winter", 
+                                 ifelse(whisker$Season=="Spring", "Summer", 
+                                        ifelse(whisker$Season=="Summer","Summer",""))))
+whis.mean.season <- whisker %>%
+  group_by(OtterID, Season2) %>%
+  summarise(Cmean=mean(C), Nmean=mean(N), Csd=sd(C), Nsd=sd(N), 
+            Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
+            Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
+
 #TDF for otters changes to 2/3.5 makes a better looking graph
 whis.mean$TDFC<-NA; whis.mean$TDFN<-NA
 whis.mean$TDFC <- whis.mean$Cmean-2
 whis.mean$TDFN <- whis.mean$Nmean-2.8
-
+whis.mean.season$TDFC<-NA; whis.mean.season$TDFN<-NA
+whis.mean.season$TDFC <- whis.mean.season$Cmean-2
+whis.mean.season$TDFN <- whis.mean.season$Nmean-2.8
 
 ggplot(data= whis.mean, aes(x=TDFC, y=TDFN)) +
   geom_point() +
@@ -416,6 +430,41 @@ ggplot() +
 ggsave("whis_preySE.png", device = "png", path = "SI/", width = 8, 
        height = 7, units = "in", dpi = 300)
 
+#Separate by season - Winter
+
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
+  geom_point(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse), width=0) + 
+  geom_errorbarh(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse), height=0) +
+  theme_few()
+
+ggsave("whis_prey_winter.png", device = "png", path = "SI/", width = 8, 
+       height = 7, units = "in", dpi = 300)
+
+#Separate by season - Summer
+
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
+  geom_point(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse), width=0) + 
+  geom_errorbarh(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse), height=0) +
+  theme_few()
+
+ggsave("whis_prey_summer.png", device = "png", path = "SI/", width = 8, 
+       height = 7, units = "in", dpi = 300)
+
+
 #now without error bars for otters (all points separate) too many points!!
 ggplot() +
   geom_point(data=whisker, aes(x=C-2.5, y=N-3), colour="gray")+
@@ -430,17 +479,6 @@ ggplot() +
 
 ggsave("whis_prey_nobars_points.png", device = "png", path = "SI/", width = 8, 
        height = 6, units = "in", dpi = 300)
-
-#Ellipses instead of error bars - this isn't working...
-ggplot() +
-  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
-  labs(x=expression(paste(delta^13, "C (\u2030)")), 
-       y=expression(paste(delta^15, "N (\u2030)" )))  +
-  stat_ellipse(data=si.mean, aes(x=Cmean, y=Nmean, fill=PreyCat), type="euclid", geom="polygon") +
-  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
-  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse), width=0) + 
-  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse), height=0) +
-  theme_classic()
 
 #ODD otter on top of prey graph
 
@@ -513,7 +551,7 @@ ggplot(data=whisker) +
 ggsave("whiskers.png", device = "png", path = "SI/", width = 8, 
        height = 6, units = "in", dpi = 300)
 
-#sub sample of otters for WSN poster
+#sub sample of otters for WSN poster (and WMMC poster)
 
 wsn<-filter(whisker, OtterID=="163520" | OtterID=="163521" | OtterID=="163536" | OtterID == "163526")
 ggplot(data=wsn) +   theme_few() +
@@ -833,3 +871,10 @@ ggplot() +
 
 ggsave("C_prey_seasons.png", device = "png", path = "SI/", width = 8, 
        height = 6.4, units = "in", dpi = 300)
+
+
+#Correlation between C and N
+cor(x=whisker$C, Y=whisker$N, use="everything")
+
+#cor example from Ash
+corrgram(data, lower.panel = panel.cor)
