@@ -17,6 +17,7 @@ library(HH) #for Anova (not normal one)
 library(psych)
 library(RVAideMemoire) # for moods
 library(rcompanion) #for moods
+library(corrgram) # for correlation graphs at the end of the script
 
 #load files
 si.test <- read.csv("SI/SI.csv")
@@ -46,7 +47,7 @@ whisker <- read.csv("SI/whiskers.csv")
 whisker$OtterID<-as.factor(whisker$OtterID)
 
 # for right now, I want to remove 163532. I removed 160478 and 77298 from the CSV
-oddotter<- filter(whisker, OtterID=="163532")
+#oddotter<- filter(whisker, OtterID=="163532")
 whisker<- filter(whisker, OtterID != "163532")
 #remove first 299, since only one right now - Temp
 #whisker<-whisker[-286, ] 
@@ -296,6 +297,7 @@ si.mean <-si.test %>%
 si.mean<-si.mean[-1,] #removing blank
 si.mean<-si.mean[-6,] #removing stars
 
+
 #prey with SE as errorbars
 ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
   geom_point(aes(color=PreyCat)) +
@@ -309,13 +311,31 @@ ggsave("prey.png", device = "png", path = "SI/", width = 8,
        height = 6, units = "in", dpi = 300)
 
 
-#Now looking at just the summer values - The SNAIL values change greatly!
+#Now looking at just the summer values
 si.summer<-filter(si.test, Season=="Summer")
 si.mean2 <-si.summer %>%
   group_by(PreyCat) %>% 
   summarise(Cmean=mean(Cnorm), Nmean=mean(N), Cmin=min(Cnorm), Cmax= max(Cnorm), 
             Csd=sd(Cnorm), Nsd=sd(N), Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
 si.mean2<-si.mean2[-1,]
+si.mean2<-si.mean2[-6,] #removing stars
+
+#Winter values
+si.winter<-filter(si.test, Season=="Winter")
+si.mean3 <-si.winter %>%
+  group_by(PreyCat) %>% 
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Cmin=min(Cnorm), Cmax= max(Cnorm), 
+            Csd=sd(Cnorm), Nsd=sd(N), Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
+si.mean3<-si.mean3[-1,]
+si.mean3<-si.mean3[-6,] #removing stars
+
+#Spring values
+si.spring<-filter(si.test, Season=="Spring")
+si.mean4 <-si.spring %>%
+  group_by(PreyCat) %>% 
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Cmin=min(Cnorm), Cmax= max(Cnorm), 
+            Csd=sd(Cnorm), Nsd=sd(N), Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
+si.mean4<-si.mean4[-6,] #removing stars
 
 ggplot(data= si.mean2, aes(x=Cmean, y=Nmean)) +
   geom_point(aes(color=PreyCat)) +
@@ -324,6 +344,18 @@ ggplot(data= si.mean2, aes(x=Cmean, y=Nmean)) +
   geom_errorbar(aes(ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
   geom_errorbarh(aes(xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
   theme_classic()
+
+#Now look at changes between seasons
+ggplot() +
+  geom_point(data= si.mean2, aes(x=Cmean, y=Nmean, color=PreyCat), shape=4) +
+  geom_point(data= si.mean3, aes(x=Cmean, y=Nmean, color=PreyCat), shape=1) +
+  geom_point(data= si.mean4, aes(x=Cmean, y=Nmean, color=PreyCat), shape=0) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  theme_classic()
+
+ggsave("prey_season.png", device = "png", path = "SI/", width = 8, 
+       height = 6, units = "in", dpi = 300)
 
 #Now looking at just the Craig values 
 si.craig<-filter(si.test, Site=="Craig")
@@ -433,16 +465,15 @@ ggsave("whis_preySE.png", device = "png", path = "SI/", width = 8,
 #Separate by season - Winter
 
 ggplot() +
-  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  geom_point(data= si.mean3, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) + theme_few() +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
-       y=expression(paste(delta^15, "N (\u2030)" )))  +
+       y=expression(paste(delta^15, "N (\u2030)" )), title = "Winter")  +
   scale_color_discrete(name  ="Prey Group") +
-  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
-  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
+  geom_errorbar(data= si.mean3, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean3, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
   geom_point(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN), size=2)+
   geom_errorbar(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse), width=0) + 
-  geom_errorbarh(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse), height=0) +
-  theme_few()
+  geom_errorbarh(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse), height=0) 
 
 ggsave("whis_prey_winter.png", device = "png", path = "SI/", width = 8, 
        height = 7, units = "in", dpi = 300)
@@ -450,12 +481,12 @@ ggsave("whis_prey_winter.png", device = "png", path = "SI/", width = 8,
 #Separate by season - Summer
 
 ggplot() +
-  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  geom_point(data= si.mean2, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
-       y=expression(paste(delta^15, "N (\u2030)" )))  +
+       y=expression(paste(delta^15, "N (\u2030)" )), title = "Summer")  +
   scale_color_discrete(name  ="Prey Group") +
-  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
-  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
+  geom_errorbar(data= si.mean2, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean2, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
   geom_point(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN), size=2)+
   geom_errorbar(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse), width=0) + 
   geom_errorbarh(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse), height=0) +
@@ -596,8 +627,8 @@ ggplot(data=whisker) + theme_few()+
   scale_colour_manual(values = c("lightseagreen", "tomato")) 
   
 #each otter separate
-  ggplot(data=whisker) + theme_few()+
-  geom_point(aes(x=Season, y=N, colour = "Nitrogen")) +
+ggplot(data=whisker) + theme_few()+
+geom_point(aes(x=Season, y=N, colour = "Nitrogen")) +
     geom_point(aes(x=Season, y=C+25, colour = "Carbon")) +
     stat_smooth(aes(x=as.numeric(Season), y=N, colour = "Nitrogen"), se= FALSE) +
     stat_smooth(aes(x=as.numeric(Season), y=C+25, colour = "Carbon"), se= FALSE) +
@@ -607,10 +638,45 @@ ggplot(data=whisker) + theme_few()+
     scale_y_continuous(sec.axis = sec_axis(~.-25, name = expression(paste(delta^13, "C (\u2030)" )))) +
     scale_colour_manual(values = c("lightseagreen", "tomato")) +
     facet_wrap(vars(OtterID), nrow= 6)
+  
+## ODD OTTER
 
-#################################
-# Residual Whiskers ANOVA       #
-#################################
+#load whisker data
+oddotter <- read.csv("SI/oddotter.csv")
+oddotter$OtterID<-as.factor(oddotter$OtterID)
+oddotter$Run<-as.factor(oddotter$Run)
+
+#plot two runs separate
+ggplot(data=oddotter) +
+  geom_line(aes(x=distance, y=N), colour="tomato") +
+  geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste(delta^15, "N (\u2030)" )), 
+       colour = "Isotope")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, 
+                                         name = expression(paste(delta^13, "C (\u2030)" )))) +
+  facet_wrap(vars(Run), nrow=2) +
+  theme_light()
+
+#plot together different colors - Nitrogen
+ggplot(data=oddotter, aes(x=distance, y=N, colour=Run)) +
+  geom_line() +
+  geom_point() +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  theme_few()
+
+#plot together different colors - Carbon
+ggplot(data=oddotter, aes(x=distance, y=C, colour=Run)) +
+  geom_line() +
+  geom_point() +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste(delta^13, "C (\u2030)" )))  +
+  theme_few()
+
+###############################################################
+#               Residual Whiskers ANOVA                       #
+###############################################################
 
 #this is the fix that Matt C. did. 
 MEANS<-whisker.short%>%
@@ -872,9 +938,38 @@ ggplot() +
 ggsave("C_prey_seasons.png", device = "png", path = "SI/", width = 8, 
        height = 6.4, units = "in", dpi = 300)
 
+###############################################################################
+#                                 Correlations                                #
+###############################################################################
 
-#Correlation between C and N
-cor(x=whisker$C, Y=whisker$N, use="everything")
 
-#cor example from Ash
-corrgram(data, lower.panel = panel.cor)
+#making one otter test
+cor533 <- whisker %>%
+  filter(OtterID=="163533") %>%
+  select(distance, C, N)
+  
+corrgram(cor533, lower.panel = panel.cor)
+
+#For each otter-avg cor?
+cor<- whisker%>%
+  group_by(OtterID)%>%
+  summarize(COR=mean(cor(C,N)))
+
+ggplot(cor, aes(x=COR)) +
+  geom_density(fill="gray", color="gray") +
+  xlim(-1,1) +
+  labs(x= "Correlation") +
+  theme_few()
+
+ggplot(data=whisker, aes(C,N)) +
+  geom_point()+
+  geom_smooth(method="lm", se=FALSE)+
+  labs(x= expression(paste(delta^13, "C (\u2030)")), 
+       y= expression(paste(delta^15, "N (\u2030)" )))+
+  facet_wrap(vars(OtterID), nrow=6) +
+  theme_light()
+
+ggplot(cor.whis, aes(x=correlation)) +
+  geom_bar(color="red") +
+  xlim(-1,1) +
+  theme_classic()

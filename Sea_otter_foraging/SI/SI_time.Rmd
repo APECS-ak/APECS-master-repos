@@ -34,7 +34,6 @@ Otter 163532 has very odd values, while it is being re-run I have seperated out 
 ```{r}
 
 # for right now, I want to separate 163532 because it is an odd otter
-oddotter<- filter(whisker, OtterID=="163532")
 whisker<- filter(whisker, OtterID != "163532")
 ```
 

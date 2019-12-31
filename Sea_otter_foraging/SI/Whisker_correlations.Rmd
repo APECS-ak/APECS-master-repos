@@ -1,0 +1,91 @@
+---
+title: "Whisker Correlations"
+author: "Nicole LaRoche"
+date: "12/30/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, message= FALSE}
+library(stats)
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+library(corrgram)
+
+
+
+#load whisker data
+whisker <- read.csv("whiskers.csv")
+whisker$OtterID<-as.character(whisker$OtterID)
+# for right now, I want to remove 163532 as it has issues
+whisker<- filter(whisker, OtterID != "163532")
+
+```
+
+
+First, I want to calculate the correlation between Carbon and Nitrogen for each otter and order them from lowest to highest
+
+``` {r, message=FALSE}
+cor.whis<- whisker%>%
+  group_by(OtterID)%>%
+  summarize(correlation=mean(cor(C,N)))
+
+cor.whis<-cor.whis[order(cor.whis$correlation),]
+cor.whis
+```
+
+Now check to make sure that these values are correct
+
+```{r, message=FALSE}
+cor533 <- whisker %>%
+  filter(OtterID=="163533") %>%
+  select(distance, C, N)
+  
+corrgram(cor533, lower.panel = panel.cor)
+
+cor524 <- whisker %>%
+  filter(OtterID=="163524") %>%
+  select(distance, C, N)
+  
+corrgram(cor524, lower.panel = panel.cor)
+
+```
+
+
+Looks good! Now to visualize the correlations - Here is the overall kernal density from -1 to 1 
+
+```{r, echo = FALSE}
+ggplot(cor.whis, aes(x=correlation)) +
+  geom_density(fill="gray", color="gray") +
+  xlim(-1,1) +
+  labs(x= "Correlation", y= "Kernel Density") +
+  theme_classic()
+```
+
+ 
+Here is each otter independently with a line of best fit 
+
+```{r, echo=FALSE}
+ggplot(data=whisker, aes(C,N)) +
+  geom_point()+
+  geom_smooth(method="lm", se=FALSE)+
+  labs(x= expression(paste(delta^13, "C (\u2030)")), 
+       y= expression(paste(delta^15, "N (\u2030)" )))+
+  facet_wrap(vars(OtterID), nrow=6) +
+  theme_light()
+```
+
+Another visualization of the distribution
+
+```{r}
+ggplot(cor.whis, aes(x=correlation)) +
+  geom_bar(color="red") +
+  xlim(-1,1) +
+  theme_classic()
+```
+
