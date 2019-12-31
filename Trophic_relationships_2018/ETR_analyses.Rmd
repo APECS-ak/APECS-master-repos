@@ -263,23 +263,31 @@ ggplot(eg) +
   ylab("Count") +
   scale_y_continuous(limits = c(0, 8))
 
+## Epifauna ##
+hist(log(eg$epi_load))
+
 ## Idotea load ##
-hist(sqrt(eg$idotea_load))
+hist(eg$idotea_load)
 ggplot(eg) +
   geom_histogram(aes(idotea_load), binwidth = 0.01) +
   xlab("idotea_load g/g") +
   ylab("Count") +
   scale_y_continuous(limits = c(0, 8))
 
-
 ## limpet load ##
 hist(eg$limpet_load)
+
+## Clams ##
+hist(clm.site.quad$mass_g)
 
 ## butter clams ##
 hist(clm.site.quad.sp$mass_g[clm.site.quad.sp$species_common == "Butter clam"])
 
 ## macoma sp clams ##
 hist(clm.site.quad.sp$mass_g[clm.site.quad.sp$species_common == "Macoma sp."])
+
+## Crabs ##
+hist(log(crb.site.string$mass_g))
 
 ## helmet crabs ##
 hist(crb.site.string.sp$mass_g[crb.site.string.sp$species_common == "Helmet crab"])
@@ -291,7 +299,7 @@ hist(crb.site.string.sp$mass_g[crb.site.string.sp$species_common == "Graceful cr
 hist(crb.site.string.sp$mass_g[crb.site.string.sp$species_common == "Red rock crab"], breaks = 10)
 
 ## All fish ##
-hist(fsh$total_fish_mass, breaks = 10)
+hist(log(fsh$total_fish_mass), breaks = 10)
 
 ## Shiner perch ##
 hist(fsh$PERCHSH)
@@ -365,7 +373,7 @@ t.lp.1
 Sum total crab mass by string. Insert 0 data for strings with no crabs so averages are correct. Append site metadata
 ```{r crb site x treatment, echo = FLASE}
 ## Nested Anova ##
-mod.crb.1 <- lm(mass_g / 1000 ~ sea_otter_tr + sea_otter_tr %in% site, data = crb.site.string)
+mod.crb.1 <- lm(log(mass_g + 1 / 1000) ~ sea_otter_tr + sea_otter_tr %in% site, data = crb.site.string)
 anova(mod.crb.1)
 
 ## Strait Anova ##
