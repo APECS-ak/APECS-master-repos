@@ -1308,13 +1308,14 @@ BAC <- c("C16.1w7", "C18.1w7", "a.C17.0", "i.C17.0")
 Make comparisons
 ```{r}
 fa_mrk <- merge(bimrk[, c(1, 2, 3, 4, 7)], fa, by.x = "Biomarker_ID", by.y = "ID")
+fa_mrk$EPA.DHA <- fa_mrk$C20.5w3 / fa_mrk$C22.6w3
 
 # clean up species #
 fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Pointed Macoma", "Macoma sp.", fa_mrk$Species_common)
 fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Bentnose Macoma", "Macoma sp.", fa_mrk$Species_common)
 
 fa_tll <- fa_mrk  %>% 
-  gather(key = "FA", value = "prop", 11:41) %>% 
+  gather(key = "FA", value = "prop", 11:42) %>% 
   filter(Species_common != "Red rock crab")
 
 ## C18EEL ##
@@ -1421,6 +1422,21 @@ fa_DHA <- fa_tll %>%
   summarize(prop_sum_m = mean(prop),
             prop_sum_sd = sd(prop))
 fa_DHA$FA_grp <- "DHA"
+
+## EPA:DHA ##
+fa_EPA.DHA_all <- fa_tll %>% 
+  filter(FA == "EPA.DHA")
+colnames(fa_DHA_all)[11] <- "FA_grp"
+colnames(fa_DHA_all)[12] <- "prop_sum"
+
+fa_EPA.DHA_all <- cbind(fa_EPA.DHA_all[, c(1:10, 12, 11)])  
+
+fa_EPA.DHA <- fa_tll %>% 
+  filter(FA == "EPA.DHA") %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(prop_sum_m = mean(prop),
+            prop_sum_sd = sd(prop))
+fa_EPA.DHA$FA_grp <- "EPA.DHA"
 
 ## All together now - for t.test ##
 fa_grp_all <- rbind(fa_BAC_all, fa_C18EEL_all, fa_C18PUFA_all, fa_PUFA_all, fa_ARA_all, fa_EPA_all, fa_DHA_all)
