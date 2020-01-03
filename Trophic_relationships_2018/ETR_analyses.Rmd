@@ -1537,7 +1537,7 @@ Plots
 ggplot(fa_grp, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
   geom_bar(position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(ymin = prop_sum_m - prop_sum_sd, ymax = prop_sum_m + prop_sum_sd), width = 0, position = position_dodge(.9)) +
-  scale_fill_manual("Sea otter treatment", c("High", "Low"), values = so.pal) +
+  scale_fill_manual("Sea otter \n region", c("High", "Low"), values = so.pal) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_y_continuous(limits = c(-0.1, 0.6), breaks = seq(0, 0.6, by = 0.2)) +
   xlab("Fatty acid") +
