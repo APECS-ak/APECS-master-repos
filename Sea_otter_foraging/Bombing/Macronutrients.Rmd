@@ -1,0 +1,80 @@
+---
+title: "Macronutrients"
+author: "Nicole LaRoche"
+date: "1/9/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Loading libraries and data
+```{r, libraries and data, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+
+bomb <- read.csv("Bomb.csv")
+moisture <- read.csv("Moisture.csv")
+pla <- read.csv("pla.csv")
+summary <- read.csv("Summary.csv")
+```
+
+
+I want to combine info from the summary file into the Moisure, bomb, and lipid files
+```{r, new moisture file, message=FALSE}
+summary.short <- select(summary, SIN, Size.mm, Species, Frozen.Weight,
+                        Live.Weight, Dissected.Weight, Site.location, Season)
+moisure.summary <- left_join(moisture,summary.short, by="SIN")
+all.lipid <- left_join(pla, moisure.summary, by="SIN")
+all.lipid <- left_join(all.lipid, bomb, by="SIN")
+```
+
+
+Converting from KJ/dry mass to KJ/wet mass
+```{r, convert to wet mass, message=FALSE}
+# remember moisture is currently in xx.xx, and we need 0.xxxx
+all.lipid$KJ.wetgram <- (1-(all.lipid$Moisture/100))*all.lipid$Gross.Heat
+all.lipid <- filter(all.lipid, Species != "Squid Eggs")
+all.lipid <- filter(all.lipid, Species != "evt")
+all.lipid <- filter(all.lipid, !is.na(X.Lipid))
+all.lipid <- filter(all.lipid, !is.na(KJ.wetgram))
+
+```
+
+
+## KJ/wet g vs length (by species)
+```{r, graph KJ vs length, echo = FALSE, message=FALSE}
+ggplot(data= all.lipid, aes(x=Size.mm, y=KJ.wetgram)) +
+  geom_point() + theme_few() +
+  stat_smooth(method= "lm") +
+  labs(x= "Length (in mm)", y="KJ/gram (by wet mass)")  +
+  facet_wrap(vars(Species), scales= "free")
+```
+
+
+## % Lipid vs length (by species) 
+
+```{r, graph lipid vs length, echo= FALSE, message=FALSE}
+ggplot(data= all.lipid, aes(x=Size.mm, y=X.Lipid)) +
+  geom_point() + theme_few() +
+  stat_smooth(method= "lm") +
+  labs(x= "Length (in mm)", y="% Lipid")  +
+  facet_wrap(vars(Species), scales= "free")
+```
+
+
+## Now to put them together
+```{r, KJ and Lipid vs length, echo = FALSE, Message = FALSE}
+ggplot(data= all.lipid) + theme_few() +
+  geom_point(aes(x=Size.mm, y=X.Lipid, color= "% Lipid")) + 
+  stat_smooth(aes(x=Size.mm, y=X.Lipid, color= "% Lipid"), method= "lm") +
+  labs(x= "Length (in mm)", y="% Lipid")  +
+  geom_point(aes(x=Size.mm, y=KJ.wetgram, color="KJ/g")) +
+  stat_smooth(aes(x=Size.mm, y=KJ.wetgram, color="KJ/g"), method= "lm") +
+  scale_color_manual(name='', values=c("% Lipid"="Red", "KJ/g"="Blue"))+
+  scale_y_continuous(sec.axis = sec_axis(~., name ="KJ/g (wet mass)" )) +
+  facet_wrap(vars(Species), nrow = 4, scales= "free")
+```
+

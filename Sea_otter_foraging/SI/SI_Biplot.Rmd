@@ -1,0 +1,426 @@
+---
+title: "SI Biplots"
+author: "Nicole LaRoche"
+date: "1/6/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+```
+
+
+
+#### In this file I am comparing various SI biplots. 
+#### 1.  Compare site means with mussel standardization
+#### 2.  Comparing my prey values to Newsome et al. 2009 prey values from CA. 
+#### 3.  Comparing Varied TDFs
+#### 4.  Comparing all seasons 
+
+
+-Loading libraries and data-
+```{r, libraries and data, message=FALSE}
+library(ggplot2)
+library(dplyr)
+library(ggthemes)
+
+si.prey <- read.csv("sifinal.csv")
+whisker <- read.csv("whiskers.csv")
+whisker$OtterID<-as.factor(whisker$OtterID)
+# for right now, I want to remove 163532
+whisker<- filter(whisker, OtterID != "163532")
+
+newsome <- read.csv("Newsome2009.csv")
+
+```
+
+-Creating means for prey and otters-
+```{r, prey means, message=FALSE}
+si.mean <-si.prey %>%
+  group_by(PreyCat) %>% 
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
+            Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
+si.mean<-si.mean[-1,] #removing blank
+
+si.season <-si.prey %>%
+  group_by(PreyCat, Season) %>% 
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
+            Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
+si.season<-si.season[-1,] #removing blank row
+si.season<-si.season[-1,] #removing blank row
+```
+
+```{r, whisker means, message=FALSE}
+whis.mean<-whisker %>%
+  group_by(OtterID) %>%
+  summarise(Cmean=mean(C), Nmean=mean(N), Csd=sd(C), Nsd=sd(N), 
+            Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
+            Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
+
+whis.season<-whisker %>%
+  group_by(OtterID, Season) %>%
+  summarise(Cmean=mean(C), Nmean=mean(N), Csd=sd(C), Nsd=sd(N), 
+            Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
+            Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
+```
+
+### 1.  Since all otters are from the northern region, I adjusted my southern prey by the change in mean mussel values from each site-
+```{r, adjusting for location, message=FALSE}
+
+mussel<-filter(si.prey, PreyCat=="Mussel")
+Cmussel<-filter(mussel, Site=="Craig")
+Smussel<-filter(mussel, Site=="Soda Bay")
+
+mean(Smussel$Cnorm)#  -18.40197
+mean(Smussel$N)#  8.195714
+mean(Cmussel$Cnorm)#  -16.52315
+mean(Cmussel$N)#  9.426667
+mus.n<-mean(Cmussel$N)-mean(Smussel$N)#  1.230952
+mus.c<-mean(Cmussel$Cnorm)-mean(Smussel$Cnorm)#1.878819
+
+si.prey$Cadjust<-NA
+si.prey$Nadjust<-NA
+si.prey$Cadjust<-ifelse(si.prey$Site=="Soda Bay",si.prey$Cnorm+mus.c,si.prey$Cnorm)
+si.prey$Nadjust<-ifelse(si.prey$Site=="Soda Bay",si.prey$N+mus.n,si.prey$N)
+
+si.mussel.mean <-si.prey %>%
+  group_by(PreyCat) %>% 
+  summarise(Cmean=mean(Cadjust), Nmean=mean(Nadjust), Csd=sd(Cadjust), Nsd=sd(Nadjust), 
+            Cse=sd(Cadjust)/sqrt(length(Cadjust)), Nse=sd(Nadjust)/sqrt(length(Nadjust)))
+si.mussel.mean<-si.mussel.mean[-1,] #removing blank
+
+```
+
+Graph of the change in C and N for mean prey when standardized by location. Circles are original and triangle is after standardization. 
+```{r, graph of mussel differences, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), shape = 19, size=3) +
+  geom_point(data= si.mussel.mean, aes(x=Cmean, y=Nmean, color=PreyCat), shape = 17, size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  geom_errorbar(data= si.mean, aes(x= Cmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= 
+                                     PreyCat), width=0) + 
+  geom_errorbarh(data = si.mean, aes(y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= 
+                                       PreyCat), height=0) +
+  geom_errorbar(data = si.mussel.mean, aes(x= Cmean, ymin = Nmean-Nse, ymax = Nmean+Nse, 
+                                           color= PreyCat), width=0) + 
+  geom_errorbarh(data = si.mussel.mean, aes(y= Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, 
+                                            color=PreyCat), height=0) +
+  theme_classic()
+```
+
+### 2.  Comparing Newsome et al. 2009 prey values to my prey. 
+
+Triangles are Newsome, Circles are mine
+```{r, CA vs AK prey graph, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat),shape=19, size =3) +
+  geom_point(data= newsome, aes(x=Cmean, y=Nmean, color=PreyCat), shape=17, size = 3)+
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  theme_classic()
+
+```
+
+### 3.  Comparing TDFs
+
+
+### 1.5/2.8
+```{r, TDF calculations: 1.5/2.8, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-1.5
+whis.mean$TDFN <- whis.mean$Nmean-2.8
+```
+
+```{r, 1.5/2.8 graph, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 1.8/2.8
+```{r, TDF calculations: 1.8/2.8, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-1.8
+whis.mean$TDFN <- whis.mean$Nmean-2.8
+```
+
+```{r, TDF graph: 1.8/2.8, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+### 2/2.8
+```{r, TDF calculations: 2/2.8, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-2
+whis.mean$TDFN <- whis.mean$Nmean-2.8
+```
+
+```{r, TDF graph: 2/2.8, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 2.3/2.8
+```{r, TDF calculations: 2.3/2.8, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-2.3
+whis.mean$TDFN <- whis.mean$Nmean-2.8
+```
+
+```{r, TDF graph: 2.3/2.8, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 1.5/3.1
+```{r, TDF calculations: 1.5/3.1, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-1.5
+whis.mean$TDFN <- whis.mean$Nmean-3.1
+```
+
+```{r, TDF graph: 1.5/3.1, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 1.8/3.1
+```{r, TDF calculations: 1.8/3.1, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-1.8
+whis.mean$TDFN <- whis.mean$Nmean-3.1
+```
+
+```{r, TDF graph: 1.8/3.1, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 2/3.1
+```{r, TDF calculations: 2/3.1, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-2
+whis.mean$TDFN <- whis.mean$Nmean-3.1
+```
+
+```{r, TDF graph: 2/3.1, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 2.3/3.1
+```{r, TDF calculations: 2.3/3.1, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-2.3
+whis.mean$TDFN <- whis.mean$Nmean-3.1
+```
+
+```{r, TDF graph: 2.3/3.1, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 1.5/3.5
+```{r, TDF calculations: 1.5/3.5, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-1.5
+whis.mean$TDFN <- whis.mean$Nmean-3.5
+```
+
+```{r, TDF graph: 1.5/3.5, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 1.8/3.5
+```{r, TDF calculations: 1.8/3.5, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-1.8
+whis.mean$TDFN <- whis.mean$Nmean-3.5
+```
+
+```{r, TDF graph: 1.8/3.5, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 2/3.5
+```{r, TDF calculations: 2/3.5, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-2
+whis.mean$TDFN <- whis.mean$Nmean-3.5
+```
+
+```{r, TDF graph: 2/3.5, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+
+### 2.3/3.5
+```{r, TDF calculations: 2.3/3.5, message=FALSE}
+whis.mean$TDFC <- whis.mean$Cmean-2.3
+whis.mean$TDFN <- whis.mean$Nmean-3.5
+```
+
+```{r, TDF graph: 2.3/3.5, echo=FALSE, message=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whis.mean, aes(x=TDFC, y=TDFN), size=2)+
+  geom_errorbar(data=whis.mean, aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse),
+                width=0) + 
+  geom_errorbarh(data=whis.mean, aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse),
+                 height=0) +
+  theme_few()
+```
+
+

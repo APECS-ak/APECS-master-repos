@@ -2,6 +2,7 @@
 
 #load programs
 library(ggplot2)
+library(lubridate)
 library(lattice)
 library(dplyr)
 
@@ -51,8 +52,20 @@ forage$Occupation <- NA
 forage$Occupation <- ifelse(forage$YEAR == "1975", "40 years", ifelse(forage$YEAR == "1988", "30 years",
                       ifelse(forage$YEAR == "1994", "15 years", ifelse(forage$YEAR == "2003", "15 years", 
                       ifelse(forage$YEAR == "2010", "8 years", NA)))))
+
+#Changing date to julian date.
+forage$Date <- as.Date(forage$Date, "%m/%d/%y")
+forage$julian <- yday(forage$Date)
+
+#calculate Spring/ Summer turnover (Using our seasons June 21)
+solstice <- as.Date("06-21", format = "%m-%d")
+yday(solstice)
+
+#Now make seasons column
+forage$Season <- NA
+forage$Season <- ifelse(forage$julian<173, "Spring", "Summer")
                              
-                               
+ 
 # checking the data frame
 is.data.frame(forage) # will say if this is a dataframe, should say TRUE
 dim(forage)
@@ -197,7 +210,11 @@ summary(s.prop.aov)
 
 sex.prey<- na.omit(sex.prey)
 chisq.test(sex.prey)
-########## Prey by otter ##############
+
+
+########################## Prey by otter ###########################
+####################################################################
+
 # USING OTTER_SUM AND OTTER_BY_GRAM
 
 #make sure ott sum and ott gram are equal
@@ -238,9 +255,50 @@ chisq.test(ott.raw$PreySz, ott.raw$Occupation)
 hist(clam$Size)
 plot(clam$where)
 
+###############################################################
+##                    Frequency of Occurance                 ##
+###############################################################
 
-## Frequency of Occurance
+#write.csv(forage, "forage.csv")
 
-write.csv(forage, "forage.csv")
+
+#need to group by bout, and preycat then count
+
+count.forage<- forage %>%
+  count(BoutID, PreyCat) %>%
+  na.omit() %>%
+  count(PreyCat)
+
+#Now counting how many for each prey cat and devide by total bouts
+count.forage$fo<-NA
+count.forage$fo<-(count.forage$n / 362)
+
+
+#Make the same thing for each season
+
+#first find out how many bouts for each season:
+
+sp<- forage %>% 
+  filter(forage$Season == "Spring") %>%
+  count(BoutID)
+sp #182
+
+su<- forage %>% 
+  filter(forage$Season == "Summer") %>%
+  count(BoutID)
+su #180
+
+count.season<- forage %>%
+  count(BoutID, PreyCat, Season) %>%
+  na.omit() %>%
+  count(PreyCat, Season)
+
+count.season$fo<-NA
+count.season$fo<-(count.season$n / 181)
+
+#graphing the seasons
+ggplot(data= count.season, aes(x= PreyCat, y=fo)) +
+  geom_col(aes(fill=Season), position = "dodge") +
+  theme_classic()
 
 

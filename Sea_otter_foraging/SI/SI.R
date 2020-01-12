@@ -42,6 +42,9 @@ si.test$Cnorm <- NA
 si.test$Cnorm<- ifelse(si.test$CN >= 3.5, si.test$C-3.32+(0.99*si.test$CN), si.test$C)
 si.test$SiteNumber<-as.character(si.test$SiteNumber)
 
+#make final CSV
+write.csv(si.test, "SI/sifinal.csv")
+
 #load whisker data
 whisker <- read.csv("SI/whiskers.csv")
 whisker$OtterID<-as.factor(whisker$OtterID)
@@ -56,7 +59,7 @@ whisker<- filter(whisker, OtterID != "163532")
 whisker.short<-filter(whisker, distance <= 8)
 
 
-#reduce si file to just clam/crab/snail/urchin
+#reduce si file to just clam/crab/snail/urchin - Not needed anymore because I can just select from PreyCat
 si.clam<- filter(si.test, Species== "cln" | Species == "sag" | Species == "prs")
 si.crab<- filter(si.test, Species== "cam" | Species == "cao" | Species== "cap" | Species== "tec" | Species == "pup")
 si.snail<- filter(si.test, Species =="tes" | Species == "cef" | Species == "nul")
@@ -167,7 +170,7 @@ ggplot(data= si.snail, aes(x=C, y=N)) +
   theme_classic()
 
 #STAR - Tissue differences
-ggplot(data= si.star, aes(x=C, y=N)) +
+ggplot(data=filter(si.prey, PreyCat=="Star"), aes(x=C, y=N)) +
   geom_point(aes(color=Tissue, shape=Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -292,11 +295,13 @@ plot(si.test$Species, si.test$C)
 #Making mean and min/max for each prey type using Cnorm
 si.mean <-si.test %>%
   group_by(PreyCat) %>% 
-  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Cmin=min(Cnorm), Cmax= max(Cnorm), 
-            Csd=sd(Cnorm), Nsd=sd(N), Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
+            Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
 si.mean<-si.mean[-1,] #removing blank
-si.mean<-si.mean[-6,] #removing stars
+#si.mean<-si.mean[-6,] #removing stars
 
+#make csv
+write.csv(si.mean, "si.mean.csv")
 
 #prey with SE as errorbars
 ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
@@ -313,31 +318,41 @@ ggsave("prey.png", device = "png", path = "SI/", width = 8,
 
 #Now looking at just the summer values
 si.summer<-filter(si.test, Season=="Summer")
-si.mean2 <-si.summer %>%
+si.mean.su <-si.summer %>%
   group_by(PreyCat) %>% 
   summarise(Cmean=mean(Cnorm), Nmean=mean(N), Cmin=min(Cnorm), Cmax= max(Cnorm), 
             Csd=sd(Cnorm), Nsd=sd(N), Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
-si.mean2<-si.mean2[-1,]
-si.mean2<-si.mean2[-6,] #removing stars
+si.mean.su<-si.mean.su[-1,]
+#si.mean.su<-si.mean.su[-6,] #removing stars
 
 #Winter values
 si.winter<-filter(si.test, Season=="Winter")
-si.mean3 <-si.winter %>%
+si.mean.wi <-si.winter %>%
   group_by(PreyCat) %>% 
   summarise(Cmean=mean(Cnorm), Nmean=mean(N), Cmin=min(Cnorm), Cmax= max(Cnorm), 
             Csd=sd(Cnorm), Nsd=sd(N), Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
-si.mean3<-si.mean3[-1,]
-si.mean3<-si.mean3[-6,] #removing stars
+si.mean.wi<-si.mean.wi[-1,]
+#si.mean.wi<-si.mean.wi[-6,] #removing stars
 
 #Spring values
 si.spring<-filter(si.test, Season=="Spring")
-si.mean4 <-si.spring %>%
+si.mean.sp <-si.spring %>%
   group_by(PreyCat) %>% 
   summarise(Cmean=mean(Cnorm), Nmean=mean(N), Cmin=min(Cnorm), Cmax= max(Cnorm), 
             Csd=sd(Cnorm), Nsd=sd(N), Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
-si.mean4<-si.mean4[-6,] #removing stars
+#si.mean.sp<-si.mean.sp[-6,] #removing stars
 
-ggplot(data= si.mean2, aes(x=Cmean, y=Nmean)) +
+#make csvs
+write.csv(si.mean.sp, "si.mean.sp.csv")
+write.csv(si.mean.su, "si.mean.su.csv")
+write.csv(si.mean.wi, "si.mean.wi.csv")
+
+#count of each prey cat
+count<- si.test %>%
+  count(PreyCat, Season)
+count
+
+ggplot(data= si.mean.su, aes(x=Cmean, y=Nmean)) +
   geom_point(aes(color=PreyCat)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" )))  +
@@ -347,9 +362,9 @@ ggplot(data= si.mean2, aes(x=Cmean, y=Nmean)) +
 
 #Now look at changes between seasons
 ggplot() +
-  geom_point(data= si.mean2, aes(x=Cmean, y=Nmean, color=PreyCat), shape=4) +
-  geom_point(data= si.mean3, aes(x=Cmean, y=Nmean, color=PreyCat), shape=1) +
-  geom_point(data= si.mean4, aes(x=Cmean, y=Nmean, color=PreyCat), shape=0) +
+  geom_point(data= si.mean.su, aes(x=Cmean, y=Nmean, color=PreyCat), shape=4) +
+  geom_point(data= si.mean.wi, aes(x=Cmean, y=Nmean, color=PreyCat), shape=1) +
+  geom_point(data= si.mean.sp, aes(x=Cmean, y=Nmean, color=PreyCat), shape=0) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" )))  +
   theme_classic()
@@ -465,12 +480,12 @@ ggsave("whis_preySE.png", device = "png", path = "SI/", width = 8,
 #Separate by season - Winter
 
 ggplot() +
-  geom_point(data= si.mean3, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) + theme_few() +
+  geom_point(data= si.mean.wi, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) + theme_few() +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" )), title = "Winter")  +
   scale_color_discrete(name  ="Prey Group") +
-  geom_errorbar(data= si.mean3, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
-  geom_errorbarh(data= si.mean3, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
+  geom_errorbar(data= si.mean.wi, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean.wi, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
   geom_point(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN), size=2)+
   geom_errorbar(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse), width=0) + 
   geom_errorbarh(data=filter(whis.mean.season, Season2=="Winter"), aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse), height=0) 
@@ -481,12 +496,12 @@ ggsave("whis_prey_winter.png", device = "png", path = "SI/", width = 8,
 #Separate by season - Summer
 
 ggplot() +
-  geom_point(data= si.mean2, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
+  geom_point(data= si.mean.su, aes(x=Cmean, y=Nmean, color=PreyCat), size=3) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" )), title = "Summer")  +
   scale_color_discrete(name  ="Prey Group") +
-  geom_errorbar(data= si.mean2, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
-  geom_errorbarh(data= si.mean2, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
+  geom_errorbar(data= si.mean.su, aes(x=Cmean, y=Nmean, ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean.su, aes(x=Cmean, y=Nmean, xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
   geom_point(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN), size=2)+
   geom_errorbar(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN, ymin = TDFN-Nse, ymax = TDFN+Nse), width=0) + 
   geom_errorbarh(data=filter(whis.mean.season, Season2=="Summer"), aes(x=TDFC, y=TDFN, xmin = TDFC-Cse, xmax = TDFC+Cse), height=0) +
@@ -509,21 +524,6 @@ ggplot() +
 
 
 ggsave("whis_prey_nobars_points.png", device = "png", path = "SI/", width = 8, 
-       height = 6, units = "in", dpi = 300)
-
-#ODD otter on top of prey graph
-
-ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
-  geom_point(aes(color=PreyCat)) +
-  labs(x=expression(paste(delta^13, "C (\u2030)")), 
-       y=expression(paste(delta^15, "N (\u2030)" )))  +
-  geom_errorbar(aes(ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
-  geom_errorbarh(aes(xmin = Cmean-Cse, xmax = Cmean+Cse, color= PreyCat), height=0) +
-  geom_point(data=oddotter, x=oddotter$C-2, y=oddotter$N-3.5) +
-  xlim(-22.5,-9) + ylim(4,14.5) +
-  theme_classic()
-
-ggsave("odd_otter.png", device = "png", path = "SI/", width = 8, 
        height = 6, units = "in", dpi = 300)
 
 
@@ -673,6 +673,21 @@ ggplot(data=oddotter, aes(x=distance, y=C, colour=Run)) +
   labs(x= "Distance from root (cm)", 
        y=expression(paste(delta^13, "C (\u2030)" )))  +
   theme_few()
+
+#ODD otter on top of prey graph
+
+ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
+  geom_point(aes(color=PreyCat)) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  geom_errorbar(aes(ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
+  geom_errorbarh(aes(xmin = Cmean-Cse, xmax = Cmean+Cse, color= PreyCat), height=0) +
+  geom_point(data=oddotter, x=oddotter$C-2, y=oddotter$N-3.5) +
+  xlim(-22.5,-9) + ylim(4,14.5) +
+  theme_classic()
+
+ggsave("odd_otter.png", device = "png", path = "SI/", width = 8, 
+       height = 6, units = "in", dpi = 300)
 
 ###############################################################
 #               Residual Whiskers ANOVA                       #

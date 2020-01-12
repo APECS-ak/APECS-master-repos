@@ -374,7 +374,7 @@ write_JAGS_model(model_filename, resid_err, process_err, mix, source)
 jags.1 <- run_model(run="test", mix, source, discr, model_filename,
                     alpha.prior = mix.alpha, resid_err, process_err)
 
-jags.1 <- run_model(run="long", mix, source, discr, model_filename,
+jags.1 <- run_model(run="very long", mix, source, discr, model_filename,
                     alpha.prior = mix.alpha, resid_err, process_err)
 
 output_options <- list(summary_save = TRUE,

@@ -17,7 +17,7 @@ I am working on sea otter whisker analysis over time from the root to the tip of
 
 First, I want to load the correct programs and files. I am loading ggplot to print some nice graphs, and load the stable isotope whisker data. Otter ID should be read as a factor.
 
-```{r, message= FALSE}
+```{r, libraries and data, message= FALSE}
 library(ggplot2)
 library(dplyr)
 library(ggthemes)
@@ -25,15 +25,19 @@ library(ggthemes)
 #load whisker data
 whisker <- read.csv("whiskers.csv")
 whisker$OtterID<-as.character(whisker$OtterID)
+oddotter <- read.csv("oddotter.csv")
+oddotter$OtterID<-as.factor(oddotter$OtterID)
+oddotter$Run<-as.factor(oddotter$Run)
+whisker.short<-filter(whisker, distance <= 8)
 
+#load prey data
+si.prey <- read.csv("sifinal.csv")
 ```
 
-#### Data Cleaning
+#### Data Cleaning - Temp until final data file is made
 
 Otter 163532 has very odd values, while it is being re-run I have seperated out the values and am going to make the whisker file without this sea otter.
-```{r}
-
-# for right now, I want to separate 163532 because it is an odd otter
+```{r, data cleaning}
 whisker<- filter(whisker, OtterID != "163532")
 ```
 
@@ -41,7 +45,7 @@ whisker<- filter(whisker, OtterID != "163532")
 # Results 
 Here is each individual sea otter from the root to the tip for Carbon in Teal and Nitrogen in Red. 
 
-```{r, echo= FALSE}
+```{r, graph indiv otters, echo= FALSE}
 ggplot(data=whisker) +
   geom_line(aes(x=distance, y=N), colour="tomato") +
   geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
@@ -54,18 +58,29 @@ ggplot(data=whisker) +
   theme_light()
 ```
 
-##### Odd otter graph - for reference
-I want to make a new column that has which run the values were a part of. 
-```{r, echo= FALSE}
+##### Odd otter graphs - for reference
 
-ggplot(data=oddotter) + theme_classic() +
-  geom_line(aes(x=SIN, y=N), colour="tomato") +
-  geom_line(aes(x=SIN, y=C+25), colour="lightseagreen") +
+
+Carbon
+```{r, odd otter carbon, echo= FALSE}
+ggplot(data=oddotter, aes(x=distance, y=C, colour=Run)) +
+  geom_line() +
+  geom_point() +
   labs(x= "Distance from root (cm)", 
-       y=expression(paste(delta^15, "N (\u2030)" )), 
-       colour = "Isotope")  +
-  scale_y_continuous(sec.axis = sec_axis(~.-25, 
-       name = expression(paste(delta^13, "C (\u2030)" ))))
+       y=expression(paste(delta^13, "C (\u2030)" )))  +
+  theme_few()
 
 ```
 
+Nitrogen
+```{r, odd otter nitrogen, echo=FALSE}
+ggplot(data=oddotter, aes(x=distance, y=N, colour=Run)) +
+  geom_line() +
+  geom_point() +
+  labs(x= "Distance from root (cm)", 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  theme_few()
+```
+
+
+### Separate out the 
