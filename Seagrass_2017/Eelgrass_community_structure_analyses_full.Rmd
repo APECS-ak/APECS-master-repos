@@ -449,7 +449,7 @@ The suspect grazer v diatom relationships does not look that good at all.
 ```{r multi check, echo = FALSE}
 ## Calculate correlations ##
 dat.cor <- dat[, c(4, 19, 94, 81, 125, 124, 123, 99, 35, 37, 90)]
-colnames(dat.cor) <- c("Julianday", "SOI", "Crabs", "Epifauna", "Epiphytes*", "Eelgrass*", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
+colnames(dat.cor) <- c("Julianday", "SOI", "Crabs", "Epifauna", "Epiphytes", "Seagrass", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
 
 ## Transform as necessary ##
 dat.cor <- as.data.frame(cbind(dat.cor$Julianday, 
@@ -457,14 +457,14 @@ dat.cor <- as.data.frame(cbind(dat.cor$Julianday,
                                sqrt(dat.cor$Crabs), 
                                log(dat.cor$Epifauna), 
                                dat.cor$Epiphytes, 
-                               dat.cor$Eelgrass, 
+                               dat.cor$Seagrass, 
                                dat.cor$Nitrate, 
                                log(dat.cor$Fish), 
                                asin(sqrt(dat.cor$Macroalgae / 100)), 
                                asin(sqrt(dat.cor$Diatoms / 100)), 
                                dat.cor$Sediment))
 
-colnames(dat.cor) <- c("Julian day", "SOI", "Crabs", "Epifauna", "Epiphytes*", "Eelgrass*", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
+colnames(dat.cor) <- c("Julian day", "SOI", "Crabs", "Epifauna", "Epiphytes*", "Seagrass*", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
 
 correl <- cor(dat.cor)
 
@@ -871,7 +871,7 @@ ggplot(data = dat) +
 ## Grazers and Crabs ##
 ggplot(data = dat) +
   geom_point(aes(x = crab_mass, y = log(grazermass_shootmass + 1)), size = 1.5) +
-  labs(x = "Crab mass (g)", y = "Log \n Grazer load (g/g)") +
+  labs(x = "Crab mass (g)", y = "Log \n Epifauna load (g/g)") +
   scale_x_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
   scale_y_continuous(limits = c(0.0, 0.16), breaks = seq(0, 0.16, by = 0.04)) +
   theme(text = element_text(size = 10))
@@ -879,7 +879,7 @@ ggplot(data = dat) +
 ## Grazers and Epiphytes ##
 ggplot(data = dat) +
   geom_point(aes(x = epiphmass_shootmass_dt, y = log(grazermass_shootmass + 1)), size = 1.5) +
-  labs(x = "Epiphyte load* (g/g)", y = "Log \n Grazer load (g/g)") +
+  labs(x = "Epiphyte load* (g/g)", y = "Log \n Epifauna load (g/g)") +
   scale_x_continuous(limits = c(-0.08, 0.09), breaks = seq(-0.08, 0.08, by = 0.04)) +
   scale_y_continuous(limits = c(0.0, 0.16), breaks = seq(0, 0.16, by = 0.04)) +
   theme(text = element_text(size = 10))
@@ -895,7 +895,7 @@ ggplot(data = dat) +
 ## Eelgrass and SOI ##
 ggplot(data = dat) +
   geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt), size = 1.5) +
-  labs(x = "Sea otter index", y = bquote('Eelgrass mass*' ~(g/m^2))) +
+  labs(x = "Sea otter index", y = bquote('Seagrass mass*' ~(g/m^2))) +
   scale_x_continuous(limits = c(-0.80, 1.20), breaks = seq(-0.80, 1.20, by = 0.40)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
   theme(text = element_text(size = 10))
@@ -903,7 +903,7 @@ ggplot(data = dat) +
 ## Eelgrass and Nitrate ##
 ggplot(data = dat) +
   geom_point(aes(x = NOx_site, y = abvgnd_mass_dt), size = 1.5) +
-  labs(x = bquote("Nitrate ("*mu~'mol)'), y = bquote('Eelgrass mass*' ~(g/m^2))) +
+  labs(x = bquote("Nitrate ("*mu~'mol)'), y = bquote('Seagrass mass*' ~(g/m^2))) +
   scale_x_continuous(limits = c(0.0, 3), breaks = seq(0, 3, by = 1)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
   theme(text = element_text(size = 10))
@@ -911,7 +911,7 @@ ggplot(data = dat) +
 ## Eelgrass and Epiphytes ##
 ggplot(data = dat) +
   geom_point(aes(x = epiphmass_shootmass_dt, y = abvgnd_mass_dt), size = 1.5) +
-  labs(x = "Epiphyte load* (g/g)", y = bquote('Eelgrass mass*' ~(g/m^2))) +
+  labs(x = "Epiphyte load* (g/g)", y = bquote('Seagrass mass*' ~(g/m^2))) +
   scale_x_continuous(limits = c(-0.08, 0.09), breaks = seq(-0.08, 0.08, by = 0.04)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
   theme(text = element_text(size = 10))
