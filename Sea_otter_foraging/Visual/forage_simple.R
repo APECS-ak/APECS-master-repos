@@ -20,11 +20,11 @@ library(dplyr)
 #sex.prey <- read.csv("sex_prey.csv")
 #compare.prop <- read.csv("compare.csv")
 
-prop<-read.csv("Visual/SOFA/short_prop.csv")
-fo<-read.csv("Visual/SOFA/fo.csv")
+#prop<-read.csv("Visual/SOFA/short_prop.csv")
+#fo<-read.csv("Visual/SOFA/fo.csv")
 
 ## RAW DATA 
-forage<-read.csv("2018_Foraging.csv")
+forage<-read.csv("Visual/2018_Foraging.csv")
 
 # to make the classes order in the way I want
 as.factor()
@@ -65,14 +65,17 @@ yday(solstice)
 forage$Season <- NA
 forage$Season <- ifelse(forage$julian<173, "Spring", "Summer")
                              
- 
+
+#save final CSV
+write.csv(forage, "Visual/forage_final.csv")
+
 # checking the data frame
 is.data.frame(forage) # will say if this is a dataframe, should say TRUE
 dim(forage)
 names(forage)
 str(forage)
 head(forage) 
-
+summary(forage)
 
 #sort the data (using dplyr)
 #all<-arrange(all, desc(prop))
@@ -293,12 +296,17 @@ count.season<- forage %>%
   na.omit() %>%
   count(PreyCat, Season)
 
+
 count.season$fo<-NA
 count.season$fo<-(count.season$n / 181)
-
+write.csv(count.season, "Visual/fo_season.csv")
 #graphing the seasons
 ggplot(data= count.season, aes(x= PreyCat, y=fo)) +
   geom_col(aes(fill=Season), position = "dodge") +
   theme_classic()
 
 
+
+#printing all species listed in forage data
+species <- summary(forage$PreyItem)
+species

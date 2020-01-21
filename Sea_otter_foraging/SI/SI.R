@@ -1,6 +1,6 @@
 ### SI ###
 
-setwd("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging")
+setwd("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging/SI")
 
 
 #load programs
@@ -710,6 +710,25 @@ summary(cfit)
 nfit<-lm(Nr~distance*OtterID, whisky)
 summary(nfit)
 
+cseason <- lm(Cr~Season*OtterID, whisky)
+summary(cseason)
+
+
+cseason.aov <- aov(C~Season, data = whisker.short)
+summary(cseason.aov)
+
+nseason.aov <- aov(N~Season, data = whisker.short)
+summary(nseason.aov)
+
+seasonmean.long <- whisker%>%
+  group_by(Season)%>%
+  summarise(MC=mean(C),
+            MN=mean(N))
+
+pairwise.t.test(x=whisker$C, g=whisker$Season, p.adj="bonferroni")
+pairwise.t.test(x=whisker$N, g=whisker$Season, p.adj="bonferroni")
+
+
 
 #plot of whisker with means overlaid
 ggplot(data=whisky, aes(x=distance, y=C)) +
@@ -740,6 +759,8 @@ ggplot(data=whisky, aes(x=distance, y=Nr)) +   theme_few() +
   geom_smooth(size=3, span=0.5, show.legend = FALSE) +
   labs(x= "Distance from root (cm)", 
        y=expression(paste("Residual from mean ",delta^15, "N" )), tag = "B")
+
+
 
 #THIS IS THE GRAPH I USED
 #Nitrogen with mean overlay
@@ -988,3 +1009,20 @@ ggplot(cor.whis, aes(x=correlation)) +
   geom_bar(color="red") +
   xlim(-1,1) +
   theme_classic()
+
+
+summary(whisker)
+
+variation<-whisker %>%
+  group_by(OtterID) %>%
+  summarise(Cmax=max(C), Nmax=max(N), Cmin=min(C), Nmin=min(N))
+
+variation$Crange <- variation$Cmax-variation$Cmin
+variation$Nrange <- variation$Nmax-variation$Nmin
+summary(variation)
+
+summary(filter(whisker, OtterID =="163521"))
+
+counted<- whisker %>%
+  group_by(OtterID) %>%
+  count()

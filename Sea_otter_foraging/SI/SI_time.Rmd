@@ -1,5 +1,5 @@
 ---
-title: "Stable Isotopes - Time"
+title: "Stable Isotopes - Time and Seasonality"
 author: "Nicole LaRoche"
 date: "11/4/2019"
 output: html_document
@@ -11,11 +11,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # Introduction
-I am working on sea otter whisker analysis over time from the root to the tip of the whisker. As my analysis is not complete, this is includes 27 sea otters as a population between Klawock and Naukati on Prince of Wales Island. Sea otter whiskers were collected from June 26- August 6, 2019. 
+I am working on sea otter whisker analysis over time from the root to the tip of the whisker. As my analysis is not complete, this is includes 29 sea otters as a population between Klawock and Naukati on Prince of Wales Island. Sea otter whiskers were collected from June 26- August 6, 2019. 
 
 # Analysis
 
-First, I want to load the correct programs and files. I am loading ggplot to print some nice graphs, and load the stable isotope whisker data. Otter ID should be read as a factor.
+First, loading programs and files. Otter ID should be read as a factor.
 
 ```{r, libraries and data, message= FALSE}
 library(ggplot2)
@@ -28,21 +28,25 @@ whisker$OtterID<-as.character(whisker$OtterID)
 oddotter <- read.csv("oddotter.csv")
 oddotter$OtterID<-as.factor(oddotter$OtterID)
 oddotter$Run<-as.factor(oddotter$Run)
-whisker.short<-filter(whisker, distance <= 8)
+
+
 
 #load prey data
 si.prey <- read.csv("sifinal.csv")
 ```
 
-#### Data Cleaning - Temp until final data file is made
+
+#### Data Cleaning - Temp until final decision is made for the odd otter
 
 Otter 163532 has very odd values, while it is being re-run I have seperated out the values and am going to make the whisker file without this sea otter.
+
 ```{r, data cleaning}
 whisker<- filter(whisker, OtterID != "163532")
 ```
 
 
-# Results 
+## Results 
+
 Here is each individual sea otter from the root to the tip for Carbon in Teal and Nitrogen in Red. 
 
 ```{r, graph indiv otters, echo= FALSE}
@@ -58,10 +62,12 @@ ggplot(data=whisker) +
   theme_light()
 ```
 
-##### Odd otter graphs - for reference
+
+### Odd otter graphs - for reference
 
 
-Carbon
+#### Carbon
+
 ```{r, odd otter carbon, echo= FALSE}
 ggplot(data=oddotter, aes(x=distance, y=C, colour=Run)) +
   geom_line() +
@@ -72,7 +78,8 @@ ggplot(data=oddotter, aes(x=distance, y=C, colour=Run)) +
 
 ```
 
-Nitrogen
+#### Nitrogen
+
 ```{r, odd otter nitrogen, echo=FALSE}
 ggplot(data=oddotter, aes(x=distance, y=N, colour=Run)) +
   geom_line() +
@@ -83,4 +90,144 @@ ggplot(data=oddotter, aes(x=distance, y=N, colour=Run)) +
 ```
 
 
-### Separate out the 
+## Seasons
+
+#### Carbon
+
+```{r, overlay carbon graph by season, echo=FALSE, message=FALSE}
+ggplot() +   
+  theme_few() +
+  geom_density(data=filter(whisker, Season == "Summer"), 
+                 aes(x=C), alpha=.5, fill= "darkgoldenrod1") +
+  geom_density(data=filter(whisker, Season == "Spring"), 
+                 aes(x=C), alpha=.5, fill= "palegreen3") +
+  geom_density(data=filter(whisker, Season == "Fall"), 
+                 aes(x=C), alpha=.5, fill= "darkorange3") +
+  geom_density(data=filter(whisker, Season == "Winter"), 
+                 aes(x=C), alpha=.5, fill = "paleturquoise1") +
+  labs(x=expression(paste(delta^13, "C" )), y="Kernel Density") 
+
+```
+
+
+#### Nitrogen
+
+```{r, overlay nitrogen graph by season, echo=FALSE, message=FALSE}
+ggplot() +   
+  theme_few() +
+  geom_density(data=filter(whisker, Season == "Summer"), 
+               aes(x=N), alpha=.9, fill= "darkgoldenrod1") +
+  geom_density(data=filter(whisker, Season == "Spring"), 
+               aes(x=N), alpha=.6, fill= "palegreen3") +
+  geom_density(data=filter(whisker, Season == "Fall"), 
+               aes(x=N), alpha=.5, fill= "darkorange3") +
+  geom_density(data=filter(whisker, Season == "Winter"), 
+               aes(x=N), alpha=.4, fill = "paleturquoise1") +
+  labs(x=expression(paste(delta^15, "N" )), y="Kernel Density") 
+```
+
+
+
+The graphs above are ok, but too messy for a paper, and the kernel density is not what I want to talk about, so here are some boxplots of the same data. 
+
+#### Carbon
+
+```{r, boxplot Carbon seasons, echo=FALSE, message=FALSE}
+ggplot(data=whisker) +
+  geom_boxplot(aes(x=Season, y=C)) +
+  labs(y=expression(paste(delta^13, "C" ))) +
+  theme_few()
+```
+
+#### Nitrogen
+
+```{r, boxplot Nitrogen seasons, echo=FALSE, message=FALSE}
+ggplot(data=whisker) +
+  geom_boxplot(aes(x=Season, y=N)) +
+  labs(y=expression(paste(delta^15, "N" ))) +
+  theme_few()
+```
+
+
+## Stats for Seasons
+
+#### Anova 
+```{r, anova seasons, message=FALSE}
+cseason.aov <- aov(C~Season, data = whisker)
+summary(cseason.aov)
+
+nseason.aov <- aov(N~Season, data = whisker)
+summary(nseason.aov)
+```
+
+Season for both C and N are significant. 
+
+#### Pairwise test for seasons 
+```{r, pairwise seasons, message=FALSE}
+pairwise.t.test(x=whisker$C, g=whisker$Season, p.adj="none")
+pairwise.t.test(x=whisker$N, g=whisker$Season, p.adj="none")
+```
+
+
+Carbon: Spring/Fall, Spring/Summer, Winter/Fall, and Winter/Summer are significant. This doesn't match with how I originally matched the seasons. 
+
+Nitrogen: Spring/Fall, Spring/Winter, Summer/Fall, and Winter/Summer are significant, which is how I originally matched up the seasons. 
+
+
+```{r, pairwise bonferroni seasons, message=FALSE}
+pairwise.t.test(x=whisker$C, g=whisker$Season, p.adj="bonferroni")
+pairwise.t.test(x=whisker$N, g=whisker$Season, p.adj="bonferroni")
+```
+
+Using bonferrroni, SPring/Fall are significant for carbon, but nothing else. And all the same Nitrogen seasons remain the same as above.
+
+
+```{r, pairwise holm, message=FALSE}
+pairwise.t.test(x=whisker$C, g=whisker$Season, p.adj="holm")
+pairwise.t.test(x=whisker$N, g=whisker$Season, p.adj="holm")
+```
+
+This method is generally considered superior to the Bonferroni adjustment, and adds Winter/Fall as stat sig for Carbon.
+
+
+#### Tukey HSD
+```{r, tukey, message=FALSE}
+TukeyHSD(aov(C~Season, data=whisker))
+TukeyHSD(aov(N~Season, data=whisker))
+```
+
+Tukey's gives similar as Bonferroni and Holm. There are significant values here, but really - the main takeaway needs to be that these means are only .3-.5. which is VERY SMALL. 
+
+
+
+### Biplot by season
+
+Making mean values for Prey and adding in TDFs for prey
+
+```{r, prey means and TDFs, message=FALSE}
+si.mean <-si.prey %>%
+  group_by(PreyCat) %>% 
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
+            Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
+si.mean<-si.mean[-1,] #removing blank
+si.mean<-si.mean[-6,] #removing stars
+
+si.mean$Ctdf<-si.mean$Cmean+2
+si.mean$Ntdf<-si.mean$Nmean+2.8
+```
+
+
+```{r, seasonal biplot, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Ctdf, y=Ntdf, ymin = Ntdf-Nse, ymax = Ntdf+Nse,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Ctdf, y=Ntdf, xmin = Ctdf-Cse,xmax = Ctdf+Cse,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whisker, aes(x=C, y=N, shape=Season), size=2)+
+  theme_few()
+```
+

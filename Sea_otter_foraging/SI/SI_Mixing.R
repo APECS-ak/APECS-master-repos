@@ -351,7 +351,7 @@ calc_area(source=source,mix=mix,discr=discr)
 
 #Run with an informative primer
 # Our 14 fecal samples were 10, 1, 0, 0, 3
-mix.alpha <- c(69.2,14.0,3.4,1.1,7.9,3.3)
+mix.alpha <- c(69,14,3,1.1,4,4,3)
 
 
 # Plot your informative prior
