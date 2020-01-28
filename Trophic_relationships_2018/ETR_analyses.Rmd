@@ -24,6 +24,7 @@ library(stringr)
 library(siar)
 library(ggrepel)
 library(broom)
+library(cplm)
 
 theme_set(theme_classic())
 ```
@@ -138,6 +139,11 @@ clm.site.quad.sp[is.na(clm.site.quad.sp)] <- 0
 
 clm.site.quad.sp <- merge(clm.site.quad.sp, site[, c(1,5)], by = "site")
 
+# total clam mass by species #
+clm.total <- clm.site.quad.sp %>% 
+  group_by(site, species_common) %>% 
+  summarize(total = sum(mass_g))
+
 ## Fish ##
 fsh <- merge(fsh, site[, c(1, 5)], by = "site")
 
@@ -247,8 +253,7 @@ shapiro.test(log(eg$shoot_mass_m))
 ggplot(eg) +
   geom_histogram(aes(log(shoot_mass_m)), binwidth = 0.5) +
   xlab(bquote("Log eelgrass mass" ~(g/m^-2))) +
-  ylab("Count") +
-  scale_y_continuous(limits = c(0, 15))
+  ylab("Count")
 
 ## epiphyte load ##
 hist(eg$epi_load)
@@ -259,28 +264,37 @@ shapiro.test(sqrt(eg$epi_load))
 
 ggplot(eg) +
   geom_histogram(aes(sqrt(epi_load)), binwidth = 0.01) +
-  xlab("Log epiphyte load g/g") +
+  xlab("sqrt epiphyte load g/g") +
   ylab("Count") +
   scale_y_continuous(limits = c(0, 8))
 
+## POM ##
+hist(pom$pc_om_POM)
+shapiro.test(pom$pc_om_POM)
+
 ## Epifauna ##
-hist(log(eg$epi_load))
+hist(sqrt(eg$grazer_load))
+shapiro.test(sqrt(eg$grazer_load))
+
+ggplot(eg) +
+  geom_histogram(aes(sqrt(grazer_load)), binwidth = 0.1) +
+  xlab("Log grazer load g/g") +
+  ylab("Count")
 
 ## Idotea load ##
 hist(eg$idotea_load)
-ggplot(eg) +
-  geom_histogram(aes(idotea_load), binwidth = 0.01) +
-  xlab("idotea_load g/g") +
-  ylab("Count") +
-  scale_y_continuous(limits = c(0, 8))
+hist((eg$idotea_load)^0.33)
+shapiro.test((eg$idotea_load)^0.33)
 
 ## limpet load ##
 hist(eg$limpet_load)
 
 ## Clams ##
 hist(clm.site.quad$mass_g)
+hist((clm.site.quad$mass_g)^0.33)
+shapiro.test((clm.site.quad$mass_g)^0.33)
 
-## butter clams ##
+## Butter clams ##
 hist(clm.site.quad.sp$mass_g[clm.site.quad.sp$species_common == "Butter clam"])
 
 ## macoma sp clams ##
@@ -288,6 +302,7 @@ hist(clm.site.quad.sp$mass_g[clm.site.quad.sp$species_common == "Macoma sp."])
 
 ## Crabs ##
 hist(log(crb.site.string$mass_g))
+shapiro.test(log(crb.site.string$mass_g))
 
 ## helmet crabs ##
 hist(crb.site.string.sp$mass_g[crb.site.string.sp$species_common == "Helmet crab"])
@@ -299,16 +314,20 @@ hist(crb.site.string.sp$mass_g[crb.site.string.sp$species_common == "Graceful cr
 hist(crb.site.string.sp$mass_g[crb.site.string.sp$species_common == "Red rock crab"], breaks = 10)
 
 ## All fish ##
-hist(log(fsh$total_fish_mass), breaks = 10)
+hist(log(fsh$total_fish_mass), breaks = 5)
+shapiro.test(log(fsh$total_fish_mass))
 
 ## Shiner perch ##
-hist(fsh$PERCHSH)
+hist(log(fsh$PERCHSH))
+shapiro.test(log(fsh$PERCHSH))
 
 ## Snake pricklebakc ##
-hist(fsh$PRICKSN)
+hist(sqrt(fsh$PRICKSN))
+shapiro.test(log(fsh$PRICKSN))
 
 ## Staghorn ##
-hist(fsh$SCULPSTG)
+hist(log(fsh$SCULPSTG))
+shapiro.test(log(fsh$SCULPSTG))
 ```
 
 Biomass normality plots
@@ -323,20 +342,12 @@ Eelgrass
 ```{r eg site x treatment, echo = FALSE}
 mod.eg.1 <- lm(log(shoot_mass_m) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
 anova(mod.eg.1)
-
-t.eg.1 <- t.test(eg$shoot_mass_m[eg$sea_otter_tr == "high"], eg$shoot_mass_m[eg$sea_otter_tr == "low"])
-
-mod.eg.2 <- lm(eelgrass_shoots_m ~ sea_otter_tr * site, data = eg)
-anova(mod.eg.2)
 ```
 
 Epiphytes
 ```{r epi site X treatment, echo = FALSE}
 mod.ep.1 <- lm(sqrt(epi_load) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
 anova(mod.ep.1)
-
-t.ep.1 <- t.test(eg$epi_load[eg$sea_otter_tr == "high"],  eg$epi_load[eg$sea_otter_tr == "low"])
-t.ep.1
 ```
 
 POM
@@ -348,25 +359,16 @@ anova(mod.pm.1)
 Grazers
 ```{r grz site X treatment, echo = FALSE}
 ## All Grazers ##
-mod.gr.1 <- lm(grazer_load ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
+mod.gr.1 <- lm(sqrt(grazer_load) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
 anova(mod.gr.1)
 
-t.gr.1 <- t.test(grazer_load ~ sea_otter_tr, data = eg)
-t.gr.1
-
 ## Idotea ##
-mod.id.1 <- lm(idotea_load ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
+mod.id.1 <- lm((idotea_load^0.33) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
 anova(mod.id.1)
-
-t.id.1 <- t.test(eg$idotea_load[eg$sea_otter_tr == "high"],  eg$idotea_load[eg$sea_otter_tr == "low"])
-t.id.1
 
 ## Limpet ##
 mod.lp.1 <- lm(limpet_load ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
 anova(mod.lp.1)
-
-t.lp.1 <- t.test(eg$limpet_load[eg$sea_otter_tr == "high"],  eg$limpet_load[eg$sea_otter_tr == "low"])
-t.lp.1
 ```
 
 ##### Crabs
@@ -402,7 +404,7 @@ anova(mod.roc.1)
 We also have species to think about...
 ```{r clm site}
 ## All Clams ##
-mod.clm.1 <- lm(mass_g / 1000 ~ sea_otter_tr + site %in% sea_otter_tr, data = clm.site.quad)
+mod.clm.1 <- lm((mass_g / 1000)^0.33 ~ sea_otter_tr + site %in% sea_otter_tr, data = clm.site.quad)
 anova(mod.clm.1)
 
 ## By species ##
@@ -422,7 +424,7 @@ anova(mod.mac.1)
 ##### Fish
 ```{r}
 ## Total mass ##
-t.fsh.1 <- t.test(total_fish_mass / 1000 ~ sea_otter_tr, data = fsh)
+t.fsh.1 <- t.test(log(total_fish_mass / 1000) ~ sea_otter_tr, data = fsh)
 t.fsh.1
 
 mean(fsh$total_fish_mass[fsh$sea_otter_tr == "high"])
@@ -442,7 +444,7 @@ mean(fsh$SCULPSTG[fsh$sea_otter_tr == "low"])
 sd(fsh$SCULPSTG[fsh$sea_otter_tr == "low"])
 
 ## Shiners ##
-t.shn.1 <- t.test(PERCHSH / 1000 ~ sea_otter_tr, data = fsh)
+t.shn.1 <- t.test(log(PERCHSH / 1000) ~ sea_otter_tr, data = fsh)
 t.shn.1
 
 mean(fsh$PERCHSH[fsh$sea_otter_tr == "high"])
@@ -452,7 +454,7 @@ mean(fsh$PERCHSH[fsh$sea_otter_tr == "low"])
 sd(fsh$PERCHSH[fsh$sea_otter_tr == "low"])
 
 ## Snake Prickleback ##
-t.snk.1 <- t.test(PRICKSN / 1000 ~ sea_otter_tr, data = fsh)
+t.snk.1 <- t.test(log(PRICKSN / 1000) ~ sea_otter_tr, data = fsh)
 t.snk.1
 
 mean(fsh$PRICKSN[fsh$sea_otter_tr == "high"])
