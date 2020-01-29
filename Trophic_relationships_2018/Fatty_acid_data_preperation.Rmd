@@ -64,6 +64,15 @@ Biomarker metadata
 bimrk <- read.csv("../ALL_DATA/Biomarker_collections_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
+Filter out B_226 from the coccolithophore bloom
+```{r}
+b6_area <- b6_area %>% 
+  filter(!str_detect(Sample, "^B_226"))
+
+b6_conc <- b6_conc %>% 
+  filter(!str_detect(Sample, "^B_226"))
+```
+
 
 ### Dry sample mass data
 ```{r data mass, echo = FALSE}
