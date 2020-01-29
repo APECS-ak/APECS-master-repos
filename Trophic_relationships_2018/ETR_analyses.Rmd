@@ -1160,37 +1160,37 @@ Append metadata
 ```{r}
 # All Primary Producers #
 fa_pro <- merge(fa_pro, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pro <- cbind(fa_pro[, c(1, 38:41, 2:37)])
+fa_pro <- cbind(fa_pro[, c(1, 37:40, 2:36)])
 colnames(fa_eg)[5] <- "Sea_otter_tr"
 
 # Eelgrass #
 fa_eg <- merge(fa_eg, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_eg <- cbind(fa_eg[, c(1, 38:41, 2:37)])
+fa_eg <- cbind(fa_eg[, c(1, 37:40, 2:36)])
 colnames(fa_eg)[5] <- "Sea_otter_tr"
 
 # Eelgrass diatoms / epiphytes #
 fa_ep <- merge(fa_ep, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_ep <- cbind(fa_ep[, c(1, 38:41, 2:37)])
+fa_ep <- cbind(fa_ep[, c(1, 37:40, 2:36)])
 colnames(fa_ep)[5] <- "Sea_otter_tr"
 
 # Fucus #
 fa_fu <- merge(fa_fu, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_fu <- cbind(fa_fu[, c(1, 38:41, 2:37)])
+fa_fu <- cbind(fa_fu[, c(1, 37:40, 2:36)])
 colnames(fa_fu)[5] <- "Sea_otter_tr"
 
 # POM #
 fa_pm <- merge(fa_pm, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pm <- cbind(fa_pm[, c(1, 38:41, 2:37)])
+fa_pm <- cbind(fa_pm[, c(1, 37:40, 2:36)])
 colnames(fa_pm)[5] <- "Sea_otter_tr"
 
 # Sugar Kelp #
 fa_sk <- merge(fa_sk, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_sk <- cbind(fa_sk[, c(1, 38:41, 2:37)])
+fa_sk <- cbind(fa_sk[, c(1, 37:40, 2:36)])
 colnames(fa_sk)[5] <- "Sea_otter_tr"
 
 # Ulva #
 fa_ul <- merge(fa_ul, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_ul <- cbind(fa_ul[, c(1, 38:41, 2:37)])
+fa_ul <- cbind(fa_ul[, c(1, 37:40, 2:36)])
 colnames(fa_ul)[5] <- "Sea_otter_tr"
 ```
 
@@ -1221,27 +1221,27 @@ Append metadata
 ```{r}
 # Primary consumers #
 fa_pcon <- merge(fa_pcon, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pcon <- cbind(fa_pcon[, c(1, 38:41, 2:37)])
+fa_pcon <- cbind(fa_pcon[, c(1, 37:40, 2:36)])
 colnames(fa_pcon)[5] <- "Sea_otter_tr"
 
 # Idotea #
 fa_ido <- merge(fa_ido, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_ido <- cbind(fa_ido[, c(1, 38:41, 2:37)])
+fa_ido <- cbind(fa_ido[, c(1, 37:40, 2:36)])
 colnames(fa_ido)[5] <- "Sea_otter_tr"
 
 # Limpet #
 fa_lmp <- merge(fa_lmp, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_lmp <- cbind(fa_lmp[, c(1, 38:41, 2:37)])
+fa_lmp <- cbind(fa_lmp[, c(1, 37:40, 2:36)])
 colnames(fa_lmp)[5] <- "Sea_otter_tr"
 
 # Butter Clams #
 fa_but <- merge(fa_but, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_but <- cbind(fa_but[, c(1, 38:41, 2:37)])
+fa_but <- cbind(fa_but[, c(1, 37:40, 2:36)])
 colnames(fa_but)[5] <- "Sea_otter_tr"
 
 # Macoma clams #
 fa_mac <- merge(fa_mac, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_mac <- cbind(fa_mac[, c(1, 38:41, 2:37)])
+fa_mac <- cbind(fa_mac[, c(1, 37:40, 2:36)])
 colnames(fa_mac)[5] <- "Sea_otter_tr"
 ```
 
@@ -1282,37 +1282,37 @@ fa_stg <- fa %>%
 ```{r}
 ## All secondary consumers ##
 fa_scon <- merge(fa_scon, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_scon <- cbind(fa_scon[, c(1, 38:41, 2:37)])
+fa_scon <- cbind(fa_scon[, c(1, 37:40, 2:36)])
 colnames(fa_scon)[5] <- "Sea_otter_tr"
 
 # Doch shrimp #
 fa_dsh <- merge(fa_dsh, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_dsh <- cbind(fa_dsh[, c(1, 38:41, 2:37)])
+fa_dsh <- cbind(fa_dsh[, c(1, 37:40, 2:36)])
 colnames(fa_dsh)[5] <- "Sea_otter_tr"
 
 # Helmet crabs #
 fa_hel <- merge(fa_hel, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_hel <- cbind(fa_hel[, c(1, 38:41, 2:37)])
+fa_hel <- cbind(fa_hel[, c(1, 37:40, 2:36)])
 colnames(fa_hel)[5] <- "Sea_otter_tr"
 
 # Graceful crabs #
 fa_grc <- merge(fa_grc, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_grc <- cbind(fa_grc[, c(1, 38:41, 2:37)])
+fa_grc <- cbind(fa_grc[, c(1, 37:40, 2:36)])
 colnames(fa_grc)[5] <- "Sea_otter_tr"
 
 # Shiner Perch #
 fa_shn <- merge(fa_shn, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_shn <- cbind(fa_shn[, c(1, 38:41, 2:37)])
+fa_shn <- cbind(fa_shn[, c(1, 37:40, 2:36)])
 colnames(fa_shn)[5] <- "Sea_otter_tr"
 
 # Snake pricklback #
 fa_snk <- merge(fa_snk, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_snk <- cbind(fa_snk[, c(1, 38:41, 2:37)])
+fa_snk <- cbind(fa_snk[, c(1, 37:40, 2:36)])
 colnames(fa_snk)[5] <- "Sea_otter_tr"
 
 # Staghorn sculpin #
 fa_stg <- merge(fa_stg, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_stg <- cbind(fa_stg[, c(1, 38:41, 2:37)])
+fa_stg <- cbind(fa_stg[, c(1, 37:40, 2:36)])
 colnames(fa_stg)[5] <- "Sea_otter_tr"
 ```
 
@@ -1597,29 +1597,29 @@ ggplot(fa_grp, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
 I will use and arcsine sqrt transformation.
 ```{r fa trans std, echo = FALSE}
 ## Primary Producers ##
-fa_pro_trs <- asin(sqrt(fa_pro[, 11:41]))
-fa_eg_trs <- asin(sqrt(fa_eg[, 11:41]))
-fa_ep_trs <- asin(sqrt(fa_ep[, 11:41]))
-fa_fu_trs <- asin(sqrt(fa_fu[, 11:41]))
-fa_pm_trs <- asin(sqrt(fa_pm[, 11:41]))
-fa_sk_trs <- asin(sqrt(fa_sk[, 11:41]))
-fa_ul_trs <- asin(sqrt(fa_ul[, 11:41]))
+fa_pro_trs <- asin(sqrt(fa_pro[, 11:40]))
+fa_eg_trs <- asin(sqrt(fa_eg[, 11:40]))
+fa_ep_trs <- asin(sqrt(fa_ep[, 11:40]))
+fa_fu_trs <- asin(sqrt(fa_fu[, 11:40]))
+fa_pm_trs <- asin(sqrt(fa_pm[, 11:40]))
+fa_sk_trs <- asin(sqrt(fa_sk[, 11:40]))
+fa_ul_trs <- asin(sqrt(fa_ul[, 11:40]))
 
 ## Primary Consumers ##
-fa_pcon_trs <- asin(sqrt(fa_pcon[, 11:41]))
-fa_ido_trs <- asin(sqrt(fa_ido[, 11:41]))
-fa_lmp_trs <- asin(sqrt(fa_lmp[, 11:41]))
-fa_but_trs <- asin(sqrt(fa_but[, 11:41]))
-fa_mac_trs <- asin(sqrt(fa_mac[, 11:41]))
+fa_pcon_trs <- asin(sqrt(fa_pcon[, 11:40]))
+fa_ido_trs <- asin(sqrt(fa_ido[, 11:40]))
+fa_lmp_trs <- asin(sqrt(fa_lmp[, 11:40]))
+fa_but_trs <- asin(sqrt(fa_but[, 11:40]))
+fa_mac_trs <- asin(sqrt(fa_mac[, 11:40]))
 
 ## Secondary consumers ##
-fa_scon_trs <- asin(sqrt(fa_scon[, 11:41]))
-fa_dsh_trs <- asin(sqrt(fa_dsh[, 11:41]))
-fa_hel_trs <- asin(sqrt(fa_hel[, 11:41]))
-fa_grc_trs <- asin(sqrt(fa_grc[, 11:41]))
-fa_shn_trs <- asin(sqrt(fa_shn[, 11:41]))
-fa_snk_trs <- asin(sqrt(fa_snk[, 11:41]))
-fa_stg_trs <- asin(sqrt(fa_stg[, 11:41]))
+fa_scon_trs <- asin(sqrt(fa_scon[, 11:40]))
+fa_dsh_trs <- asin(sqrt(fa_dsh[, 11:40]))
+fa_hel_trs <- asin(sqrt(fa_hel[, 11:40]))
+fa_grc_trs <- asin(sqrt(fa_grc[, 11:40]))
+fa_shn_trs <- asin(sqrt(fa_shn[, 11:40]))
+fa_snk_trs <- asin(sqrt(fa_snk[, 11:40]))
+fa_stg_trs <- asin(sqrt(fa_stg[, 11:40]))
 ```
 
 #### Ordination
@@ -1743,8 +1743,7 @@ Remove undetermined FA from *untranformed* FA data. * NOTE * Run initial FA data
 ```{r}
 ## Primary Producers ##
 # Eelgrass #
-fa_eg_simp <- fa_eg %>%
-  dplyr::select(- C17.3w)
+fa_eg_simp <- fa_eg 
 
 # Eelgrass diatoms / epiphytes #
 fa_ep_simp <- fa_ep %>%
@@ -2241,6 +2240,25 @@ fa_grc_mds <- metaMDS(fa_grc_dist, k = 2, distance = "euclidean", autotransform 
 fa_stg_mds <- metaMDS(fa_stg_dist, k = 2, distance = "euclidean", autotransform = FALSE)
 ```
 
+Stress. so stressful
+```{r}
+## Primary Producers ##
+fa_fu_mds$stress
+fa_pm_mds$stress
+fa_eg_mds$stress
+fa_ul_mds$stress
+
+## Primary Consumers
+fa_ido_mds$stress
+fa_lmp_mds$stress
+fa_but_mds$stress
+
+## Secondary consumers ##
+fa_dsh_mds$stress
+fa_grc_mds$stress
+fa_stg_mds$stress
+```
+
 ##### Data Prep
 ```{r}
 ## Producers ##
@@ -2295,24 +2313,13 @@ fa_grc_mds_dat <- merge(fa_grc_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", 
 fa_stg_mds_dat <- as.data.frame(scores(fa_stg_mds))
 fa_stg_mds_dat$ID <- fa_stg$ID 
 fa_stg_mds_dat <- merge(fa_stg_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-
-
-
-# Crabs - Helmet #
-fa_hel_1.0_mds_dat <- as.data.frame(scores(fa_hel_1.0_mds))
-fa_hel_1.0_mds_dat$ID <- fa_hel_1.0$ID 
-fa_hel_1.0_mds_dat$Species_common <- fa_hel_1.0$Species_common
-fa_hel_1.0_mds_dat <- merge(fa_hel_1.0_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-fa_hel_1.0_mds_dat$Species_common <- factor(fa_hel_1.0_mds_dat$Species_common, levels = c("Helmet crab"))
-
-
 ```
 
 ##### FA Vectors
 ```{r fa vector, echo = FALSE, eval = FALSE}
 ## Primary producer Vectors ##
 # Fucus #
-vec.fu <- envfit(fa_fu_mds$points, fa_fu[, 11:41], perm = 9999)
+vec.fu <- envfit(fa_fu_mds$points, fa_fu[, 11:40], perm = 9999)
 vec.fu.arrows <- scores(vec.fu, display = "vectors")
 vec.fu.dat <- data.frame(vec.fu.arrows)
 vec.fu.dat$pvals <- vec.fu$vectors$pvals
@@ -2324,7 +2331,7 @@ vec.fu.dat$MDS1_sc <- vec.fu.dat$MDS1 * (scalefactor * vec.fu.dat$r2)
 vec.fu.dat$MDS2_sc <- vec.fu.dat$MDS2 * (scalefactor * vec.fu.dat$r2)
 
 vec.fu.dat.sig <- vec.fu.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 fu_arrow_angle <- 90 - ((atan2(vec.fu.dat.sig$MDS1_sc, vec.fu.dat.sig$MDS2_sc)* 180)/pi)
 fu_arrow_angle <- ifelse(fu_arrow_angle > 90 & fu_arrow_angle < 270, fu_arrow_angle + 180, fu_arrow_angle)
@@ -2346,7 +2353,7 @@ vec.pm.dat$MDS1_sc <- vec.pm.dat$MDS1 * (scalefactor * vec.pm.dat$r2)
 vec.pm.dat$MDS2_sc <- vec.pm.dat$MDS2 * (scalefactor * vec.pm.dat$r2)
 
 vec.pm.dat.sig <- vec.pm.dat %>% 
-  filter(pvals < 0.01)
+  filter(r2 >= 0.9)
 
 pm_arrow_angle <- 90 - ((atan2(vec.pm.dat.sig$MDS1_sc, vec.pm.dat.sig$MDS2_sc)* 180)/pi)
 pm_arrow_angle <- ifelse(pm_arrow_angle > 90 & pm_arrow_angle < 270, pm_arrow_angle + 180, pm_arrow_angle)
@@ -2356,7 +2363,7 @@ vec.pm.dat.sig$FA = sub("w", "*omega*-", vec.pm.dat.sig$FA)
 vec.pm.dat.sig$FA = sub("\\.", ":", vec.pm.dat.sig$FA)
 
 # Eelgrass #
-vec.eg <- envfit(fa_eg_mds$points, fa_eg[, 11:41], perm = 9999)
+vec.eg <- envfit(fa_eg_mds$points, fa_eg[, 11:40], perm = 9999)
 vec.eg.arrows <- scores(vec.eg, display = "vectors")
 vec.eg.dat <- data.frame(vec.eg.arrows)
 vec.eg.dat$pvals <- vec.eg$vectors$pvals
@@ -2368,7 +2375,7 @@ vec.eg.dat$MDS1_sc <- vec.eg.dat$MDS1 * (scalefactor * vec.eg.dat$r2)
 vec.eg.dat$MDS2_sc <- vec.eg.dat$MDS2 * (scalefactor * vec.eg.dat$r2)
 
 vec.eg.dat.sig <- vec.eg.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 eg_arrow_angle <- 90 - ((atan2(vec.eg.dat.sig$MDS1_sc, vec.eg.dat.sig$MDS2_sc)* 180)/pi)
 eg_arrow_angle <- ifelse(eg_arrow_angle > 90 & eg_arrow_angle < 270, eg_arrow_angle + 180, eg_arrow_angle)
@@ -2378,7 +2385,7 @@ vec.eg.dat.sig$FA = sub("w", "*omega*-", vec.eg.dat.sig$FA)
 vec.eg.dat.sig$FA = sub("\\.", ":", vec.eg.dat.sig$FA)
 
 # Ulva #
-vec.ul <- envfit(fa_ul_mds$points, fa_ul[, 11:41], perm = 9999)
+vec.ul <- envfit(fa_ul_mds$points, fa_ul[, 11:40], perm = 9999)
 vec.ul.arrows <- scores(vec.ul, display = "vectors")
 vec.ul.dat <- data.frame(vec.ul.arrows)
 vec.ul.dat$pvals <- vec.ul$vectors$pvals
@@ -2390,7 +2397,7 @@ vec.ul.dat$MDS1_sc <- vec.ul.dat$MDS1 * (scalefactor * vec.ul.dat$r2)
 vec.ul.dat$MDS2_sc <- vec.ul.dat$MDS2 * (scalefactor * vec.ul.dat$r2)
 
 vec.ul.dat.sig <- vec.ul.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 ul_arrow_angle <- 90 - ((atan2(vec.ul.dat.sig$MDS1_sc, vec.ul.dat.sig$MDS2_sc)* 180)/pi)
 ul_arrow_angle <- ifelse(ul_arrow_angle > 90 & ul_arrow_angle < 270, ul_arrow_angle + 180, ul_arrow_angle)
@@ -2401,7 +2408,7 @@ vec.ul.dat.sig$FA = sub("\\.", ":", vec.ul.dat.sig$FA)
 
 ## Primary Consumers ##
 # Idotea #
-vec.ido <- envfit(fa_ido_mds$points, fa_ido[, 11:41], perm = 9999)
+vec.ido <- envfit(fa_ido_mds$points, fa_ido[, 11:40], perm = 9999)
 vec.ido.arrows <- scores(vec.ido, display = "vectors")
 vec.ido.dat <- data.frame(vec.ido.arrows)
 vec.ido.dat$pvals <- vec.ido$vectors$pvals
@@ -2413,7 +2420,7 @@ vec.ido.dat$MDS1_sc <- vec.ido.dat$MDS1 * (scalefactor * vec.ido.dat$r2)
 vec.ido.dat$MDS2_sc <- vec.ido.dat$MDS2 * (scalefactor * vec.ido.dat$r2)
 
 vec.ido.dat.sig <- vec.ido.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 ido_arrow_angle <- 90 - ((atan2(vec.ido.dat.sig$MDS1_sc, vec.ido.dat.sig$MDS2_sc)* 180)/pi)
 ido_arrow_angle <- ifelse(ido_arrow_angle > 90 & ido_arrow_angle < 270, ido_arrow_angle + 180, ido_arrow_angle)
@@ -2423,7 +2430,7 @@ vec.ido.dat.sig$FA = sub("w", "*omega*-", vec.ido.dat.sig$FA)
 vec.ido.dat.sig$FA = sub("\\.", ":", vec.ido.dat.sig$FA)
 
 # Limpet #
-vec.lmp <- envfit(fa_lmp_mds$points, fa_lmp[, 11:41], perm = 9999)
+vec.lmp <- envfit(fa_lmp_mds$points, fa_lmp[, 11:40], perm = 9999)
 vec.lmp.arrows <- scores(vec.lmp, display = "vectors")
 vec.lmp.dat <- data.frame(vec.lmp.arrows)
 vec.lmp.dat$pvals <- vec.lmp$vectors$pvals
@@ -2435,7 +2442,7 @@ vec.lmp.dat$MDS1_sc <- vec.lmp.dat$MDS1 * (scalefactor * vec.lmp.dat$r2)
 vec.lmp.dat$MDS2_sc <- vec.lmp.dat$MDS2 * (scalefactor * vec.lmp.dat$r2)
 
 vec.lmp.dat.sig <- vec.lmp.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 lmp_arrow_angle <- 90 - ((atan2(vec.lmp.dat.sig$MDS1_sc, vec.lmp.dat.sig$MDS2_sc)* 180)/pi)
 lmp_arrow_angle <- ifelse(lmp_arrow_angle > 90 & lmp_arrow_angle < 270, lmp_arrow_angle + 180, lmp_arrow_angle)
@@ -2445,7 +2452,7 @@ vec.lmp.dat.sig$FA = sub("w", "*omega*-", vec.lmp.dat.sig$FA)
 vec.lmp.dat.sig$FA = sub("\\.", ":", vec.lmp.dat.sig$FA)
 
 # Butter clam #
-vec.but <- envfit(fa_but_mds$points, fa_but[, 11:41], perm = 9999)
+vec.but <- envfit(fa_but_mds$points, fa_but[, 11:40], perm = 9999)
 vec.but.arrows <- scores(vec.but, display = "vectors")
 vec.but.dat <- data.frame(vec.but.arrows)
 vec.but.dat$pvals <- vec.but$vectors$pvals
@@ -2457,7 +2464,7 @@ vec.but.dat$MDS1_sc <- vec.but.dat$MDS1 * (scalefactor * vec.but.dat$r2)
 vec.but.dat$MDS2_sc <- vec.but.dat$MDS2 * (scalefactor * vec.but.dat$r2)
 
 vec.but.dat.sig <- vec.but.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 but_arrow_angle <- 90 - ((atan2(vec.but.dat.sig$MDS1_sc, vec.but.dat.sig$MDS2_sc)* 180)/pi)
 but_arrow_angle <- ifelse(but_arrow_angle > 90 & but_arrow_angle < 270, but_arrow_angle + 180, but_arrow_angle)
@@ -2468,7 +2475,7 @@ vec.but.dat.sig$FA = sub("\\.", ":", vec.but.dat.sig$FA)
 
 ## Secondary Consumers ##
 # Dock Shrimp #
-vec.dsh <- envfit(fa_dsh_mds$points, fa_dsh[, 11:41], perm = 9999)
+vec.dsh <- envfit(fa_dsh_mds$points, fa_dsh[, 11:40], perm = 9999)
 vec.dsh.arrows <- scores(vec.dsh, display = "vectors")
 vec.dsh.dat <- data.frame(vec.dsh.arrows)
 vec.dsh.dat$pvals <- vec.dsh$vectors$pvals
@@ -2480,7 +2487,7 @@ vec.dsh.dat$MDS1_sc <- vec.dsh.dat$MDS1 * (scalefactor * vec.dsh.dat$r2)
 vec.dsh.dat$MDS2_sc <- vec.dsh.dat$MDS2 * (scalefactor * vec.dsh.dat$r2)
 
 vec.dsh.dat.sig <- vec.dsh.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 dsh_arrow_angle <- 90 - ((atan2(vec.dsh.dat.sig$MDS1_sc, vec.dsh.dat.sig$MDS2_sc)* 180)/pi)
 dsh_arrow_angle <- ifelse(dsh_arrow_angle > 90 & dsh_arrow_angle < 270, dsh_arrow_angle + 180, dsh_arrow_angle)
@@ -2490,7 +2497,7 @@ vec.dsh.dat.sig$FA = sub("w", "*omega*-", vec.dsh.dat.sig$FA)
 vec.dsh.dat.sig$FA = sub("\\.", ":", vec.dsh.dat.sig$FA)
 
 # Graceful crabs #
-vec.grc <- envfit(fa_grc_mds$points, fa_grc[, 11:41], perm = 9999)
+vec.grc <- envfit(fa_grc_mds$points, fa_grc[, 11:40], perm = 9999)
 vec.grc.arrows <- scores(vec.grc, display = "vectors")
 vec.grc.dat <- data.frame(vec.grc.arrows)
 vec.grc.dat$pvals <- vec.grc$vectors$pvals
@@ -2502,7 +2509,7 @@ vec.grc.dat$MDS1_sc <- vec.grc.dat$MDS1 * (scalefactor * vec.grc.dat$r2)
 vec.grc.dat$MDS2_sc <- vec.grc.dat$MDS2 * (scalefactor * vec.grc.dat$r2)
 
 vec.grc.dat.sig <- vec.grc.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 grc_arrow_angle <- 90 - ((atan2(vec.grc.dat.sig$MDS1_sc, vec.grc.dat.sig$MDS2_sc)* 180)/pi)
 grc_arrow_angle <- ifelse(grc_arrow_angle > 90 & grc_arrow_angle < 270, grc_arrow_angle + 180, grc_arrow_angle)
@@ -2512,7 +2519,7 @@ vec.grc.dat.sig$FA = sub("w", "*omega*-", vec.grc.dat.sig$FA)
 vec.grc.dat.sig$FA = sub("\\.", ":", vec.grc.dat.sig$FA)
 
 # Staghorn sculpin #
-vec.stg <- envfit(fa_stg_mds$points, fa_stg[, 11:41], perm = 9999)
+vec.stg <- envfit(fa_stg_mds$points, fa_stg[, 11:40], perm = 9999)
 vec.stg.arrows <- scores(vec.stg, display = "vectors")
 vec.stg.dat <- data.frame(vec.stg.arrows)
 vec.stg.dat$pvals <- vec.stg$vectors$pvals
@@ -2524,7 +2531,7 @@ vec.stg.dat$MDS1_sc <- vec.stg.dat$MDS1 * (scalefactor * vec.stg.dat$r2)
 vec.stg.dat$MDS2_sc <- vec.stg.dat$MDS2 * (scalefactor * vec.stg.dat$r2)
 
 vec.stg.dat.sig <- vec.stg.dat %>% 
-  filter(pvals < 0.05)
+  filter(r2 >= 0.75)
 
 stg_arrow_angle <- 90 - ((atan2(vec.stg.dat.sig$MDS1_sc, vec.stg.dat.sig$MDS2_sc)* 180)/pi)
 stg_arrow_angle <- ifelse(stg_arrow_angle > 90 & stg_arrow_angle < 270, stg_arrow_angle + 180, stg_arrow_angle)
@@ -2535,113 +2542,124 @@ vec.stg.dat.sig$FA = sub("\\.", ":", vec.stg.dat.sig$FA)
 ```
 
 ##### Plots
+NOTE that axes limits are very specific to allow for plotting a 4.5 X 10 in pdf panel plot
 ```{r}
 ## Primary Producers ##
 # Fucus #
-ggplot(fa_fu_mds_dat) +
+fu.nmds <- ggplot(fa_fu_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.fu.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.fu.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size=3, parse = T, angle = fu_arrow_angle, hjust = fu_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.05, 0.07)) +
-  scale_y_continuous(limits = c(-0.08, 0.05)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  geom_segment(data = vec.fu.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.fu.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = fu_arrow_angle, hjust = fu_arrow_hjust) +
+  scale_x_continuous(limits = c(-0.05, 0.1)) +
+  scale_y_continuous(limits = c(-0.1, 0.07)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
   
 # POM #   
-ggplot(fa_pm_mds_dat) +
+pm.nmds <- ggplot(fa_pm_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.pm.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.pm.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 3, parse = T, angle = pm_arrow_angle, hjust = pm_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.16, 0.14)) +
-  scale_y_continuous(limits = c(-0.12, 0.15)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  geom_segment(data = vec.pm.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.pm.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = pm_arrow_angle, hjust = pm_arrow_hjust) +
+  scale_x_continuous(limits = c(-0.14, 0.14)) +
+  scale_y_continuous(limits = c(-0.1, 0.13)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")Eelgrass
 
 # Eelgrass #
-ggplot(fa_eg_mds_dat) +
+eg.nmds <- ggplot(fa_eg_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.eg.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.eg.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size=3, parse = T, angle = eg_arrow_angle, hjust = eg_arrow_hjust) +
+  geom_segment(data = vec.eg.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.eg.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = eg_arrow_angle, hjust = eg_arrow_hjust) +
   scale_x_continuous(limits = c(-0.1, 0.2)) +
-  scale_y_continuous(limits = c(-0.055, 0.09)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  scale_y_continuous(limits = c(-0.055, 0.12)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 
 # Ulva #
-ggplot(fa_ul_mds_dat) +
+ul.nmds <- ggplot(fa_ul_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.ul.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.ul.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size=3, parse = T, angle = ul_arrow_angle, hjust = ul_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.23, 0.3)) +
-  scale_y_continuous(limits = c(-0.16, 0.2)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  geom_segment(data = vec.ul.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.ul.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = ul_arrow_angle, hjust = ul_arrow_hjust) +
+  scale_x_continuous(limits = c(-0.265, 0.3)) +
+  scale_y_continuous(limits = c(-0.17, 0.25)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 
 ## Primary Consumers ##
 # Idotea #
-ggplot(fa_ido_mds_dat) +
+ido.nmsd <- ggplot(fa_ido_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.ido.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.ido.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size=3, parse = T, angle = ido_arrow_angle, hjust = ido_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.22, 0.2)) +
-  scale_y_continuous(limits = c(-0.16, 0.12)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  geom_segment(data = vec.ido.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.ido.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = ido_arrow_angle, hjust = ido_arrow_hjust) +
+  scale_x_continuous(limits = c(-0.22, 0.25)) +
+  scale_y_continuous(limits = c(-0.18, 0.12)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 
 # Limpet #
-ggplot(fa_lmp_mds_dat) +
+lmp.nmds <- ggplot(fa_lmp_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.lmp.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.lmp.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size=3, parse = T, angle = lmp_arrow_angle, hjust = lmp_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.16, 0.15)) +
-  scale_y_continuous(limits = c(-0.14, 0.1)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  geom_segment(data = vec.lmp.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.lmp.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = lmp_arrow_angle, hjust = lmp_arrow_hjust) +
+  scale_x_continuous(limits = c(-0.15, 0.17)) +
+  scale_y_continuous(limits = c(-0.16, 0.12)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 
 # Butter Clam #
-ggplot(fa_but_mds_dat) +
+but.nmds <- ggplot(fa_but_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.but.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.but.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size=3, parse = T, angle = but_arrow_angle, hjust = but_arrow_hjust) +
+  geom_segment(data = vec.but.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.but.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = but_arrow_angle, hjust = but_arrow_hjust) +
   scale_x_continuous(limits = c(-0.22, 0.15)) +
-  scale_y_continuous(limits = c(-0.2, 0.2)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  scale_y_continuous(limits = c(-0.21, 0.25)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 
 ## Secondary Consumers ##
 # Dock Shrimp #
-ggplot(fa_dsh_mds_dat) +
+dsh.nmds <- ggplot(fa_dsh_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.dsh.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.dsh.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 3, parse = T, angle = dsh_arrow_angle, hjust = dsh_arrow_hjust) +
+  geom_segment(data = vec.dsh.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.dsh.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = dsh_arrow_angle, hjust = dsh_arrow_hjust) +
   scale_x_continuous(limits = c(-0.10, 0.075)) +
-  scale_y_continuous(limits = c(-0.05, 0.065)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  scale_y_continuous(limits = c(-0.07, 0.085)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 
 # Graceful crabs #
-ggplot(fa_grc_mds_dat) +
+grc.nmds <- ggplot(fa_grc_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.grc.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.grc.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 3, parse = T, angle = grc_arrow_angle, hjust = grc_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.13, 0.15)) +
-  scale_y_continuous(limits = c(-0.1, 0.12)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  geom_segment(data = vec.grc.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.grc.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = grc_arrow_angle, hjust = grc_arrow_hjust) +
+  scale_x_continuous(limits = c(-0.13, 0.17)) +
+  scale_y_continuous(limits = c(-0.12, 0.13)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 
 # Staghorn sculpin #
-ggplot(fa_stg_mds_dat) +
+stg.nmds <- ggplot(fa_stg_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.stg.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.stg.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 3, parse = T, angle = stg_arrow_angle, hjust = stg_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.12, 0.14)) +
-  scale_y_continuous(limits = c(-0.15, 0.13)) +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
+  geom_segment(data = vec.stg.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_text(data = vec.stg.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = stg_arrow_angle, hjust = stg_arrow_hjust) +
+  scale_x_continuous(limits = c(-0.13, 0.16)) +
+  scale_y_continuous(limits = c(-0.19, 0.18)) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 ```
 
 ##### Panel - FA
 ```{r}
-cowplot::plot_grid(nmds.pro, nmds.pcon, nmds.scon, nrow = 3, ncol = 1, labels = c("a", "b", "c"), label_size = 10)
+cowplot::plot_grid(eg.nmds, fu.nmds, pm.nmds, ul.nmds, ido.nmsd, lmp.nmds, but.nmds, dsh.nmds, grc.nmds, stg.nmds, nrow = 5, ncol = 2, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j"), label_size = 10)
 ```
 
