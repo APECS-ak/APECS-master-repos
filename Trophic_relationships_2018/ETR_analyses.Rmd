@@ -1145,10 +1145,7 @@ fa_fu <- fa %>%
 
 # POM #
 fa_pm <- fa %>%
-  filter(Species_common == "Particulate organic matter") %>% 
-  filter(ID != "B_226")
-
-fa_pm <- dplyr::select(fa_pm, -c(34))
+  filter(Species_common == "Particulate organic matter")
 
 # Sugar Kelp #
 fa_sk <- fa %>%
@@ -1161,10 +1158,10 @@ fa_ul <- fa %>%
 
 Append metadata
 ```{r}
-## All producers ##
+# All Primary Producers #
 fa_pro <- merge(fa_pro, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
 fa_pro <- cbind(fa_pro[, c(1, 38:41, 2:37)])
-colnames(fa_pro)[5] <- "Sea_otter_tr"
+colnames(fa_eg)[5] <- "Sea_otter_tr"
 
 # Eelgrass #
 fa_eg <- merge(fa_eg, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
@@ -1183,7 +1180,7 @@ colnames(fa_fu)[5] <- "Sea_otter_tr"
 
 # POM #
 fa_pm <- merge(fa_pm, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pm <- cbind(fa_pm[, c(1, 37:40, 2:36)])
+fa_pm <- cbind(fa_pm[, c(1, 38:41, 2:37)])
 colnames(fa_pm)[5] <- "Sea_otter_tr"
 
 # Sugar Kelp #
@@ -1604,7 +1601,7 @@ fa_pro_trs <- asin(sqrt(fa_pro[, 11:41]))
 fa_eg_trs <- asin(sqrt(fa_eg[, 11:41]))
 fa_ep_trs <- asin(sqrt(fa_ep[, 11:41]))
 fa_fu_trs <- asin(sqrt(fa_fu[, 11:41]))
-fa_pm_trs <- asin(sqrt(fa_pm[, 11:40]))
+fa_pm_trs <- asin(sqrt(fa_pm[, 11:41]))
 fa_sk_trs <- asin(sqrt(fa_sk[, 11:41]))
 fa_ul_trs <- asin(sqrt(fa_ul[, 11:41]))
 
@@ -2556,8 +2553,8 @@ ggplot(fa_pm_mds_dat) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
   geom_segment(data = vec.pm.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.15, "inches")), colour = "gray50", alpha = 1) +
   geom_text(data = vec.pm.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 3, parse = T, angle = pm_arrow_angle, hjust = pm_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.05, 0.07)) +
-  scale_y_continuous(limits = c(-0.08, 0.05)) +
+  scale_x_continuous(limits = c(-0.16, 0.14)) +
+  scale_y_continuous(limits = c(-0.12, 0.15)) +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank())
 
 # Eelgrass #
