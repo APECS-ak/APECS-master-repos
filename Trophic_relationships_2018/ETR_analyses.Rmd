@@ -793,6 +793,10 @@ si <- si %>%
   filter(Biomarker_ID != "B_226")
 
 si$Species_common <- ifelse(str_detect(si$Species_common, "Macoma"), "Macoma sp.", si$Species_common)
+
+si.n <- si %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarise(n = n())
 ```
 
 #### Whole community
@@ -1124,6 +1128,15 @@ Similar to SI data there are two perspectives to analysis. 1) The whole communit
 
 #### FA data prep
 Subsets
+```{r}
+fa.temp <- merge(fa, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
+
+fa.n <- fa.temp %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarise(n = n())
+```
+
+
 
 ##### Primary Producers
 ```{r fa subsets, echo = FALSE}
