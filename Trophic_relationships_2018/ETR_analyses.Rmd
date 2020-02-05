@@ -1863,67 +1863,34 @@ Remove undetermined FA from *untranformed* FA data. * NOTE * Run initial FA data
 # Eelgrass #
 fa_eg_simp <- fa_eg 
 
-# Eelgrass diatoms / epiphytes #
-fa_ep_simp <- fa_ep %>%
-  dplyr::select(- C17.3w)
-
 # Fucus #
-fa_fu_simp <- fa_fu %>%
-  dplyr::select(- C17.3w)
+fa_fu_simp <- fa_fu
 
 # POM #
-fa_pm_simp <- fa_pm %>%
-  dplyr::select(- C17.3w)
-
-# Sugar Kelp #
-fa_sk_simp <- fa_sk %>%
-  dplyr::select(- C17.3w)
+fa_pm_simp <- fa_pm
 
 # Ulva #
-fa_ul_simp <- fa_ul %>%
-  dplyr::select(- C17.3w)
+fa_ul_simp <- fa_ul
 
 ## Primary Consumers ##
 # Idotea #
-fa_ido_simp <- fa_ido %>%
-  dplyr::select(- C17.3w)
+fa_ido_simp <- fa_ido
 
 # Limpet #
-fa_lmp_simp <- fa_lmp %>%
-  dplyr::select(- C17.3w)
+fa_lmp_simp <- fa_lmp
 
 # Butter Clams ##
-fa_but_simp <- fa_but %>%
-  dplyr::select(- C17.3w)
-
-# Macoma Clams #
-fa_mac_simp <- fa_mac %>%
-  dplyr::select(- C17.3w)
+fa_but_simp <- fa_but
 
 ## Secondary Consumers ##
 # Dock Shrimp #
-fa_dsh_simp <- fa_dsh %>%
-  dplyr::select(- C17.3w)
-
-# Helmet crabs #
-fa_hel_simp <- fa_hel %>%
-  dplyr::select(- C17.3w)
+fa_dsh_simp <- fa_dsh
 
 # Graceful crabs #
-fa_grc_simp <- fa_grc %>%
-  dplyr::select(- C17.3w)
-
-# Shiner Perch #
-fa_shn_simp <- fa_shn %>%
-  dplyr::select(- C17.3w)
-
-# Snake prickleback #
-fa_snk_simp <- fa_snk %>%
-  dplyr::select(- C17.3w)
+fa_grc_simp <- fa_grc
 
 # Staghorn sculpin #
-fa_stg_simp <- fa_stg %>%
-  dplyr::select(- C17.3w)
+fa_stg_simp <- fa_stg
 ```
 
 ###### Primary Producers
@@ -1947,27 +1914,6 @@ simp.eg.redu <- simp.eg.dat %>%
   mutate(cumsum = cumsum * 100) %>% 
   rename("Low" = ava) %>% 
   rename("High" = avb)
-
-## Epiphytes ##
-simp.ep <- simper(fa_ep_simp[, 11:40], fa_ep_simp$Sea_otter_tr, permutations = 9999)
-simp.ep.dat <- summary(simp.ep, ordered = TRUE, digits = 4)
-simp.ep.dat <- data.frame(simp.ep.dat$High_Low)
-simp.ep.dat$FA <- row.names(simp.ep.dat)
-simp.ep.dat$average_scaled <- simp.ep.dat$average / sum(simp.ep.dat$average)
-simp.ep$High_Low$overall
-simp.ep.dat$taxa <- "Epiphytes"
-
-simp.ep.redu <- simp.ep.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("High" = ava) %>% 
-  rename("Low" = avb)
 
 ## Fucus ##
 simp.fu <- simper(fa_fu_simp[, 11:40], fa_fu_simp$Sea_otter_tr, permutations = 9999)
@@ -2000,27 +1946,6 @@ simp.pm$Low_High$overall
 simp.pm.dat$taxa <- "POM"
 
 simp.pm.redu <- simp.pm.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## Sugar kelp ##
-simp.sk <- simper(fa_sk_simp[, 11:40], fa_sk_simp$Sea_otter_tr, permutations = 9999)
-simp.sk.dat <- summary(simp.sk, ordered = TRUE, digits = 4)
-simp.sk.dat <- data.frame(simp.sk.dat$Low_High)
-simp.sk.dat$FA <- row.names(simp.sk.dat)
-simp.sk.dat$average_scaled <- simp.sk.dat$average / sum(simp.sk.dat$average)
-simp.sk$Low_High$overall
-simp.sk.dat$taxa <- "Sugar kelp"
-
-simp.sk.redu <- simp.sk.dat %>% 
   filter(cumsum <= 0.9) %>% 
   dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
   mutate_if(is.numeric, round, 4) %>% 
