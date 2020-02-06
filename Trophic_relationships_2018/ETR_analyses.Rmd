@@ -16,6 +16,7 @@ editor_options:
 library(dplyr)
 library(tidyr)
 library(ggplot2)
+library(nlme)
 library(DT)
 library(cowplot)
 library(RColorBrewer)
@@ -436,31 +437,33 @@ ggplot(eg) +
   geom_histogram(aes(y = ))
 ```
 
-#### ANOVAS of sites and treatment
+#### GLMMs of sea otter
 ##### Eelgrass things
 Eelgrass
 ```{r eg site x treatment, echo = FALSE}
-mod.eg.1 <- lm(log(shoot_mass_m) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
-anova(mod.eg.1)
+mod.eg.1 <- lmer(log(shoot_mass_m) ~ sea_otter_tr + (1 | site), data = eg)
+summary(mod.eg.1)
+summ(mod.eg.1)
+plot_summs(mod.eg.1)
 ```
 
 Epiphytes
 ```{r epi site X treatment, echo = FALSE}
-mod.ep.1 <- lm(sqrt(epi_load) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
-anova(mod.ep.1)
+mod.ep.1 <- lme(sqrt(epi_load) ~ sea_otter_tr, random = ~1|site, data = eg)
+summary(mod.ep.1)
 ```
 
 POM
 ```{r}
-mod.pm.1 <- lm(pc_om_POM ~ sea_otter_tr + sea_otter_tr %in% site, data = pom)
-anova(mod.pm.1)
+mod.pm.1 <- lme(pc_om_POM ~ sea_otter_tr, random = ~1|site, data = pom)
+summary(mod.pm.1)
 ```
 
 Grazers
 ```{r grz site X treatment, echo = FALSE}
 ## All Grazers ##
-mod.gr.1 <- lm(sqrt(grazer_load) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
-anova(mod.gr.1)
+mod.gr.1 <- lme(sqrt(grazer_load) ~ sea_otter_tr, random = ~1|site, data = eg)
+summary(mod.gr.1)
 
 ## Idotea ##
 mod.id.1 <- lm((idotea_load^0.33) ~ sea_otter_tr + sea_otter_tr %in% site, data = eg)
