@@ -1202,6 +1202,78 @@ ggplot(subset(fsh.prop.sum, sea_otter_tr == "low")) +
 cowplot::plot_grid(elg.m, epi.m, pom.m, grz.all, ido.m, lmp.m, clm.all, but.m, mac.m, crb.all, grc.m, hel.m, rrc.m, fsh.all, stg.m, shn.m, snk.m, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q"), nrow = 6, ncol = 3, label_size = 10, align = "v", label_x = 0.26)
 ```
 
+##### Extra plots
+```{r}
+## Clams ##
+ggplot() +
+  geom_errorbar(data = clm.sum, aes(x = site, ymin = mass_g_mean - mass_g_sd, ymax = mass_g_mean + mass_g_sd), width = 0, position = position_dodge(width = 0.5)) +
+  geom_point(data = clm.sum, aes(x = site, y = mass_g_mean, color = sea_otter_tr), size = 2.5, position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = so.pal, "Sea otter regmion") +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean, xend = 3, yend = mass_g_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean + mass_g_sd, xend = 3, yend = mass_g_mean + mass_g_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean - mass_g_sd, xend = 3, yend = mass_g_mean - mass_g_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean, xend = 6, yend = mass_g_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean + mass_g_sd, xend = 6, yend = mass_g_mean + mass_g_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean - mass_g_sd, xend = 6, yend = mass_g_mean - mass_g_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
+  scale_y_continuous(limits = c(0, 800), breaks = seq(0, 800, by = 200)) +
+  ylab(bquote("Clam mass" ~(g/m^-2))) +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 14))
+
+## Butter Clams ##
+ggplot() +
+  geom_errorbar(data = clm.sum, aes(x = site, ymin = but_mass_mean - but_mass_sd, ymax = but_mass_mean + but_mass_sd), width = 0, position = position_dodge(width = 0.5)) +
+  geom_point(data = clm.sum, aes(x = site, y = but_mass_mean, color = sea_otter_tr), size = 2.5, position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = so.pal, "Sea otter regmion") +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean, xend = 3, yend = but_mass_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean + but_mass_sd, xend = 3, yend = but_mass_mean + but_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean - but_mass_sd, xend = 3, yend = but_mass_mean - but_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean, xend = 6, yend = but_mass_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean + but_mass_sd, xend = 6, yend = but_mass_mean + but_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean - but_mass_sd, xend = 6, yend = but_mass_mean - but_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
+  scale_y_continuous(limits = c(-70, 600), breaks = seq(0, 600, by = 100)) +
+  ylab(bquote("Butter clam" ~(g/m^-2))) +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 14))
+
+## Crabs ##
+ggplot() +
+  geom_errorbar(data = crb.sum, aes(x = site, ymin = mass_g_mean - mass_g_sd, ymax = mass_g_mean + mass_g_sd), width = 0, position = position_dodge(width = 0.5)) +
+  geom_point(data = crb.sum, aes(x = site, y = mass_g_mean, color = sea_otter_tr), size = 2.5, position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = so.pal, "Sea otter regmion") +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean, xend = 3, yend = mass_g_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean + mass_g_sd, xend = 3, yend = mass_g_mean + mass_g_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean - mass_g_sd, xend = 3, yend = mass_g_mean - mass_g_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean, xend = 6, yend = mass_g_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean + mass_g_sd, xend = 6, yend = mass_g_mean + mass_g_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean - mass_g_sd, xend = 6, yend = mass_g_mean - mass_g_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
+  scale_y_continuous(limits = c(-200, 2600), breaks = seq(0, 2500, by = 500)) +
+  ylab("Crab (g/string)")  +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 14))
+
+## Red rocks ##
+ggplot() +
+  geom_errorbar(data = crb.sum, aes(x = site, ymin = rrc_mass_mean - rrc_mass_sd, ymax = rrc_mass_mean + rrc_mass_sd), width = 0, position = position_dodge(width = 0.5)) +
+  geom_point(data = crb.sum, aes(x = site, y = rrc_mass_mean, color = sea_otter_tr), size = 2.5, position = position_dodge(width = 0.5)) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean, xend = 3, yend = rrc_mass_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean + rrc_mass_sd, xend = 3, yend = rrc_mass_mean + rrc_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean - rrc_mass_sd, xend = 3, yend = rrc_mass_mean - rrc_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean, xend = 6, yend = rrc_mass_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean + rrc_mass_sd, xend = 6, yend = rrc_mass_mean + rrc_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean - rrc_mass_sd, xend = 6, yend = rrc_mass_mean - rrc_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
+  scale_y_continuous(limits = c(-100, 2500), breaks = seq(0, 2500, by = 500)) +
+  ylab("Red rock crab (g/string)")  +
+  xlab("Site") +
+  theme(legend.position = "none", text = element_text(size = 14))
+```
+
+
 ### Stable Isotopes
 There are two perspectives in analysis. 1) The whole community (all data) comparisons and 2) by species comparisons.
 
@@ -1399,6 +1471,61 @@ legend <- get_legend(si.all.h.lgnd)
 si.pan1 <- cowplot::plot_grid(si.all.h, si.c.all, si.n.all, labels = c("a", "b", "c"), nrow = 3, ncol = 1, label_size = 10, label_x = 0.12)
 
 cowplot::plot_grid(si.pan1, legend, rel_widths = c(2.5, 1))
+```
+
+##### Extra plots
+```{r}
+ggplot() +
+  geom_point(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, shape = si.sum$sp_group, color = si.sum$Sea_otter_tr), size = 2.75) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_polygon(aes(x = high.c.area$xcoords, y = high.c.area$ycoords), fill = so.pal[1], alpha = 0.4) +
+  geom_polygon(aes(x = low.c.area$xcoords, y = low.c.area$ycoords), fill = so.pal[2], alpha = 0.4) +
+  scale_x_continuous(limits = c(-22, -6), breaks = seq(-22, -6, by = 2)) +
+  scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
+  geom_text_repel(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, label = si.sum$si.names), size = 4) +
+  xlab(expression({delta}^13*C~'\u2030')) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  theme(legend.position = "none", text = element_text(size = 20))
+
+ggplot() +
+  geom_point(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, shape = si.sum$sp_group, color = si.sum$Sea_otter_tr), size = 2.75) +
+  geom_errorbar(aes(x = si.sum$del_C_mean, ymin = si.sum$del_N_mean - si.sum$del_N_sd, ymax = si.sum$del_N_mean + si.sum$del_N_sd), width = 0) +
+  geom_errorbarh(aes(xmin = si.sum$del_C_mean - si.sum$del_C_sd, xmax = si.sum$del_C_mean + si.sum$del_C_sd, y = si.sum$del_N_mean), width = 0) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_polygon(aes(x = high.c.area$xcoords, y = high.c.area$ycoords), fill = so.pal[1], alpha = 0.4) +
+  geom_polygon(aes(x = low.c.area$xcoords, y = low.c.area$ycoords), fill = so.pal[2], alpha = 0.4) +
+  scale_x_continuous(limits = c(-22, -6), breaks = seq(-22, -6, by = 2)) +
+  scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
+  #geom_text_repel(aes(x = si.sum$del_C_mean, y = si.sum$del_N_mean, label = si.sum$si.names), size = 4) +
+  xlab(expression({delta}^13*C~'\u2030')) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  theme(legend.position = "none", text = element_text(size = 20))
+
+## C plots by treatment ##
+ggplot(si.sum) +
+  geom_errorbar(aes(x = si.names, ymin = del_C_mean - del_C_sd, ymax = del_C_mean + del_C_sd, group = Sea_otter_tr), width = 0, position = position_dodge(0.7)) +
+  geom_point(aes(x = si.names, y = del_C_mean, shape = sp_group, color = Sea_otter_tr), size = 3, position = position_dodge(0.7)) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  scale_y_continuous(limits = c(-22, -6), breaks = seq(-22, -6, by = 2)) +
+  ylab(expression({delta}^13*C~'\u2030')) +
+  xlab("Species") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "none", text = element_text(size = 20))
+
+## N plots by treatment ##
+ggplot(si.sum) +
+  geom_errorbar(aes(x = si.names, ymin = del_N_mean - del_N_sd, ymax = del_N_mean + del_N_sd, group = Sea_otter_tr), width = 0, position = position_dodge(0.7)) +
+  geom_point(aes(x = si.names, y = del_N_mean, shape = sp_group, color = Sea_otter_tr), size = 3, position = position_dodge(0.7)) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  xlab("Species") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "none", text = element_text(size = 20))
 ```
 
 
@@ -3039,5 +3166,32 @@ stg.nmds <- ggplot(fa_stg_mds_dat) +
 ##### Panel - FA
 ```{r}
 cowplot::plot_grid(eg.nmds, fu.nmds, pm.nmds, ul.nmds, ido.nmsd, lmp.nmds, but.nmds, dsh.nmds, grc.nmds, stg.nmds, nrow = 5, ncol = 2, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j"), label_size = 10)
+```
+
+##### Extra plots
+```{r}
+ggplot(fa_fu_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 4) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
+
+ggplot(fa_lmp_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 4) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
+
+ggplot(fa_dsh_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 4) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
+
+ggplot(fa_grc_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 4) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
 ```
 
