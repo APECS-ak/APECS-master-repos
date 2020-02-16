@@ -5,6 +5,7 @@ library(ggplot2)
 library(lubridate)
 library(lattice)
 library(dplyr)
+library(scales)
 
 ###  OLD DATA  ###
 #s.prop <- read.csv("s_prop.csv") # import a file with the male/female proportions
@@ -68,6 +69,12 @@ forage$Season <- ifelse(forage$julian<173, "Spring", "Summer")
 
 #save final CSV
 write.csv(forage, "Visual/forage_final.csv")
+
+#loading final (if not using code above)
+forage<-read.csv("Visual/forage_final.csv")
+
+#changing all blanks to NA
+forage <- forage %>% mutate_all(na_if,"")
 
 # checking the data frame
 is.data.frame(forage) # will say if this is a dataframe, should say TRUE
@@ -262,8 +269,9 @@ plot(clam$where)
 ##                    Frequency of Occurance                 ##
 ###############################################################
 
-#write.csv(forage, "forage.csv")
+#write.csv(forage, "Visual/forage.csv")
 
+forage <- read.csv("Visual/forage.csv")
 
 #need to group by bout, and preycat then count
 
@@ -291,6 +299,8 @@ su<- forage %>%
   count(BoutID)
 su #180
 
+#remove NA from preycat
+forage <- filter(forage, PreyCat != is.na(PreyCat))
 count.season<- forage %>%
   count(BoutID, PreyCat, Season) %>%
   na.omit() %>%
@@ -299,14 +309,63 @@ count.season<- forage %>%
 
 count.season$fo<-NA
 count.season$fo<-(count.season$n / 181)
-write.csv(count.season, "Visual/fo_season.csv")
+#only do once, 
+#write.csv(count.season, "Visual/fo_season.csv")
 #graphing the seasons
 ggplot(data= count.season, aes(x= PreyCat, y=fo)) +
   geom_col(aes(fill=Season), position = "dodge") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(y= "Frequency of Occurrence (per bout)", x=NULL) +
+  scale_fill_grey() +
   theme_classic()
 
+ggsave("fo_season.png", device = "png", path = "Visual/", width = 8, 
+       height = 7, units = "in", dpi = 300)
 
 
 #printing all species listed in forage data
 species <- summary(forage$PreyItem)
 species
+
+
+ggplot(data= species.forage) +
+  theme_few() +
+  geom_col(aes(x=PreyItem, y = n, fill = observer), position = "dodge")
+
+ggplot(data= size.forage) +
+  theme_few() +
+  geom_col(aes(x=PreySz, y= n, fill = observer), position = "dodge")
+
+species.forage <- forage %>% 
+  drop_na(PreyItem) %>%
+  group_by(observer) %>%
+  count(PreyItem)
+
+species.forage2 <- spread(species.forage, PreyItem, n)
+
+species.forage2[is.na(species.forage2)] <- 0
+chisq.test(species.forage2)
+
+species.forage <- forage %>% 
+  drop_na(PreyItem) %>%
+  group_by(observer) %>%
+  count(PreyItem)
+
+
+size.forage <- forage %>% 
+  drop_na(PreySz) %>%
+  group_by(observer) %>%
+  count(PreySz)
+
+
+size.forage2 <- spread(size.forage, PreySz, n)
+
+
+size.forage2 <- size.forage2[-2,] 
+size.forage2<-size.forage2[,-5]
+size.forage2<-size.forage2[,-11]
+size.forage2<-size.forage2[,-11]
+size.forage2<-size.forage2[,-1]
+chisq.test(size.forage2)
+#data:  size.forage2
+#X-squared = 37.764, df = 9, p-value = 1.922e-05

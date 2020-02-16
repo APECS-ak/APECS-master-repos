@@ -205,3 +205,71 @@ ggplot(data= bomb.crab, aes(x=size, y=KJ)) +
   geom_point(aes(color=Species)) +
   labs(x="Crab Width (mm)", y="KJ per dry gram") +
   theme_classic()
+
+
+#######################################################################
+
+#######################################################################
+
+bomb <- read.csv("Bombing/Bomb.csv")
+moisture <- read.csv("Bombing/Moisture.csv")
+pla <- read.csv("Bombing/pla.csv")
+summary <- read.csv("Bombing/Summary.csv")
+
+#combine summary and bomb data
+summary.urch <- summary %>%
+  filter(Species == "std" | Species == "stf") %>%
+  select(SIN, Size.mm, Species, Frozen.Weight,
+                        Live.Weight, Dissected.Weight, Site.location, Season)
+
+moisture.urch <- left_join(summary.urch, moisture, by="SIN")
+urchin <- left_join(moisture.urch, bomb, by="SIN")
+urchin$KJ.wetgram <- NA
+urchin$KJ.wetgram <- (1-(urchin$Moisture/100))*urchin$Gross.Heat
+urchin$calorie <-urchin$KJ.wetgram*239.006
+urchin$calorie.dry <- urchin$Gross.Heat*239.006
+
+
+
+## Re-doing this graph
+
+bomb <- read.csv("Bombing/Bomb.csv")
+
+summary <- read.csv("Bombing/Summary.csv")
+summary$PreyCat <- NA
+summary$PreyCat <- ifelse(summary$Species == "apc", "Cucumber", 
+                            ifelse(summary$Species == "cln" | summary$Species == "prs" | summary$Species == "sag" |
+                                     summary$Species == "pab", "Clam", 
+                                   ifelse(summary$Species == "cam" | summary$Species == "cap" | summary$Species == "cao" | 
+                                            summary$Species == "tec"| summary$Species == "pas" | summary$Species == "pup", "Crab", 
+                                          ifelse(summary$Species == "cef" | summary$Species == "tes" | summary$Species == "nul" | 
+                                                   summary$Species == "lid"| summary$Species == "map", "Snail", 
+                                                ifelse(summary$Species == "pio" | summary$Species == "evt", "Star", 
+                                                        ifelse(summary$Species == "stf"| summary$Species == "std", "Urchin",
+                                                               ifelse(summary$Species == "mtr", "Mussel",
+                                                                      ifelse(summary$Species == "hak", "Abalone", 
+                                                                             ifelse(summary$Species == "crs", "Chiton" ,
+                                                                                    ifelse(summary$Species == "crg" | summary$Species == "pom" | 
+                                                                                             summary$Species == "chr", "Scallop", NA))))))))))
+
+
+
+
+write.csv(summary, "Bombing/Summary_PC.csv")
+
+#load new summary file
+summary <- read.csv("Bombing/Summary_PC.csv")
+bomb.data <- left_join(bomb, summary, by="SIN")
+
+#now by PreyCat - also removing Ab, Chiton, Scallop and Mussel
+bomb.data<- filter(bomb.data, PreyCat != is.na(PreyCat)) #removing squid eggs and composites
+bomb.short<-filter(bomb.data, PreyCat == "Clam" | PreyCat == "Crab")
+ggplot(data= bomb.short, aes(y=Gross.Heat, x=Season)) +
+  theme_few() +
+  geom_point() +
+  stat_smooth(aes(x=as.numeric(Season), y=Gross.Heat)) +
+  labs(x=NULL, y="KJ/ dry gram") +
+  facet_wrap(vars(PreyCat))
+
+ggsave("KJ_cc.png", device = "png", path = "Bombing/", width = 12, 
+       height = 3, units = "in", dpi = 300)

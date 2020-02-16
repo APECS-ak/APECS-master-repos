@@ -21,6 +21,7 @@ First, loading programs and files. Otter ID should be read as a factor.
 library(ggplot2)
 library(dplyr)
 library(ggthemes)
+library(scales)
 
 #load whisker data
 whisker <- read.csv("whiskers.csv")
@@ -38,10 +39,12 @@ si.prey <- read.csv("sifinal.csv")
 
 #### Data Cleaning - Temp until final decision is made for the odd otter
 
-Otter 163532 has very odd values, while it is being re-run I have seperated out the values and am going to make the whisker file without this sea otter.
+Otter 163532 has very odd values, while it is being re-run I have seperated out the values and am going to make the whisker file without this sea otter. I also want the seasons to print in date order, as opposed to alphabetical order
 
 ```{r, data cleaning}
 whisker<- filter(whisker, OtterID != "163532")
+
+whisker$Season<-factor(whisker$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
 ```
 
 
@@ -217,7 +220,11 @@ si.mean$Ntdf<-si.mean$Nmean+2.8
 ```
 
 
-```{r, seasonal biplot, echo=FALSE, message=FALSE, warning=FALSE}
+#### Biplot with sea otters separated by season (error bars are standard error)
+
+Folling Newsome et al. 2009, this is how they portrayed their data. I don't like that some of the sea otter points fall outside of the prey, but I do like that the graph is a tighter x-axis. 
+
+```{r, seasonal biplot se, echo=FALSE, message=FALSE, warning=FALSE}
 ggplot() +
   geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, color=PreyCat), size=3) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
@@ -229,5 +236,79 @@ ggplot() +
                                     color= PreyCat), height=0) +
   geom_point(data=whisker, aes(x=C, y=N, shape=Season), size=2)+
   theme_few()
+```
+
+
+#### Biplot in BW
+
+this is in case there is a requrement for a black and white figure, I'm open to feedback on what would make things stand out more.
+
+```{r, biplot bw, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, shape=PreyCat), size =4) +
+  scale_shape_manual(values=c(6, 4, 16, 17, 18, 8, 9), name="Prey Group")+
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  geom_errorbar(data= si.mean, aes(x=Ctdf, y=Ntdf, ymin = Ntdf-Nse, ymax = Ntdf+Nse,
+                                   shape= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Ctdf, y=Ntdf, xmin = Ctdf-Cse,xmax = Ctdf+Cse,
+                                    shape= PreyCat), height=0) +
+  geom_point(data=whisker, aes(x=C, y=N, color=Season), size=2)+
+  scale_color_grey()+
+  theme_few()
+```
+
+
+#### Biplot with sea otters separated by season (error bars are standard dev)
+
+This is the plot I prefer, as it shows all points are within one sd of the prey means. 
+
+```{r, seasonal biplot sd, echo=FALSE, message=FALSE, warning=FALSE}
+ggplot() +
+  geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Ctdf, y=Ntdf, ymin = Ntdf-Nsd, ymax = Ntdf+Nsd,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Ctdf, y=Ntdf, xmin = Ctdf-Csd,xmax = Ctdf+Csd,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whisker, aes(x=C, y=N, shape=Season), size=2)+
+  theme_few()
+```
+
+
+## Mixing Model Results
+
+#### Loading data and prepping for graphing
+
+I made the seasons facors so they will show in order of the months of the year and not alphabetically.
+
+```{r, mixing model, message=FALSE}
+#load prey data
+mix.mod <- read.csv("mix_season.csv")
+
+mix.mod$Season<-factor(mix.mod$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
+
+```
+
+
+### Box and whisker stand in for the moment
+
+I would like this to be a box and whisker plot separated similar to what I have below, but I didn't save all the correct files from the output, and so am rerunning the model. 
+
+```{r, box whisker mixing, message=FALSE, echo=FALSE, warning=FALSE}
+ggplot(aes(y = Mean, x = Season), data = mix.mod) +
+  theme_bw() +
+  geom_point(aes(color=Season), size =4) +
+  geom_errorbar(aes(ymin = Mean-SD,ymax = Mean+SD), width=.5) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  ylab("Diet proportion") + theme(legend.position = "none") +
+  facet_wrap(vars(PreyCat), nrow = 2)
+```
+
+
+```{r, Anova for mixing model}
+
 ```
 

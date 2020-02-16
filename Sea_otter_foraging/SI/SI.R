@@ -8,6 +8,7 @@ library(ggplot2) #always
 library(lattice) #always
 library(dplyr) #always
 library(ggthemes) #for graphs 
+library(scales) # for graphs
 library(car) #for stats
 library(compute.es) #for stats
 library(effects) 
@@ -18,6 +19,8 @@ library(psych)
 library(RVAideMemoire) # for moods
 library(rcompanion) #for moods
 library(corrgram) # for correlation graphs at the end of the script
+library(gridExtra) # making multi pane graphs
+library(grid) # making multi pane graphs
 
 #load files
 si.test <- read.csv("SI/SI.csv")
@@ -44,6 +47,9 @@ si.test$SiteNumber<-as.character(si.test$SiteNumber)
 
 #make final CSV
 write.csv(si.test, "SI/sifinal.csv")
+
+## load final CSV 
+si.prey <- read.csv("SI/sifinal.csv")
 
 #load whisker data
 whisker <- read.csv("SI/whiskers.csv")
@@ -170,7 +176,7 @@ ggplot(data= si.snail, aes(x=C, y=N)) +
   theme_classic()
 
 #STAR - Tissue differences
-ggplot(data=filter(si.prey, PreyCat=="Star"), aes(x=C, y=N)) +
+ggplot(data=si.star, aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Tissue, shape=Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -293,15 +299,27 @@ plot(si.test$Species, si.test$C)
 ######################################################################
 
 #Making mean and min/max for each prey type using Cnorm
-si.mean <-si.test %>%
+si.mean <-si.prey %>%
   group_by(PreyCat) %>% 
   summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
             Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
 si.mean<-si.mean[-1,] #removing blank
-#si.mean<-si.mean[-6,] #removing stars
+si.mean<-si.mean[-6,] #removing stars
 
 #make csv
 write.csv(si.mean, "si.mean.csv")
+
+# seasonal means
+si.season <-si.prey %>%
+  group_by(PreyCat, Season) %>% 
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
+            Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
+si.season<-si.season[-1,] #removing blank row
+si.season<-si.season[-1,] #removing blank row
+
+#filter only summer
+si.summer <- filter(si.season, Season == "Summer")
+write.csv(si.summer, "SI/si.season.csv")
 
 #prey with SE as errorbars
 ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
@@ -433,6 +451,19 @@ whis.mean<-whisker %>%
             Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
             Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
 
+#print csv vof means (for table)
+write.csv(whis.mean, "SI/whis.mean.csv")
+
+#season mean
+season.mean<-whisker %>%
+  group_by(Season) %>%
+  summarise(Cmean=mean(C), Nmean=mean(N), Csd=sd(C), Nsd=sd(N), 
+            Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
+            Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
+
+#print csv vof means (for table)
+write.csv(season.mean, "SI/season.mean.csv")
+
 #Whiskers mean for each season group
 whisker$Season2 <- NA
 whisker$Season2 <- ifelse(whisker$Season=="Fall", "Winter", 
@@ -445,7 +476,7 @@ whis.mean.season <- whisker %>%
             Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
             Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
 
-#TDF for otters changes to 2/3.5 makes a better looking graph
+#TDF for otters changes to 2/2.8 makes a better looking graph
 whis.mean$TDFC<-NA; whis.mean$TDFN<-NA
 whis.mean$TDFC <- whis.mean$Cmean-2
 whis.mean$TDFN <- whis.mean$Nmean-2.8
@@ -1025,4 +1056,149 @@ summary(filter(whisker, OtterID =="163521"))
 
 counted<- whisker %>%
   group_by(OtterID) %>%
+  count()
+
+############################################################################
+###### Graphs for paper
+############################################################################
+ggplot() +
+  geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, shape=PreyCat), size =4) +
+  scale_shape_manual(values=c(6, 4, 16, 17, 18, 8, 9), name="Prey Group")+
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  geom_errorbar(data= si.mean, aes(x=Ctdf, y=Ntdf, ymin = Ntdf-Nse, ymax = Ntdf+Nse,
+                                   shape= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Ctdf, y=Ntdf, xmin = Ctdf-Cse,xmax = Ctdf+Cse,
+                                    shape= PreyCat), height=0) +
+  geom_point(data=whisker, aes(x=C, y=N, color=Season), size=2)+
+  scale_color_grey()+
+  theme_few()
+
+
+#somthing to think about - adding the prey cat names
+#geom_text(size=8,hjust=-0.5)
+
+
+ggsave("biplot_BW.png", device = "png", path = "SI/", width = 8, 
+       height = 7, units = "in", dpi = 300)
+
+ggplot() +
+  geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, color=PreyCat), size=3) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" )))  +
+  scale_color_discrete(name  ="Prey Group") +
+  geom_errorbar(data= si.mean, aes(x=Ctdf, y=Ntdf, ymin = Ntdf-Nsd, ymax = Ntdf+Nsd,
+                                   color= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x=Ctdf, y=Ntdf, xmin = Ctdf-Csd,xmax = Ctdf+Csd,
+                                    color= PreyCat), height=0) +
+  geom_point(data=whisker, aes(x=C, y=N, shape=Season), size=2)+
+  theme_few()
+
+ggsave("biplot.png", device = "png", path = "SI/", width = 11, 
+       height = 7, units = "in", dpi = 300)
+
+A <- ggplot(data=whisker) +
+  geom_boxplot(aes(x=Season, y=C)) +
+  labs(y=expression(paste(delta^13, "C" )), x=NULL, tag = "A") +
+  theme_few() 
+
+
+B <- ggplot(data=whisker) +
+  geom_boxplot(aes(x=Season, y=N)) +
+  labs(y=expression(paste(delta^15, "N" )), tag = "B") +
+  theme_few()
+
+grid.arrange(A, B, nrow = 2)
+g <- arrangeGrob(A, B, nrow=2) #generates g
+ggsave("CN_season.png", g, device = "png", path = "SI/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+a <- ggplot(data=filter(whisker, OtterID=="163520")) +   theme_few() +
+  geom_line(aes(x=distance, y=N), colour="tomato") + 
+  geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
+  labs(x= NULL, y=expression(paste(delta^15, "N (\u2030)" )), tag = "A")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, name = NULL), 
+                     breaks= c(9, 11, 13, 15), limits = c(8.5,15)) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"), 
+        legend.position = "none", legend.title = element_blank(), 
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  ggtitle("520")
+
+b <- ggplot(data=filter(whisker, OtterID=="163521")) +   theme_few() +
+  geom_line(aes(x=distance, y=N), colour="tomato") + 
+  geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
+  labs(x= NULL, y= NULL, tag = "B")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25,
+                    name = expression(paste(delta^13, "C (\u2030)" ))), 
+                    breaks= c(9, 11, 13, 15), limits = c(8.5,15)) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"),
+        legend.position = "none", legend.title = element_blank(),
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  ggtitle("521")
+
+c <- ggplot(data=filter(whisker,OtterID=="163524")) +   theme_few() +
+  geom_line(aes(x=distance, y=N), colour="tomato") + 
+  geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
+  labs(x= "Distance from root (cm)", y=expression(paste(delta^15, "N (\u2030)" )), tag = "C")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, name = NULL), 
+                     breaks= c(9, 11, 13, 15), limits = c(8.5,15)) +
+  xlim(0,6) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"), 
+        legend.position = "none", legend.title = element_blank(), 
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  ggtitle("524")
+
+d <-ggplot(data=filter(whisker, OtterID=="77287")) +   theme_few() +
+  geom_line(aes(x=distance, y=N), colour="tomato") + 
+  geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
+  labs(x= "Distance from root (cm)", y=NULL, tag = "D")  +
+  xlim(0,6) +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, 
+           name = expression(paste(delta^13, "C (\u2030)" ))), 
+           breaks= c(9, 11, 13, 15), limits = c(8.5,15)) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"), 
+        legend.position = "none", legend.title = element_blank(),
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  ggtitle("287")
+
+gr <- arrangeGrob(a, b, c, d, nrow=2) 
+ggsave("INDIV.png", gr, device = "png", path = "SI/", width = 9, 
+       height = 7.5, units = "in", dpi = 300)
+
+
+
+####***************************************************************
+
+#test box/whisker alternative
+
+ggplot(aes(y = Mean, x = Season), data = mix.mod) +
+  theme_bw() +
+  geom_point(aes(color=Season), size =4) +
+  geom_errorbar(aes(ymin = Mean-SD,ymax = Mean+SD), width=.5) +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  ylab("Diet proportion") + theme(legend.position = "none") +
+  facet_wrap(vars(PreyCat), nrow = 2)
+
+ggsave("mixing.png", device = "png", path = "SI/", width = 8, 
+       height = 6, units = "in", dpi = 300)
+
+
+
+cseas.aov <- aov(C~Season, data = si.prey)
+summary(cseas.aov)
+
+nseas.aov <- aov(N~Season, data = si.prey)
+summary(nseas.aov)
+
+pairwise.t.test(x=si.prey$C, g=si.prey$Season, p.adj="bonferroni")
+
+
+
+count.season<- si.prey %>%
+  group_by(PreyCat, Season) %>%
   count()

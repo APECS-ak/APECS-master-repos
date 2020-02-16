@@ -25,6 +25,7 @@ library(dplyr)
 library(ggthemes)
 
 si.prey <- read.csv("sifinal.csv")
+
 whisker <- read.csv("whiskers.csv")
 whisker$OtterID<-as.factor(whisker$OtterID)
 # for right now, I want to remove 163532
@@ -41,6 +42,15 @@ si.mean <-si.prey %>%
   summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
             Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
 si.mean<-si.mean[-1,] #removing blank
+si.mean<-si.mean[-6,] # removing stars
+
+star <- read.csv("star2.csv")
+star.mean <- star %>%
+  summarise(Cmean=mean(MeanC), Nmean=mean(MeanN), Csd=sd(MeanC), Nsd=sd(MeanN),
+            Cse=sd(MeanC)/sqrt(length(MeanC)), Nse=sd(MeanN)/sqrt(length(MeanN)))
+star.mean$PreyCat <- "Star"
+
+si.mean <- full_join(si.mean, star.mean)
 
 si.season <-si.prey %>%
   group_by(PreyCat, Season) %>% 

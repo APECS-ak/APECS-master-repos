@@ -351,7 +351,7 @@ calc_area(source=source,mix=mix,discr=discr)
 
 #Run with an informative primer
 # Our 14 fecal samples were 10, 1, 0, 0, 3
-mix.alpha <- c(69,14,3,1.1,4,4,3)
+mix.alpha <- c(81,32,14,2,3,5,3,7)
 
 
 # Plot your informative prior
@@ -399,3 +399,177 @@ output_options <- list(summary_save = TRUE,
                        plot_xy_save_png = FALSE)
 
 output_JAGS(jags.1, mix, source, output_options)
+#########################################################################
+####                    Looking at the outputs                       ####  
+#########################################################################
+
+library(MixSIAR)
+library(ggplot2)
+library(R2jags)
+library(tidyr)
+
+#Load image Very long seasons (this is converged)
+load(file="SI/season_verylong.RData")
+
+attach.jags(jags.1) # adding model
+
+dim(p.fac1) # 3000, 4, 7 -> 3000 iterations of 4 seasons and 7 sources
+median(p.fac1[,1,1]) #median of season 1, source 1
+p.fac1[,2,1]
+
+
+#Making data frame for graph
+post.fall <- data.frame(Season = "Fall",Clam = p.fac1[,1,1], Crab = p.fac1[,1,2], 
+                          Cucumber = p.fac1[,1,3], Mussel = p.fac1[,1,4], 
+                          Snail = p.fac1[,1,5], Tegula = p.fac1[,1,6], Urchin = p.fac1[,1,7])
+post.spring <- data.frame(Season = "Spring",Clam = p.fac1[,2,1], Crab = p.fac1[,2,2], 
+                         Cucumber = p.fac1[,2,3], Mussel = p.fac1[,2,4], 
+                         Snail = p.fac1[,2,5], Tegula = p.fac1[,2,6], Urchin = p.fac1[,2,7])
+post.summer <- data.frame(Season = "Summer",Clam = p.fac1[,3,1], Crab = p.fac1[,3,2], 
+                        Cucumber = p.fac1[,3,3], Mussel = p.fac1[,3,4], 
+                        Snail = p.fac1[,3,5], Tegula = p.fac1[,3,6], Urchin = p.fac1[,3,7])
+post.winter <- data.frame(Season = "Winter",Clam = p.fac1[,4,1], Crab = p.fac1[,4,2], 
+                          Cucumber = p.fac1[,4,3], Mussel = p.fac1[,4,4], 
+                          Snail = p.fac1[,4,5], Tegula = p.fac1[,4,6], Urchin = p.fac1[,4,7])
+fall <- post.fall %>% gather(source,value,2:8)
+spring <- post.spring %>% gather(source,value,2:8)
+summer <- post.summer %>% gather(source,value,2:8)
+winter<- post.winter %>% gather(source,value,2:8)
+all <- rbind(spring, summer, fall, winter)
+
+ggplot(aes(y = value, x = source, fill = Season), data = all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  #scale_fill_manual(values=c("black","white"), name="") + # Seagrass is black, coral is white
+  theme( axis.title=element_text(size=16), legend.position = "none")
+
+ggsave("mixing_mixing.png", device = "png", path = "SI/", width = 9, 
+       height = 5, units = "in", dpi = 300)
+
+
+### Looking at only clams and crabs
+
+cc.all <- filter(all, source == "Clam" | source == "Crab")
+ggplot(aes(y = value, x = source, fill = Season), data = cc.all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  theme( axis.title=element_text(size=16), legend.position = "none")
+
+ggsave("cc_mixing.png", device = "png", path = "SI/", width = 9, 
+       height = 5, units = "in", dpi = 300)
+
+
+#anova for mixing model by species
+
+#clam
+clam<-filter(all, source == "Clam")
+clam.aov <- aov(value~Season, data = clam)
+summary(clam.aov)
+pairwise.t.test(x=clam$value, g=clam$Season, p.adj="bonferroni")
+
+#crab
+crab<-filter(all, source == "Crab")
+crab.aov <- aov(value~Season, data = crab)
+summary(crab.aov)
+pairwise.t.test(x=crab$value, g=crab$Season, p.adj="bonferroni")
+
+#cucumber
+cucumber<-filter(all, source == "Cucumber")
+cucumber.aov <- aov(value~Season, data = cucumber)
+summary(cucumber.aov)
+pairwise.t.test(x=cucumber$value, g=cucumber$Season, p.adj="bonferroni")
+
+#mussel
+mussel<-filter(all, source == "Mussel")
+mussel.aov <- aov(value~Season, data = mussel)
+summary(mussel.aov)
+pairwise.t.test(x=mussel$value, g=mussel$Season, p.adj="bonferroni")
+
+#this is a graph of just the summer values 
+ggplot(aes(y = value, x = source, fill = source), data = summer) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  xlab(NULL) +
+  ylab("Diet proportion") +
+  theme(axis.title=element_text(size=16), legend.position = "none")
+
+ggsave("mixing_summer.png", device = "png", path = "SI/", width = 9, 
+       height = 5, units = "in", dpi = 300)
+
+##############################################################################
+## With Stars Added - note this model didn't converge
+##############################################################################
+
+dim(p.fac1) # 3000, 4, 8 -> 3000 iterations of 4 seasons and 7 sources
+median(p.fac1[,1,1]) #median of season 1, source 1
+p.fac1[,2,1]
+
+
+#Making data frame for graph
+post.fall <- data.frame(Season = "Fall",Clam = p.fac1[,1,1], Crab = p.fac1[,1,2], 
+                        Cucumber = p.fac1[,1,3], Mussel = p.fac1[,1,4], 
+                        Snail = p.fac1[,1,5], Star = p.fac1[,1,6], 
+                        Tegula = p.fac1[,1,7], Urchin = p.fac1[,1,8])
+post.spring <- data.frame(Season = "Spring",Clam = p.fac1[,2,1], Crab = p.fac1[,2,2], 
+                          Cucumber = p.fac1[,2,3], Mussel = p.fac1[,2,4], 
+                          Snail = p.fac1[,2,5], Tegula = p.fac1[,2,7], Urchin = p.fac1[,2,8],
+                          Star = p.fac1[,2,6])
+post.summer <- data.frame(Season = "Summer",Clam = p.fac1[,3,1], Crab = p.fac1[,3,2], 
+                          Cucumber = p.fac1[,3,3], Mussel = p.fac1[,3,4], 
+                          Snail = p.fac1[,3,5], Tegula = p.fac1[,3,7], Urchin = p.fac1[,3,8],
+                          Star = p.fac1[,3,6])
+post.winter <- data.frame(Season = "Winter",Clam = p.fac1[,4,1], Crab = p.fac1[,4,2], 
+                          Cucumber = p.fac1[,4,3], Mussel = p.fac1[,4,4], 
+                          Snail = p.fac1[,4,5], Tegula = p.fac1[,4,7], Urchin = p.fac1[,4,8],
+                          Star = p.fac1[,4,6])
+fall <- post.fall %>% gather(source,value,2:9)
+spring <- post.spring %>% gather(source,value,2:9)
+summer <- post.summer %>% gather(source,value,2:9)
+winter<- post.winter %>% gather(source,value,2:9)
+all <- rbind(spring, summer, fall, winter)
+
+ggplot(aes(y = value, x = source, fill = Season), data = all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_bw() +
+  xlab("Prey Catagory") +
+  ylab("Diet proportion") +
+  #scale_fill_manual(values=c("black","white"), name="") + # Seagrass is black, coral is white
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), axis.line = element_line(colour = "black"), axis.title=element_text(size=16))
+
+ggsave("mixing2.png", device = "png", path = "SI/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+#anova for mixing model by species
+
+#clam
+clam<-filter(all, source == "Clam")
+clam.aov <- aov(value~Season, data = clam)
+summary(clam.aov)
+pairwise.t.test(x=clam$value, g=clam$Season, p.adj="bonferroni")
+
+#crab
+crab<-filter(all, source == "Crab")
+crab.aov <- aov(value~Season, data = crab)
+summary(crab.aov)
+pairwise.t.test(x=crab$value, g=crab$Season, p.adj="bonferroni")
+
+#cucumber
+cucumber<-filter(all, source == "Cucumber")
+cucumber.aov <- aov(value~Season, data = cucumber)
+summary(cucumber.aov)
+pairwise.t.test(x=cucumber$value, g=cucumber$Season, p.adj="bonferroni")
+
+#mussel
+mussel<-filter(all, source == "Mussel")
+mussel.aov <- aov(value~Season, data = mussel)
+summary(mussel.aov)
+pairwise.t.test(x=mussel$value, g=mussel$Season, p.adj="bonferroni")
+
