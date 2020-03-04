@@ -1,0 +1,26 @@
+---
+title: "ETR_stomach_analysis"
+author: "Wendel Raymond"
+date: "March 4, 2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Stomachs
+
+```{r libraries, echo = FALSE, warning = FALSE, message = FALSE}
+library(dplyr)
+```
+
+## Data
+```{r data}
+stom <- read.csv("E:/wraymond2/My Documents/Graduate School/Eelgrass/Eelgrass trophic relationships/Data/Stomach_processing_2018_FINAL_WR.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+## Explore
+```{r}
+s <- stom %>% 
+  group
+```
+
