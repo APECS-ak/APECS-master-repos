@@ -323,14 +323,15 @@ plot_grid(tmp.tr, sal.tr, do.tr, nox.tr, pho.tr, li.tr, sed.tr, nrow = 4, ncol =
 ### Biomarker Metadata
 ```{r bimrk metadata, echo = FALSE}
 ## Filter out ones we did not use ##
-bimrk_redu <- merge(bimrk, si[ 1], by = "Biomarker_ID")
+bimrk_redu <- merge(bimrk, fa[ 1], by.x = "Biomarker_ID", by.y = "ID")
 
 ## Mean size by sample ##
 bimrk_redu$size_mm_mean <-rowMeans(bimrk_redu[, 12:25], na.rm = TRUE)
 
 bimrk.sum <- bimrk_redu %>% 
-  group_by(Sea_otter_region, Species_common) %>% 
-  summarise(size_mean = mean(size_mm_mean),
+  group_by(Site, Species_common) %>% 
+  summarise(n = n(),
+            size_mean = mean(size_mm_mean),
             size_sd = sd(size_mm_mean))
 
 ## Mean size Macoma sp. ##
@@ -377,6 +378,7 @@ shapiro.test(pom$pc_om_POM)
 
 ## Epifauna ##
 hist(sqrt(eg$grazer_load))
+range(eg$grazer_load)
 shapiro.test(sqrt(eg$grazer_load))
 
 ggplot(eg) +
@@ -386,12 +388,15 @@ ggplot(eg) +
 
 ## Idotea load ##
 hist(eg$idotea_load)
+range(eg$idotea_load)
 hist(sqrt(eg$idotea_load))
 hist((eg$idotea_load)^0.33)
 hist((eg$idotea_load)^0.25)
 
 ## limpet load ##
 hist(eg$limpet_load)
+range(eg$limpet_load)
+
 hist(sqrt(eg$limpet_load))
 hist((eg$limpet_load)^0.33)
 hist((eg$limpet_load)^0.25)
@@ -464,7 +469,7 @@ summary(mod.ep.1)
 
 POM
 ```{r}
-mod.pm.1 <- lme(pc_om_POM ~ sea_otter_tr, random = ~1|site, data = pom)
+mod.pm.1 <- lme(asin(sqrt(pc_om_POM / 100)) ~ sea_otter_tr, random = ~1|site, data = pom)
 summary(mod.pm.1)
 anova(mod.pm.1)
 ```
@@ -2171,6 +2176,16 @@ ggplot(fa_grp, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
   xlab("Fatty acid") +
   ylab("Mean Proportion") +
   facet_wrap(~Species_common, scales = "free_x")
+
+ggplot(subset(fa_grp, FA_grp == "ARA"), aes(x = Sea_otter_region, y = prop_sum_m, fill = Sea_otter_region)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(ymin = prop_sum_m - prop_sum_sd, ymax = prop_sum_m + prop_sum_sd), width = 0, position = position_dodge(.9)) +
+  scale_fill_manual("Sea otter \n region", c("High", "Low"), values = so.pal) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(limits = c(0, 0.15), breaks = seq(0, 0.15, by = 0.05)) +
+  xlab("Fatty acid") +
+  ylab("Mean Proportion") +
+  facet_wrap(~Species_common, scales = "free_x")
 ```
 
 ##### Transformations
@@ -3171,6 +3186,12 @@ cowplot::plot_grid(eg.nmds, fu.nmds, pm.nmds, ul.nmds, ido.nmsd, lmp.nmds, but.n
 ##### Extra plots
 ```{r}
 ggplot(fa_fu_mds_dat) +
+  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 4) +
+  scale_color_manual(values = so.pal, "Sea otter treatment") +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
+  theme(legend.position = "none")
+
+ggplot(fa_ido_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 4) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
