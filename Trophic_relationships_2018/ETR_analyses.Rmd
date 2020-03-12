@@ -340,6 +340,10 @@ bimrk.mac <- bimrk_redu %>%
   group_by(Sea_otter_region) %>% 
   summarise(size_mean = mean(size_mm_mean),
             size_sd = sd(size_mm_mean))
+
+bimrk.n <- bimrk_redu %>% 
+  group_by(Site, Sea_otter_region,Species_common) %>% 
+  summarise(n = n())
 ```
 
 ### Biomass
@@ -1312,6 +1316,17 @@ si.n <- si %>%
 ```
 
 #### Whole community
+Convex hulls. Raw data
+```{r}
+## High sea otter ##
+high.c.area.raw <- convexhull(si$del_C[si$Sea_otter_tr == "High"], si$del_N[si$Sea_otter_tr == "High"])
+
+## Low sea otter ##
+low.c.area.raw <- convexhull(si$del_C[si$Sea_otter_tr == "Low"], si$del_N[si$Sea_otter_tr == "Low"])
+
+```
+
+
 Convex hulls. First calcualte mean values by species by sea otter treatment
 ```{r c hulls all, echo = FALSE}
 si.sum <- si %>% 
@@ -1342,10 +1357,12 @@ low.c.area <- convexhull(si.sum$del_C_mean[si.sum$Sea_otter_tr == "Low"], si.sum
 ##### Plots
 ```{r plots si all, echo = FALSE}
 ## All data ##
-si.raw <- ggplot(si) +
-  geom_point(aes(x = del_C, y = del_N, shape = sp_group, color = Sea_otter_tr), size = 3) +
+ggplot() +
+  geom_point(aes(x = si$del_C, y = si$del_N, shape = si$sp_group, color = si$Sea_otter_tr), size = 3) +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer"))
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_polygon(aes(x = high.c.area.raw$xcoords, y = high.c.area.raw$ycoords), fill = so.pal[1], alpha = 0.4) +
+  geom_polygon(aes(x = low.c.area.raw$xcoords, y = low.c.area.raw$ycoords), fill = so.pal[2], alpha = 0.4)
 
 ## new names ##
 si.names <- c("BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "SHN", "SNK", "STG", "SK", "UL", "BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "RRC", "SHN", "SNK", "STG", "SK", "UL")
