@@ -461,6 +461,7 @@ ggplot(eg) +
 Eelgrass
 ```{r eg site x treatment, echo = FALSE}
 mod.eg.1 <- lme(log(shoot_mass_m) ~ sea_otter_tr, random = ~1|site, data = eg)
+plot(mod.eg.1)
 summary(mod.eg.1)
 summ(mod.eg.1, scale = TRUE)
 ```
@@ -468,24 +469,27 @@ summ(mod.eg.1, scale = TRUE)
 Epiphytes
 ```{r epi site X treatment, echo = FALSE}
 mod.ep.1 <- lme(sqrt(epi_load) ~ sea_otter_tr, random = ~1|site, data = eg)
+plot(mod.ep.1)
 summary(mod.ep.1)
 ```
 
 POM
 ```{r}
 mod.pm.1 <- lme(asin(sqrt(pc_om_POM / 100)) ~ sea_otter_tr, random = ~1|site, data = pom)
+plot(mod.pm.1)
 summary(mod.pm.1)
-anova(mod.pm.1)
 ```
 
 Grazers
 ```{r grz site X treatment, echo = FALSE}
 ## All Grazers ##
 mod.gr.1 <- lme(sqrt(grazer_load) ~ sea_otter_tr, random = ~1|site, data = eg)
+plot(mod.gr.1)
 summary(mod.gr.1)
 
 ## Idotea ##
 mod.id.1 <- lme(idotea_load^0.25 ~ sea_otter_tr, random = ~1|site, data = eg)
+plot(mod.id.1)
 summary(mod.id.1)
 
 ## Limpet ##
@@ -498,19 +502,23 @@ Sum total crab mass by string. Insert 0 data for strings with no crabs so averag
 ```{r crb site x treatment, echo = FLASE}
 ## All Crabs##
 mod.crb.1 <- lme(mass_g^0.25 ~ sea_otter_tr, random = ~1|site, data = crb.site.string)
+plot(mod.crb.1)
 summary(mod.crb.1)
 
 ## By species ##
 # Graceful #
 mod.dun.1 <- lme(mass_g^0.25  ~ sea_otter_tr, random = ~1|site, data = subset(crb.site.string.sp, species_common == "Graceful crab"))
+plot(mod.dun.1)
 summary(mod.dun.1)
 
 # Helmet #
-mod.hel.1 <- lme(mass_g^0.33 ~ sea_otter_tr, random = ~1|site, data = subset(crb.site.string.sp, species_common == "Helmet crab"))
+mod.hel.1 <- lme(mass_g^0.5 ~ sea_otter_tr, random = ~1|site, data = subset(crb.site.string.sp, species_common == "Helmet crab"))
+plot(mod.hel.1)
 summary(mod.hel.1)
 
 # Red rock #
 mod.roc.1 <- lme(mass_g^0.33 ~ sea_otter_tr, random = ~1|site, data = subset(crb.site.string.sp, species_common == "Red rock crab"))
+plot(mod.roc.1)
 summary(mod.roc.1)
 ```
 
@@ -519,15 +527,18 @@ We also have species to think about...
 ```{r clm site}
 ## All Clams ##
 mod.clm.1 <- lme(mass_g^0.33 ~ sea_otter_tr, random = ~1|site, data = clm.site.quad)
+plot(mod.clm.1)
 summary(mod.clm.1)
 
 ## By species ##
 # Butter clams #
 mod.but.1 <- lme(mass_g ~ sea_otter_tr, random = ~1|site, data = subset(clm.site.quad.sp, species_common == "Butter clam"))
+plot(mod.but.1)
 summary(mod.but.1)
 
 # Macoma sp. ##
 mod.mac.1 <- lme(mass_g^0.25 ~ sea_otter_tr, random = ~1|site, data = subset(clm.site.quad.sp, species_common == "Macoma sp."))
+plot(mod.mac.1)
 summary(mod.mac.1)
 ```
 
@@ -1721,7 +1732,6 @@ fa.n <- fa.temp %>%
 ```
 
 
-
 ##### Primary Producers
 ```{r fa subsets, echo = FALSE}
 ## All Producers ##
@@ -2537,27 +2547,6 @@ simp.but.redu <- simp.but.dat %>%
   mutate(cumsum = cumsum * 100) %>% 
   rename("Low" = ava) %>% 
   rename("High" = avb)
-
-# Macoma sp #
-simp.mac <- simper(fa_mac_simp[, 11:40], fa_mac_simp$Sea_otter_tr, permutations = 9999)
-simp.mac.dat <- summary(simp.mac, ordered = TRUE, digits = 4)
-simp.mac.dat <- data.frame(simp.mac.dat$Low_High)
-simp.mac.dat$FA <- row.names(simp.mac.dat)
-simp.mac.dat$average_scaled <- simp.mac.dat$average / sum(simp.mac.dat$average)
-simp.mac$Low_High$overall
-simp.mac.dat$taxa <- "Macoma sp."
-
-simp.mac.redu <- simp.mac.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
 ```
 
 ###### Secondary consumers
@@ -2693,20 +2682,14 @@ simp.stg.redu <- simp.stg.dat %>%
 ```{r}
 ## Combine ##
 simp.sum <- rbind(simp.eg.dat,
-                  simp.ep.dat,
                   simp.fu.dat,
                   simp.pm.dat,
-                  simp.sk.dat,
                   simp.ul.dat,
                   simp.ido.dat,
                   simp.lmp.dat,
                   simp.but.dat,
-                  simp.mac.dat,
                   simp.dsh.dat,
                   simp.grc.dat,
-                  simp.hel.dat,
-                  simp.shn.dat,
-                  simp.snk.dat,
                   simp.stg.dat)
 
 ## Export ##
@@ -2725,7 +2708,6 @@ simp.top <- simp.sum %>%
   top_n(-5, cumsum) %>% 
   mutate(FA = FA) %>% 
   mutate(cumsum = cumsum) 
-
 
 ## Top summaries ##
 simp.top.sum <- simp.top %>% 
