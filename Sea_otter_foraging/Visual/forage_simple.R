@@ -273,6 +273,7 @@ plot(clam$where)
 
 forage <- read.csv("Visual/forage.csv")
 
+
 #need to group by bout, and preycat then count
 
 count.forage<- forage %>%
@@ -322,6 +323,67 @@ ggplot(data= count.season, aes(x= PreyCat, y=fo)) +
 ggsave("fo_season.png", device = "png", path = "Visual/", width = 8, 
        height = 7, units = "in", dpi = 300)
 
+
+#####################################################################################################
+#FO for each dive
+forage<- forage %>% unite("dive.no", BoutID, DiveNo, sep="-")
+
+#How many dives
+forage %>% 
+  na.omit() %>% 
+  count(dive.no) 
+
+#3,522 inlcuding no success
+#2,419 not including no success
+
+#need to group by dive, and preycat then count
+count.forage<- forage %>%
+  count(dive.no, PreyCat) %>%
+  na.omit() %>%
+  count(PreyCat)
+
+#Now counting how many for each prey cat and devide by total bouts
+count.forage$fo<-NA
+count.forage$fo.s<-NA
+count.forage$fo<-(count.forage$n / 3522)
+count.forage$fo.s<-(count.forage$n / 2419)
+
+#Make the same thing for each season
+
+#first find out how many bouts for each season:
+
+sp<- forage %>% 
+  filter(forage$Season == "Spring") %>%
+  count(BoutID)
+sp #182
+
+su<- forage %>% 
+  filter(forage$Season == "Summer") %>%
+  count(BoutID)
+su #180
+
+#remove NA from preycat
+forage <- filter(forage, PreyCat != is.na(PreyCat))
+count.season<- forage %>%
+  count(BoutID, PreyCat, Season) %>%
+  na.omit() %>%
+  count(PreyCat, Season)
+
+
+count.season$fo<-NA
+count.season$fo<-(count.season$n / 181)
+#only do once, 
+#write.csv(count.season, "Visual/fo_season.csv")
+#graphing the seasons
+ggplot(data= count.season, aes(x= PreyCat, y=fo)) +
+  geom_col(aes(fill=Season), position = "dodge") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(y= "Frequency of Occurrence (per bout)", x=NULL) +
+  scale_fill_grey() +
+  theme_classic()
+
+ggsave("fo_season.png", device = "png", path = "Visual/", width = 8, 
+       height = 7, units = "in", dpi = 300)
 
 #printing all species listed in forage data
 species <- summary(forage$PreyItem)

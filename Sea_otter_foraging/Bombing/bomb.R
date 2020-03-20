@@ -231,26 +231,23 @@ urchin$calorie.dry <- urchin$Gross.Heat*239.006
 
 
 
-## Re-doing this graph
-
-bomb <- read.csv("Bombing/Bomb.csv")
-
+## Making summary file with PreyCat
 summary <- read.csv("Bombing/Summary.csv")
 summary$PreyCat <- NA
 summary$PreyCat <- ifelse(summary$Species == "apc", "Cucumber", 
                             ifelse(summary$Species == "cln" | summary$Species == "prs" | summary$Species == "sag" |
-                                     summary$Species == "pab", "Clam", 
-                                   ifelse(summary$Species == "cam" | summary$Species == "cap" | summary$Species == "cao" | 
-                                            summary$Species == "tec"| summary$Species == "pas" | summary$Species == "pup", "Crab", 
-                                          ifelse(summary$Species == "cef" | summary$Species == "tes" | summary$Species == "nul" | 
-                                                   summary$Species == "lid"| summary$Species == "map", "Snail", 
-                                                ifelse(summary$Species == "pio" | summary$Species == "evt", "Star", 
-                                                        ifelse(summary$Species == "stf"| summary$Species == "std", "Urchin",
-                                                               ifelse(summary$Species == "mtr", "Mussel",
-                                                                      ifelse(summary$Species == "hak", "Abalone", 
-                                                                             ifelse(summary$Species == "crs", "Chiton" ,
-                                                                                    ifelse(summary$Species == "crg" | summary$Species == "pom" | 
-                                                                                             summary$Species == "chr", "Scallop", NA))))))))))
+                                   summary$Species == "pab", "Clam", 
+                             ifelse(summary$Species == "cam" | summary$Species == "cap" | summary$Species == "cao" | 
+                                    summary$Species == "tec"| summary$Species == "pas" | summary$Species == "pup", "Crab", 
+                              ifelse(summary$Species == "cef"  | summary$Species == "nul" | summary$Species == "lid", "Carn Snail",
+                               ifelse(summary$Species == "map"| summary$Species == "tes", "Herb Snail",
+                                ifelse(summary$Species == "pio" | summary$Species == "evt", "Star", 
+                                 ifelse(summary$Species == "stf"| summary$Species == "std", "Urchin",
+                                  ifelse(summary$Species == "mtr", "Mussel",
+                                   ifelse(summary$Species == "hak", "Abalone", 
+                                    ifelse(summary$Species == "crs", "Chiton" ,
+                                     ifelse(summary$Species == "crg" | summary$Species == "pom" | 
+                                            summary$Species == "chr", "Scallop", NA)))))))))))
 
 
 
@@ -259,17 +256,211 @@ write.csv(summary, "Bombing/Summary_PC.csv")
 
 #load new summary file
 summary <- read.csv("Bombing/Summary_PC.csv")
-bomb.data <- left_join(bomb, summary, by="SIN")
+plab <- read.csv("Bombing/plab.csv")
+summary.short <- select(summary, SIN, Size.mm, Species, Frozen.Weight,
+                        Live.Weight, Dissected.Weight, Site.location, Season, Tissue, PreyCat)
+all <- left_join(plab, summary.short, by="SIN")
+
+# remember moisture is currently in xx.xx, and we need 0.xxxx, also need lipid dry
+all$KJ.wetgram <-NA
+all$KJ.wetgram <- (1-(all$moisture/100))*all$KJ
+all$lipid_dry <- NA
+all$lipid_dry <- (all$lipid_wet*100)/(100-all$moisture)
+#Removing NA in PreyCat
+all<-all %>% drop_na(PreyCat)
 
 #now by PreyCat - also removing Ab, Chiton, Scallop and Mussel
-bomb.data<- filter(bomb.data, PreyCat != is.na(PreyCat)) #removing squid eggs and composites
-bomb.short<-filter(bomb.data, PreyCat == "Clam" | PreyCat == "Crab")
-ggplot(data= bomb.short, aes(y=Gross.Heat, x=Season)) +
+main <- filter(all, PreyCat != "Abalone" & PreyCat != "Scallop" & PreyCat != "Chiton")
+#some stars are whole and some are parts - removing all "parts"
+main <- filter (main, Tissue == "whole")
+
+#Just printing crab and clam data
+bomb.short<-filter(all, PreyCat == "Clam" | PreyCat == "Crab")
+ggplot(data= bomb.short, aes(y=KJ, x=Season)) +
   theme_few() +
   geom_point() +
-  stat_smooth(aes(x=as.numeric(Season), y=Gross.Heat)) +
+  stat_smooth(aes(x=as.numeric(Season), y=KJ)) +
   labs(x=NULL, y="KJ/ dry gram") +
   facet_wrap(vars(PreyCat))
 
 ggsave("KJ_cc.png", device = "png", path = "Bombing/", width = 12, 
        height = 3, units = "in", dpi = 300)
+
+
+# kj/dry gram with all main species
+ggplot(data= main, aes(y=KJ, x=Season)) +
+  theme_few() +
+  geom_point() +
+  stat_smooth(aes(x=as.numeric(Season), y=KJ)) +
+  labs(x=NULL, y="KJ/ dry gram") +
+  facet_wrap(vars(PreyCat), scales = "free")
+
+ggsave("KJ_main.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+#% protein vs %lipid (wet)
+lipid<-all %>% drop_na(lipid_wet)
+ggplot(data= lipid, aes(x=protein_wet, y=lipid_wet, color = PreyCat)) +
+  theme_few() +
+  geom_point() +
+  stat_smooth(formula = y~x, se= FALSE, method= lm)
+
+ggsave("lp_wet_main.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+#% protein vs %lipid (dry) - something is wrong with urchins, so removing for the time being
+
+ggplot(data= filter(lipid, PreyCat != "Urchin"), aes(x=protein_dry/KJ, y=lipid_dry/KJ, color = Species)) +
+  theme_few() +
+  geom_point() +
+  stat_smooth(formula = y~x, se= FALSE, method= lm) +
+  facet_wrap(vars(Species))
+
+ggsave("lp_dry_main.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+#dry by species
+ggplot(data= filter(lipid, PreyCat != "Urchin"), aes(x=protein_dry, y=lipid_dry)) +
+  theme_few() +
+  geom_point() +
+  stat_smooth(formula = y~x, se= FALSE, method= lm) +
+  facet_wrap(vars(Species), scales = "free")
+
+ggsave("lp_dry_species.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Dry Lipid by season
+ggplot(data= lipid, aes(x=Season, y=lipid_dry)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=as.numeric(Season), y=lipid_dry)) +
+  labs(x= "", y="% Lipid")  +
+  facet_wrap(vars(Species), scales = "free", nrow=4)
+
+ggsave("lipid_season.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Dry Protein by season
+protein <- all %>% drop_na(protein_wet)
+ggplot(data= filter(protein, Species != "map" & Species != "evt" & Species != "pup" & Species != "cao"), aes(x=Season, y=protein_dry)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=as.numeric(Season), y=protein_dry), method = "loess", formula = y~x) +
+  labs(x= "", y="% Protein")  +
+  facet_wrap(vars(Species), scales = "free", nrow=4)
+
+ggsave("protein_season.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Moisture by season
+moisture <- protein %>% drop_na(moisture)
+ggplot(data= filter(moisture, Species != "map" & Species != "evt" & Species != "pup" & Species != "cao"), aes(x=Season, y=moisture)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=as.numeric(Season), y=moisture), method = "loess", formula = y~x) +
+  labs(x= "", y="% Moisture")  +
+  facet_wrap(vars(Species), scales = "free", nrow=4)
+
+ggsave("moisture.p_season.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+# Ash by season
+ash <- all %>% drop_na(ash)
+ggplot(data= ash, aes(x=Season, y=ash)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=as.numeric(Season), y=ash)) +
+  labs(x= "", y="% Ash")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=4)
+
+ggsave("ash_season.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+
+# Ash by size
+ash <- all %>% drop_na(ash)
+ggplot(data= ash, aes(x=Size.mm, y=ash)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=Size.mm, y=ash)) +
+  labs(x= "Size (mm)", y="% Ash")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=3)
+
+ggsave("ash_size.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Moisture by size
+
+ggplot(data= moisture, aes(x=Size.mm, y=moisture)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=Size.mm, y=moisture)) +
+  labs(x= "Size (mm)", y="% Moisture")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=3)
+
+ggsave("moisture_size.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Protein by size
+
+ggplot(data= protein, aes(x=Size.mm, y=protein_dry)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=Size.mm, y=protein_dry)) +
+  labs(x= "Size (mm)", y="% Protein (dry)")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=3)
+
+ggsave("protein_size.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+# Lipid by size
+ggplot(data= lipid, aes(x=Size.mm, y=lipid_dry)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=Size.mm, y=lipid_dry)) +
+  labs(x= "Size (mm)", y="% Lipid (dry)")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=3)
+
+ggsave("lipid_size.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Energy by size (PreyCat)
+ggplot(data= all, aes(x=Size.mm, y=KJ)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=Size.mm, y=KJ)) +
+  labs(x= "Size (mm)", y="KJ/g (dry)")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=3)
+
+ggsave("energy_size.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Energy vs Protein (PreyCat)
+ggplot(data= protein, aes(x=protein_dry, y=KJ)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=protein_dry, y=KJ)) +
+  labs(x= "% Protein", y="KJ/g (dry)")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=3)
+
+ggsave("energy_protein.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Energy vs Lipid (PreyCat)
+ggplot(data= lipid, aes(x=lipid_dry, y=KJ)) +
+  geom_point() + theme_few() +
+  stat_smooth(aes(x=lipid_dry, y=KJ)) +
+  labs(x= "% Lipid", y="KJ/g (dry)")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=3)
+
+ggsave("energy_lipid.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)
+
+
+# Moisture
+ggplot(data= moisture, aes(x=Size.mm, y=moisture)) +
+  geom_boxplot() + theme_few() +
+  labs(x= "", y="% Moisture")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=3)
+
+ggsave("moisture_size.png", device = "png", path = "Bombing/", width = 9, 
+       height = 6, units = "in", dpi = 300)

@@ -57,6 +57,63 @@ ggplot() +
 
 
 #How simialar are clams and stars?
+prey.si <- read.csv("SI/Prey.csv")
 
-# paired t-test
-t.test(y1,y2,paired=TRUE) # where y1 & y2 are numeric
+# independent t-test  - testing two that are very different: Clams and Crabs
+
+crab.c <- prey.si %>% 
+  filter(PreyCat == "Crab") %>%
+  select(C)
+
+clam.c <- prey.si %>% 
+  filter(PreyCat == "Clam") %>%
+  select(C)
+t.test(clam.c,crab.c) # where y1 & y2 are numeric
+
+#data:  clam.c and crab.c
+#t = -6.0922, df = 60.806, p-value = 8.259e-08
+#alternative hypothesis: true difference in means is not equal to 0
+#95 percent confidence interval:
+#  -1.9163142 -0.9691606
+#sample estimates:
+#  mean of x mean of y 
+#-17.19128 -15.74854 
+
+star.c <- prey.si %>% 
+  filter(PreyCat == "Star") %>%
+  select(C)
+
+clam.c <- prey.si %>% 
+  filter(PreyCat == "Clam") %>%
+  select(C)
+t.test(clam.c,star.c) # where y1 & y2 are numeric
+
+#Welch Two Sample t-test
+#data:  clam.c and star.c
+#t = 2.0226, df = 23.525, p-value = 0.05463
+#alternative hypothesis: true difference in means is not equal to 0
+#95 percent confidence interval:
+#  -0.0201014  1.8875130
+#sample estimates:
+#  mean of x mean of y 
+#-17.19128 -18.12498
+
+star.n <- prey.si %>% 
+  filter(PreyCat == "Star") %>%
+  select(N)
+
+clam.n <- prey.si %>% 
+  filter(PreyCat == "Clam") %>%
+  select(N)
+t.test(clam.n,star.n) # where y1 & y2 are numeric
+
+#Welch Two Sample t-test
+#data:  clam.n and star.n
+#t = 1.5137, df = 36.122, p-value = 0.1388
+#alternative hypothesis: true difference in means is not equal to 0
+#95 percent confidence interval:
+#  -0.1183356  0.8151163
+#sample estimates:
+#  mean of x mean of y 
+#9.848140  9.499749
+

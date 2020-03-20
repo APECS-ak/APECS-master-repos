@@ -15,34 +15,63 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 library(ggthemes)
+library(lubridate)
 
 
 plab <- read.csv("plab.csv")
 summary <- read.csv("Summary_PC.csv")
 ```
 
-
-I want to combine info from the summary file into the Moisure, bomb, and lipid files
-```{r, new moisture file, message=FALSE}
-summary.short <- select(summary, SIN, Size.mm, Species, Frozen.Weight,
-                        Live.Weight, Dissected.Weight, Site.location, Season, PreyCat)
-all <- left_join(plab, summary.short, by="SIN")
+Converting Seasons into quarters/months
+```{r, season to quarter}
+summary$Date.Collected <- parse_date_time(summary$Date.Collected, orders = "mdy")
+summary$Date.Collected <- as.Date(summary$Date.Collected)
+summary$quarter <- quarter(summary$Date.Collected, with_year = TRUE)
+summary$month <- floor_date(summary$Date.Collected, unit = "month")
+summary$month[summary$month == "2018-07-01"] <- "2018-08-01"
 ```
-
 
 Converting from KJ/dry mass to KJ/wet mass
-```{r, convert to wet mass, message=FALSE}
+```{r, convert to wet mass}
 # remember moisture is currently in xx.xx, and we need 0.xxxx
-all$KJ.wetgram <-NA
-all$KJ.wetgram <- (1-(all$moisture/100))*all$KJ
-#Removing NA in PreyCat
-all<-all %>% drop_na(PreyCat)
+plab$KJ.wetgram <-NA
+plab$KJ.wetgram <- (1-(plab$moisture/100))*plab$KJ
+```
+
+Converting from KJ/dry to KCal/dry
+```{r, convert to Kcal/dry}
+plab$kcal.dry <- NA
+plab$kcal.dry <- plab$KJ*0.2390057361
+```
+
+Converting from KJ/wet to KCal/wet
+```{r, convert to Kcal/wet}
+plab$kcal.wet <- NA
+plab$kcal.wet <- plab$KJ.wetgram*0.2390057361
+```
+
+Converting from lipid/wet mass to lipid/dry mass
+```{r, converting wet lipid to dry lipid}
+plab$lipid.dry <-NA
+plab$lipid.dry <- (1-(plab$moisture/100))*plab$KJ
 ```
 
 
-## KJ/wet g vs length (by species)
-```{r, graph KJ vs length, echo = FALSE, message=FALSE}
-ggplot(data= all, aes(x=Size.mm, y=KJ)) +
+I want to combine info from the summary file into the Moisure, bomb, and lipid files
+```{r, new file with no nas and one with nas, message=FALSE}
+#summary.short <- select(summary, SIN, Size.mm, Species, Frozen.Weight,
+                        #Live.Weight, Dissected.Weight, Site.location, Season, PreyCat) # this isn't working and I don't know why
+summary.w <-   filter(summary, Tissue == "whole")
+all <- drop_na(plab)
+all <- left_join(all, summary.w, by="SIN")
+plab <- left_join(plab, summary.w, by="SIN")
+plab<-plab %>% drop_na(PreyCat)
+```
+
+
+## KJ/dry gram vs length (by species)
+```{r graph KJ vs length, echo = FALSE, message=FALSE, warning = FALSE}
+ggplot(data= plab, aes(x=Size.mm, y=KJ), na.rm=TRUE) +
   geom_point() + theme_few() +
   stat_smooth(method= "lm") +
   labs(x= "Length (in mm)", y="KJ/gram (by dry mass)")  +
@@ -50,67 +79,165 @@ ggplot(data= all, aes(x=Size.mm, y=KJ)) +
 ```
 
 
-## % Lipid vs length (by species) 
+## % Lipid vs length (by Species) 
 
-```{r, graph lipid vs length, echo= FALSE, message=FALSE}
-ggplot(data= all, aes(x=Size.mm, y=lipid_wet)) +
+```{r, graph lipid vs length, echo= FALSE, message=FALSE, warning=FALSE}
+plab.lip <- plab %>%
+  filter(PreyCat== "Clam" | PreyCat == "Crab" | PreyCat == "Herb Snail" | PreyCat == "Cucumber" | PreyCat == "Urchin") %>%
+  drop_na(lipid.dry)
+
+ggplot(data= plab.lip, aes(x=Size.mm, y=lipid.dry)) +
   geom_point() + theme_few() +
   stat_smooth(method= "lm") +
-  labs(x= "Length (in mm)", y="% Lipid (wet mass)")  +
-  facet_wrap(vars(PreyCat), scales= "free")
+  labs(x= "Length (in mm)", y="% Lipid (dry mass)")  +
+  facet_wrap(vars(Species), scales= "free")
 ```
 
+
+## % Protein vs Length
 ```{r, graph protein vs length, echo= FALSE, message=FALSE}
-ggplot(data= all, aes(x=Size.mm, y=protein_wet)) +
+plab.prot <- plab %>%
+  filter(PreyCat== "Clam" | PreyCat == "Crab" | PreyCat == "Herb Snail" | PreyCat == "Cucumber" | PreyCat == "Urchin") %>%
+  drop_na(protein_dry)
+
+ggplot(data= plab.prot, aes(x=Size.mm, y=protein_dry)) +
   geom_point() + theme_few() +
   stat_smooth(method= "lm") +
-  labs(x= "Length (in mm)", y="% Protein (wet mass)")  +
-  facet_wrap(vars(PreyCat), scales= "free")
+  labs(x= "Length (in mm)", y="% Protein (dry mass)")  +
+  facet_wrap(vars(Species), scales= "free")
 ```
 
-## Now to put them together
-```{r, KJ and Lipid vs length, echo = FALSE, Message = FALSE}
-ggplot(data= all) + theme_few() +
-  geom_point(aes(x=Size.mm, y=lipid_wet, color= "% Lipid")) + 
-  stat_smooth(aes(x=Size.mm, y=lipid_wet, color= "% Lipid"), method= "lm") +
-  labs(x= "Length (in mm)", y="% Lipid")  +
-  geom_point(aes(x=Size.mm, y=KJ.wetgram, color="KJ/g")) +
-  stat_smooth(aes(x=Size.mm, y=KJ.wetgram, color="KJ/g"), method= "lm") +
-  scale_color_manual(name='', values=c("% Lipid"="Red", "KJ/g"="Blue"))+
-  scale_y_continuous(sec.axis = sec_axis(~., name ="KJ/g (wet mass)" )) +
-  facet_wrap(vars(PreyCat), nrow = 4, scales= "free")
+## lipid and overall energy together
+```{r, KJ and Lipid vs length, echo = FALSE, Message = FALSE, warning=FALSE}
+ggplot(data= plab.lip) + theme_few() +
+  geom_point(aes(x=Size.mm, y=lipid.dry, color= "% Lipid (dry mass)")) + 
+  stat_smooth(aes(x=Size.mm, y=lipid.dry, color= "% Lipid (dry mass)"), method= "lm") +
+  labs(x= "Length (in mm)", y="% Lipid (dry mass)")  +
+  geom_point(aes(x=Size.mm, y=KJ, color="KJ/g (dry mass)")) +
+  stat_smooth(aes(x=Size.mm, y=KJ, color="KJ/g (dry mass)"), method= "lm") +
+  scale_color_manual(name='', values=c("% Lipid (dry mass)"="Red", "KJ/g (dry mass)"="Blue"))+
+  scale_y_continuous(sec.axis = sec_axis(~., name ="KJ/g (dry mass)" )) +
+  facet_wrap(vars(Species), nrow = 4, scales= "free")
 ```
 
-### % Lipid vs % Protein (wet mass values)
+### % Lipid vs % Protein (dry mass values)
 ```{r, lipid v protein, echo=FALSE}
-ggplot(data= all, aes(x=protein_wet, y=lipid_wet, color = PreyCat)) +
+plab.lp <- plab.lip %>% drop_na(protein_dry)
+ggplot(data= plab.lp, aes(x=protein_dry, y=lipid.dry, color = PreyCat)) +
   theme_few() +
   geom_point() +
   stat_smooth(formula = y~x, se= FALSE, method= lm)
 
 ```
 
-```{r, season - lipid, echo=FALSE, warning=FALSE}
-ggplot(data= all, aes(x=Season, y=lipid_wet)) +
-  geom_point() + theme_few() +
-  stat_smooth(aes(x=as.numeric(Season), y=lipid_wet)) +
-  labs(x= "", y="% Lipid")  +
-  facet_wrap(vars(PreyCat), scales = "free", nrow=4)
+## % Lipid by sesason
+```{r, season - lipid, echo=FALSE, warning=FALSE, message = FALSE}
+ggplot(data= plab.lip, aes(x=month, y=lipid.dry)) +
+  geom_boxplot(aes(color = Season)) + theme_few() +
+  stat_summary(aes(y = lipid.dry,group=1), fun.y=mean, colour="black", geom="line",group=1) +
+  labs(x= "", y="% Lipid (dry mass)")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=2)
 ```
 
-```{r, season - protein, echo=FALSE, warning=FALSE}
-ggplot(data= all, aes(x=Season, y=protein_wet)) +
-  geom_point() + theme_few() +
-  stat_smooth(aes(x=as.numeric(Season), y=protein_wet)) +
-  labs(x= "", y="% Lipid")  +
-  facet_wrap(vars(PreyCat), scales = "free", nrow=4)
+## % Protein by sesason
+```{r, season - protein, echo=FALSE, warning=FALSE, message= FALSE}
+ggplot(data= plab.prot, aes(x=month, y=protein_dry)) +
+  geom_boxplot(aes(color = Season)) + theme_few() +
+  stat_summary(aes(y = protein_dry,group=1), fun.y=mean, colour="black", geom="line",group=1) +
+  labs(x= "", y="% Protein (dry mass)")  +
+  facet_wrap(vars(PreyCat), scales = "free", nrow=2)
 ```
 
-```{r, bomb species, warning= FALSE, echo=FALSE}
-ggplot(data= all, aes(y=KJ, x=Season), na.rm=TRUE) +
-  geom_point() + theme_few() +
-  stat_smooth(aes(x=as.numeric(Season), y=KJ)) +
-  labs(x="Season", y="KJ (g)") +
-  facet_wrap(vars(PreyCat))
+## Energy by season
+```{r, bomb species, warning= FALSE, echo=FALSE, message=FALSE}
+ggplot(data= filter(plab, PreyCat== "Clam" | PreyCat == "Crab" | PreyCat == "Herb Snail" | PreyCat == "Cucumber" | PreyCat == "Urchin"), aes(y=kcal.dry, x=month), na.rm=TRUE) +
+  geom_boxplot(aes(color= Season)) + theme_few() +
+  stat_summary(aes(y = kcal.dry,group=1), fun.y=mean, colour="black", geom="line",group=1) +
+  labs(x="", y="Kcal (per dry gram)") +
+  facet_wrap(vars(PreyCat), scales = "free", nrow = 2)
 ```
+
+
+Creating energy means for each season
+```{r, energy means for seasons, message=FALSE, warning=FALSE}
+means <-plab %>%
+    filter(PreyCat == "Clam" | PreyCat == "Crab" | PreyCat == "Herb Snail" | PreyCat == "Cucumber" | PreyCat == "Urchin") %>%
+  group_by(PreyCat, month) %>% 
+  summarise(kcal.m=mean(kcal.dry, na.rm = T), kcal.sd= sd(kcal.dry, na.rm = T), protein.m=mean(protein_dry, na.rm = T), protein.sd=sd(protein_dry, na.rm = T), lipid.m=mean(lipid.dry, na.rm = T), lipid.sd=sd(lipid.dry, na.rm = T), moisture.m=mean(moisture, na.rm = T), moisture.sd=sd(moisture, na.rm = T), ash.m=mean(ash, na.rm = T), ash.sd=sd(ash, na.rm = T))
+```
+
+
+## Energy by Season, means only
+```{r energy by season all in one graph, message=FALSE, echo=FALSE, warning=FALSE}
+ggplot(data= means , aes(y=kcal.m, x=month, color=PreyCat), na.rm=TRUE) + 
+  geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
+  geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
+  geom_errorbar(aes(ymin = kcal.m-kcal.sd, ymax = kcal.m+kcal.sd), position=position_dodge(width=25), width = 25) + 
+  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
+  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+    labs(x="", y="Kcal (per dry gram)") + theme_few()
+```
+
+## %Lipid by Season, means only
+```{r lipid by season all in one graph, message=FALSE, echo=FALSE, warning=FALSE}
+ggplot(data= means , aes(y=lipid.m, x=month, color=PreyCat), na.rm=TRUE) + 
+  geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
+  geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
+  geom_errorbar(aes(ymin = lipid.m-lipid.sd, ymax = lipid.m+lipid.sd), position=position_dodge(width=25), width = 25) + 
+  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
+  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+    labs(x="", y="% Lipid (per dry gram)") + theme_few()
+```
+
+
+## %Protein by Season, means only
+```{r protein by season all in one graph, message=FALSE, echo=FALSE, warning=FALSE}
+ggplot(data= means , aes(y=protein.m, x=month, color=PreyCat), na.rm=TRUE) + 
+  geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
+  geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
+  geom_errorbar(aes(ymin = protein.m-protein.sd, ymax = protein.m+protein.sd), position=position_dodge(width=25), width = 25) + 
+  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
+  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+    labs(x="", y="% Protein (per dry gram)") + theme_few()
+```
+
+
+## % Moisture by Season, means only
+```{r moisture by season all in one graph, message=FALSE, echo=FALSE, warning=FALSE}
+ggplot(data= means , aes(y=moisture.m, x=month, color=PreyCat), na.rm=TRUE) + 
+  geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
+  geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
+  geom_errorbar(aes(ymin = moisture.m-moisture.sd, ymax = moisture.m+moisture.sd), position=position_dodge(width=25), width = 25) + 
+  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
+  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+    labs(x="", y="% Moisture") + theme_few()
+```
+
+
+## % Ash by Season, means only
+Some samples are missing due to small sizes
+```{r ash by season all in one graph, message=FALSE, echo=FALSE, warning=FALSE}
+ggplot(data= means , aes(y=ash.m, x=month, color=PreyCat), na.rm=TRUE) + 
+  geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
+  geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
+  geom_errorbar(aes(ymin = ash.m-ash.sd, ymax = ash.m+ash.sd), position=position_dodge(width=25), width = 25) + 
+  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
+  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+    labs(x="", y="% Ash") + theme_few()
+```
+
+
+
+
+
 

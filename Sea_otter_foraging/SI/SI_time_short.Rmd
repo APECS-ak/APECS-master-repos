@@ -22,6 +22,7 @@ library(ggplot2)
 library(dplyr)
 library(ggthemes)
 library(scales)
+library(MASS)
 
 #load whisker data
 whisker <- read.csv("whiskers.csv")
@@ -41,44 +42,6 @@ whisker$Season<-factor(whisker$Season , levels=c("Spring", "Summer", "Fall", "Wi
 
 
 ## Results - Seasons
-
-#### Carbon
-
-```{r, overlay carbon graph by season, echo=FALSE, message=FALSE}
-ggplot() +   
-  theme_few() +
-  geom_density(data=filter(whisker, Season == "Summer"), 
-                 aes(x=C), alpha=.5, fill= "darkgoldenrod1") +
-  geom_density(data=filter(whisker, Season == "Spring"), 
-                 aes(x=C), alpha=.5, fill= "palegreen3") +
-  geom_density(data=filter(whisker, Season == "Fall"), 
-                 aes(x=C), alpha=.5, fill= "darkorange3") +
-  geom_density(data=filter(whisker, Season == "Winter"), 
-                 aes(x=C), alpha=.5, fill = "paleturquoise1") +
-  labs(x=expression(paste(delta^13, "C" )), y="Kernel Density") 
-
-```
-
-
-#### Nitrogen
-
-```{r, overlay nitrogen graph by season, echo=FALSE, message=FALSE}
-ggplot() +   
-  theme_few() +
-  geom_density(data=filter(whisker, Season == "Summer"), 
-               aes(x=N), alpha=.9, fill= "darkgoldenrod1") +
-  geom_density(data=filter(whisker, Season == "Spring"), 
-               aes(x=N), alpha=.6, fill= "palegreen3") +
-  geom_density(data=filter(whisker, Season == "Fall"), 
-               aes(x=N), alpha=.5, fill= "darkorange3") +
-  geom_density(data=filter(whisker, Season == "Winter"), 
-               aes(x=N), alpha=.4, fill = "paleturquoise1") +
-  labs(x=expression(paste(delta^15, "N" )), y="Kernel Density") 
-```
-
-
-
-The graphs above are ok, but too messy for a paper, and the kernel density is not what I want to talk about, so here are some boxplots of the same data. 
 
 #### Carbon
 
@@ -112,7 +75,7 @@ nseason.aov <- aov(N~Season*OtterID, data = whisker)
 summary(nseason.aov)
 ```
 
-Season for both C and N are significant. This is not what I would have predicted!
+Season for both C and N are significant. But you can also see that there is an interaction with Otter ID. Which is where my problem starts.
 
 #### Pairwise test for seasons 
 ```{r, pairwise seasons, message=FALSE}
@@ -150,4 +113,41 @@ TukeyHSD(aov(N~Season, data=whisker))
 
 Tukey's gives similar as Bonferroni and Holm. There are significant values here, but really - the main takeaway needs to be that these means are only 0.3-0.5‰. which is VERY SMALL in and ecological sense. 
 
+
+## Normality
+
+I didn't initially test for normality in either Carbon or Nitrogen values
+
+```{r, normality}
+plot(density(whisker$C));plot(density(whisker$N))
+
+shapiro.test(whisker$C); shapiro.test(whisker$N)
+qqnorm(whisker$C); qqnorm(whisker$N)
+```
+
+```{r, residuals}
+lm<- aov(data= whisker, C~Season)
+lm.sum <- summary.lm(lm)
+lm.sum
+e <- residuals(lm)
+h <- hatvalues(lm)
+r <- e/(lm.sum$sigma*sqrt(1-h))
+yHat <- fitted.values(lm)
+```
+
+```{r, graphs residuals}
+with(data = whisker, expr = stripchart(abs(r) ~ Season,
+    ylab = expression(abs(hat(" "*r*" " ))), xlab = "season",
+    method = "jitter", pch = 1, vertical = TRUE))
+qqnorm(r); abline(a=0, b=1, lty = 2)
+plot(abs(r) ~ yHat, ylab = expression(abs(hat(" "*r*" " ))),
+    xlab = "Fitted Values")
+abline(a = 0, b = 0.055, lty = 2)
+
+shapiro.test(r)
+
+```
+```{r, lme}
+
+```
 

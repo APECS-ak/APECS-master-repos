@@ -156,7 +156,7 @@ ggplot(data=whisker) +
 
 #### Anova 
 ```{r, anova seasons, message=FALSE}
-cseason.aov <- aov(C~Season, data = whisker)
+cseason.aov <- aov(C~Season*OtterID, data = whisker)
 summary(cseason.aov)
 
 nseason.aov <- aov(N~Season, data = whisker)
