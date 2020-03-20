@@ -2129,67 +2129,67 @@ fa_grp_low_sd_wide[, 3:10] <- round(fa_grp_low_sd_wide[, 3:10], 3)
 T.tests
 ```{r}
 ## ALA.LIN ##
-ALA.LIN.ttest <- fa_ALA.LIN_all %>% 
+ALA.LIN.MWU <- fa_ALA.LIN_all %>% 
   group_by(Species_common) %>% 
-  do(broom::tidy(t.test(prop_sum ~ Sea_otter_region, data = .)))
-ALA.LIN.ttest$FA_grp <- "ALA.LIN"
+  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+ALA.LIN.MWU$FA_grp <- "ALA.LIN"
 
 ## C18PUFA ##
-C18PUFA.ttest <- fa_C18PUFA_all %>% 
+C18PUFA.MWU  <- fa_C18PUFA_all %>% 
   group_by(Species_common) %>% 
-  do(broom::tidy(t.test(prop_sum ~ Sea_otter_region, data = .)))
-C18PUFA.ttest$FA_grp <- "C18PUFA"
+  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+C18PUFA.MWU$FA_grp <- "C18PUFA"
 
 ## PUFA ##
-PUFA.ttest <- fa_PUFA_all %>% 
+PUFA.MWU <- fa_PUFA_all %>% 
   group_by(Species_common) %>% 
-  do(broom::tidy(t.test(prop_sum ~ Sea_otter_region, data = .)))
-PUFA.ttest$FA_grp <- "PUFA"
+  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+PUFA.MWU$FA_grp <- "PUFA"
 
 ## BAC ##
-BAC.ttest <- fa_BAC_all %>% 
+BAC.MWU <- fa_BAC_all %>% 
   group_by(Species_common) %>% 
-  do(broom::tidy(t.test(prop_sum ~ Sea_otter_region, data = .)))
-BAC.ttest$FA_grp <- "BAC"
+  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+BAC.MWU$FA_grp <- "BAC"
 
 ## PAL ##
-PAL.ttest <- fa_PAL_all %>% 
+PAL.MWU <- fa_PAL_all %>% 
   group_by(Species_common) %>% 
-  do(broom::tidy(t.test(prop_sum ~ Sea_otter_region, data = .)))
-PAL.ttest$FA_grp <- "PAL"
+  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+PAL.MWU$FA_grp <- "PAL"
 
 ## ARA ##
-ARA.ttest <- fa_ARA_all %>% 
+ARA.MWU <- fa_ARA_all %>% 
   group_by(Species_common) %>% 
-  do(broom::tidy(t.test(prop_sum ~ Sea_otter_region, data = .)))
-ARA.ttest$FA_grp <- "ARA"
+  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+ARA.MWU$FA_grp <- "ARA"
 
 ## EPA ##
-EPA.ttest <- fa_EPA_all %>% 
+EPA.MWU <- fa_EPA_all %>% 
   group_by(Species_common) %>% 
-  do(broom::tidy(t.test(prop_sum ~ Sea_otter_region, data = .)))
-EPA.ttest$FA_grp <- "EPA"
+  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+EPA.MWU$FA_grp <- "EPA"
 
 ## DHA ##
-DHA.ttest <- fa_DHA_all %>% 
+DHA.MWU <- fa_DHA_all %>% 
   group_by(Species_common) %>% 
-  do(broom::tidy(t.test(prop_sum ~ Sea_otter_region, data = .)))
-DHA.ttest$FA_grp <- "DHA"
+  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+DHA.MWU$FA_grp <- "DHA"
 
 ## Clean up ##
-fa_grp_ttest <- rbind(ALA.LIN.ttest, C18PUFA.ttest, PUFA.ttest, BAC.ttest, PAL.ttest, ARA.ttest, EPA.ttest, DHA.ttest)
+fa_grp_MWU <- rbind(ALA.LIN.MWU, C18PUFA.MWU, PUFA.MWU, BAC.MWU, PAL.MWU, ARA.MWU, EPA.MWU, DHA.MWU)
 
-fa_grp_ttest_p <- fa_grp_ttest[, c(1, 6, 12)]
-fa_grp_ttest_p$p.value <- round(fa_grp_ttest_p$p.value, 3)
-fa_grp_ttest_p$FA_grp <- factor(fa_grp_ttest_p$FA_grp, levels = c("BAC", "ALA.LIN", "C18PUFA", "PUFA", "PAL", "ARA", "EPA", "DHA"))
-fa_grp_ttest_p$Species_common <- factor(fa_grp_ttest_p$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
-fa_grp_ttest_p <- tidyr::spread(fa_grp_ttest_p, key = FA_grp, value = p.value)
+fa_grp_MWU_p <- fa_grp_MWU[, c(1, 3, 6)]
+fa_grp_MWU_p$p.value <- round(fa_grp_MWU_p$p.value, 3)
+fa_grp_MWU_p$FA_grp <- factor(fa_grp_MWU_p$FA_grp, levels = c("BAC", "ALA.LIN", "C18PUFA", "PUFA", "PAL", "ARA", "EPA", "DHA"))
+fa_grp_MWU_p$Species_common <- factor(fa_grp_MWU_p$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
+fa_grp_MWU_p <- tidyr::spread(fa_grp_MWU_p, key = FA_grp, value = p.value)
 
-fa_grp_ttest_t <- fa_grp_ttest[, c(1, 5, 12)]
-fa_grp_ttest_t$statistic <- round(fa_grp_ttest_t$statistic, 3)
-fa_grp_ttest_t$FA_grp <- factor(fa_grp_ttest_t$FA_grp, levels = c("BAC", "ALA.LIN", "C18PUFA", "PUFA", "PAL", "ARA", "EPA", "DHA"))
-fa_grp_ttest_t$Species_common <- factor(fa_grp_ttest_t$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
-fa_grp_ttest_t <- tidyr::spread(fa_grp_ttest_t, key = FA_grp, value = statistic)
+fa_grp_MWU_t <- fa_grp_MWU[, c(1, 2, 6)]
+fa_grp_MWU_t$statistic <- round(fa_grp_MWU_t$statistic, 3)
+fa_grp_MWU_t$FA_grp <- factor(fa_grp_MWU_t$FA_grp, levels = c("BAC", "ALA.LIN", "C18PUFA", "PUFA", "PAL", "ARA", "EPA", "DHA"))
+fa_grp_MWU_t$Species_common <- factor(fa_grp_MWU_t$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
+fa_grp_MWU_t <- tidyr::spread(fa_grp_MWU_t, key = FA_grp, value = statistic)
 ```
 
 Plots
