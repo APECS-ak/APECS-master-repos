@@ -2126,7 +2126,7 @@ fa_grp_low_sd_wide <- fa_grp %>%
 fa_grp_low_sd_wide[, 3:10] <- round(fa_grp_low_sd_wide[, 3:10], 3)
 ```
 
-T.tests
+Mann-Whitney tests
 ```{r}
 ## ALA.LIN ##
 ALA.LIN.MWU <- fa_ALA.LIN_all %>% 
