@@ -61,6 +61,9 @@ tran.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", header 
 ## Sea Otter Impact Index ##
 so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_new.csv", stringsAsFactors = FALSE, header = TRUE)
 
+## Pits ##
+pits <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
 ## Sediment ##
 sed.site <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
@@ -210,6 +213,17 @@ dat$Ntotal_site <- abiot.final$NTotal_umol[abiot.final$sample_type == "site"]
 dat$NOx_site <- abiot.final$NOx_umol[abiot.final$sample_type == "site"]
 ```
 
+Pits
+```{r}
+pits.site <- pits %>%
+    filter(trans_type == "Inside") %>% 
+    group_by(site) %>% 
+    summarise(pit_mean= mean(pit_bin),
+              pit_st.er = st.er(pit_bin))
+
+dat$pits <- pits.site$pit_mean
+```
+
 
 ## Tests for normality
 Responses should be tested for normality. If a responce is also a predictor it should not be tranformed unless the resulting model indicates a strange residual structure.
@@ -259,6 +273,7 @@ shapiro.test(log(dat$fish_mass))
 ```
 
 Sediment is not normal and there is not a good transformation becasue there are so many low values. I will proceed without a tranformation. We purposly selected eelgrass beds and therefore we are going to get a certian sediment type. We see here that we see two types (generally) of sediment types. Places with small, muddy sediemnts and places with sandier more consolidated sediments.
+
 ```{r sed norm, echo=FALSE}
 hist(dat$sed_inside_prim)
 shapiro.test(dat$sed_inside_prim)
@@ -300,6 +315,12 @@ shapiro.test(dat$diatom_dens)
 hist(asin(sqrt(dat$diatom_dens / 100)))
 shapiro.test(asin(sqrt(dat$diatom_dens / 100)))
 ```
+
+Sea otter pits
+```{r pits norm, echo = FALSE}
+hist(dat)
+```
+
 
 ### Summary of appropriate transformations to meet normality
 Factor  | Transformation
@@ -448,28 +469,28 @@ Another check after doing transfomarions etc.
 The suspect grazer v diatom relationships does not look that good at all. 
 ```{r multi check, echo = FALSE}
 ## Calculate correlations ##
-dat.cor <- dat[, c(4, 19, 94, 81, 125, 124, 123, 99, 35, 37, 90)]
-colnames(dat.cor) <- c("Julianday", "SOI", "Crabs", "Epifauna", "Epiphytes", "Seagrass", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
+dat.cor <- dat[, c(4, 15, 94, 99, 81, 126, 125, 123, 90, 92, 124)]
+colnames(dat.cor) <- c("Julianday", "SO_dens", "Crabs", "Fish", "Epifauna", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light", "Pits")
 
 ## Transform as necessary ##
 dat.cor <- as.data.frame(cbind(dat.cor$Julianday, 
-                               dat.cor$SOI, 
-                               sqrt(dat.cor$Crabs), 
+                               log(dat.cor$SO_dens + 1), 
+                               sqrt(dat.cor$Crabs),
+                               log(dat.cor$Fish),
                                log(dat.cor$Epifauna), 
                                dat.cor$Epiphytes, 
                                dat.cor$Seagrass, 
                                dat.cor$Nitrate, 
-                               log(dat.cor$Fish), 
-                               asin(sqrt(dat.cor$Macroalgae / 100)), 
-                               asin(sqrt(dat.cor$Diatoms / 100)), 
-                               dat.cor$Sediment))
+                               dat.cor$Sediment,
+                               dat.cor$Light,
+                               dat.cor$Pits))
 
-colnames(dat.cor) <- c("Julian day", "SOI", "Crabs", "Epifauna", "Epiphytes*", "Seagrass*", "Nitrate", "Fish", "Macroalgae", "Diatoms", "Sediment")
+colnames(dat.cor) <- c("Julian Day", "SO_dens", "Crabs", "Fish", "Epifauna", "Epiphytes*", "Seagrass*", "Nitrate", "Sediment", "Light", "Pits")
 
 correl <- cor(dat.cor)
 
 ## Plotting correlations ##
-corrplot(correl, method = "color", type = "lower", addCoef.col =  "black", number.cex = 0.5, tl.cex = 0.6, cl.cex = 0.5, tl.col = "black")
+corrplot(correl, method = "color", type = "lower", addCoef.col =  "black", number.cex = 0.75, tl.cex = 0.8, cl.cex = 0.75, tl.col = "black")
 
 ```
 
@@ -549,7 +570,7 @@ General approach
 
 Global model will include, sea otter index, epiphyte load, grazer load, crab biomass, and nitrate. Note transformations of variables where appropraite.
 ```{r mod1 global, echo=FALSE}
-mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + crab_mass + grazermass_shootmass + epiphmass_shootmass_dt + NOx_site, data = dat)
+mod1 <- lm(abvgnd_mass_dt ~ dens_surv_avg + dens_surv_avg_sq + crab_mass + grazermass_shootmass + epiphmass_shootmass_dt + NOx_site, data = dat)
 ```
 
 Dredge and filter models
@@ -982,5 +1003,10 @@ ggplot(dat) +
 ggplot(dat) +
   geom_point(aes(x = sed_inside_prim, y = abvgnd_mass_dt)) +
   labs(x = "Sediment", y = "Eelgrass - detrended")
+
+
+ggplot(dat) +
+  geom_point(aes(x = dens_surv_avg, y = abvgnd_mass_dt)) +
+  geom_smooth(aes(x = dens_surv_avg, y = abvgnd_mass_dt), method = loess)
 ```
 
