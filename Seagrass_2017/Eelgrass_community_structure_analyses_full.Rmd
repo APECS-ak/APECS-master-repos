@@ -15,6 +15,7 @@ library(nlme)
 library(lme4)
 library(MASS)
 library(lmerTest)
+library(mgcv)
 library(DT)
 library(ggplot2)
 library(sjPlot)
@@ -42,7 +43,7 @@ All data are summarized at the site level. That is the level at which we can app
 5. fish biomass (g) - can also be counts. n = 1
 
 **Explanatory factors**
-1. Sea otter index. n = 1
+1. Sea otter density. n = 1
 2. Time (julian day). n = 1
 3. Sediment type (primary sediment type from the "inside" eelgrass transect). n = 10
 4. Light attenuation. n = 1
@@ -50,9 +51,8 @@ All data are summarized at the site level. That is the level at which we can app
 6. fish biomass (g). n = 1
 7. grazer load (g/g). n = 8
 8. epiphyte load (g/g). n = 8
-9. macrophyte cover (percent). n = 8
-10. diatom cover (percent). n = 8
-11. Total nitrogen. n = 1, but there is the 'day of' sampling, 1m on nutrient day, and 4m on nutrient day.
+10. Total nitrogen. n = 1, but there is the 'day of' sampling, 1m on nutrient day, and 4m on nutrient day.
+11. Sea otter pits (from the "inside" eelgrass gransect). n = 10
 
 ```{r import data, echo = FALSE, message = FALSE, warning = FALSE}
 ## Transect ##
@@ -219,9 +219,17 @@ pits.site <- pits %>%
     filter(trans_type == "Inside") %>% 
     group_by(site) %>% 
     summarise(pit_mean= mean(pit_bin),
-              pit_st.er = st.er(pit_bin))
+              pit_se = st.er(pit_bin))
 
-dat$pits <- pits.site$pit_mean
+dat$pits_inside <- pits.site$pit_mean
+
+pits.all.site <- pits %>%
+    group_by(site) %>% 
+    summarise(pit_all_mean= mean(pit_bin),
+              pit_all_se = st.er(pit_bin))
+
+pits.all.site <- pits.all.site[2:22,]
+dat$pits_all <- pits.all.site$pit_all_mean
 ```
 
 
@@ -297,32 +305,15 @@ hist(dat$light_avail)
 shapiro.test(dat$light_avail)
 ```
 
-Macrophyte cover. So this is tricky. Its percent coer data so one would think that a asin(sqrt()) transformation would be good, but its not. Also log gets really strange because there are so many zeros. Given this I think that we should proceed without transformation. 
-```{r macro norm, echo=FALSE}
-hist(dat$macro_dens)
-range(dat$macro_dens)
-shapiro.test(dat$macro_dens)
-
-hist(asin(sqrt(dat$macro_dens / 100)))
-hist(log(dat$macro_dens + 1), breaks = 7)
-```
-
-Diatom cover is not normal but a asin(sqrt()) tranformation does the trick.
-```{r dia norm, echo = FALSE}
-hist(dat$diatom_dens)
-shapiro.test(dat$diatom_dens)
-
-hist(asin(sqrt(dat$diatom_dens / 100)))
-shapiro.test(asin(sqrt(dat$diatom_dens / 100)))
-```
-
 Sea otter pits
 ```{r pits norm, echo = FALSE}
-hist(dat)
+hist(dat$pits_inside)
 ```
 
 
 ### Summary of appropriate transformations to meet normality
+RESPONCE variables only
+
 Factor  | Transformation
 ------  | --------------
 Aboveground | none
@@ -330,11 +321,6 @@ epi load  | log
 grz load  | log
 crab  | sqrt
 fish | log
-sediment | none
-Total N | none
-Light avil | none
-Macroalgae | none
-Diatoms | asing-sqrt
 
 ## Variation of predictor variables acorss sites
 In an effort to avoid spurious models, we can look at some of the environmental co-variates across sites to see if there are  patterns. If there seems to be no site effect it may be reasonable to exclude that variable from analysis.
@@ -410,34 +396,15 @@ Crabmass
 plot(dat$date_julian, sqrt(dat$crab_mass))
 ```
 
-Macroalgae cover does not have a temporal signal.
-```{r macro time, echo = FLASE}
-plot(dat$date_julian, asin(sqrt(dat$macro_dens / 100)))
-tmod4 <- lm(asin(sqrt(dat$macro_dens / 100)) ~ dat$date_julian)
-summary(tmod4)
-```
-
-Diatom cover shows some positive signal with time but turns out that its fairly weak. A bigger issue is how to deal with the missing data from one site. Se below
-```{r dia time, echo = FALSE}
-plot(dat$date_julian, asin(sqrt(dat$diatom_dens / 100)))
-tmod5 <- lm(asin(sqrt(dat$diatom_dens[2:21] / 100)) ~ dat$date_julian[2:21])
-summary(tmod5)
-
-mean(asin(sqrt(dat$diatom_dens[2:21] / 100)))
-```
-
 ### Missing data
 The diatom cover data does not have a value for one site. There are a few ways to deal with this. One is to omit the data entirely which means omitting the site. I don't really want to do that. The overall mean of the observed could also work. Seeing that the transformation does reasonable well to normalize the data and there is reasonable spread across sites I think we can proceed with this approach. Note that later interpretation will need to address this. Another approach is to take the mean value from sites sampled close in time to site with missing data. This makes logical sense, but then again we did not find a significant time effect. We could also use multiple imputation, but thats hold off.. for now. 
-
 So lets add the mean value. And check normality again. Looks good.
 ```{r dia missing, echo = FALSE}
 ggplot(dat[2:21,]) +
   geom_col(aes(x = site, y = asin(sqrt(diatom_dens/ 100)))) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
 ## add mean value ##
 dat[1, 37] <- mean(dat$diatom_dens, na.rm = TRUE)
-
 ## assess normality again ##
 hist(dat$diatom_dens)
 hist(asin(sqrt(dat$diatom_dens / 100)))
@@ -448,19 +415,32 @@ shapiro.test(asin(sqrt(dat$diatom_dens / 100)))
 Early exploratory analysis suggested that there may be some quadratic / exponetial relationships among data. This is especially true for eelgrass biomass vs. sea otter index. *Note* these relationships will be assessed with temporally detrended data if applicable.
 
 Aboveground biomass shows some slight signs of a quadratic relationship with eelgrass above ground biomass. Plotting and modeling do not suggest that such a relationship is more explanatory than a linear relationship though.
+
+Quadratic relationshps were examined for other responce variables, and there was very little evidence to support including a quadratic realtionship of sea otter density.
 ```{r abv quad, echo=FALSE}
-plot(dat$sea_otter_index_tr, dat$abvgnd_mass_dt)
-
-
-ggplot(dat) +
-  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt)) +
-  geom_smooth(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt), method = "loess")
+plot(dat$dens_surv_avg, dat$abvgnd_mass_dt)
 
 ggplot(dat) +
-  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt)) +
-  geom_smooth(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt), method = "loess", n = 4)
+  geom_point(aes(x = dens_surv_avg, y = abvgnd_mass_dt)) +
+  geom_smooth(aes(x = dens_surv_avg, y = abvgnd_mass_dt), method = "loess")
 
-summary(gam(dat$abvgnd_mass_dt ~ s(dat$sea_otter_index_tr)))
+ggplot(dat) +
+  geom_point(aes(x = dens_surv_avg, y = abvgnd_mass_dt)) +
+  geom_smooth(aes(x = dens_surv_avg, y = abvgnd_mass_dt), method = "loess", n = 3)
+
+summary(gam(dat$abvgnd_mass_dt ~ s(dat$dens_surv_avg, k = 4)))
+
+ggplot(dat) +
+  geom_point(aes(x = dens_surv_avg, y = epiphmass_shootmass_dt)) +
+  geom_smooth(aes(x = dens_surv_avg, y = epiphmass_shootmass_dt), method = "loess")
+
+ggplot(dat) +
+  geom_point(aes(x = dens_surv_avg, y = sqrt(crab_mass))) +
+  geom_smooth(aes(x = dens_surv_avg, y = sqrt(crab_mass)), method = "loess")
+
+ggplot(dat) +
+  geom_point(aes(x = dens_surv_avg, y = log(grazermass_shootmass))) +
+  geom_smooth(aes(x = dens_surv_avg, y = log(grazermass_shootmass)), method = "loess")
 ```
 
 ## Multicolinearity
@@ -469,23 +449,27 @@ Another check after doing transfomarions etc.
 The suspect grazer v diatom relationships does not look that good at all. 
 ```{r multi check, echo = FALSE}
 ## Calculate correlations ##
-dat.cor <- dat[, c(4, 15, 94, 99, 81, 126, 125, 123, 90, 92, 124)]
-colnames(dat.cor) <- c("Julianday", "SO_dens", "Crabs", "Fish", "Epifauna", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light", "Pits")
+dat.cor <- dat[, c(4, 15, 17, 19, 94, 99, 81, 127, 126, 123, 90, 92, 124, 35, 37)]
+colnames(dat.cor) <- c("Julianday", "SO_dens", "total_pits", "SOI", "Crabs", "Fish", "Epifauna", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light", "Pits", "Macroalgae", "Diatoms")
 
 ## Transform as necessary ##
 dat.cor <- as.data.frame(cbind(dat.cor$Julianday, 
-                               log(dat.cor$SO_dens + 1), 
-                               sqrt(dat.cor$Crabs),
-                               log(dat.cor$Fish),
-                               log(dat.cor$Epifauna), 
+                               dat.cor$SO_dens,
+                               dat.cor$total_pits,
+                               dat.cor$SOI,
+                               dat.cor$Crabs,
+                               dat.cor$Fish,
+                               dat.cor$Epifauna, 
                                dat.cor$Epiphytes, 
                                dat.cor$Seagrass, 
                                dat.cor$Nitrate, 
                                dat.cor$Sediment,
                                dat.cor$Light,
-                               dat.cor$Pits))
+                               dat.cor$Pits,
+                               dat.cor$Macroalgae,
+                               dat.cor$Diatoms))
 
-colnames(dat.cor) <- c("Julian Day", "SO_dens", "Crabs", "Fish", "Epifauna", "Epiphytes*", "Seagrass*", "Nitrate", "Sediment", "Light", "Pits")
+colnames(dat.cor) <- c("Julianday", "SO_dens", "total_pits", "SOI", "Crabs", "Fish", "Epifauna", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light", "inside_pits", "Macroalgae", "Diatoms")
 
 correl <- cor(dat.cor)
 
@@ -542,7 +526,7 @@ ggplot(abiot.final) +
   labs(x = "Site", y = "Salinity (ppt)")
 ```
 
-Testing for efffects of sites on environmental variables.
+Testing for effects of sites on environmental variables.
 ```{r envi test, echo = FALSE}
 temp.mod <- lm(temperature_C_transect ~ date_julian, data = dat)
 summary(temp.mod)
@@ -570,7 +554,7 @@ General approach
 
 Global model will include, sea otter index, epiphyte load, grazer load, crab biomass, and nitrate. Note transformations of variables where appropraite.
 ```{r mod1 global, echo=FALSE}
-mod1 <- lm(abvgnd_mass_dt ~ dens_surv_avg + dens_surv_avg_sq + crab_mass + grazermass_shootmass + epiphmass_shootmass_dt + NOx_site, data = dat)
+mod1 <- lm(abvgnd_mass_dt ~ sea_otter_index_tr + crab_mass + grazermass_shootmass + epiphmass_shootmass_dt + NOx_site, data = dat)
 ```
 
 Dredge and filter models
@@ -1006,7 +990,7 @@ ggplot(dat) +
 
 
 ggplot(dat) +
-  geom_point(aes(x = dens_surv_avg, y = abvgnd_mass_dt)) +
-  geom_smooth(aes(x = dens_surv_avg, y = abvgnd_mass_dt), method = loess)
+  geom_point(aes(x = pits_inside, y = abvgnd_mass_dt)) +
+  geom_smooth(aes(x = pits_inside, y = abvgnd_mass_dt), method = lm)
 ```
 
