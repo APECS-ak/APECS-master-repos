@@ -1202,3 +1202,19 @@ pairwise.t.test(x=si.prey$C, g=si.prey$Season, p.adj="bonferroni")
 count.season<- si.prey %>%
   group_by(PreyCat, Season) %>%
   count()
+
+
+# means for table 
+whisker.mean <-whisker %>%
+  group_by(Season, Site) %>%
+  summarise(Cmean=mean(C), Csd=sd(C), 
+            Nmean=mean(N), Nsd=sd(N))
+
+count.means <- whisker %>%
+  group_by(Season, Site) %>%
+  count()
+
+whisker.mean <- left_join(whisker.mean, count.means)
+write.csv(whisker.mean, "SI/whisker_means.csv")
+
+

@@ -1,14 +1,14 @@
 ﻿SIN,ID,Date Collected,Size mm,Species,Frozen Weight,Live Weight,Date Dissected,Dissected Weight,Notes,SEX,Site location,Season,site number,Dried,Ash,Bomb,SI,SPV,Tissue
-403900,18-022,5/17/18,470,apc,,731.97,,,ca cuc 1,,Soda Bay,Spring,9,FM135AIPan,y,l,ptn,y,whole
-403901,18-023,5/17/18,460,apc,,633.49,,,ca cuc 2,,Soda Bay,Spring,9,FM135AIPan,y,l,ptn,y,whole
-403902,18-024,5/17/18,240,apc,,131.77,,,ca cuc 3,,Soda Bay,Spring,9,FM135AIPan,y,l,ptn,y,whole
-403903,18-029,5/17/18,80,apc,,14.54,,,small ca cuc 4,,Soda Bay,Spring,8,FM135AIPan,y,l,ptn,y,whole
-403904,18-030,5/17/18,80,apc,,13.93,,,small ca cuc 5,,Soda Bay,Spring,8,FM135AIPan,y,l,ptn,y,whole
-403905,18-454,8/10/18,220,apc,260.48,,,,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
-403906,18-455,8/10/18,200,apc,227.94,,,,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
-403907,18-456,8/10/18,270,apc,381.36,,,,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
-403908,18-457,8/10/18,230,apc,291.61,,,,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
-403909,18-458,8/10/18,230,apc,285.99,,,,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
+403900,18-022,5/17/18,470,apc,,731.97,,731.97,ca cuc 1,,Soda Bay,Spring,9,FM135AIPan,y,l,ptn,y,whole
+403901,18-023,5/17/18,460,apc,,633.49,,633.49,ca cuc 2,,Soda Bay,Spring,9,FM135AIPan,y,l,ptn,y,whole
+403902,18-024,5/17/18,240,apc,,131.77,,131.77,ca cuc 3,,Soda Bay,Spring,9,FM135AIPan,y,l,ptn,y,whole
+403903,18-029,5/17/18,80,apc,,14.54,,14.54,small ca cuc 4,,Soda Bay,Spring,8,FM135AIPan,y,l,ptn,y,whole
+403904,18-030,5/17/18,80,apc,,13.93,,13.93,small ca cuc 5,,Soda Bay,Spring,8,FM135AIPan,y,l,ptn,y,whole
+403905,18-454,8/10/18,220,apc,260.48,,,260.48,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
+403906,18-455,8/10/18,200,apc,227.94,,,227.94,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
+403907,18-456,8/10/18,270,apc,381.36,,,381.36,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
+403908,18-457,8/10/18,230,apc,291.61,,,291.61,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
+403909,18-458,8/10/18,230,apc,285.99,,,285.99,"Soda Bay, no length, est based on mass",,Soda Bay,Summer,9,FM135AIPan,y,l,ptn,y,whole
 403925,18-001,5/3/18,85,sag,,177.06,5/3/18,51.82,,,Craig,Spring,2,FM135AIPan,y,l,cn,y,whole
 403926,18-002,5/3/18,81,sag,,153.86,5/3/18,43.96,,,Craig,Spring,2,FM135AIPan,y,l,cn,y,whole
 403927,18-003,5/3/18,62,sag,,56.73,5/3/18,22.77,,,Craig,Spring,2,FM135AIPan,y,l,cn,y,whole
@@ -85,10 +85,10 @@
 403998,18-404,7/28/18,160,cam,515.24,,8/14/18,269.17,North Pass,f,Soda Bay,Summer,15,FM135AlPan,y,l,cn,y,whole
 403999,18-405,7/28/18,71,cam,44.49,,8/14/18,16.65,North Pass,f,Soda Bay,Summer,15,FM135AlPan,y,l,cn,y,whole
 404000,18-511,7/28/18,89,cam,97.93,,12/21/18,44.91,"Natsuhini, pots",m,Soda Bay,Summer,15,FM135AlPan,y,l,cn,y,whole
-404001,19-001,2/17/19,250,apc,382.36,,,,Soda Bay,,Soda Bay,Winter,9,FM135AlPan,y,l,cn,y,whole
-404002,19-002,2/17/19,350,apc,768.45,,,,Soda Bay,,Soda Bay,Winter,9,FM135AlPan,y,l,cn,y,whole
-404003,19-003,2/17/19,250,apc,326.72,,,,Soda Bay,,Soda Bay,Winter,9,FM135AlPan,y,l,cn,y,whole
-404004,19-004,2/17/19,250,apc,287.5,,,,Soda Bay,,Soda Bay,Winter,9,FM135AlPan,y,s,cn,y,whole
+404001,19-001,2/17/19,250,apc,382.36,,,382.36,Soda Bay,,Soda Bay,Winter,9,FM135AlPan,y,l,cn,y,whole
+404002,19-002,2/17/19,350,apc,768.45,,,768.45,Soda Bay,,Soda Bay,Winter,9,FM135AlPan,y,l,cn,y,whole
+404003,19-003,2/17/19,250,apc,326.72,,,326.72,Soda Bay,,Soda Bay,Winter,9,FM135AlPan,y,l,cn,y,whole
+404004,19-004,2/17/19,250,apc,287.5,,,287.5,Soda Bay,,Soda Bay,Winter,9,FM135AlPan,y,s,cn,y,whole
 404005,18-173,5/17/18,37,sag,11.3,,5/26/18,4.79,,,Soda Bay,Spring,8,FM135,p,l,ptn,y,whole
 404006,18-124,5/2/18,25,cln,3.99,,5/20/18,1.86,,,Nossuk,Spring,1,FM135<0.5g,,s,ptn,,whole
 404007,18-125,5/2/18,27,cln,5.47,,5/20/18,2.64,,,Nossuk,Spring,1,FM135,,l,ptn,,whole
@@ -117,7 +117,7 @@
 404030,18-631,8/10/18,79,pio,348.27,,1/30/19,92.1,"stomach, soda bay",,Soda Bay,Summer,9,FM135AlPan,y,l,ptn,,stomach
 404031,18-631,8/10/18,79,pio,348.27,,1/30/19,8.8,"gonads, soda bay",,Soda Bay,Summer,9,FM135AlPan,y,l,ptn,,gonads
 404032,18-631,8/10/18,79,pio,348.27,,1/30/19,5.89,"feet, soda bay",,Soda Bay,Summer,9,FM135,,l,ptn,,feet
-404033,19-005,2/17/19,74,apc,8.26,,,,"Soda bay, soft sediment site, 2 combined",,Soda Bay,Winter,8,FM135AlPan,y,l,ptn,y,whole
+404033,19-005,2/17/19,74,apc,8.26,,,8.26,"Soda bay, soft sediment site, 2 combined",,Soda Bay,Winter,8,FM135AlPan,y,l,ptn,y,whole
 404034,19-051,2/17/19,27.5,cln,6.47,,3/6/19,2.75,Soda Bay,,Soda Bay,Winter,8,FM135,,l,cn?,,whole
 404035,19-052,2/17/19,62,cln,76.73,,3/6/19,39.25,Soda Bay,,Soda Bay,Winter,8,FM135AlPan,y,l,ptn,y,whole
 404036,19-053,2/17/19,49,cln,29.83,,3/6/19,15.25,Soda Bay,,Soda Bay,Winter,8,FM135AlPan,y,l,ptn,y,whole
@@ -436,3 +436,342 @@
 404385,19-072,2/19/19,64,pio,172.6,,4/8/19,35.05,"composite, post bomb",,Craig,Winter,5,,,"composite, post bomb",,,whole
 404398,18-629,8/10/18,90,pio,487.93,,1/30/19,105.28,404027-29,,Soda Bay,Summer,9,FM135AlPan,,composite,,,whole
 404399,18-052,5/13/18,35,std,14.69,,5/20/18,0.66,"404015, 404018",,Craig,Spring,5,FM135<0.5g,,s (composite),,,whole
+,18-026,5/17/18,55,apc,5.87,6.77,,5.87,"small ca cuc 1, also labeled 18-633",,Soda Bay,Spring,8,,,,,,whole
+,18-027,5/17/18,55,apc,6.7,6.9,,6.7,"small ca cuc 2, also labeled 18-634",,Soda Bay,Spring,8,,,,,,whole
+,18-028,5/17/18,71,apc,12.57,18.31,,12.57,"small ca cuc 3, also labeled 18-635",,Soda Bay,Spring,8,,,,,,whole
+,18-270,5/17/18,36.5,cam,6.96,,8/8/18,0.95,Soda Bay,m,Soda Bay,Spring,9,,,,,,whole
+,18-517,8/8/18,54,cam,23.74,,1/23/19,14.04,"S Wadleigh, soft shell",m,Craig,Summer,2,,,,,,whole
+,18-518,8/8/18,84,cam,110.99,,1/23/19,44.53,S Wadleigh,m,Craig,Summer,2,,,,,,whole
+,18-519,8/2/18,72.5,cam,61.32,,4/5/19,28.84,North Pass,m,Soda Bay,Summer,15,,,,,,whole
+,18-520,8/2/18,76,cam,78.42,,4/10/19,26.07,North Pass,m,Soda Bay,Summer,15,,,,,,whole
+,18-521,8/2/18,69,cam,41.48,,4/10/19,19.08,North Pass,m,Soda Bay,Summer,15,,,,,,whole
+,18-522,8/2/18,85,cam,96.45,,4/10/19,41.37,North Pass - LABELED AS 18-519,m,Soda Bay,Summer,15,,,,,,whole
+,18-421,8/10/18,41,cao,19.23,,8/14/18,5,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-422,8/10/18,41,cao,17.14,,8/14/18,5.84,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-423,8/10/18,35,cao,12.62,,8/14/18,3.56,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-424,8/10/18,33.5,cao,10.71,,8/14/18,2.94,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-425,8/10/18,23.5,cao,5.21,,8/14/18,1.06,Whale Rock,,,Summer,,,,,,,whole
+,18-497,8/15/18,43,cao,24.38,,2/11/19,8.04,Nossuk,m,Nossuk,Summer,26,,,,,,whole
+,18-498,8/15/18,23,cao,4.59,,2/11/19,1.1,Nossuk,m,Nossuk,Summer,26,,,,,,whole
+,18-499,8/15/18,26,cao,5.82,,2/25/19,0.84,Nossuk,m,Nossuk,Summer,26,,,,,,whole
+,18-500,8/15/18,24,cao,4.53,,2/25/19,0.36,Nossuk,m,Nossuk,Summer,26,,,,,,whole
+,18-501,8/15/18,36,cao,19.38,,2/25/19,5.17,"Nossuk, listed on bag as 18-497",m,Nossuk,Summer,26,,,,,,whole
+,18-636,8/15/18,37,cao,15.13,,2/25/19,4.22,"Nossuk, listed on bag as 18-498",m,Nossuk,Summer,27,,,,,,whole
+,18-276,5/16/18,113.5,cap,185.88,,8/8/18,79.26,RRC 6 North Pass,m,Soda Bay,Spring,6,,,,,,whole
+,18-486,8/8/18,124,cap,269.83,,9/11/18,77.01,Alberto,f,Craig,Summer,5,,,,,,whole
+,18-508,7/28/18,150,cap,466.9,,2/11/19,218.93,"Natsuhini, pots",m,Soda Bay,Summer,15,,,,,,whole
+,18-513,8/8/18,99,cap,115.12,,12/21/18,62.68,S Wadleigh,f,Craig,Summer,2,,,,,,whole
+,18-667,7/28/18,147,cap,253.52,,6/19/19,95.93,"Natsuhini, WR pots",,Soda Bay,Summer,15,,,,,,whole
+,18-668,7/28/18,149,cap,303.82,,6/19/19,154.42,"Natsuhini, WR pots",,Soda Bay,Summer,15,,,,,,whole
+,18-058,5/13/18,17,map,2.56,,5/20/18,0.56,,,Craig,Spring,5,,,,,,whole
+,18-059,5/13/18,16,map,2.03,,5/20/18,0.4,,,Craig,Spring,5,,,,,,whole
+,18-060,5/13/18,14,map,1.18,,5/20/18,0.3,,,Craig,Spring,5,,,,,,whole
+,18-153,5/17/18,85,cef,41.56,,5/26/18,5.33,,,Soda Bay,Spring,9,,,,,,whole
+,18-155,5/17/18,70,cef,25.6,,5/26/18,5,,,Soda Bay,Spring,9,,,,,,whole
+,18-330,8/8/18,60,cef,19.26,,8/9/18,3.08,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-331,8/8/18,58,cef,20.56,,8/9/18,3.35,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-334,8/8/18,52,cef,13.24,,8/9/18,1.73,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-359,8/10/18,64.5,cef,27.13,,8/14/18,5.03,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-360,8/10/18,70.5,cef,32.32,,8/14/18,4.85,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-361,8/10/18,64,cef,28.58,,8/14/18,4.43,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-533,8/15/18,,cef,28.88,,4/1/19,3.12,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-534,8/15/18,,cef,32.97,,4/1/19,4.54,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-535,8/15/18,,cef,40.94,,4/1/19,7.22,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-536,8/15/18,,cef,27.33,,4/1/19,3.89,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-537,8/15/18,,cef,16.96,,4/1/19,2.74,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,19-038,2/19/19,51,cef,14.63,,3/4/19,1.54,Alberto Is,,Craig,Winter,5,,,,,,whole
+,19-039,2/19/19,49,cef,11.21,,3/4/19,0.87,Alberto Is,,Craig,Winter,5,,,,,,whole
+,19-093,2/17/19,56,cef,22.48,,6/18/19,0.3,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-094,2/17/19,44,cef,9.84,,6/18/19,1.38,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-095,2/17/19,53,cef,11.63,,6/18/19,0.56,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,18-374,8/10/18,27.5,chr,4.11,,8/14/18,2,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,19-021,2/18/19,27,cln,6.43,,3/4/19,2.01,Wadleigh,,Craig,Winter,2,,,,,,whole
+,18-388,8/2/18,17,cln,1.65,,8/14/18,0.75,North Pass,,Soda Bay,Summer,15,,,,,,whole
+,18-186,8/3/18,27,cln,4.83,,8/8/18,2.65,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-187,8/3/18,25.5,cln,4.16,,8/8/18,2.23,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-188,8/3/18,26,cln,4.19,,8/8/18,2.18,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-189,8/3/18,25.5,cln,3.94,,8/8/18,2.15,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-190,8/3/18,24.5,cln,3.94,,8/8/18,2.17,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-191,8/3/18,38,cln,15.35,,8/8/18,8.59,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-192,8/3/18,20,cln,1.97,,8/8/18,1.03,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-290,8/8/18,40,cln,20.36,,8/9/18,9.52,"S. Wadleigh, bagged 290-294 together",,Craig,Summer,2,,,,,,whole
+,18-291,8/8/18,40.5,cln,21.48,,8/9/18,9.58,"S. Wadleigh, bagged 290-294 together",,Craig,Summer,2,,,,,,whole
+,18-292,8/8/18,30.5,cln,13.9,,8/9/18,5.85,"S. Wadleigh, bagged 290-294 together",,Craig,Summer,2,,,,,,whole
+,18-293,8/8/18,29,cln,10.25,,8/9/18,4.51,"S. Wadleigh, bagged 290-294 together",,Craig,Summer,2,,,,,,whole
+,18-294,8/8/18,37,cln,13.2,,8/9/18,5.59,"S. Wadleigh, bagged 290-294 together",,Craig,Summer,2,,,,,,whole
+,18-459,8/10/18,220,cum,184.73,,,184.73,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-460,8/10/18,270,cum,171.35,,,171.35,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-461,8/10/18,250,cum,119.8,,,119.8,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-462,8/10/18,160,cum,77.01,,,77.01,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-463,8/10/18,130,cum,19.12,,,19.12,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-141,5/17/18,26,eul,10.15,,5/26/18,6.95,"broken shell, tiff's location in Salt lake",,Nossuk,Spring,10,,,,,,whole
+,18-142,5/17/18,29,eul,9.91,,5/26/18,4.43,tiff's location in Salt lake,,Nossuk,Spring,10,,,,,,whole
+,18-143,5/17/18,27,eul,2.21,,5/26/18,1.19,tiff's location in Salt lake,,Nossuk,Spring,10,,,,,,whole
+,18-144,5/17/18,14,eul,1.13,,5/26/18,0.57,tiff's location in Salt lake,,Nossuk,Spring,10,,,,,,whole
+,18-157,5/17/18,16,eul,1.54,,5/26/18,0.77,,,Soda Bay,Spring,8,,,,,,whole
+,18-244,5/3/18,37,eul,22.7,,8/8/18,9.83,Get coordinates from Tiff. ,,Nossuk,Spring,3,,,,,,whole
+,19-134,2/19/19,40,kat,7.03,,6/21/19,2.49,,,Craig,Winter,5,,,,,,whole
+,19-143,2/19/19,52,kat,10.46,,6/21/19,3.1,,,Craig,Winter,5,,,,,,whole
+,19-144,2/19/19,32,kat,7.21,,6/21/19,2.75,,,Craig,Winter,5,,,,,,whole
+,19-145,2/19/19,45,kat,7.9,,6/21/19,2.67,,,Craig,Winter,5,,,,,,whole
+,18-036,5/13/18,55,kat,14.3,,5/20/18,2.29,,,Craig,Spring,5,,,,,,whole
+,18-037,5/13/18,44.5,kat,6.47,,5/20/18,2.31,,,Craig,Spring,5,,,,,,whole
+,18-038,5/13/18,48,kat,9.11,,5/20/18,2.21,,,Craig,Spring,5,,,,,,whole
+,18-039,5/13/18,36,kat,4,,5/20/18,1.31,don’t have exact weight before dissection,,Craig,Spring,5,,,,,,whole
+,18-040,5/13/18,36,kat,4.13,,5/20/18,1.3,,,Craig,Spring,5,,,,,,whole
+,18-072,5/2/18,71,kat,28.52,,5/20/18,12.54,,,Nossuk,Spring,1,,,,,,whole
+,18-073,5/2/18,57,kat,11.47,,5/20/18,3.81,,,Nossuk,Spring,1,,,,,,whole
+,18-074,5/2/18,66,kat,11.19,,5/20/18,3.14,,,Nossuk,Spring,1,,,,,,whole
+,18-075,5/2/18,65,kat,7.64,,5/20/18,1.67,,,Nossuk,Spring,1,,,,,,whole
+,18-076,5/2/18,25,kat,1,,5/20/18,0.29,,,Nossuk,Spring,1,,,,,,whole
+,18-102,5/18/18,55,kat,6.25,,5/20/18,1.83,,,,Spring,12,,,,,,whole
+,18-103,5/18/18,50,kat,14.57,,5/20/18,1.98,,,,Spring,12,,,,,,whole
+,18-340,8/8/18,41,kat,8.42,,8/9/18,2.09,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-341,8/8/18,40,kat,7.31,,8/9/18,2.3,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-342,8/8/18,42,kat,5.84,,8/9/18,1.61,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-343,8/8/18,33,kat,4.6,,8/9/18,1.27,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-406,8/12/18,63,kat,27.75,,8/14/18,9.52,Midway Is.,,Soda Bay,Summer,29,,,,,,whole
+,18-407,8/12/18,65,kat,20.24,,8/14/18,6.68,Midway Is.,,Soda Bay,Summer,29,,,,,,whole
+,18-408,8/12/18,62,kat,19.74,,8/14/18,6.21,Midway Is.,,Soda Bay,Summer,29,,,,,,whole
+,18-409,8/12/18,63,kat,15.2,,8/14/18,5.11,Midway Is.,,Soda Bay,Summer,29,,,,,,whole
+,18-410,8/12/18,59,kat,18.73,,8/14/18,5.57,Midway Is.,,Soda Bay,Summer,29,,,,,,whole
+,19-147,2/19/19,32,kat,7.96,,6/21/19,2.71,,,Craig,Winter,5,,,,,,whole
+,18-682,8/2/18,39,lid,6.87,,6/21/19,1.22,,,Soda Bay,Summer,18,,,,,,whole
+,18-683,8/2/18,40,lid,6.44,,6/21/19,0.78,,,Soda Bay,Summer,18,,,,,,whole
+,18-684,8/2/18,35,lid,4.62,,6/21/19,1.08,,,Soda Bay,Summer,18,,,,,,whole
+,19-120,2/19/19,29,lid,2.46,,6/19/19,0.35,Lira,,Craig,Winter,5,,,,,,whole
+,19-121,2/19/19,29,lid,2.39,,6/19/19,0.32,Lira,,Craig,Winter,5,,,,,,whole
+,19-122,2/19/19,25,lid,2.01,,6/19/19,0.29,Lira,,Craig,Winter,5,,,,,,whole
+,18-686,8/2/18,26,lid,2.09,,6/21/19,0.39,,,Soda Bay,Summer,18,,,,,,whole
+,18-687,8/2/18,31,lid,3.59,,6/21/19,0.48,,,Soda Bay,Summer,18,,,,,,whole
+,18-685,8/2/18,34,lid,5.19,,6/21/19,0.66,,,Soda Bay,Summer,18,,,,,,whole
+,18-681,8/2/18,35,lid,4.49,,6/21/19,0.61,,,Soda Bay,Summer,18,,,,,,whole
+,18-017,5/3/18,41,mac,,10.19,5/3/18,3.6,,,Craig,Spring,2,,,,,,whole
+,18-018,5/3/18,46.5,mac,,14.04,5/3/18,5.32,,,Craig,Spring,2,,,,,,whole
+,18-019,5/3/18,52,mac,,21.72,5/3/18,6.61,,,Craig,Spring,2,,,,,,whole
+,18-020,5/3/18,35,mac,,5.92,5/3/18,1.56,,,Craig,Spring,2,,,,,,whole
+,18-021,5/3/18,34.5,mac,,5.16,5/3/18,1.73,,,Craig,Spring,2,,,,,,whole
+,18-116,5/2/18,41,mac,11.03,,5/20/18,5.09,,,Nossuk,Spring,1,,,,,,whole
+,18-117,5/2/18,33.5,mac,3.89,,5/20/18,1.63,,,Nossuk,Spring,1,,,,,,whole
+,18-118,5/2/18,45,mac,9.67,,5/20/18,3.77,,,Nossuk,Spring,1,,,,,,whole
+,18-119,5/2/18,23,mac,1.73,,5/20/18,0.75,,,Nossuk,Spring,1,,,,,,whole
+,18-163,5/17/18,60,mac,26.67,,5/26/18,13.12,,,Soda Bay,Spring,8,,,,,,whole
+,18-164,5/17/18,56,mac,24.27,,5/26/18,12.34,,,Soda Bay,Spring,8,,,,,,whole
+,18-165,5/17/18,46,mac,14.27,,5/26/18,8.11,,,Soda Bay,Spring,8,,,,,,whole
+,18-166,5/17/18,19,mac,0.82,,5/26/18,0.49,,,Soda Bay,Spring,8,,,,,,whole
+,18-167,5/17/18,29,mac,2.47,,5/26/18,1.53,,,Soda Bay,Spring,8,,,,,,whole
+,18-208,8/3/18,36,man,5.83,,8/8/18,3.11,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-209,8/3/18,35.5,man,4.33,,8/8/18,2.01,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-210,8/3/18,34,man,4.63,,8/8/18,1.91,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-211,8/3/18,34,man,4.73,,8/8/18,1.93,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-212,8/3/18,30,man,3.52,,8/8/18,1.98,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-213,8/3/18,27.5,man,3.06,,8/8/18,1.67,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-214,8/3/18,28,man,3.28,,8/8/18,1.7,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-215,8/3/18,24.5,man,2.42,,8/8/18,1.3,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-216,8/3/18,27.5,man,3.25,,8/8/18,1.88,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-217,8/3/18,27,man,2.65,,8/8/18,1.22,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-218,8/3/18,24,man,2.18,,8/8/18,1.14,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-219,8/3/18,21,man,1.47,,8/8/18,0.9,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-220,8/3/18,20,man,1.41,,8/8/18,0.93,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-221,8/3/18,25,man,2.13,,8/8/18,1.21,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-222,8/3/18,20,man,1.31,,8/8/18,0.83,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-223,8/3/18,21,man,1.71,,8/8/18,1.01,"Kaguk, bagged with remaining man",,Nossuk,Summer,20,,,,,,whole
+,18-242,5/2/18,42.5,man,9.55,,8/8/18,4.04,Nossuk,,Nossuk,Spring,1,,,,,,whole
+,18-243,5/2/18,39,man,7.07,,8/8/18,3.01,Nossuk,,Nossuk,Spring,1,,,,,,whole
+,18-253,8/8/18,67.5,man,66.72,,8/9/18,24.73,S. Wadleigh,,Craig,Summer,2,,,,,,whole
+,18-258,8/8/18,64.5,man,40.26,,8/9/18,15.78,S. Wadleigh,,Craig,Summer,2,,,,,,whole
+,18-259,8/8/18,60.5,man,36.97,,8/9/18,16.45,S. Wadleigh,,Craig,Summer,2,,,,,,whole
+,18-260,8/8/18,59,man,31.88,,8/9/18,13.54,S. Wadleigh,,Craig,Summer,2,,,,,,whole
+,18-261,8/8/18,61,man,23.15,,8/9/18,8.82,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-262,8/8/18,57,man,21.3,,8/9/18,7.84,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-263,8/8/18,48.5,man,14.78,,8/9/18,5.21,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-264,8/8/18,45,man,12.36,,8/9/18,6.01,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-265,8/8/18,53,man,24.97,,8/9/18,9.94,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-266,8/8/18,47,man,12.48,,8/9/18,4.06,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-267,8/8/18,42,man,11.84,,8/9/18,5.33,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-268,8/8/18,30.5,man,4.51,,8/9/18,2.53,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-269,8/8/18,37,man,6.38,,8/9/18,3.11,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,18-277,8/8/18,43,man,9.18,,8/9/18,4.18,"S. Wadleigh, bagged 261-269 and 277 together",,Craig,Summer,2,,,,,,whole
+,19-126,2/19/19,19,map,2.55,,6/19/19,0.09,"either calistoma spp, or margarites mupillus",,Craig,Winter,5,,,,,,whole
+,19-127,2/19/19,18,map,2.11,,6/19/19,0.02,"either calistoma spp, or margarites mupillus",,Craig,Winter,5,,,,,,whole
+,19-129,2/19/19,20,map,3.08,,6/19/19,0.12,"either calistoma spp, or margarites mupillus",,Craig,Winter,5,,,,,,whole
+,19-132,2/19/19,19,map,2.58,,6/19/19,0.13,"either calistoma spp, or margarites mupillus",,Craig,Winter,5,,,,,,whole
+,19-111,2/17/19,18,map,2.49,,6/18/19,0.21,"either calistoma spp, or margarites mupillus",,Soda Bay,Winter,9,,,,,,whole
+,19-113,2/17/19,13,map,1.29,,6/18/19,0.1,"either calistoma spp, or margarites mupillus",,Soda Bay,Winter,9,,,,,,whole
+,19-031,2/18/19,21,mtr,1.02,,3/4/19,0.25,"bagged together 031, 032, 033, 034,035",,Craig,Winter,2,,,,,,whole
+,19-032,2/18/19,17,mtr,0.67,,3/4/19,0.13,"bagged together 031, 032, 033, 034,035",,Craig,Winter,2,,,,,,whole
+,19-033,2/18/19,20,mtr,1.27,,3/4/19,0.29,"bagged together 031, 032, 033, 034,035",,Craig,Winter,2,,,,,,whole
+,19-034,2/18/19,22,mtr,1.14,,3/4/19,0.19,"bagged together 031, 032, 033, 034,035",,Craig,Winter,2,,,,,,whole
+,19-035,2/18/19,12,mtr,0.25,,3/4/19,0.02,"bagged together 031, 032, 033, 034,035",,Craig,Winter,2,,,,,,whole
+,19-137,2/19/19,29,mtr,2.58,,6/21/19,0.93,,,Craig,Winter,5,,,,,,whole
+,19-138,2/19/19,26,mtr,1.67,,6/21/19,0.77,,,Craig,Winter,5,,,,,,whole
+,19-139,2/19/19,32,mtr,3.62,,6/21/19,1.67,,,Craig,Winter,5,,,,,,whole
+,19-140,2/19/19,27,mtr,2.17,,6/21/19,1.41,,,Craig,Winter,5,,,,,,whole
+,19-141,2/19/19,28,mtr,2.41,,6/21/19,0.96,,,Craig,Winter,5,,,,,,whole
+,19-142,2/19/19,34,mtr,4.09,,6/21/19,1.65,,,Craig,Winter,5,,,,,,whole
+,18-068,5/13/18,22,mtr,1.32,,5/20/18,0.14,,,Craig,Spring,5,,,,,,whole
+,18-069,5/13/18,23,mtr,1.39,,5/20/18,0.36,,,Craig,Spring,5,,,,,,whole
+,18-082,5/2/18,38,mtr,4.31,,5/20/18,1.1,,,Nossuk,Spring,1,,,,,,whole
+,18-083,5/2/18,34,mtr,3.83,,5/20/18,1.11,,,Nossuk,Spring,1,,,,,,whole
+,18-084,5/2/18,29,mtr,1.84,,5/20/18,0.56,,,Nossuk,Spring,1,,,,,,whole
+,18-085,5/2/18,33.5,mtr,3.72,,5/20/18,0.85,,,Nossuk,Spring,1,,,,,,whole
+,18-086,5/2/18,26,mtr,2.23,,5/20/18,0.85,,,Nossuk,Spring,1,,,,,,whole
+,18-105,5/18/18,62,mtr,20.12,,5/20/18,5.45,,,,Spring,12,,,,,,whole
+,18-106,5/18/18,75,mtr,34.12,,5/20/18,13.36,,,,Spring,12,,,,,,whole
+,18-107,5/18/18,41,mtr,8.77,,5/20/18,3.04,,,,Spring,12,,,,,,whole
+,18-108,5/18/18,42,mtr,8.46,,5/20/18,2.4,,,,Spring,12,,,,,,whole
+,18-109,5/18/18,40.5,mtr,7.73,,5/20/18,2.44,,,,Spring,12,,,,,,whole
+,18-133,5/3/18,26,mtr,1.95,,5/26/18,0.68,,,Craig,Spring,2,,,,,,whole
+,18-134,5/3/18,21,mtr,1.13,,5/26/18,0.57,,,Craig,Spring,2,,,,,,whole
+,18-161,5/17/18,45,mtr,7,,5/26/18,2.7,,,Soda Bay,Spring,8,,,,,,whole
+,18-162,5/17/18,31,mtr,2.67,,5/26/18,0.83,,,Soda Bay,Spring,8,,,,,,whole
+,18-224,8/3/18,46,mtr,8.95,,8/8/18,5.03,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-225,8/3/18,39,mtr,5.46,,8/8/18,3.12,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-226,8/3/18,34,mtr,5.7,,8/8/18,3.19,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-227,8/3/18,26,mtr,1.86,,8/8/18,1.01,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-228,8/3/18,36,mtr,5.19,,8/8/18,2.59,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-229,8/3/18,39.5,mtr,6.45,,8/8/18,3.5,"Nossuk, some barnicles on shell",,Nossuk,Summer,21,,,,,,whole
+,18-230,8/3/18,46.5,mtr,10.9,,8/8/18,5.09,"Nossuk, many barnicles on shell",,Nossuk,Summer,21,,,,,,whole
+,18-305,8/8/18,36,mtr,7.64,,8/9/18,2.99,S. Wadleigh,,Craig,Summer,2,,,,,,whole
+,18-306,8/8/18,40,mtr,8.58,,8/9/18,3.59,S. Wadleigh,,Craig,Summer,2,,,,,,whole
+,18-370,8/10/18,45,mtr,7.66,,8/14/18,3.32,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-371,8/10/18,46,mtr,6.28,,8/14/18,2.66,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-402,8/2/18,33,mtr,3.86,,8/14/18,1.38,North Pass,,Soda Bay,Summer,15,,,,,,whole
+,18-403,8/2/18,35.5,mtr,5.86,,8/14/18,2.83,North Pass,,Soda Bay,Summer,15,,,,,,whole
+,19-059,2/17/19,27,mtr,1.78,,3/6/19,0.6,"Soda Bay, bagged together: 59, 60, 61",,Soda Bay,Winter,8,,,,,,whole
+,19-060,2/17/19,26,mtr,1.47,,3/6/19,0.47,"Soda Bay, bagged together: 59, 60, 61",,Soda Bay,Winter,8,,,,,,whole
+,19-061,2/17/19,31,mtr,2.35,,3/6/19,0.73,"Soda Bay, bagged together: 59, 60, 61",,Soda Bay,Winter,8,,,,,,whole
+,19-062,2/17/19,31.5,mtr,2.73,,3/6/19,0.9,"Soda Bay, bagged together: 62, 63, 64",,Soda Bay,Winter,8,,,,,,whole
+,19-063,2/17/19,36,mtr,4.2,,3/6/19,1.52,"Soda Bay, bagged together: 62, 63, 64",,Soda Bay,Winter,8,,,,,,whole
+,19-064,2/17/19,35,mtr,3.45,,3/6/19,1.35,"Soda Bay, bagged together: 62, 63, 64",,Soda Bay,Winter,8,,,,,,whole
+,19-100,2/17/19,30,mtr,2.6,,6/18/19,0.95,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-102,2/17/19,29,mtr,2.82,,6/18/19,1.14,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-104,2/17/19,25,mtr,1.35,,6/18/19,0.45,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-105,2/17/19,30,mtr,2.17,,6/18/19,1.02,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-106,2/17/19,24,mtr,1.37,,6/18/19,0.54,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-107,2/17/19,29,mtr,2.29,,6/18/19,1.04,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-108,2/17/19,27,mtr,1.53,,6/18/19,0.55,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-114,2/19/19,29,nul,2.78,,6/19/19,0.51,,,Craig,Winter,5,,,,,,whole
+,19-115,2/19/19,28,nul,2.59,,6/19/19,0.36,,,Craig,Winter,5,,,,,,whole
+,19-119,2/19/19,26,nul,2.41,,6/19/19,0.51,,,Craig,Winter,5,,,,,,whole
+,18-091,5/2/18,46.5,nul,12.19,,5/20/18,2.22,Nossuk,,Nossuk,Spring,1,,,,,,whole
+,18-092,5/2/18,47,nul,11.5,,5/20/18,2.01,Nossuk,,Nossuk,Spring,1,,,,,,whole
+,18-093,5/2/18,49.5,nul,13.29,,5/20/18,2.62,Nossuk,,Nossuk,Spring,1,,,,,,whole
+,18-094,5/2/18,45,nul,11.01,,5/20/18,1.22,Nossuk,,Nossuk,Spring,1,,,,,,whole
+,18-095,5/2/18,43.5,nul,9.49,,5/20/18,1.7,Nossuk,,Nossuk,Spring,1,,,,,,whole
+,18-096,5/2/18,46,nul,11.38,,5/20/18,1.93,Nossuk,,Nossuk,Spring,1,,,,,,whole
+,18-249,8/3/18,18,nul,1.09,,8/8/18,0.37,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-250,8/3/18,29,nul,3.26,,8/8/18,0.95,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-251,8/3/18,31,nul,2.79,,8/8/18,1.21,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-252,8/3/18,21,nul,1.89,,8/8/18,0.6,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-254,8/3/18,29,nul,2.05,,8/8/18,1.22,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-255,8/3/18,31,nul,5.28,,8/8/18,1.06,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-256,8/3/18,24,nul,2.04,,8/8/18,0.92,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-691,8/2/18,27,nul,3.97,,6/21/19,0.51,South Pass,,Soda Bay,Summer,30,,,,,,whole
+,18-692,8/2/18,30,nul,4.65,,6/21/19,0.78,South Pass,,Soda Bay,Summer,30,,,,,,whole
+,18-639,7/28/18,69,pas,4.02,,4/1/19,1.82,"South Pass, beach seine",,Soda Bay,Summer,30,,,,,,whole
+,18-642,7/28/18,76,pas,5.67,,4/1/19,3.09,"South Pass, beach seine",,Soda Bay,Summer,30,,,,,,whole
+,18-643,7/28/18,68,pas,5.01,,4/1/19,2.67,"South Pass, beach seine",,Soda Bay,Summer,30,,,,,,whole
+,18-644,7/28/18,67,pas,3.33,,4/1/19,1.7,"South Pass, beach seine",,Soda Bay,Summer,30,,,,,,whole
+,18-645,7/28/18,69,pas,4.36,,4/1/19,2.15,"South Pass, beach seine",,Soda Bay,Summer,30,,,,,,whole
+,18-319,8/8/18,77,pom,59.91,,8/9/18,19.97,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-378,8/10/18,30,pom,3.85,,8/14/18,1.57,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-449,8/15/18,44,pom,5.69,,9/4/18,1.54,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-450,8/15/18,32,pom,1.58,,9/4/18,0.6,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-451,8/15/18,40,pom,4.88,,9/4/18,1.17,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-560,8/15/18,,pom,46,,4/1/19,2.21,"Nossuk, bagged with 561",,Nossuk,Summer,26,,,,,,whole
+,18-561,8/15/18,,pom,26,,4/1/19,0.55,"Nossuk, bagged with 560",,Nossuk,Summer,26,,,,,,whole
+,19-012,2/18/19,52,prs,31.89,,3/4/19,15.25,Wadleigh,,Craig,Winter,2,,,,,,whole
+,19-018,2/18/19,23,prs,3.18,,3/4/19,0.92,"Wadleigh, bagged together: 018, 019, 020",,Craig,Winter,2,,,,,,whole
+,19-019,2/18/19,19.5,prs,2.01,,3/4/19,0.7,"Wadleigh, bagged together: 018, 019, 020",,Craig,Winter,2,,,,,,whole
+,19-020,2/18/19,15,prs,0.82,,3/4/19,0.22,"Wadleigh, bagged together: 018, 019, 020",,Craig,Winter,2,,,,,,whole
+,18-006,5/3/18,40,prs,,24.03,5/3/18,6.42,,,Craig,Spring,2,,,,,,whole
+,18-195,8/3/18,24,prs,3.76,,8/8/18,1.6,"Kaguk, bagged with remaining prs",,Nossuk,Summer,20,,,,,,whole
+,18-196,8/3/18,25.5,prs,4.56,,8/8/18,2.28,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-197,8/3/18,35,prs,10.38,,8/8/18,4.53,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-198,8/3/18,27,prs,5.5,,8/8/18,2.61,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-199,8/3/18,32,prs,8.21,,8/8/18,4.02,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-200,8/3/18,29.5,prs,5.6,,8/8/18,2.76,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-201,8/3/18,27.5,prs,5.82,,8/8/18,2.82,"Kaguk, bagged with remaining prs",,Nossuk,Summer,20,,,,,,whole
+,18-202,8/3/18,27,prs,6.63,,8/8/18,2.71,"Kaguk, bagged with remaining prs",,Nossuk,Summer,20,,,,,,whole
+,18-203,8/3/18,24,prs,3.96,,8/8/18,2.08,"Kaguk, bagged with remaining prs",,Nossuk,Summer,20,,,,,,whole
+,18-204,8/3/18,24,prs,3.78,,8/8/18,1.99,"Kaguk, bagged with remaining prs",,Nossuk,Summer,20,,,,,,whole
+,18-205,8/3/18,24,prs,4.29,,8/8/18,2.33,"Kaguk, bagged with remaining prs",,Nossuk,Summer,20,,,,,,whole
+,18-206,8/3/18,23,prs,3.9,,8/8/18,2.08,"Kaguk, bagged with remaining prs",,Nossuk,Summer,20,,,,,,whole
+,18-207,8/3/18,20,prs,2.79,,8/8/18,1.58,"Kaguk, bagged with remaining prs",,Nossuk,Summer,20,,,,,,whole
+,18-233,8/3/18,31.5,prs,8.16,,8/8/18,3.61,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-234,8/3/18,34.5,prs,13.47,,8/8/18,5.11,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-235,8/3/18,35.5,prs,17.78,,8/8/18,7.01,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-236,8/3/18,26,prs,5.47,,8/8/18,2.26,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-237,8/3/18,34,prs,8.72,,8/8/18,3.43,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-300,8/8/18,47,prs,25.56,,8/9/18,12.03,"S. Wadleigh, bagged with 301",,Craig,Summer,2,,,,,,whole
+,18-301,8/8/18,52.5,prs,44.78,,8/9/18,16.52,"S. Wadleigh, bagged with 300",,Craig,Summer,2,,,,,,whole
+,18-321,8/8/18,59.5,prs,71.25,,8/9/18,27.31,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-366,8/10/18,56,prs,55.58,,8/14/18,21.32,Soda Bay,,Soda Bay,Summer,9,,,,,,whole
+,18-439,8/2/18,43,prs,24.43,,9/4/18,8.86,** accidently repeated this number! North Pass,,Soda Bay,Summer,15,,,,,,whole
+,18-440,8/2/18,41,prs,22.2,,9/4/18,7.57,North Pass,,Soda Bay,Summer,15,,,,,,whole
+,18-441,8/2/18,42,prs,28.14,,9/4/18,8.26,North Pass,,Soda Bay,Summer,15,,,,,,whole
+,18-442,8/2/18,36.5,prs,20.67,,9/4/18,7.63,North Pass,,Soda Bay,Summer,15,,,,,,whole
+,18-443,8/2/18,40,prs,24.26,,9/4/18,9.33,North Pass,,Soda Bay,Summer,15,,,,,,whole
+,18-436,8/15/18,53,pup,,79.45,8/15/18,24.22,Nossuk,f,Nossuk,Summer,26,,,,,,whole
+,18-437,8/15/18,48,pup,,86.63,8/15/18,31.7,Nossuk,m,Nossuk,Summer,26,,,,,,whole
+,18-438,8/15/18,59,pup,,106.19,8/15/18,28.11,Nossuk,f,Nossuk,Summer,26,,,,,,whole
+,18-439,8/15/18,46,pup,,68.75,8/15/18,11.5,Nossuk,m,Nossuk,Summer,26,,,,,,whole
+,18-483,8/8/18,49,pup,44.53,,9/11/18,8.72,Alberto,m,Craig,Summer,5,,,,,,whole
+,18-496,8/15/18,19,pup,2.9,,2/11/19,1.19,Nossuk,f,Nossuk,Summer,26,,,,,,whole
+,18-193,8/3/18,31.5,sag,6.17,,8/8/18,3.22,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-194,8/3/18,36,sag,19.42,,8/8/18,10.86,Kaguk,,Nossuk,Summer,20,,,,,,whole
+,18-231,8/3/18,33,sag,7.18,,8/8/18,3.23,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-283,8/8/18,40.5,sag,15.85,,8/9/18,7.69,"S. Wadleigh, bagged with 284",,Craig,Summer,2,,,,,,whole
+,18-284,8/8/18,42.5,sag,17.3,,8/9/18,8.65,"S. Wadleigh, bagged with 283",,Craig,Summer,2,,,,,,whole
+,18-445,8/15/18,42,sag,15.35,,9/4/18,7.23,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-446,8/15/18,43,sag,15.53,,9/4/18,7.32,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-447,8/15/18,36,sag,10.1,,9/4/18,4.84,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,18-448,8/15/18,45,sag,20.23,,9/4/18,10.24,Nossuk,,Nossuk,Summer,21,,,,,,whole
+,19-041,2/17/19,40,sag,12.99,,3/6/19,6.17,Soda Bay,,Soda Bay,Winter,8,,,,,,whole
+,18-326,8/8/18,23,std,4.62,,8/9/18,1.12,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-327,8/8/18,22,std,4.45,,8/9/18,1.23,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-431,8/15/18,24.5,std,,6.92,8/15/18,0.95,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-432,8/15/18,24,std,,5.13,8/15/18,0.85,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-433,8/15/18,25.5,std,,6.04,8/15/18,1.54,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-434,8/15/18,19,std,,3.19,8/15/18,0.46,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-435,8/15/18,21,std,,3.74,8/15/18,0.87,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,19-096,2/17/19,34,std,11.06,,6/18/19,1.36,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,19-097,2/17/19,29,std,7.65,,6/18/19,0.09,SB #2 rocky,,Soda Bay,Winter,9,,,,,,whole
+,18-426,8/15/18,51,stf,,37.6,8/15/18,8.63,Whale Rock,,Nossuk,Summer,27,,,,,,whole
+,18-427,8/15/18,41,stf,,25.42,8/15/18,8.14,Whale Rock,,Nossuk,Summer,27,,,,,,whole
+,18-429,8/15/18,33,stf,,12.54,8/15/18,3.37,Whale Rock,,Nossuk,Summer,27,,,,,,whole
+,18-430,8/15/18,30,stf,,12.33,8/15/18,3.22,Whale Rock,,Nossuk,Summer,27,,,,,,whole
+,18-428,8/15/18,42,stf,,28.87,8/15/18,8.3,Whale Rock,,Nossuk,Summer,27,,,,,,whole
+,18-145,5/18/18,52,stp,45.91,,5/26/18,2.4,,,,Spring,12,,,,,,whole
+,18-469,7/31/18,58,tec,47.76,,6-Sep,12.43,Guktu,m,Nossuk,Summer,31,,,,,,whole
+,18-470,7/31/18,48,tec,27.28,,6-Sep,8.08,Guktu,m,Nossuk,Summer,31,,,,,,whole
+,18-471,7/31/18,45,tec,19.99,,6-Sep,7.72,Guktu,f,Nossuk,Summer,31,,,,,,whole
+,18-472,7/31/18,59.5,tec,40.74,,6-Sep,9.79,Guktu,m,Nossuk,Summer,31,,,,,,whole
+,18-491,5/18/18,45,tec,43.03,,1/30/19,14.86,Salt Lake Bay pots,m,,Spring,12,,,,,,whole
+,18-492,5/18/18,53,tec,73.27,,2/4/19,28.95,Salt Lake Bay pots,m,,Spring,12,,,,,,whole
+,18-493,5/18/18,42,tec,43.99,,2/4/19,15.4,Salt Lake Bay pots,m,,Spring,12,,,,,,whole
+,18-494,5/18/18,45,tec,42.08,,2/11/19,15.71,Salt Lake Bay pots,m,,Spring,12,,,,,,whole
+,18-495,5/18/18,42,tec,40.94,,2/11/19,15.01,Salt Lake Bay pots,m,,Spring,12,,,,,,whole
+,18-528,7/31/18,37,tec,19.95,,12/20/18,8.37,"Nossuk, Seine",m,Nossuk,Summer,16,,,,,,whole
+,18-529,7/31/18,47.5,tec,40.07,,12/20/18,17.48,"Nossuk, Seine",f,Nossuk,Summer,16,,,,,,whole
+,18-530,7/31/18,50.5,tec,45.35,,12/20/18,18.25,"Nossuk, Seine",f,Nossuk,Summer,16,,,,,,whole
+,18-531,7/31/18,39,tec,19.96,,12/20/18,7.29,"Nossuk, Seine",m,Nossuk,Summer,16,,,,,,whole
+,18-110,5/18/18,24,tes,3.7,,5/20/18,1.27,listed as tef on bag,,,Spring,12,,,,,,whole
+,18-111,5/18/18,25,tes,4.98,,5/20/18,1.09,listed as tef on bag,,,Spring,12,,,,,,whole
+,18-112,5/18/18,21,tes,3.21,,5/20/18,1.03,listed as tef on bag,,,Spring,12,,,,,,whole
+,18-113,5/18/18,20,tes,2.58,,5/20/18,0.88,listed as tef on bag,,,Spring,12,,,,,,whole
+,18-114,5/18/18,16,tes,1.64,,5/20/18,0.37,listed as tef on bag,,,Spring,12,,,,,,whole
+,18-338,8/8/18,24,tes,5.75,,8/9/18,0.79,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-339,8/8/18,25.5,tes,7.26,,8/9/18,1.17,Alberto Is.,,Craig,Summer,5,,,,,,whole
+,18-413,8/12/18,33,tes,12.1,,8/14/18,4.77,Midway Is.,,Soda Bay,Summer,29,,,,,,whole
+,18-414,8/12/18,32,tes,14.67,,8/14/18,4.83,Midway Is.,,Soda Bay,Summer,29,,,,,,whole
+,18-553,8/15/18,33,tes,12.29,,4/1/19,1.3,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-556,8/15/18,21,tes,5.06,,4/1/19,1.53,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-557,8/15/18,20,tes,6.41,,4/1/19,1.34,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-558,8/15/18,20,tes,5.4,,4/1/19,1.08,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-559,8/15/18,29,tes,9.32,,4/1/19,2.84,Nossuk,,Nossuk,Summer,26,,,,,,whole
+,18-649,8/15/18,20.5,tes,5.56,,4/1/19,1.38,"Nossuk, should have been 18-554",,Nossuk,Summer,27,,,,,,whole
+,18-650,8/15/18,20,tes,5.59,,4/1/19,1.38,"Nossuk, should have been 18-555",,Nossuk,Summer,27,,,,,,whole
+,18-412,8/12/18,34,tes,13.68,,8/14/18,5.14,Midway Is.,,Soda Bay,Summer,29,,,,,,whole
+,18-411,8/12/18,31,tes,11.81,,8/14/18,4.3,Midway Is.,,Soda Bay,Summer,29,,,,,,whole

@@ -1,90 +1,151 @@
 ---
-title: "LME - carbon"
+title: "LME for Sea Otter vibrissae"
 author: "Nicole LaRoche"
-date: "3/9/2020"
+updated: "3/30/2020"
 output: html_document
 ---
+
+This script is to test the significance of the difference in the means of carbon and nitrogen values across seasons and in different locations around Prince of Wales. Because there are serial samples from an individual sea otter, there is codependence. To account for this, I want the otter `OtterID` to be a random variable. The fixed variables are `Season` and `Site`.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r, libraries and data, message= FALSE}
+library(tidyr)
 library(ggplot2)
 library(dplyr)
+library(broom)
 library(ggthemes)
-library(lme4)
+library(nlme)
 
 #load whisker data
 whisker <- read.csv("whiskers.csv")
 whisker$OtterID<-as.character(whisker$OtterID)
 whisker<- filter(whisker, OtterID != "163532")
 whisker$Season<-factor(whisker$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
+whisker.mean <- read.csv("whisker_means.csv") #made this file in "SI.R"
 ```
 
-### Boxplot of Carbon means across seasons
+### Whisker means
+
+Here are the means and number of samples for each catagory
+
+```{r printout of whisker means}
+whisker.mean
+```
+
+
+### Boxplot of Carbon means across seasons and sites
 
 ```{r, boxplot Carbon seasons, echo=FALSE, message=FALSE}
 ggplot(data=whisker) +
-  geom_boxplot(aes(x=Season, y=C)) +
+  geom_boxplot(aes(x=Season, y=C, fill=Site)) +
   labs(y=expression(paste(delta^13, "C" ))) +
+  scale_fill_brewer(palette = "Greens") +
+  theme_few()
+```
+
+### Boxplot of Nitrogen means across seasons and sites
+
+```{r, boxplot Nitrogen seasons, echo=FALSE, message=FALSE}
+ggplot(data=whisker) +
+  geom_boxplot(aes(x=Season, y=N, fill=Site)) +
+  labs(y=expression(paste(delta^15, "N" ))) +
+  scale_fill_brewer(palette = "Purples") +
   theme_few()
 ```
 
 
-### LME 
+### Linear Model
 
-First, I am interested in Carbon values, and the effect Season has on these values. But there is some sort of interaction because the 289 samples come from only 29 otters. I was thinking that I would want to make a model `C ~ Season + (Season | OtterID)` but that produced a warning because I didn't have enough degrees of freedom. So then I replaced season in the random factor with 1 (because I have seen this in a lot of examples). This didn't give me errors. I also can't 100% explain why this is "correct" 
-
-```{r LME, message =FALSE}
-test.model <- lmer(C~Season + (1 | OtterID), data = whisker)
-summary(test.model)
-```
-
-
-
-### Residuals from model above
-
-Looks skewed, but no large values
-
-```{r residual visualizations, echo = FALSE}
-plot(test.model)
-
-```
-
-```{r anova for both}
-anova(test.model)
-```
+Does not work - not normal because of interactions
 
 
 ```{r lm}
-LM <- lm(C ~ Season+OtterID, data=whisker)
+LM <- lm(C ~ Season+OtterID+Site, data=whisker)
 summary(LM)
 plot(LM)
 ```
 
-```{r glm}
-GLM <- gls(C ~ Season + OtterID, data=whisker, method = "ML")
-summary(GLM)
-```
+### Linear Mixed Effects Model
 
+Factors: Season and Site are fixed and OtterID is random
 
-```{r}
-lmmc <- lme(C ~ Season, data=whisker,
+```{r lmmc}
+lmmc <- lme(C ~ Season + Site, data=whisker,
 random = ~1|OtterID)
 anova(lmmc)
 summary(lmmc)
+```
 
-lmmn <- lme(N ~ Season, data=whisker,
+```{r lmmn}
+lmmn <- lme(N ~ Season + Site, data=whisker,
 random = ~1|OtterID)
 anova(lmmn)
+summary(lmmn)
 ```
+```{r lmm per site not working, warning=FALSE, echo=FALSE}
+#lmmn2 <- whisker %>%
+#  nest(-Site) %>%
+#  mutate(fit=map(data, ~lme(N ~ Season , random = ~1|OtterID, data=.)),
+#         results = map(fit, glance)) %>%
+#  unnest(results)
+#lmmn2
+
+```
+
+From the boxplot of N means, I can see there are diferences in sites for only one or two of the sites, I wanted to see what the p-values are for individual sites, but wasn't sure how to account for this in one model, so I ran three seperate models with site filtered.
+
+#### Tonowek Narrows
+
+```{r lmmn tonowek}
+lmmn.ton <- lme(N ~ Season, data=filter(whisker, Site == "Tonowek"),
+random = ~1|OtterID)
+anova(lmmn.ton)
+summary(lmmn.ton)
+```
+
+
+#### Shinaku Inlet
+
+```{r lmmn shinaku}
+lmmn.sh <- lme(N ~ Season, data=filter(whisker, Site == "Shinaku"),
+random = ~1|OtterID)
+anova(lmmn.sh)
+summary(lmmn.sh)
+```
+
+
+#### Sukkwan Strait
+
+```{r lmmn sukkwan}
+lmmn.suk <- lme(N ~ Season, data=filter(whisker, Site == "Sukkwan Strait"),
+random = ~1|OtterID)
+anova(lmmn.suk)
+summary(lmmn.suk)
+```
+
+#### Residuals and QQ plots from original C and N LMEs
 
 ```{r residuals}
 plot(lmmc)
+plot(lmmn)
 ```
 
 ```{r qq plot}
 qqnorm(resid(lmmc, type = "normalized"), main = "lmmc")
+qqnorm(resid(lmmn, type = "normalized"), main = "lmmn")
+```
+
+### Post hoc Tukey's test
+
+I wanted to know what seasons fall out together in the Nitrogen data. I am not sure if Tukey's is the correct test for this? Also not sure how to do for both Season and Site together or separate like I did below.
+
+
+```{r tukey}
+library(lsmeans)
+lsmeans(lmmn, pairwise~Season, adjust="tukey")
+lsmeans(lmmn, pairwise~Site, adjust="tukey")
 ```
 

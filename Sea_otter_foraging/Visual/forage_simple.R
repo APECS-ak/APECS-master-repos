@@ -70,6 +70,8 @@ forage$Season <- ifelse(forage$julian<173, "Spring", "Summer")
 #save final CSV
 write.csv(forage, "Visual/forage_final.csv")
 
+
+#____________________________________________________
 #loading final (if not using code above)
 forage<-read.csv("Visual/forage_final.csv")
 

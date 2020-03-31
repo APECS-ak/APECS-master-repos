@@ -1,9 +1,14 @@
 #### FILE FOR PRINTING THINGS ####
 
+library(ggplot2)
+library(dplyr) 
+library(ggthemes)
 library(ggpubr)
 library(cowplot)
+library(gridExtra) # making multi pane graphs
+library(grid) # making multi pane graphs
 
-#FIGURE 1 - Seasonal Enegery
+#Chapter 2 - FIGURE 1 - Seasonal Enegery
 a <- ggplot(data= means , aes(y=kcal.m, x=month, color=PreyCat), na.rm=TRUE) + 
   geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
   geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
@@ -69,4 +74,34 @@ ggdraw() +
                   x = c(0, 0.333, .667, 0, .333), y = c(1, 1, 1, .5, .5))
 
 ggsave("Figure1.png", device = "png", path = "Bombing/", width = 10, 
+       height = 6, units = "in", dpi = 300)
+
+
+
+
+#########################################################################################
+#########################################################################################
+
+#Chapter 1 - Carbon and nitrogen for site and season
+
+A <- ggplot(data=whisker) +
+  geom_boxplot(aes(x=Season, y=C, fill=Site)) +
+  labs(y=expression(paste(delta^13, "C" )), x = NULL, tag = "A") +
+  scale_fill_brewer(palette = "Greys") +
+  theme_few() +
+  theme(legend.position="none", axis.text.x = element_blank(), axis.title.y = element_text(size = 16), 
+        axis.text.y = element_text(size = 14))
+
+B <- ggplot(data=whisker) +
+  geom_boxplot(aes(x=Season, y=N, fill=Site)) +
+  labs(y=expression(paste(delta^15, "N" )), tag = "B") +
+  scale_fill_brewer(palette = "Greys") +
+  theme_few() +
+  theme(legend.position="bottom", axis.text = element_text(size = 14), 
+        axis.title = element_text(size = 16), legend.text = element_text(size = 16), 
+        legend.title = element_text(size = 16))
+
+g <- grid.arrange(A, B, nrow = 2, heights = c(1.5, 2))
+#g <- arrangeGrob(A, B, nrow=2) #generates g
+ggsave("CN_season_site.png", g, device = "png", path = "SI/", width = 9, 
        height = 6, units = "in", dpi = 300)
