@@ -1015,7 +1015,7 @@ crb.soi <- ggplot(data = dat) +
   labs(x = "Sea otter index", y = "Square-root \n crab mass (g)") +
   scale_x_continuous(limits = c(-0.80, 1.20), breaks = seq(-0.80, 1.20, by = 0.40)) +
   scale_y_continuous(limits = c(0, 20), breaks = seq(0, 20, by = 5)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ## Grazers and Crabs ##
@@ -1024,7 +1024,7 @@ ggplot(data = dat) +
   labs(x = "Crab mass (g)", y = "Log \n Epifauna load (g/g)") +
   scale_x_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
   scale_y_continuous(limits = c(0.0, 0.16), breaks = seq(0, 0.16, by = 0.04)) +
-  theme(text = element_text(size = 10))
+  theme(text = element_text(size = 8))
 
 ## Grazers and Epiphytes ##
 grz.epi <- ggplot(data = dat) +
@@ -1032,7 +1032,7 @@ grz.epi <- ggplot(data = dat) +
   labs(x = "Epiphyte load* (g/g)", y = "Log \n Epifauna load (g/g)") +
   scale_x_continuous(limits = c(-0.08, 0.09), breaks = seq(-0.08, 0.08, by = 0.04)) +
   scale_y_continuous(limits = c(0.0, 0.16), breaks = seq(0, 0.16, by = 0.04)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ## Epi and Nitrate ##
@@ -1041,38 +1041,33 @@ epi.nox <- ggplot(data = dat) +
   labs(x = bquote("Nitrate ("*mu~'mol)'), y = "Epiphyte load* (g/g)") +
   scale_x_continuous(limits = c(0.0, 3), breaks = seq(0, 3, by = 1)) +
   scale_y_continuous(limits = c(-0.07, 0.09), breaks = seq(-0.06, 0.09, by = 0.03)) +
-  theme(text = element_text(size = 10))
+  theme(text = element_text(size = 8))
 
 ## Eelgrass and SOI ##
 eg.soi <- ggplot(data = dat) +
   geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt), size = 1.5) +
-  labs(x = "Sea otter index", y = bquote('Seagrass mass*' ~(g/m^2))) +
+  labs(x = "Sea otter index", y = bquote(atop("Seagrass", 'mass*' ~(g/m^2)))) +
   scale_x_continuous(limits = c(-0.80, 1.20), breaks = seq(-0.80, 1.20, by = 0.40)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ## Eelgrass and Nitrate ##
 eg.nox <- ggplot(data = dat) +
   geom_point(aes(x = NOx_site, y = abvgnd_mass_dt), size = 1.5) +
-  labs(x = bquote("Nitrate ("*mu~'mol)'), y = bquote('Seagrass mass*' ~(g/m^2))) +
+  labs(x = bquote("Nitrate ("*mu~'mol)'), y = bquote(atop("Seagrass", 'mass*' ~(g/m^2)))) +
   scale_x_continuous(limits = c(0.0, 3), breaks = seq(0, 3, by = 1)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
-  theme(text = element_text(size = 10))
+  theme(text = element_text(size = 8))
 
 ## Eelgrass and Epiphytes ##
 eg.epi <- ggplot(data = dat) +
   geom_point(aes(x = epiphmass_shootmass_dt, y = abvgnd_mass_dt), size = 1.5) +
-  labs(x = "Epiphyte load* (g/g)", y = bquote('Seagrass mass*' ~(g/m^2))) +
+  labs(x = "Epiphyte load* (g/g)", y = bquote(atop("Seagrass", 'mass*' ~(g/m^2)))) +
   scale_x_continuous(limits = c(-0.08, 0.09), breaks = seq(-0.08, 0.08, by = 0.04)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
-
-Cowplot
-```{r}
-plot_grid(crb.soi, eg.epi, grz.epi, epi.nox, eg.soi, eg.nox, nrow = 3, ncol = 2, align = "v", scale = 0.9)
 ```
 
 ## Alternate hypothesis: major results plots
@@ -1083,7 +1078,7 @@ fsh.crb <- ggplot(data = dat) +
   labs(x = "Crab mass (g)", y = "Log fish mass (g)") +
   scale_x_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 50)) +
   scale_y_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 3)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 fsh.dia <- ggplot(data = dat) +
@@ -1091,7 +1086,7 @@ fsh.dia <- ggplot(data = dat) +
   labs(x = "Diatom cover ", y = "Log fish mass (g)") +
   scale_x_continuous(limits = c(0, 1.8), breaks = seq(0, 1.8, by = 0.4)) +
   scale_y_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 3)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 fsh.sed <- ggplot(data = dat) +
@@ -1099,22 +1094,21 @@ fsh.sed <- ggplot(data = dat) +
   labs(x = "Sediment score", y = "Log fish mass (g)") +
   scale_x_continuous(limits = c(0, 5.2), breaks = seq(0, 5, by = 1)) +
   scale_y_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 3)) +
-  theme(text = element_text(size = 10))
+  theme(text = element_text(size = 8))
 
 fsh.nox <- ggplot(data = dat) +
   geom_point(aes(x = NOx_site, y = log(fish_mass)), size = 1.5) +
   labs(x = bquote("Nitrate ("*mu~'mol)'), y = "Log fish mass (g)") +
   scale_x_continuous(limits = c(0.0, 3), breaks = seq(0, 3, by = 1)) +
   scale_y_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 3)) +
-  theme(text = element_text(size = 10)) +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(text = element_text(size = 8))
 
 fsh.eg <- ggplot(data = dat) +
   geom_point(aes(x = abvgnd_mass_dt, y = log(fish_mass)), size = 1.5) +
   labs(x = bquote('Seagrass mass*' ~(g/m^2)), y = "Log fish mass (g)") +
   scale_x_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
   scale_y_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 3)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 grz.dia <- ggplot(data = dat) +
@@ -1122,15 +1116,15 @@ grz.dia <- ggplot(data = dat) +
   labs(x = "Diatom cover", y = "Log \n Epifauna load (g/g)") +
   scale_x_continuous(limits = c(0, 1.8), breaks = seq(0, 1.8, by = 0.4)) +
   scale_y_continuous(limits = c(0.0, 0.16), breaks = seq(0, 0.16, by = 0.04)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 epi.fsh <- ggplot(data = dat) +
   geom_point(aes(x = fish_mass, y = epiphmass_shootmass_dt), size = 1.5) +
   labs(x = "Fish mass (g)", y = "Epiphyte load* (g/g)") +
-  scale_x_continuous(limits = c(0.0, 150000), breaks = seq(0, 150000, by = 50000)) +
+  scale_x_continuous(limits = c(0.0, 150000), breaks = seq(0, 150000, by = 50000), labels = function(x) format(x, scientific = TRUE)) +
   scale_y_continuous(limits = c(-0.07, 0.09), breaks = seq(-0.06, 0.09, by = 0.03)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 epi.soi <- ggplot(data = dat) +
@@ -1138,25 +1132,33 @@ epi.soi <- ggplot(data = dat) +
   labs(x = "Sea otter index", y = "Epiphyte load* (g/g)") +
   scale_x_continuous(limits = c(-0.80, 1.20), breaks = seq(-0.80, 1.20, by = 0.40)) +
   scale_y_continuous(limits = c(-0.07, 0.09), breaks = seq(-0.06, 0.09, by = 0.03)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 eg.dia <- ggplot(data = dat) +
   geom_point(aes(x = diatom_dens_as, y = abvgnd_mass_dt), size = 1.5) +
-  labs(x = "Diatom cover", y = bquote('Seagrass mass*' ~(g/m^2))) +
+  labs(x = "Diatom cover", y = bquote(atop("Seagrass", 'mass*' ~(g/m^2)))) +
   scale_x_continuous(limits = c(0, 1.8), breaks = seq(0, 1.8, by = 0.4)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
-  theme(text = element_text(size = 10)) +
+  theme(text = element_text(size = 8)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 eg.sed <- ggplot(data = dat) +
   geom_point(aes(x = sed_inside_prim, y = abvgnd_mass_dt), size = 1.5) +
-  labs(x = "Sediment score", y = bquote('Seagrass mass*' ~(g/m^2))) +
+  labs(x = "Sediment score", y = bquote(atop("Seagrass", 'mass*' ~(g/m^2)))) +
   scale_x_continuous(limits = c(0, 5.2), breaks = seq(0, 5, by = 1)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
-  theme(text = element_text(size = 10))
+  theme(text = element_text(size = 8))
 ```
 
+Cowplot
+```{r}
+plot_grid(crb.soi, grz.epi, eg.epi, epi.nox,
+          eg.nox, eg.soi, epi.soi, fsh.crb,
+          epi.fsh, fsh.dia, grz.dia, fsh.nox,
+          eg.dia, fsh.sed, eg.sed, fsh.eg, 
+          nrow = 4, ncol = 4, align = "hv", scale = 0.95)
+```
 
 
 ## Useful Plots
