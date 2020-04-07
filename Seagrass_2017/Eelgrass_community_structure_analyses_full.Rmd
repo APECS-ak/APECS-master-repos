@@ -486,6 +486,18 @@ corrplot(correl, method = "color", type = "lower", addCoef.col =  "black", numbe
 
 ```
 
+SOI, seagrass biomass, sediment grain size
+```{r}
+dat.cor.sed <- dat[, c(19, 126, 90)] 
+colnames(dat.cor.sed) <- c("SOI", "Seagrass", "Sediment")
+
+correl.sed <- cor(dat.cor.sed)
+corrplot(correl.sed, method = "color", type = "lower", addCoef.col =  "black", number.cex = 0.75, tl.cex = 0.8, cl.cex = 0.75, tl.col = "black")
+
+pairs(dat.cor.sed, cex.labels = 1, cex = 0.8, cex.axis = 0.6, pch = 16)
+```
+
+
 ## Environmental data
 Plots and analyses of environmental data across sites. I will focus on primary sediment, and coordinated nutirents, temp, salinity.
 
@@ -999,11 +1011,18 @@ plot_grid(p.crb, p.fsh, p.grz, p.epi, p.abv, ncol = 1, labels = "auto", align = 
 ## Export dredge objects
 For manuscripts and the like
 ```{r export dredge}
-write.csv(mod1.dr.top, "abv_raw_dredge.csv", row.names = FALSE)
-write.csv(mod2.dr.top, "epi_raw_dredge.csv", row.names = FALSE)
-write.csv(mod3.dr.top, "grz_raw_dredge.csv", row.names = FALSE)
-write.csv(mod4.dr.top, "crb_raw_dredge.csv", row.names = FALSE)
-write.csv(mod5.dr.top, "fsh_raw_dredge.csv", row.names = FALSE)
+write.csv(mod1.1.dr.top, "abv_raw_dredge_1.1.csv", row.names = FALSE)
+write.csv(mod1.2.dr.top, "abv_raw_dredge_1.2.csv", row.names = FALSE)
+
+write.csv(mod2.1.dr.top, "epi_raw_dredge.csv", row.names = FALSE)
+write.csv(mod2.2.dr.top, "epi_raw_dredge_2.2.csv", row.names = FALSE)
+
+write.csv(mod3.1.dr.top, "grz_raw_dredge.csv", row.names = FALSE)
+write.csv(mod3.2.dr.top, "grz_raw_dredge_3.2.csv", row.names = FALSE)
+
+write.csv(mod4.1.dr.top, "crb_raw_dredge.csv", row.names = FALSE)
+
+write.csv(mod5.1.dr.top, "fsh_raw_dredge_1.1.csv", row.names = FALSE)
 ```
 
 ## Trophic cascade: major results plots
@@ -1222,9 +1241,18 @@ ggplot(dat) +
   geom_point(aes(x = sed_inside_prim, y = abvgnd_mass)) +
   labs(x = "Sediment", y = "Eelgrass")
 
-ggplot(dat) +
-  geom_point(aes(x = sed_inside_prim, y = abvgnd_mass_dt)) +
-  labs(x = "Sediment", y = "Eelgrass - detrended")
+p1 <- ggplot(dat) +
+  geom_point(aes(x = abvgnd_mass_dt, y = sqrt(crab_mass))) +
+  geom_smooth(aes(x = abvgnd_mass_dt, y = sqrt(crab_mass)), method = "lm") +
+  labs(x = "Seagrass mass", y = "Crabs") 
+
+p2 <- ggplot(dat) +
+  geom_point(aes(x = shoot_dens, y = sqrt(crab_mass))) +
+  geom_smooth(aes(x = shoot_dens, y = sqrt(crab_mass)), method = "lm") +
+  labs(x = "Seagrass density", y = "Crabs") 
+
+plot_grid(p1, p2)
+
 
 
 ggplot(dat) +
