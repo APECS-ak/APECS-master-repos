@@ -182,9 +182,17 @@ FA_a <- FA_ac %>%
 FA_a_1.0 <- FA_a %>%
   filter(mean_prop >= 0.01)
 
+FA_a_0.5 <- FA_a %>% 
+  filter(mean_prop >= 0.005)
+
 # Unique FAs #
-FAs <- unique(FA_a_1.0$FA)
-FAs
+FAs_1.0 <- unique(FA_a_1.0$FA)
+FAs_1.0
+
+FAs_0.5 <- unique(FA_a_0.5$FA)
+FAs_0.5
+
+setdiff(FAs_0.5, FAs_1.0)
 
 # Filter Master FA data by unique FA >= 1% #
 FA_ac_filt <- FA_ac %>%
