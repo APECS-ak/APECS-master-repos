@@ -73,7 +73,7 @@ si <- read.csv("../ALL_DATA/Isotopes_eelgrass_comm_2018_RAW.csv", header = TRUE,
 
 Fatty Acid
 ```{r dat fa, echo = FALSE}
-fa <- read.csv("../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+fa <- read.csv("../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
 famrk <- read.csv("../ALL_DATA/Marker_FA_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
@@ -1785,37 +1785,37 @@ Append metadata
 ```{r}
 # All Primary Producers #
 fa_pro <- merge(fa_pro, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pro <- cbind(fa_pro[, c(1, 37:40, 2:36)])
-colnames(fa_eg)[5] <- "Sea_otter_tr"
+fa_pro <- cbind(fa_pro[, c(1, 49:52, 2:48)])
+colnames(fa_pro)[5] <- "Sea_otter_tr"
 
 # Eelgrass #
 fa_eg <- merge(fa_eg, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_eg <- cbind(fa_eg[, c(1, 37:40, 2:36)])
+fa_eg <- cbind(fa_eg[, c(1, 49:52, 2:48)])
 colnames(fa_eg)[5] <- "Sea_otter_tr"
 
 # Eelgrass diatoms / epiphytes #
 fa_ep <- merge(fa_ep, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_ep <- cbind(fa_ep[, c(1, 37:40, 2:36)])
+fa_ep <- cbind(fa_ep[, c(1, 49:52, 2:48)])
 colnames(fa_ep)[5] <- "Sea_otter_tr"
 
 # Fucus #
 fa_fu <- merge(fa_fu, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_fu <- cbind(fa_fu[, c(1, 37:40, 2:36)])
+fa_fu <- cbind(fa_fu[, c(1, 49:52, 2:48)])
 colnames(fa_fu)[5] <- "Sea_otter_tr"
 
 # POM #
 fa_pm <- merge(fa_pm, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pm <- cbind(fa_pm[, c(1, 37:40, 2:36)])
+fa_pm <- cbind(fa_pm[, c(1, 49:52, 2:48)])
 colnames(fa_pm)[5] <- "Sea_otter_tr"
 
 # Sugar Kelp #
 fa_sk <- merge(fa_sk, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_sk <- cbind(fa_sk[, c(1, 37:40, 2:36)])
+fa_sk <- cbind(fa_sk[, c(1, 49:52, 2:48)])
 colnames(fa_sk)[5] <- "Sea_otter_tr"
 
 # Ulva #
 fa_ul <- merge(fa_ul, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_ul <- cbind(fa_ul[, c(1, 37:40, 2:36)])
+fa_ul <- cbind(fa_ul[, c(1, 49:52, 2:48)])
 colnames(fa_ul)[5] <- "Sea_otter_tr"
 ```
 
@@ -1827,7 +1827,7 @@ fa_pcon <- fa %>%
 
 # Pentidotea #
 fa_ido <- fa %>% 
-  filter(Species_common == "Pentidotea")
+  filter(Species_common == "Idotea")
 
 # Limpet #
 fa_lmp <- fa %>% 
@@ -1846,27 +1846,27 @@ Append metadata
 ```{r}
 # Primary consumers #
 fa_pcon <- merge(fa_pcon, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_pcon <- cbind(fa_pcon[, c(1, 37:40, 2:36)])
+fa_pcon <- cbind(fa_pcon[, c(1, 49:52, 2:48)])
 colnames(fa_pcon)[5] <- "Sea_otter_tr"
 
 # Pentidotea #
 fa_ido <- merge(fa_ido, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_ido <- cbind(fa_ido[, c(1, 37:40, 2:36)])
+fa_ido <- cbind(fa_ido[, c(1, 49:52, 2:48)])
 colnames(fa_ido)[5] <- "Sea_otter_tr"
 
 # Limpet #
 fa_lmp <- merge(fa_lmp, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_lmp <- cbind(fa_lmp[, c(1, 37:40, 2:36)])
+fa_lmp <- cbind(fa_lmp[, c(1, 49:52, 2:48)])
 colnames(fa_lmp)[5] <- "Sea_otter_tr"
 
 # Butter Clams #
 fa_but <- merge(fa_but, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_but <- cbind(fa_but[, c(1, 37:40, 2:36)])
+fa_but <- cbind(fa_but[, c(1, 49:52, 2:48)])
 colnames(fa_but)[5] <- "Sea_otter_tr"
 
 # Macoma clams #
 fa_mac <- merge(fa_mac, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_mac <- cbind(fa_mac[, c(1, 37:40, 2:36)])
+fa_mac <- cbind(fa_mac[, c(1, 49:52, 2:48)])
 colnames(fa_mac)[5] <- "Sea_otter_tr"
 ```
 
@@ -1907,37 +1907,37 @@ fa_stg <- fa %>%
 ```{r}
 ## All secondary consumers ##
 fa_scon <- merge(fa_scon, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_scon <- cbind(fa_scon[, c(1, 37:40, 2:36)])
+fa_scon <- cbind(fa_scon[, c(1, 49:52, 2:48)])
 colnames(fa_scon)[5] <- "Sea_otter_tr"
 
 # Doch shrimp #
 fa_dsh <- merge(fa_dsh, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_dsh <- cbind(fa_dsh[, c(1, 37:40, 2:36)])
+fa_dsh <- cbind(fa_dsh[, c(1, 49:52, 2:48)])
 colnames(fa_dsh)[5] <- "Sea_otter_tr"
 
 # Helmet crabs #
 fa_hel <- merge(fa_hel, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_hel <- cbind(fa_hel[, c(1, 37:40, 2:36)])
+fa_hel <- cbind(fa_hel[, c(1, 49:52, 2:48)])
 colnames(fa_hel)[5] <- "Sea_otter_tr"
 
 # Graceful crabs #
 fa_grc <- merge(fa_grc, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_grc <- cbind(fa_grc[, c(1, 37:40, 2:36)])
+fa_grc <- cbind(fa_grc[, c(1, 49:52, 2:48)])
 colnames(fa_grc)[5] <- "Sea_otter_tr"
 
 # Shiner Perch #
 fa_shn <- merge(fa_shn, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_shn <- cbind(fa_shn[, c(1, 37:40, 2:36)])
+fa_shn <- cbind(fa_shn[, c(1, 49:52, 2:48)])
 colnames(fa_shn)[5] <- "Sea_otter_tr"
 
 # Snake pricklback #
 fa_snk <- merge(fa_snk, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_snk <- cbind(fa_snk[, c(1, 37:40, 2:36)])
+fa_snk <- cbind(fa_snk[, c(1, 49:52, 2:48)])
 colnames(fa_snk)[5] <- "Sea_otter_tr"
 
 # Staghorn sculpin #
 fa_stg <- merge(fa_stg, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
-fa_stg <- cbind(fa_stg[, c(1, 37:40, 2:36)])
+fa_stg <- cbind(fa_stg[, c(1, 49:52, 2:48)])
 colnames(fa_stg)[5] <- "Sea_otter_tr"
 ```
 
@@ -1952,7 +1952,7 @@ fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Pointed Macoma", "Maco
 fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Bentnose Macoma", "Macoma sp.", fa_mrk$Species_common)
 
 fa_mrk <- fa_mrk  %>% 
-  gather(key = "FA", value = "prop", 11:40) %>% 
+  gather(key = "FA", value = "prop", 11:52) %>% 
   filter(FA %in% famrk$FA) %>%
   filter(Species_common != "Red rock crab") %>% 
   group_by(FA, Sea_otter_region, Species_common) %>% 
@@ -1975,7 +1975,7 @@ OM3 <- names(fa[str_detect(names(fa), "w3")])
 OM6 <- names(fa[str_detect(names(fa), "w6")])
 OM3.6 <- names(fa[str_detect(names(fa), paste(c("w3", "w6"), collapse = "|"))])
 PUFA <- names(fa[str_detect(names(fa), paste(c(".2w", ".3w", ".4w", ".5w", ".6w"), collapse = "|"))])
-BAC <- c("C16.1w7", "C18.1w7", "a.C17.0", "i.C17.0")
+BAC <- c("a.C17.0", "a.C18.0",  "C15.0", "C17.0", "C17.1w9", "C18.1w9", "C20.1w7", "C20.1w9", "C22.1w9", "i.C15.0", "i.C16.0", "i.C17.0")
 ```
 
 Make comparisons
@@ -1988,7 +1988,7 @@ fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Pointed Macoma", "Maco
 fa_mrk$Species_common <- ifelse(fa_mrk$Species_common == "Bentnose Macoma", "Macoma sp.", fa_mrk$Species_common)
 
 fa_tll <- fa_mrk  %>% 
-  gather(key = "FA", value = "prop", 11:41) %>% 
+  gather(key = "FA", value = "prop", 11:53) %>% 
   filter(Species_common != "Red rock crab")
 
 ## ALA.LIN ##
@@ -2237,29 +2237,29 @@ ggplot(subset(fa_grp, FA_grp == "ARA"), aes(x = Sea_otter_region, y = prop_sum_m
 I will use and arcsine sqrt transformation.
 ```{r fa trans std, echo = FALSE}
 ## Primary Producers ##
-fa_pro_trs <- asin(sqrt(fa_pro[, 11:40]))
-fa_eg_trs <- asin(sqrt(fa_eg[, 11:40]))
-fa_ep_trs <- asin(sqrt(fa_ep[, 11:40]))
-fa_fu_trs <- asin(sqrt(fa_fu[, 11:40]))
-fa_pm_trs <- asin(sqrt(fa_pm[, 11:40]))
-fa_sk_trs <- asin(sqrt(fa_sk[, 11:40]))
-fa_ul_trs <- asin(sqrt(fa_ul[, 11:40]))
+fa_pro_trs <- asin(sqrt(fa_pro[, 11:52]))
+fa_eg_trs <- asin(sqrt(fa_eg[, 11:52]))
+fa_ep_trs <- asin(sqrt(fa_ep[, 11:52]))
+fa_fu_trs <- asin(sqrt(fa_fu[, 11:52]))
+fa_pm_trs <- asin(sqrt(fa_pm[, 11:52]))
+fa_sk_trs <- asin(sqrt(fa_sk[, 11:52]))
+fa_ul_trs <- asin(sqrt(fa_ul[, 11:52]))
 
 ## Primary Consumers ##
-fa_pcon_trs <- asin(sqrt(fa_pcon[, 11:40]))
-fa_ido_trs <- asin(sqrt(fa_ido[, 11:40]))
-fa_lmp_trs <- asin(sqrt(fa_lmp[, 11:40]))
-fa_but_trs <- asin(sqrt(fa_but[, 11:40]))
-fa_mac_trs <- asin(sqrt(fa_mac[, 11:40]))
+fa_pcon_trs <- asin(sqrt(fa_pcon[, 11:52]))
+fa_ido_trs <- asin(sqrt(fa_ido[, 11:52]))
+fa_lmp_trs <- asin(sqrt(fa_lmp[, 11:52]))
+fa_but_trs <- asin(sqrt(fa_but[, 11:52]))
+fa_mac_trs <- asin(sqrt(fa_mac[, 11:52]))
 
 ## Secondary consumers ##
-fa_scon_trs <- asin(sqrt(fa_scon[, 11:40]))
-fa_dsh_trs <- asin(sqrt(fa_dsh[, 11:40]))
-fa_hel_trs <- asin(sqrt(fa_hel[, 11:40]))
-fa_grc_trs <- asin(sqrt(fa_grc[, 11:40]))
-fa_shn_trs <- asin(sqrt(fa_shn[, 11:40]))
-fa_snk_trs <- asin(sqrt(fa_snk[, 11:40]))
-fa_stg_trs <- asin(sqrt(fa_stg[, 11:40]))
+fa_scon_trs <- asin(sqrt(fa_scon[, 11:52]))
+fa_dsh_trs <- asin(sqrt(fa_dsh[, 11:52]))
+fa_hel_trs <- asin(sqrt(fa_hel[, 11:52]))
+fa_grc_trs <- asin(sqrt(fa_grc[, 11:52]))
+fa_shn_trs <- asin(sqrt(fa_shn[, 11:52]))
+fa_snk_trs <- asin(sqrt(fa_snk[, 11:52]))
+fa_stg_trs <- asin(sqrt(fa_stg[, 11:52]))
 ```
 
 #### Ordination
@@ -2408,8 +2408,14 @@ fa_but_simp <- fa_but
 # Dock Shrimp #
 fa_dsh_simp <- fa_dsh
 
+# Helmet crab #
+fa_hel_simp <- fa_hel
+
 # Graceful crabs #
 fa_grc_simp <- fa_grc
+
+# Snake prickleback #
+fa_snk_simp <- fa_snk
 
 # Staghorn sculpin #
 fa_stg_simp <- fa_stg
@@ -2418,7 +2424,7 @@ fa_stg_simp <- fa_stg
 ###### Primary Producers
 ```{r}
 ## Eelgrass ##
-simp.eg <- simper(fa_eg_simp[, 11:40], fa_eg_simp$Sea_otter_tr, permutations = 9999)
+simp.eg <- simper(fa_eg_simp[, 11:52], fa_eg_simp$Sea_otter_tr, permutations = 9999)
 simp.eg.dat <- summary(simp.eg, ordered = TRUE, digits = 4)
 simp.eg.dat <- data.frame(simp.eg.dat$Low_High)
 simp.eg.dat$FA <- row.names(simp.eg.dat)
@@ -2438,7 +2444,7 @@ simp.eg.redu <- simp.eg.dat %>%
   rename("High" = avb)
 
 ## Fucus ##
-simp.fu <- simper(fa_fu_simp[, 11:40], fa_fu_simp$Sea_otter_tr, permutations = 9999)
+simp.fu <- simper(fa_fu_simp[, 11:52], fa_fu_simp$Sea_otter_tr, permutations = 9999)
 simp.fu.dat <- summary(simp.fu, ordered = TRUE, digits = 4)
 simp.fu.dat <- data.frame(simp.fu.dat$Low_High)
 simp.fu.dat$FA <- row.names(simp.fu.dat)
@@ -2459,7 +2465,7 @@ simp.fu.redu <- simp.fu.dat %>%
   rename("High" = avb)
 
 ## POM ##
-simp.pm <- simper(fa_pm_simp[, 11:40], fa_pm_simp$Sea_otter_tr, permutations = 9999)
+simp.pm <- simper(fa_pm_simp[, 11:52], fa_pm_simp$Sea_otter_tr, permutations = 9999)
 simp.pm.dat <- summary(simp.pm, ordered = TRUE, digits = 4)
 simp.pm.dat <- data.frame(simp.pm.dat$Low_High)
 simp.pm.dat$FA <- row.names(simp.pm.dat)
@@ -2480,7 +2486,7 @@ simp.pm.redu <- simp.pm.dat %>%
   rename("High" = avb)
 
 ## Ulva ##
-simp.ul <- simper(fa_ul_simp[, 11:40], fa_ul_simp$Sea_otter_tr, permutations = 9999)
+simp.ul <- simper(fa_ul_simp[, 11:52], fa_ul_simp$Sea_otter_tr, permutations = 9999)
 simp.ul.dat <- summary(simp.ul, ordered = TRUE, digits = 4)
 simp.ul.dat <- data.frame(simp.ul.dat$Low_High)
 simp.ul.dat$FA <- row.names(simp.ul.dat)
@@ -2504,7 +2510,7 @@ simp.ul.redu <- simp.ul.dat %>%
 ###### Primary Consumers
 ```{r}
 ## Pentidotea ##
-simp.ido <- simper(fa_ido_simp[, 11:40], fa_ido_simp$Sea_otter_tr, permutations = 9999)
+simp.ido <- simper(fa_ido_simp[, 11:52], fa_ido_simp$Sea_otter_tr, permutations = 9999)
 simp.ido.dat <- summary(simp.ido, ordered = TRUE, digits = 4)
 simp.ido.dat <- data.frame(simp.ido.dat$Low_High)
 simp.ido.dat$FA <- row.names(simp.ido.dat)
@@ -2525,7 +2531,7 @@ simp.ido.redu <- simp.ido.dat %>%
   rename("High" = avb)
 
 ## Limpets ##
-simp.lmp <- simper(fa_lmp_simp[, 11:40], fa_lmp_simp$Sea_otter_tr, permutations = 9999)
+simp.lmp <- simper(fa_lmp_simp[, 11:52], fa_lmp_simp$Sea_otter_tr, permutations = 9999)
 simp.lmp.dat <- summary(simp.lmp, ordered = TRUE, digits = 4)
 simp.lmp.dat <- data.frame(simp.lmp.dat$Low_High)
 simp.lmp.dat$FA <- row.names(simp.lmp.dat)
@@ -2546,7 +2552,7 @@ simp.lmp.redu <- simp.lmp.dat %>%
   rename("High" = avb)
 
 # Butter clams #
-simp.but <- simper(fa_but_simp[, 11:40], fa_but_simp$Sea_otter_tr, permutations = 9999)
+simp.but <- simper(fa_but_simp[, 11:52], fa_but_simp$Sea_otter_tr, permutations = 9999)
 simp.but.dat <- summary(simp.but, ordered = TRUE, digits = 4)
 simp.but.dat <- data.frame(simp.but.dat$Low_High)
 simp.but.dat$FA <- row.names(simp.but.dat)
@@ -2570,7 +2576,7 @@ simp.but.redu <- simp.but.dat %>%
 ###### Secondary consumers
 ```{r}
 ## Dock shrimp ##
-simp.dsh <- simper(fa_dsh_simp[, 11:40], fa_dsh_simp$Sea_otter_tr, permutations = 9999)
+simp.dsh <- simper(fa_dsh_simp[, 11:52], fa_dsh_simp$Sea_otter_tr, permutations = 9999)
 simp.dsh.dat <- summary(simp.dsh, ordered = TRUE, digits = 4)
 simp.dsh.dat <- data.frame(simp.dsh.dat$Low_High)
 simp.dsh.dat$FA <- row.names(simp.dsh.dat)
@@ -2591,7 +2597,7 @@ simp.dsh.redu <- simp.dsh.dat %>%
   rename("High" = avb)
 
 ## Helmet crabs ##
-simp.hel <- simper(fa_hel_simp[, 11:40], fa_hel_simp$Sea_otter_tr, permutations = 9999)
+simp.hel <- simper(fa_hel_simp[, 11:52], fa_hel_simp$Sea_otter_tr, permutations = 9999)
 simp.hel.dat <- summary(simp.hel, ordered = TRUE, digits = 4)
 simp.hel.dat <- data.frame(simp.hel.dat$Low_High)
 simp.hel.dat$FA <- row.names(simp.hel.dat)
@@ -2612,7 +2618,7 @@ simp.hel.redu <- simp.hel.dat %>%
   rename("High" = avb)
 
 ## Graceful crabs ##
-simp.grc <- simper(fa_grc_simp[, 11:40], fa_grc_simp$Sea_otter_tr, permutations = 9999)
+simp.grc <- simper(fa_grc_simp[, 11:52], fa_grc_simp$Sea_otter_tr, permutations = 9999)
 simp.grc.dat <- summary(simp.grc, ordered = TRUE, digits = 4)
 simp.grc.dat <- data.frame(simp.grc.dat$Low_High)
 simp.grc.dat$FA <- row.names(simp.grc.dat)
@@ -2632,29 +2638,8 @@ simp.grc.redu <- simp.grc.dat %>%
   rename("Low" = ava) %>% 
   rename("High" = avb)
 
-## Shiner perch ##
-simp.shn <- simper(fa_shn_simp[, 11:40], fa_shn_simp$Sea_otter_tr, permutations = 9999)
-simp.shn.dat <- summary(simp.shn, ordered = TRUE, digits = 4)
-simp.shn.dat <- data.frame(simp.shn.dat$Low_High)
-simp.shn.dat$FA <- row.names(simp.shn.dat)
-simp.shn.dat$average_scaled <- simp.shn.dat$average / sum(simp.shn.dat$average)
-simp.shn$Low_High$overall
-simp.shn.dat$taxa <- "Shiner perch"
-
-simp.shn.redu <- simp.shn.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
 ## Snake prickleback ##
-simp.snk <- simper(fa_snk_simp[, 11:40], fa_snk_simp$Sea_otter_tr, permutations = 9999)
+simp.snk <- simper(fa_snk_simp[, 11:52], fa_snk_simp$Sea_otter_tr, permutations = 9999)
 simp.snk.dat <- summary(simp.snk, ordered = TRUE, digits = 4)
 simp.snk.dat <- data.frame(simp.snk.dat$Low_High)
 simp.snk.dat$FA <- row.names(simp.snk.dat)
@@ -2675,7 +2660,7 @@ simp.snk.redu <- simp.snk.dat %>%
   rename("High" = avb)
 
 ## Staghorn sculpin ##
-simp.stg <- simper(fa_stg_simp[, 11:40], fa_stg_simp$Sea_otter_tr, permutations = 9999)
+simp.stg <- simper(fa_stg_simp[, 11:52], fa_stg_simp$Sea_otter_tr, permutations = 9999)
 simp.stg.dat <- summary(simp.stg, ordered = TRUE, digits = 4)
 simp.stg.dat <- data.frame(simp.stg.dat$High_Low)
 simp.stg.dat$FA <- row.names(simp.stg.dat)
@@ -2707,7 +2692,9 @@ simp.sum <- rbind(simp.eg.dat,
                   simp.lmp.dat,
                   simp.but.dat,
                   simp.dsh.dat,
+                  simp.hel.dat,
                   simp.grc.dat,
+                  simp.snk.dat,
                   simp.stg.dat)
 
 ## Export ##
