@@ -28,6 +28,7 @@ library(broom)
 library(cplm)
 library(jtools)
 library(ggstance)
+library(ggrepel)
 
 theme_set(theme_classic())
 ```
@@ -41,7 +42,7 @@ st.er <- function(x, na.rm = TRUE) {
 
 ```{r}
 shape.pal <- c(15, 16, 17)
-so.pal <- (c("red3", "deepskyblue3"))
+so.pal <- (c("darkorange2", "blue3"))
 ```
 
 ## Data
@@ -390,12 +391,12 @@ ggplot(eg) +
   xlab("Log grazer load g/g") +
   ylab("Count")
 
-## Idotea load ##
-hist(eg$idotea_load)
-range(eg$idotea_load)
-hist(sqrt(eg$idotea_load))
-hist((eg$idotea_load)^0.33)
-hist((eg$idotea_load)^0.25)
+## Pentidotea load ##
+hist(eg$Pentidotea_load)
+range(eg$Pentidotea_load)
+hist(sqrt(eg$Pentidotea_load))
+hist((eg$Pentidotea_load)^0.33)
+hist((eg$Pentidotea_load)^0.25)
 
 ## limpet load ##
 hist(eg$limpet_load)
@@ -487,8 +488,8 @@ mod.gr.1 <- lme(sqrt(grazer_load) ~ sea_otter_tr, random = ~1|site, data = eg)
 plot(mod.gr.1)
 summary(mod.gr.1)
 
-## Idotea ##
-mod.id.1 <- lme(idotea_load^0.25 ~ sea_otter_tr, random = ~1|site, data = eg)
+## Pentidotea ##
+mod.id.1 <- lme(Pentidotea_load^0.25 ~ sea_otter_tr, random = ~1|site, data = eg)
 plot(mod.id.1)
 summary(mod.id.1)
 
@@ -597,8 +598,8 @@ eg.sum <- eg %>%
             epi_load_sd = sd(epi_load),
             grz_load_mean = mean(grazer_load),
             grz_load_sd = sd(grazer_load),
-            ido_load_mean = mean(idotea_load),
-            ido_load_sd = sd(idotea_load ),
+            ido_load_mean = mean(Pentidotea_load),
+            ido_load_sd = sd(Pentidotea_load ),
             lmp_load_mean = mean(limpet_load),
             lmp_load_sd = sd(limpet_load))
 
@@ -610,8 +611,8 @@ eg.sum.tr <- eg %>%
             epi_load_sd = sd(epi_load),
             grz_load_mean = mean(grazer_load),
             grz_load_sd = sd(grazer_load),
-            ido_load_mean = mean(idotea_load),
-            ido_load_sd = sd(idotea_load ),
+            ido_load_mean = mean(Pentidotea_load),
+            ido_load_sd = sd(Pentidotea_load ),
             lmp_load_mean = mean(limpet_load),
             lmp_load_sd = sd(limpet_load))
 ```
@@ -749,7 +750,7 @@ fsh.prop.sum <- fsh.prop %>%
 ## Eelgrass ##
 ggplot(eg.sum) +
   geom_bar(aes(x = site, y = shoot_mass_m_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
-  geom_errorbar(aes(x = site, ymin = shoot_mass_m_mean - shoot_mass_m_se, ymax = shoot_mass_m_mean + shoot_mass_m_se), width = 0) +
+  geom_errorbar(aes(x = site, ymin = shoot_mass_m_mean - shoot_mass_m_sd, ymax = shoot_mass_m_mean + shoot_mass_m_sd), width = 0) +
   scale_fill_manual("Sea otter\ntreatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
@@ -764,7 +765,7 @@ ggplot() +
   geom_point(data = eg.sum, aes(x = sea_otter_tr, y = shoot_mass_m_mean), size = 2, pch = 1, position = position_nudge(x = 0.2)) +
   scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100))
   
-elg.m <- ggplot() +
+elg.m <-ggplot() +
   geom_errorbar(data = eg.sum, aes(x = site, ymin = shoot_mass_m_mean - shoot_mass_m_sd, ymax = shoot_mass_m_mean + shoot_mass_m_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = eg.sum, aes(x = site, y = shoot_mass_m_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
@@ -777,8 +778,17 @@ elg.m <- ggplot() +
   scale_y_continuous(limits = c(0, 400), breaks = seq(0, 400, by = 100)) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   ylab(bquote("Eelgrass mass" ~(g/m^-2))) +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
+
+ggplot() +
+  geom_boxplot(data = eg, aes(sea_otter_tr, shoot_mass_m, fill = sea_otter_tr)) +
+  scale_fill_manual(values = so.pal, "Sea otter region") +
+  scale_y_continuous(limits = c(0, 500), breaks = seq(0, 500, by = 100)) +
+  ylab(bquote("Seagrass mass" ~(g/m^-2))) +
+  theme(legend.position = "none", text = element_text(size = 8)) +
+  scale_x_discrete(labels = c("High", "Low")) +
+  xlab("")
   
 ## Epiphyte Load ##
 ggplot(eg.sum) +
@@ -804,9 +814,17 @@ epi.m <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 0.012), breaks = seq(0, 0.012, by = 0.003)) +
   ylab("Epiphyte load (g/g)") +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
+ggplot() +
+  geom_boxplot(data = eg, aes(sea_otter_tr, epi_load, fill = sea_otter_tr)) +
+  scale_fill_manual(values = so.pal, "Sea otter region") +
+  scale_y_continuous(limits = c(0, 0.015), breaks = seq(0, 0.015, by = 0.003)) +
+  ylab("Epiphyte load (g/g)") +
+  theme(legend.position = "none", text = element_text(size = 8)) +
+  scale_x_discrete(labels = c("High", "Low")) +
+  xlab("")
 
 ## POM ##
 ggplot(pom.sum) +
@@ -832,7 +850,7 @@ pom.m <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 3.2), breaks = seq(0, 3.2, by = 0.5)) +
   ylab("Percent organic matter") +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Grazer Load ##
@@ -859,17 +877,17 @@ grz.all <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-0.002, 0.35), breaks = seq(0, 0.35, by = 0.1)) +
   ylab("Epifauna load (g/g)") +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
-## Idotea Load ##
+## Pentidotea Load ##
 ggplot(eg.sum) +
   geom_bar(aes(x = site, y = ido_load_mean, fill = sea_otter_tr), position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(x = site, ymin = ido_load_mean - ido_load_se, ymax = ido_load_mean + ido_load_se), width = 0) +
   scale_fill_manual("Sea otter treatment", labels = c("High", "Low"), values = so.pal) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 0.15), breaks = seq(0, 0.15, by = 0.03)) +
-  ylab("Idotea load (g/g)") +
+  ylab("Pentidotea load (g/g)") +
   xlab("Site") +
   theme(legend.position = "none", text = element_text(size = 8))
 
@@ -885,8 +903,8 @@ ido.m <- ggplot() +
   geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = ido_load_mean - ido_load_sd, xend = 6, yend = ido_load_mean - ido_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-0.02, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
-  ylab("Idotea load (g/g))") +
-  xlab("Site") +
+  ylab("Pentidotea load (g/g)") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Limpet Load ##
@@ -913,7 +931,7 @@ lmp.m <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-0.005, 0.04), breaks = seq(0, 0.04, by = 0.01)) +
   ylab("Limpet load (g/g)") +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Clams site ##
@@ -940,7 +958,7 @@ clm.all <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 800), breaks = seq(0, 800, by = 200)) +
   ylab(bquote("Clam mass" ~(g/m^-2))) +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Butter clams ##
@@ -967,7 +985,7 @@ but.m <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-30, 600), breaks = seq(0, 600, by = 100)) +
   ylab(bquote("Butter clam" ~(g/m^-2))) +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Macoma sp. clams ##
@@ -994,7 +1012,7 @@ mac.m <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-30, 500), breaks = seq(0, 500, by = 100)) +
   ylab(bquote("Macoma sp. clam mass" ~(g/m^-2))) +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Crabs site sp ##
@@ -1021,7 +1039,7 @@ crb.all <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-200, 2600), breaks = seq(0, 2500, by = 500)) +
   ylab("Crab (g/string)")  +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Gracefuil crabs ##
@@ -1075,7 +1093,7 @@ hel.m <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-30, 200), breaks = seq(0, 200, by = 50)) +
   ylab("Helmet crab (g/string)")  +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Red rock crabs ##
@@ -1102,7 +1120,7 @@ rrc.m <- ggplot() +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-100, 2500), breaks = seq(0, 2500, by = 500)) +
   ylab("Red rock crab (g/string)")  +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Fish site ##
@@ -1127,7 +1145,7 @@ fsh.all <- ggplot() +
   scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(-2, 40), breaks = seq(0, 40, by = 10)) +
   ylab("Fish (kg/site)") +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
   
 ## Staghorn ##
@@ -1152,7 +1170,7 @@ stg.m <- ggplot() +
   scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(0, 3), breaks = seq(0, 3, by = 1)) +
   ylab("Staghorn sculpin (kg/site)") +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Shiner ##
@@ -1177,7 +1195,7 @@ shn.m <- ggplot() +
   scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(-5, 22), breaks = seq(-5, 22, by = 5)) +
   ylab("Shiner perch (kg/set)") +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Snake prickleback ##
@@ -1202,7 +1220,7 @@ snk.m <- ggplot() +
   scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(-5, 15), breaks = seq(-5, 15, by = 5)) +
   ylab("Snake prickleback (kg/set)") +
-  xlab("Site") +
+  xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
 
 ## Fish proportions ##
@@ -1591,9 +1609,9 @@ si_ul <- si %>%
   filter(Species_common == "Ulva")
 
 ## Primary Consumers ##
-# Idotea #
+# Pentidotea #
 si_ido <- si %>% 
-  filter(Species_common == "Idotea")
+  filter(Species_common == "Pentidotea")
 
 # Butter Clams ##
 si_but <- si %>% 
@@ -1663,7 +1681,7 @@ t.test(del_C ~ Sea_otter_tr, data = si_ul)
 t.test(del_N ~ Sea_otter_tr, data = si_ul)
 
 ## Primary consumers ##
-# Idotea #
+# Pentidotea #
 t.test(del_C ~ Sea_otter_tr, data = si_ido)
 
 t.test(del_N ~ Sea_otter_tr, data = si_ido)
@@ -1805,11 +1823,11 @@ colnames(fa_ul)[5] <- "Sea_otter_tr"
 ```{r}
 ## Primary consumers ##
 fa_pcon <- fa %>% 
-  filter(Species_common == "Butter clam" | Species_common == "Idotea" | Species_common == "Limpet" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
+  filter(Species_common == "Butter clam" | Species_common == "Pentidotea" | Species_common == "Limpet" | Species_common == "Macoma sp." | Species_common == "Pointed Macoma" | Species_common == "Bentnose Macoma")
 
-# Idotea #
+# Pentidotea #
 fa_ido <- fa %>% 
-  filter(Species_common == "Idotea")
+  filter(Species_common == "Pentidotea")
 
 # Limpet #
 fa_lmp <- fa %>% 
@@ -1831,7 +1849,7 @@ fa_pcon <- merge(fa_pcon, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomar
 fa_pcon <- cbind(fa_pcon[, c(1, 37:40, 2:36)])
 colnames(fa_pcon)[5] <- "Sea_otter_tr"
 
-# Idotea #
+# Pentidotea #
 fa_ido <- merge(fa_ido, bimrk[, c(1, 2, 3, 4, 7)], by.x = "ID", by.y = "Biomarker_ID")
 fa_ido <- cbind(fa_ido[, c(1, 37:40, 2:36)])
 colnames(fa_ido)[5] <- "Sea_otter_tr"
@@ -1941,7 +1959,7 @@ fa_mrk <- fa_mrk  %>%
   summarize(prop_m = mean(prop),
             prop_sd = sd(prop))
 
-fa_mrk$Species_common <- factor(fa_mrk$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
+fa_mrk$Species_common <- factor(fa_mrk$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Pentidotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
 ```
 
 ###### FA groups
@@ -2307,7 +2325,7 @@ perm.ul
 ##### Primary Consumers
 ```{r}
 ## All primary consumers ##
-# Idotea #
+# Pentidotea #
 perm.ido <- adonis2(fa_ido_dist ~ Sea_otter_tr, data = fa_ido, perm = 9999)
 perm.ido
 
@@ -2377,7 +2395,7 @@ fa_pm_simp <- fa_pm
 fa_ul_simp <- fa_ul
 
 ## Primary Consumers ##
-# Idotea #
+# Pentidotea #
 fa_ido_simp <- fa_ido
 
 # Limpet #
@@ -2485,14 +2503,14 @@ simp.ul.redu <- simp.ul.dat %>%
 
 ###### Primary Consumers
 ```{r}
-## Idotea ##
+## Pentidotea ##
 simp.ido <- simper(fa_ido_simp[, 11:40], fa_ido_simp$Sea_otter_tr, permutations = 9999)
 simp.ido.dat <- summary(simp.ido, ordered = TRUE, digits = 4)
 simp.ido.dat <- data.frame(simp.ido.dat$Low_High)
 simp.ido.dat$FA <- row.names(simp.ido.dat)
 simp.ido.dat$average_scaled <- simp.ido.dat$average / sum(simp.ido.dat$average)
 simp.ido$Low_High$overall
-simp.ido.dat$taxa <- "Idotea"
+simp.ido.dat$taxa <- "Pentidotea"
 
 simp.ido.redu <- simp.ido.dat %>% 
   filter(cumsum <= 0.9) %>% 
@@ -2711,7 +2729,7 @@ simp.top <- simp.sum %>%
 
 ## Top summaries ##
 simp.top.sum <- simp.top %>% 
-  filter(taxa == "Eelgrass" | taxa == "Fucus" | taxa == "POM" | taxa == "Sugar kelp" | taxa == "Ulva" | taxa == "Idotea" | taxa == "Limpet" | taxa == "Butter clam" | taxa == "Dock shrimp" | taxa == "Graceful crab" | taxa == "Staghorn sculpin") %>% 
+  filter(taxa == "Eelgrass" | taxa == "Fucus" | taxa == "POM" | taxa == "Sugar kelp" | taxa == "Ulva" | taxa == "Pentidotea" | taxa == "Limpet" | taxa == "Butter clam" | taxa == "Dock shrimp" | taxa == "Graceful crab" | taxa == "Staghorn sculpin") %>% 
   group_by(FA) %>% 
   summarize(n = n())
 
@@ -2807,7 +2825,7 @@ fa_lmp_mds_dat <- as.data.frame(scores(fa_lmp_mds))
 fa_lmp_mds_dat$ID <- fa_lmp$ID 
 fa_lmp_mds_dat <- merge(fa_lmp_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
 
-# Idotea #
+# Pentidotea #
 fa_ido_mds_dat <- as.data.frame(scores(fa_ido_mds))
 fa_ido_mds_dat$ID <- fa_ido$ID 
 fa_ido_mds_dat <- merge(fa_ido_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
@@ -2926,7 +2944,7 @@ vec.ul.dat.sig$FA = sub("w", "*omega*-", vec.ul.dat.sig$FA)
 vec.ul.dat.sig$FA = sub("\\.", ":", vec.ul.dat.sig$FA)
 
 ## Primary Consumers ##
-# Idotea #
+# Pentidotea #
 vec.ido <- envfit(fa_ido_mds$points, fa_ido[, 11:40], perm = 9999)
 vec.ido.arrows <- scores(vec.ido, display = "vectors")
 vec.ido.dat <- data.frame(vec.ido.arrows)
@@ -3109,7 +3127,7 @@ ul.nmds <- ggplot(fa_ul_mds_dat) +
   theme(legend.position = "none")
 
 ## Primary Consumers ##
-# Idotea #
+# Pentidotea #
 ido.nmsd <- ggplot(fa_ido_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
