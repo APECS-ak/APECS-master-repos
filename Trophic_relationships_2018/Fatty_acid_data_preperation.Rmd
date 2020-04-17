@@ -111,8 +111,8 @@ b5_ac$Conc <- gather(b5_conc, key = "FA", value = "Conc", 2:59)[,3]
 b5_ac$Batch <- as.character(5)
 
 ## Batch 6 ##
-b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:66)
-b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:66)[,3]
+b6_ac <- gather(b6_area, key = "FA", value = "Area", 2:65)
+b6_ac$Conc <- gather(b6_conc, key = "FA", value = "Conc", 2:65)[,3]
 b6_ac$Batch <- as.character(6)
 
 ## Batch 7 ##
@@ -195,12 +195,20 @@ FAs_0.5
 setdiff(FAs_0.5, FAs_1.0)
 
 # Filter Master FA data by unique FA >= 1% #
-FA_ac_filt <- FA_ac %>%
-  filter(FA %in% FAs) %>% 
+FA_ac_filt_1.0 <- FA_ac %>%
+  filter(FA %in% FAs_1.0) %>% 
   group_by(ID) %>%
   mutate(Total_filt_area = sum(Area))
 
-FA_ac_filt$Prop_filt_area <- FA_ac_filt$Area / FA_ac_filt$Total_filt_area
+FA_ac_filt_1.0$Prop_filt_area <- FA_ac_filt_1.0$Area / FA_ac_filt_1.0$Total_filt_area
+
+# Filter Master FA data by unique FA >=0.5% #
+FA_ac_filt_0.5 <- FA_ac %>%
+  filter(FA %in% FAs_0.5) %>% 
+  group_by(ID) %>%
+  mutate(Total_filt_area = sum(Area))
+
+FA_ac_filt_0.5$Prop_filt_area <- FA_ac_filt_0.5$Area / FA_ac_filt_0.5$Total_filt_area
 ```
 
 ## C19 standard data
@@ -259,15 +267,30 @@ sp_prop_summary_1.0 <- FA_ac_filt %>%
 Convert tall data to wide for multivarite analysis. General structure will be sample data columns followed by FA columns with zeros filling instances when a sample did not have a FA that other samples did.
 
 ```{r tall to wide, echo = FALSE}
-FA_prop <- spread(FA_ac_filt[, c(1, 3, 4, 7, 8, 9, 10, 14)], key = FA, value = Prop_filt_area)
+## 1.0% Filter ##
+FA_prop_1.0 <- spread(FA_ac_filt_1.0[, c(1, 3, 4, 7, 8, 9, 10, 14)], key = FA, value = Prop_filt_area)
+FA_prop_1.0[is.na(FA_prop_1.0)] <- 0
 
-FA_prop[is.na(FA_prop)] <- 0
+FA_conc_1.0 <- spread(FA_ac_filt_1.0[, c(1, 3, 4, 6, 7, 8, 9, 10)], key = FA, value = Conc)
+FA_conc_1.0[is.na(FA_conc_1.0)] <- 0
+
+## 0.5 Filter ##
+FA_prop_0.5 <- spread(FA_ac_filt_0.5[, c(1, 3, 4, 7, 8, 9, 10, 14)], key = FA, value = Prop_filt_area)
+FA_prop_0.5[is.na(FA_prop_0.5)] <- 0
+
+FA_conc_0.5 <- spread(FA_ac_filt_0.5[, c(1, 3, 4, 6, 7, 8, 9, 10)], key = FA, value = Conc)
+FA_conc_0.5[is.na(FA_conc_0.5)] <- 0
 ```
 
 
 ### Export wide data
 ```{r export wide, echo = FALSE}
 ## 1.0% filter ##
-write.csv(FA_prop, "../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", row.names = FALSE)
+write.csv(FA_prop_1.0, "../ALL_DATA/FA_proportions_1.0filter_2018_derived.csv", row.names = FALSE)
+write.csv(FA_conc_1.0, "../ALL_DATA/FA_concentrations_1.0filter_2018_derived.csv", row.names = FALSE)
+
+## 0.5% filter ##
+write.csv(FA_prop_0.5, "../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", row.names = FALSE)
+write.csv(FA_conc_0.5, "../ALL_DATA/FA_concentrations_0.5filter_2018_derived.csv", row.names = FALSE)
 ```
 
