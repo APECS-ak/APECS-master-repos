@@ -1975,7 +1975,7 @@ OM3 <- names(fa[str_detect(names(fa), "w3")])
 OM6 <- names(fa[str_detect(names(fa), "w6")])
 OM3.6 <- names(fa[str_detect(names(fa), paste(c("w3", "w6"), collapse = "|"))])
 PUFA <- names(fa[str_detect(names(fa), paste(c(".2w", ".3w", ".4w", ".5w", ".6w"), collapse = "|"))])
-BAC <- c("a.C17.0", "a.C18.0",  "C15.0", "C17.0", "C17.1w9", "C18.1w9", "C20.1w7", "C20.1w9", "C22.1w9", "i.C15.0", "i.C16.0", "i.C17.0")
+BAC <- c("a.C17.0", "a.C18.0",  "C15.0", "C17.0", "C17.1w9", "C18.1w7", "C18.1w9", "C20.1w7", "C20.1w9", "C22.1w9", "i.C15.0", "i.C16.0", "i.C17.0")
 ```
 
 Make comparisons
