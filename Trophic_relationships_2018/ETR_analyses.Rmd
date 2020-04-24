@@ -75,7 +75,21 @@ Fatty Acid
 ```{r dat fa, echo = FALSE}
 fa <- read.csv("../ALL_DATA/FA_proportions_0.5filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
 
+fa_conc <- read.csv("../ALL_DATA/FA_concentrations_0.5filter_2018_derived.csv", header = TRUE, stringsAsFactors = FALSE)
+
 famrk <- read.csv("../ALL_DATA/Marker_FA_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+Fatty acid sample mass
+```{r}
+samp_mass <- read.csv("../ALL_DATA/Biomarker_extraction_mass_2018_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+samp_mass$Weigh_date <- as.Date(samp_mass$Weigh_date, "%m/%d/%Y")
+samp_mass$Extraction_date <- as.Date(samp_mass$Extraction_date, "%m/%d/%Y")
+
+samp_mass_redu <- samp_mass %>% 
+  filter(Notes != "error in extraction") %>% 
+  filter(Biomarker_ID != "B_004" & sample_on_foil_mg != 22.67) %>% 
+  filter(Biomarker_ID != "B_160")
 ```
 
 Biomarker metadata
@@ -1941,7 +1955,8 @@ fa_stg <- cbind(fa_stg[, c(1, 49:52, 2:48)])
 colnames(fa_stg)[5] <- "Sea_otter_tr"
 ```
 
-##### Marker FA
+#### Marker FA
+##### Proportions data prep
 Filter data for FA which have known sources.
 ```{r}
 ## Specific Markers ##
@@ -1962,7 +1977,7 @@ fa_mrk <- fa_mrk  %>%
 fa_mrk$Species_common <- factor(fa_mrk$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Pentidotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
 ```
 
-###### FA groups
+##### FA groups
 LC-PUFAs, 18C EFA, omega-3 and omega-6, PUFA, Bacterial
 
 Make groups
@@ -1978,7 +1993,7 @@ PUFA <- names(fa[str_detect(names(fa), paste(c(".2w", ".3w", ".4w", ".5w", ".6w"
 BAC <- c("a.C17.0", "a.C18.0",  "C15.0", "C17.0", "C17.1w9", "C18.1w7", "C18.1w9", "C20.1w7", "C20.1w9", "C22.1w9", "i.C15.0", "i.C16.0", "i.C17.0")
 ```
 
-Make comparisons
+##### Make comparisons
 ```{r}
 fa_mrk <- merge(bimrk[, c(1, 2, 3, 4, 7)], fa, by.x = "Biomarker_ID", by.y = "ID")
 fa_mrk$EPA.DHA <- fa_mrk$C20.5w3 / fa_mrk$C22.6w3
@@ -2144,7 +2159,7 @@ fa_grp_low_sd_wide <- fa_grp %>%
 fa_grp_low_sd_wide[, 3:10] <- round(fa_grp_low_sd_wide[, 3:10], 3)
 ```
 
-Mann-Whitney tests
+##### Mann-Whitney tests
 ```{r}
 ## ALA.LIN ##
 ALA.LIN.MWU <- fa_ALA.LIN_all %>% 
@@ -2210,7 +2225,7 @@ fa_grp_MWU_t$Species_common <- factor(fa_grp_MWU_t$Species_common, levels = c("E
 fa_grp_MWU_t <- tidyr::spread(fa_grp_MWU_t, key = FA_grp, value = statistic)
 ```
 
-Plots
+##### Plots
 ```{r}
 ggplot(fa_grp, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
   geom_bar(position = position_dodge(), stat = "identity") +
@@ -2233,7 +2248,7 @@ ggplot(subset(fa_grp, FA_grp == "ARA"), aes(x = Sea_otter_region, y = prop_sum_m
   facet_wrap(~Species_common, scales = "free_x")
 ```
 
-##### Transformations
+#### Transformations
 I will use and arcsine sqrt transformation.
 ```{r fa trans std, echo = FALSE}
 ## Primary Producers ##
@@ -3318,5 +3333,293 @@ ggplot(fa_grc_mds_dat) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
   theme(legend.position = "none")
+```
+
+#### FA Concentration
+##### Data prep and normalize
+```{r}
+## Prep tall data ##
+fa_c <- merge(bimrk[, c(1, 2, 3, 4, 7)], fa_conc, by.x = "Biomarker_ID", by.y = "ID")
+
+# clean up species #
+fa_c$Species_common <- ifelse(fa_c$Species_common == "Pointed Macoma", "Macoma sp.", fa_c$Species_common)
+fa_c$Species_common <- ifelse(fa_c$Species_common == "Bentnose Macoma", "Macoma sp.", fa_c$Species_common)
+
+fa_c_tll <- fa_c  %>% 
+  gather(key = "FA", value = "conc", 11:52) %>% 
+  filter(Species_common != "Red rock crab")
+
+## Append dry sample mass ##
+fa_c_tll <- merge(fa_c_tll, samp_mass_redu[, c(1, 7)], by = "Biomarker_ID")
+
+## Normalize ##
+fa_c_tll$conc_norm <- fa_c_tll$conc / fa_c_tll$sample_extracted_mass_mg
+```
+
+##### Make groups (same as proportions)
+```{r}
+## Make groups ##
+LCPUFA <- c("C20.5w3", "C22.6w3", "C20.4w6")
+ALA.LIN <- c("C18.2w6", "C18.3w3")
+C18PUFA <- c("C18.2w3", "C18.3w6", "C18.4w3")
+OM3 <- names(fa[str_detect(names(fa), "w3")])
+OM6 <- names(fa[str_detect(names(fa), "w6")])
+OM3.6 <- names(fa[str_detect(names(fa), paste(c("w3", "w6"), collapse = "|"))])
+PUFA <- names(fa[str_detect(names(fa), paste(c(".2w", ".3w", ".4w", ".5w", ".6w"), collapse = "|"))])
+BAC <- c("a.C17.0", "a.C18.0",  "C15.0", "C17.0", "C17.1w9", "C18.1w7", "C18.1w9", "C20.1w7", "C20.1w9", "C22.1w9", "i.C15.0", "i.C16.0", "i.C17.0")
+```
+
+##### Make comparisons
+```{r}
+## ALA.LIN ##
+fa_ALA.LIN_c_all <- fa_c_tll %>% 
+  filter(FA %in% ALA.LIN) %>% 
+  group_by(Biomarker_ID) %>% 
+  summarize(conc_sum = sum(conc_norm))
+
+fa_ALA.LIN_c_all <- merge(unique(fa_c_tll[, 1:10]), fa_ALA.LIN_c_all, by = "Biomarker_ID")
+fa_ALA.LIN_c_all$FA_grp  <- "ALA.LIN" 
+
+fa_ALA.LIN_c <- fa_ALA.LIN_c_all %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(conc_sum_m = mean(conc_sum),
+            conc_sum_sd = sd(conc_sum))
+fa_ALA.LIN_c$FA_grp <- "ALA.LIN"
+
+## C18PUFA ##
+fa_C18PUFA_c_all <- fa_c_tll %>% 
+  filter(FA %in% C18PUFA) %>% 
+  group_by(Biomarker_ID) %>% 
+  summarize(conc_sum = sum(conc_norm))
+
+fa_C18PUFA_c_all <- merge(unique(fa_c_tll[, 1:10]), fa_C18PUFA_c_all, by = "Biomarker_ID")
+fa_C18PUFA_c_all$FA_grp  <- "C18PUFA" 
+
+fa_C18PUFA_c <- fa_C18PUFA_c_all %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(conc_sum_m = mean(conc_sum),
+            conc_sum_sd = sd(conc_sum))
+fa_C18PUFA_c$FA_grp <- "C18PUFA"
+
+## PUFA ##
+fa_PUFA_c_all <- fa_c_tll %>% 
+  filter(FA %in% PUFA) %>% 
+  group_by(Biomarker_ID) %>% 
+  summarize(conc_sum = sum(conc_norm))
+
+fa_PUFA_c_all <- merge(unique(fa_c_tll[, 1:10]), fa_PUFA_c_all, by = "Biomarker_ID")
+fa_PUFA_c_all$FA_grp  <- "PUFA"
+
+fa_PUFA_c <- fa_PUFA_c_all %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(conc_sum_m = mean(conc_sum),
+            conc_sum_sd = sd(conc_sum))
+fa_PUFA_c$FA_grp <- "PUFA"
+
+## BAC ##
+fa_BAC_c_all <- fa_c_tll %>% 
+  filter(FA %in% BAC) %>% 
+  group_by(Biomarker_ID) %>% 
+  summarize(conc_sum = sum(conc_norm))
+
+fa_BAC_c_all <- merge(unique(fa_c_tll[, 1:10]), fa_BAC_c_all, by = "Biomarker_ID")
+fa_BAC_c_all$FA_grp  <- "BAC"
+
+fa_BAC_c <- fa_BAC_c_all %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(conc_sum_m = mean(conc_sum),
+            conc_sum_sd = sd(conc_sum))
+fa_BAC_c$FA_grp <- "BAC"
+
+## PAL ##
+fa_PAL_c_all <- fa_c_tll %>% 
+  filter(FA == "C16.1w7")
+colnames(fa_PAL_c_all)[11] <- "FA_grp"
+colnames(fa_PAL_c_all)[14] <- "conc_sum"
+
+fa_PAL_c_all <- cbind(fa_PAL_c_all[, c(1:10, 14, 11)])
+
+fa_PAL_c <- fa_c_tll %>% 
+  filter(FA == "C16.1w7") %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(conc_sum_m = mean(conc_norm),
+            conc_sum_sd = sd(conc_norm))
+fa_PAL_c$FA_grp <- "PAL"
+
+## ARA ##
+fa_ARA_c_all <- fa_c_tll %>% 
+  filter(FA == "C20.4w6")
+colnames(fa_ARA_c_all)[11] <- "FA_grp"
+colnames(fa_ARA_c_all)[14] <- "conc_sum"
+
+fa_ARA_c_all <- cbind(fa_ARA_c_all[, c(1:10, 14, 11)])
+
+fa_ARA_c <- fa_c_tll %>% 
+  filter(FA == "C20.4w6") %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(conc_sum_m = mean(conc_norm),
+            conc_sum_sd = sd(conc_norm))
+fa_ARA_c$FA_grp <- "ARA"
+
+## EPA ##
+fa_EPA_c_all <- fa_c_tll %>% 
+  filter(FA == "C20.5w3")
+colnames(fa_EPA_c_all)[11] <- "FA_grp"
+colnames(fa_EPA_c_all)[14] <- "conc_sum"
+
+fa_EPA_c_all <- cbind(fa_EPA_c_all[, c(1:10, 14, 11)])
+
+fa_EPA_c <- fa_c_tll %>% 
+  filter(FA == "C20.5w3") %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(conc_sum_m = mean(conc_norm),
+            conc_sum_sd = sd(conc_norm))
+fa_EPA_c$FA_grp <- "EPA"
+
+## DHA ##
+fa_DHA_c_all <- fa_c_tll %>% 
+  filter(FA == "C22.6w3")
+colnames(fa_DHA_c_all)[11] <- "FA_grp"
+colnames(fa_DHA_c_all)[14] <- "conc_sum"
+
+fa_DHA_c_all <- cbind(fa_DHA_c_all[, c(1:10, 14, 11)])
+
+fa_DHA_c <- fa_c_tll %>% 
+  filter(FA == "C22.6w3") %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarize(conc_sum_m = mean(conc_norm),
+            conc_sum_sd = sd(conc_norm))
+fa_DHA_c$FA_grp <- "DHA"
+
+## All together now - for t.test ##
+fa_grp_c_all <- rbind(fa_BAC_c_all, fa_ALA.LIN_c_all, fa_C18PUFA_c_all, fa_PUFA_c_all, fa_PAL_c_all, fa_ARA_c_all, fa_EPA_c_all, fa_DHA_c_all)
+
+## All together now - for plots ##
+fa_grp_c <- rbind(fa_BAC_c, fa_ALA.LIN_c, fa_C18PUFA_c, fa_PUFA_c, fa_PAL_c, fa_ARA_c, fa_EPA_c, fa_DHA_c)
+fa_grp_c$FA_grp <- factor(fa_grp_c$FA_grp, levels = c("BAC", "ALA.LIN", "C18PUFA", "PUFA", "PAL", "ARA", "EPA", "DHA"))
+fa_grp_c$Species_common <- factor(fa_grp_c$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
+
+fa_grp_high_wide <- fa_grp %>% 
+  dplyr::select(-prop_sum_sd) %>% 
+  filter(Sea_otter_region == "High") %>% 
+  spread(key = FA_grp, value = prop_sum_m)
+fa_grp_high_wide[, 3:10] <- round(fa_grp_high_wide[, 3:10], 3)
+
+fa_grp_low_wide <- fa_grp %>% 
+  dplyr::select(-prop_sum_sd) %>% 
+  filter(Sea_otter_region == "Low") %>% 
+  spread(key = FA_grp, value = prop_sum_m, 3)
+fa_grp_low_wide[, 3:10] <- round(fa_grp_low_wide[, 3:10], 3)
+  
+fa_grp_high_sd_wide <- fa_grp %>% 
+  dplyr::select(-prop_sum_m) %>% 
+  filter(Sea_otter_region == "High") %>% 
+  spread(key = FA_grp, value = prop_sum_sd)
+fa_grp_high_sd_wide[, 3:10] <- round(fa_grp_high_sd_wide[, 3:10], 3)
+
+fa_grp_low_sd_wide <- fa_grp %>% 
+  dplyr::select(-prop_sum_m) %>% 
+  filter(Sea_otter_region == "Low") %>% 
+  spread(key = FA_grp, value = prop_sum_sd)
+fa_grp_low_sd_wide[, 3:10] <- round(fa_grp_low_sd_wide[, 3:10], 3)
+```
+
+##### Mann-Whitney tests
+```{r}
+## ALA.LIN ##
+ALA.LIN.MWU_c <- fa_ALA.LIN_c_all %>% 
+  group_by(Species_common) %>% 
+  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+ALA.LIN.MWU_c$FA_grp <- "ALA.LIN"
+
+## C18PUFA ##
+C18PUFA.MWU_c  <- fa_C18PUFA_c_all %>% 
+  group_by(Species_common) %>% 
+  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+C18PUFA.MWU_c$FA_grp <- "C18PUFA"
+
+## PUFA ##
+PUFA.MWU_c <- fa_PUFA_c_all %>% 
+  group_by(Species_common) %>% 
+  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+PUFA.MWU_c$FA_grp <- "PUFA"
+
+## BAC ##
+BAC.MWU_c <- fa_BAC_c_all %>% 
+  group_by(Species_common) %>% 
+  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+BAC.MWU_c$FA_grp <- "BAC"
+
+## PAL ##
+PAL.MWU_c <- fa_PAL_c_all %>% 
+  group_by(Species_common) %>% 
+  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+PAL.MWU_c$FA_grp <- "PAL"
+
+## ARA ##
+ARA.MWU_c <- fa_ARA_c_all %>% 
+  group_by(Species_common) %>% 
+  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+ARA.MWU_c$FA_grp <- "ARA"
+
+## EPA ##
+EPA.MWU_c <- fa_EPA_c_all %>% 
+  group_by(Species_common) %>% 
+  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+EPA.MWU_c$FA_grp <- "EPA"
+
+## DHA ##
+DHA.MWU_c <- fa_DHA_c_all %>% 
+  group_by(Species_common) %>% 
+  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
+DHA.MWU_c$FA_grp <- "DHA"
+
+## Clean up ##
+fa_grp_MWU_c <- rbind(ALA.LIN.MWU_c, C18PUFA.MWU_c, PUFA.MWU_c, BAC.MWU_c, PAL.MWU_c, ARA.MWU_c, EPA.MWU_c, DHA.MWU_c)
+
+fa_grp_MWU_c_p <- fa_grp_MWU_c[, c(1, 3, 6)]
+fa_grp_MWU_c_p$p.value <- round(fa_grp_MWU_c_p$p.value, 3)
+fa_grp_MWU_c_p$FA_grp <- factor(fa_grp_MWU_c_p$FA_grp, levels = c("BAC", "ALA.LIN", "C18PUFA", "PUFA", "PAL", "ARA", "EPA", "DHA"))
+fa_grp_MWU_c_p$Species_common <- factor(fa_grp_MWU_c_p$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
+fa_grp_MWU_c_p <- tidyr::spread(fa_grp_MWU_c_p, key = FA_grp, value = p.value)
+
+fa_grp_MWU_c_t <- fa_grp_MWU_c[, c(1, 2, 6)]
+fa_grp_MWU_c_t$statistic <- round(fa_grp_MWU_c_t$statistic, 3)
+fa_grp_MWU_c_t$FA_grp <- factor(fa_grp_MWU_c_t$FA_grp, levels = c("BAC", "ALA.LIN", "C18PUFA", "PUFA", "PAL", "ARA", "EPA", "DHA"))
+fa_grp_MWU_c_t$Species_common <- factor(fa_grp_MWU_c_t$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
+fa_grp_MWU_c_t <- tidyr::spread(fa_grp_MWU_c_t, key = FA_grp, value = statistic)
+```
+
+
+##### Plots
+```{r}
+ggplot(fa_grp_c, aes(x = FA_grp, y = conc_sum_m, fill = Sea_otter_region)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(ymin = conc_sum_m - conc_sum_sd, ymax = conc_sum_m + conc_sum_sd), width = 0, position = position_dodge(.9)) +
+  scale_fill_manual("Sea otter \n region", c("High", "Low"), values = so.pal) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(limits = c(-0.1, 16), breaks = seq(0, 16, by = 4)) + 
+  xlab("Fatty acid") +
+  ylab("Mean concentration (ug/mg DW)") +
+  facet_wrap(~Species_common, scales = "free_x")
+```
+
+```{r}
+## EPA ##
+epa.conc.sp.tr <- fa_c_tll %>%
+  filter(FA == "C22.6w3") %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarise(mean = mean(conc_norm),
+            sd = sd(conc_norm))
+
+ggplot(epa.conc.sp.tr, aes(x = Sea_otter_region, y = mean, fill = Sea_otter_region)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(ymin = mean - sd, ymax = mean + sd), width = 0, position = position_dodge(.9)) +
+  scale_fill_manual("Sea otter \n region", c("High", "Low"), values = so.pal) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  #scale_y_continuous(limits = c(-0.1, 0.6), breaks = seq(0, 0.6, by = 0.2)) +
+  xlab("Sea otter region") +
+  ylab("Mean Concentration (ug/mg DW)") +
+  facet_wrap(~Species_common, scales = "free_x")
 ```
 
