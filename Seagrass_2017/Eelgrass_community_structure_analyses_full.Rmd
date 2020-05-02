@@ -1190,12 +1190,28 @@ ggplot(dat) +
   theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+ggplot(nut.sum) +
+  geom_col(aes(x = site_full, y = NH4_umol)) +
+  theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ## time and eelgrass ##
 ggplot(dat) +
   geom_point(aes(x = date_julian, y = abvgnd_mass), size = 5) +
   labs(x = "date", y = "aboveground biomass") +
   theme(text = element_text(size = 18), axis.ticks = element_line(size = 2)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+mean(dat$abvgnd_mass[dat$sea_otter_index_tr <=-0.4073554])
+st.er(dat$abvgnd_mass[dat$sea_otter_index_tr <=-0.4073554])
+
+mean(dat$abvgnd_mass[dat$sea_otter_index_tr > 0.1729845])
+st.er(dat$abvgnd_mass[dat$sea_otter_index_tr > 0.1729845])
+
+## Raw eelgrass and soi ##
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass), size = 2) +
+  labs(x = "SOI", y = "aboveground biomass")
 
 ## Grazer load and epiphyte load ##
 ggplot(dat) +
