@@ -1,0 +1,129 @@
+---
+title: "LME - Prey"
+output: html_document
+---
+
+LME for prey with Site and Season as Fixed effects and Species as random effect.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, libraries and data, warning= FALSE, message=FALSE}
+library(tidyverse)
+library(ggthemes)
+library(nlme) #lme model
+library(emmeans)
+library(MuMIn) #r.squaredGLMM
+library(forcats) # condense factors
+library(broom)
+library(minpack.lm)
+```
+
+```{r, load data, message=FALSE, warning=FALSE}
+#load prey data
+si.prey <- read.csv("sifinal.csv")
+si.prey <- si.prey %>% 
+  filter(PreyCat != "Star" & Species != "map" & PreyCat != "Snail" & Species != "squid eggs")
+
+si.prey$PreyCat <- fct_collapse(si.prey$PreyCat, Cucumber.Snail = c("Cucumber","Tegula"))
+```
+
+```{r carbon graph}
+ggplot(data=si.prey) +
+  geom_boxplot(aes(x=Season, y=Cnorm, fill=Season)) +
+  labs(y=expression(paste(delta^13, "C" ))) +
+  scale_fill_brewer(palette = "Greens") +
+  facet_wrap(vars(PreyCat)) +
+  theme_few()
+```
+
+
+```{r nitrogen graph}
+ggplot(data=si.prey) +
+  geom_boxplot(aes(x=Season, y=N, fill=Season)) +
+  labs(y=expression(paste(delta^15, "N" ))) +
+  scale_fill_brewer(palette = "Purples") +
+  facet_wrap(vars(PreyCat)) +
+  theme_few()
+```
+
+
+### Linear Mixed Effects Model
+
+```{r lmmc}
+lmmc <- lme(Cnorm ~ Season+Site, data=si.prey,
+random = ~1|PreyCat)
+anova(lmmc)
+summary(lmmc)
+r.squaredGLMM(lmmc)
+```
+
+```{r lmmn}
+lmmn <- lme(N ~ Season+Site, data=si.prey,
+random = ~1|PreyCat)
+anova(lmmn)
+summary(lmmn)
+r.squaredGLMM(lmmn)
+```
+
+#### Residuals and QQ plots from original C and N LMEs
+
+```{r residuals}
+plot(lmmc)
+plot(lmmn)
+```
+
+```{r qq plot}
+qqnorm(resid(lmmc, type = "normalized"), main = "lmmc")
+qqnorm(resid(lmmn, type = "normalized"), main = "lmmn")
+```
+
+
+```{r predict and ranef for lmmn}
+fixef(lmmn)
+ranef(lmmn)
+si.prey$predictN <- predict(lmmn, level=1)
+ggplot(data=si.prey, aes(x=N, y=predictN)) +
+    geom_abline(slope = 1, intercept = 0) +
+  geom_point() +
+      xlim(6, 14) + ylim(6, 14) +
+  geom_smooth(se=FALSE, method= "lm") +
+    facet_wrap(vars(PreyCat)) +
+  theme_few()
+
+fixef(lmmc)
+ranef(lmmc)
+si.prey$predictC <- predict(lmmc, level=1)
+ggplot(data=si.prey, aes(x=C, y=predictC)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(se=FALSE, method= "lm") +
+    xlim(-21, -11) + ylim(-21, -11) +
+  facet_wrap(vars(PreyCat)) +
+  theme_few()
+```
+
+### Post hoc Tukey's test
+
+```{r tukey ton}
+lsmeans(lmmc, pairwise~Season, adjust="tukey")
+lsmeans(lmmn, pairwise~Season, adjust="tukey")
+```
+
+### LM with separate models for each Prey Cat
+```{r seaparate Prey Cats, message=FALSE, warning=FALSE}
+si.prey.2 <- si.prey %>% select(SIN, Cnorm, N, Season, Site, PreyCat)
+si.prey.2 %>%
+  nest(-PreyCat) %>%
+  mutate(fit=map(data, ~lm(Cnorm ~ Season*Site,data=.)),
+                 results = map(fit, augment)) %>% 
+  unnest(results) %>% 
+  ggplot(aes(x = Cnorm, y = .fitted)) +
+  geom_abline(intercept = 0, slope = 1, alpha = .2) +  # Line of perfect fit
+  geom_point() +
+  facet_wrap(vars(PreyCat), scales = "free") +
+  labs(x = "Normalized carbon", y = "Predicted Value") +
+  theme_bw()
+```
+

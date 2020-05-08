@@ -1,0 +1,208 @@
+---
+title: "BIOMASS"
+author: "Nicole LaRoche"
+date: "4/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, libraries, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(ggthemes)
+library(dplyr)
+library(tidyr)
+library(scales)
+library(viridis)
+```
+
+```{r, import files, warning=FALSE, message=FALSE}
+biomass <- read.csv("sofa_output.csv", header=T, na.strings=c(""))
+#run plab and summary from macronutrients.rmd
+
+```
+
+
+## By year
+
+```{r, year, echo=FALSE}
+biomass$Year.since <- ifelse(biomass$Year==1988, "> 30 years", 
+                  ifelse(biomass$Year== 2010, "> 8 years", "> 15 years"))
+biomass$Year.since <- factor(biomass$Year.since, levels = c("> 30 years", "> 15 years", "> 8 years"))
+biomass %>%
+  drop_na(Year, Long.Term) %>%
+  ggplot(aes(x=Year, y=Long.Term)) +
+  geom_bar(stat="identity") +
+  labs(y= "Kcal/min intake", x=NULL) +
+  theme_few()
+
+biomass %>%
+  drop_na(Year, Diversity) %>%
+  ggplot(aes(x=Year, y=Diversity)) +
+  geom_bar(stat="identity") +
+    labs(y= "Diversity of Species in diet", x=NULL) +
+  theme_few()
+
+cbp1 <- c("#ffffff",  "#009E73", "#D55E00",
+          "#F0E442", "#999999" )
+
+#cbp1 <- c("#999999", "#E69F00", "#56B4E9", "#009E73","#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+#           Gray       Orange     Blue      Green     Yellow     Dark blue   Dark orange Pink
+biomass %>%
+  drop_na(Year.since, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
+           Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Year.since, y=Proportion, fill = Prey.Cat)) +
+  geom_bar(stat="identity", position = position_fill(reverse = T)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(y= "Proportion of diet (by biomass)", x=NULL) +
+  scale_fill_brewer(palette = "RdYlBu", name="Prey Catagory", direction = -1)+
+  theme_few()
+
+
+```
+
+## By Status
+
+```{r, sex, echo=FALSE}
+biomass %>%
+  drop_na(Status, Diversity) %>%
+  ggplot(aes(x=Status, y=Diversity)) +
+  geom_bar(stat="identity") +
+      labs(y= "Species Diversity in diet", x=NULL) +
+  theme_few()
+
+biomass %>%
+  drop_na(Status, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
+           Prey.Cat == "Mussel" | Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Prey.Cat, y=Proportion, fill = Status)) +
+  geom_bar(stat="identity", position = position_dodge()) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(y= "Proportion of diet (by biomass)", x=NULL) +
+  scale_fill_grey(name = "Reproductive Status", 
+                  labels = c("Female no pup", "Female with pup", "Male")) +
+  theme_few() +
+  theme(legend.position="top")
+
+biomass %>%
+  drop_na(Status, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
+           Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Status, y=Proportion, fill = Prey.Cat)) +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE), color= "black") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(y= "Proportion of diet (by biomass)", x=NULL) +
+  scale_fill_brewer(palette = "Set2", name="Prey Catagory") +
+  theme_few() +
+  theme(legend.position="top")
+```
+
+## By Age
+
+```{r, Age, echo=FALSE}
+biomass %>%
+  drop_na(Age, Diversity) %>%
+  ggplot(aes(x=Age, y=Diversity)) +
+  geom_bar(stat="identity") +
+  labs(y= "Diversity of species in diet", x=NULL) +
+  theme_few()
+
+biomass %>%
+  drop_na(Age, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
+           Prey.Cat == "Mussel" | Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Prey.Cat, y=Proportion, fill = Age)) +
+  geom_bar(stat="identity", position = position_dodge()) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(y= "Proportion of diet (by biomass)", x=NULL) +
+  scale_fill_grey() +
+  theme_few() +
+  theme(legend.position="top")
+
+biomass %>%
+  drop_na(Age, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
+           Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Age, y=Proportion, fill = Prey.Cat)) +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE), color="black") +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(y= "Proportion of diet (by biomass)", x=NULL) +
+    scale_fill_brewer(palette = "Set2", name= "Prey Catagory") +
+  theme_few() +
+  theme(legend.position="top")
+```
+
+## By Season
+
+```{r, season, echo=FALSE}
+biomass %>%
+  drop_na(Season, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
+           Prey.Cat == "Mussel" | Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Prey.Cat, y=Proportion, fill = Season)) +
+  geom_bar(stat="identity", position = position_dodge()) +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(y= "Proportion of diet (by biomass)", x=NULL) +
+  scale_fill_grey() +
+  theme_few() +
+  theme(legend.position="top")
+
+biomass %>%
+  drop_na(Season, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
+           Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Season, y=Proportion, fill = Prey.Cat)) +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE), color = "black") +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(y= "Proportion of diet (by biomass)", x=NULL) +
+    scale_fill_brewer(palette = "Set2", name = "Prey Catagory") +
+  theme_few() +
+  theme(legend.position="top")
+```
+
+## By Zone 
+
+Thinking of a good way to portray these... maybe on a map?
+
+Zones 6 and 8 have the lowest consistant density of sea otters
+
+```{r, zone, echo=FALSE}
+biomass %>%
+  drop_na(Zone, Diversity) %>%
+  ggplot(aes(x=Zone, y=Diversity)) +
+  geom_bar(stat="identity") +
+    labs(y= "Species diversity in diet", x=NULL) +
+  theme_few()
+
+biomass %>%
+  drop_na(Zone, Long.Term) %>%
+  ggplot(aes(x=Zone, y=Long.Term)) +
+  geom_bar(stat="identity") +
+  labs(y= "Kcal/min intake rate", x=NULL) +
+  theme_few()
+
+biomass %>%
+  drop_na(Zone, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
+           Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Zone, y=Proportion, fill = Prey.Cat)) +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE), color= "black") +
+    scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+    labs(y= "Proportion of diet (by biomass)", x=NULL) +
+      scale_fill_brewer(palette = "Set2", name= "Prey Catagory") +
+  theme_few()
+```
+
+### STATS
+
+```{r}
+
+```
+
+
+
+

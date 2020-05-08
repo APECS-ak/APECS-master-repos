@@ -464,3 +464,123 @@ ggplot(data= moisture, aes(x=Size.mm, y=moisture)) +
 
 ggsave("moisture_size.png", device = "png", path = "Bombing/", width = 9, 
        height = 6, units = "in", dpi = 300)
+
+
+
+####### Crabs by sex 
+###############################
+
+crab.count <- plab %>%
+  filter(PreyCat=="Crab") %>%
+  count(Species, SEX)
+
+crab.mean <- plab %>%
+  filter(PreyCat=="Crab") %>%
+  group_by(Species, SEX) #%>%
+  #summarise(KJ.Mean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N))
+  
+
+ggplot(data=filter(plab, PreyCat=="Crab"), aes(x=Season, y=kcal.dry, color=SEX, shape = gravid)) +
+  theme_few() +
+  geom_point()+
+  facet_wrap(vars(Species))
+
+cam <- filter(plab, Species == "cam")
+
+ggplot(data=filter(plab, PreyCat=="Crab"), aes(x=Season, y=lipid.dry, color=SEX, shape = gravid)) +
+  theme_few() +
+  geom_point()+
+  facet_wrap(vars(Species))
+
+ggplot(data=filter(plab, PreyCat=="Crab"), aes(x=Season, y=protein_dry, color=SEX, shape = gravid)) +
+  theme_few() +
+  geom_point()+
+  facet_wrap(vars(Species))
+
+ggplot(data=filter(plab, PreyCat=="Crab"), aes(x=Season, y=kcal.wet, color=SEX, shape = gravid)) +
+  theme_few() +
+  geom_point()+
+  facet_wrap(vars(Species))
+
+
+# looking at egg values
+#run code from macronutrients
+all <- drop_na(plab)
+all <- left_join(all, summary, by="SIN")
+plab2 <- left_join(plab, summary, by="SIN")
+plab2<-plab2 %>% drop_na(PreyCat)
+plab2$gravid <- if(plab2$gravid == "") {"n"}
+
+ggplot(data=filter(plab2, Species=="cam"), aes(x=Season, y=protein_dry, color=gravid)) +
+  theme_few() +
+  geom_point()
+
+ggplot(data=filter(plab2, Species=="cam"), aes(x=Season, y=lipid.dry, color=gravid)) +
+  theme_few() +
+  geom_point()
+
+ggplot(data=filter(plab2, Species=="cam"), aes(x=month, y=kcal.dry, color=gravid)) +
+  theme_few() +
+  geom_point() +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), 
+               expand = c(0.1,0))+
+  labs(x="", y="Kcal (per dry gram)") +
+  scale_color_manual(values=c("steelblue2", "springgreen2", "tomato2"), 
+                    name="Gravid",
+                    breaks=c("", "y", "e"),
+                    labels=c("No", "Yes", "Eggs"))
+
+ggsave("cam_cal.png", device = "png", path = "Bombing/", width = 8, 
+       height = 6, units = "in", dpi = 300)
+
+ggplot(data=filter(plab2, Species=="cam"), aes(x=month, y=kcal.wet, color=gravid)) +
+  theme_few() +
+  geom_point() +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), 
+               expand = c(0.1,0))+
+  labs(x="", y="Kcal (per wet gram)") +
+  scale_color_manual(values=c("steelblue2", "springgreen2", "tomato2"), 
+                     name="Gravid",
+                     breaks=c("", "y", "e"),
+                     labels=c("No", "Yes", "Eggs"))
+
+
+
+############################################################################################
+##                                         Tables                                         ##
+############################################################################################
+
+#data from macronutrients.rmd
+
+plab.mean <-plab %>%
+  group_by(Season, Species) %>%
+  summarise(length.mean= mean(Size.mm, na.rm = T), length.sd= sd(Size.mm, na.rm = T), 
+            length.n=length(Size.mm[!is.na(Size.mm)]), mass.mean=mean(Dissected.Weight, na.rm = T), 
+            mass.sd=sd(Dissected.Weight, na.rm = T), mass.n=length(Dissected.Weight[!is.na(Dissected.Weight)]), 
+            edible.mean=mean(edible, na.rm = T), edible.sd=sd(edible, na.rm = T), 
+            edible.n=length(edible[!is.na(edible)]), Kcal.mean=mean(kcal.dry, na.rm = T), 
+            Kcal.sd=sd(kcal.dry, na.rm = T), Kcal.n=length(kcal.dry[!is.na(kcal.dry)]), 
+            protein.mean=mean(protein_dry, na.rm = T), protein.sd=sd(protein_dry, na.rm = T), 
+            protein.n=length(protein_dry[!is.na(protein_dry)]), lipid.mean=mean(lipid_dry, na.rm = T), 
+            lipid.sd=sd(lipid_dry, na.rm = T), lipid.n=length(lipid_dry[!is.na(lipid_dry)]), 
+            ash.mean=mean(ash, na.rm = T), ash.sd=sd(ash, na.rm = T), ash.n=length(ash[!is.na(ash)]),
+            moisture.mean=mean(moisture, na.rm = T), moisture.sd= sd(moisture, na.rm = T), 
+            moisture.n=length(moisture[!is.na(moisture)]))
+write.csv(plab.mean, "Bombing/plab_means.csv")
+
+
+plab.mean.preycat <-plab %>%
+  group_by(Season, PreyCat) %>%
+  summarise(length.mean= mean(Size.mm, na.rm = T), length.sd= sd(Size.mm, na.rm = T), 
+            length.n=length(Size.mm[!is.na(Size.mm)]), mass.mean=mean(Dissected.Weight, na.rm = T), 
+            mass.sd=sd(Dissected.Weight, na.rm = T), mass.n=length(Dissected.Weight[!is.na(Dissected.Weight)]), 
+            edible.mean=mean(edible, na.rm = T), edible.sd=sd(edible, na.rm = T), 
+            edible.n=length(edible[!is.na(edible)]), Kcal.mean=mean(kcal.dry, na.rm = T), 
+            Kcal.sd=sd(kcal.dry, na.rm = T), Kcal.n=length(kcal.dry[!is.na(kcal.dry)]), 
+            protein.mean=mean(protein_dry, na.rm = T), protein.sd=sd(protein_dry, na.rm = T), 
+            protein.n=length(protein_dry[!is.na(protein_dry)]), lipid.mean=mean(lipid_dry, na.rm = T), 
+            lipid.sd=sd(lipid_dry, na.rm = T), lipid.n=length(lipid_dry[!is.na(lipid_dry)]), 
+            ash.mean=mean(ash, na.rm = T), ash.sd=sd(ash, na.rm = T), ash.n=length(ash[!is.na(ash)]),
+            moisture.mean=mean(moisture, na.rm = T), moisture.sd= sd(moisture, na.rm = T), 
+            moisture.n=length(moisture[!is.na(moisture)]))
+write.csv(plab.mean.preycat, "Bombing/plab_means_preycat.csv")

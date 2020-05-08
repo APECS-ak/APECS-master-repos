@@ -84,6 +84,7 @@ ggsave("sofa_prop.png", device = "png", path = "Bombing/", width = 8,
 library(tidyverse)
 library(broom)
 library(minpack.lm)
+library(propagate)
 
 #EXAMPLE
 mtcars %>% 
@@ -99,7 +100,7 @@ mtcars %>%
   labs(x = "Miles Per Gallon", y = "Predicted Value") +
   theme_bw()
 
-#Make sure to run after combining PLAB and SUMMARY_PC 
+#Make sure to run after combining PLAB and SUMMARY_PC from macronutrients
 power <- drop_na(summary.w, Size.mm)
 power <- drop_na(power, Dissected.Weight)
 power <- select(power, ID, Size.mm, Species, Dissected.Weight, PreyCat)
@@ -126,6 +127,7 @@ pow.mod <- power.sp %>%
 # count of observations added to df
 pow.mod.n <- left_join(sp.count,pow.mod)
 
+
 #add in urchins from BC ---------
 #bc stf
 urchins <- read_csv("Bombing/urchin_bc.csv")
@@ -140,6 +142,7 @@ urch.mod <- nlsLM(edible_wet_mass_g ~ a*daimeter_mm^b, start = list(a=1, b=3), d
 x <- data.frame("Species" = c("stf", "stf"), "n" = c(74,74), "term" = c("a", "b"), 
                 "estimate" = c(0.0004273, 2.6483119), "std.error" = c(0.000559, 0.277))
 pow.mod.n <- bind_rows(pow.mod.n, x)
+
 
 #making the combined species lists ----- 
 power.cat <- drop_na(power, PreyCat)
@@ -174,11 +177,6 @@ z <- data.frame("Species" = c("can", "can"), "n" = c(52,52), "term" = c("a", "b"
                 "estimate" = c(0.0001873, 2.7399639), "std.error" = c(0.000137, 0.145))
 pow.mod.n <- bind_rows(pow.mod.n, z)
 
-#add in standard dev
-#st.err = std.dev/ sqr rt of n
-#st.err*sqr rt of n = std.dev
-pow.mod.n$std.dev <- NA
-pow.mod.n$std.dev <- pow.mod.n$std.error*sqrt(pow.mod.n$n)
 
 #making values in a /b form
 power.values <- pow.mod.n %>%
@@ -223,20 +221,24 @@ power.v <- pivot_longer(power.v, cols = starts_with("x."),
 power.v$Fitted_Size <- as.numeric(power.v$Fitted_Size)
 
 #graph with predicted values as red line
-ggplot() +
-  geom_point(data=power, aes(x=Size.mm, y=Dissected.Weight)) +
+ggplot(data=power, aes(x=Size.mm, y=Dissected.Weight)) +
+  geom_point() +
   geom_line(data=power.v, aes(x=Fitted_Size, y=Fitted_Weight), color= "Red") +
   facet_wrap(vars(Species), scales = "free") +
   labs(x = "Size (mm)", y = "Weight (g)") + theme_bw()
 
 
-ggplot(data=power, aes(x=Size.mm, y=Dissected.Weight)) +
+  ggplot(data= power, aes(x=Size.mm, y=Dissected.Weight)) +
   geom_point() +
-  stat_smooth() +
-  facet_wrap(vars(Species), scales = "free") +
+  facet_wrap(vars(PreyCat), scales = "free") +
+  geom_smooth(method = "nls", formula = (y~a*x^b), start = list(a=0,b=3), se = TRUE)+
   labs(x = "Size (mm)", y = "Weight (g)") + theme_bw()
 
-
+ggplot(data=power, aes(x=Size.mm, y=Dissected.Weight)) +
+  geom_point() +
+  geom_abline(slope= power.values$a*x^power.values$b) +
+  facet_wrap(vars(Species), scales = "free") +
+  labs(x = "Size (mm)", y = "Weight (g)") + theme_bw()
 
 
 #make means of kcal/gram STF
@@ -255,3 +257,402 @@ check <- check[,1]
 calc <- power.values[,1]
 missing <- setdiff(check, calc)
 write_csv(missing, "Bombing/missing.csv")
+
+
+## Cen AK mussels
+cak.muss <- read.csv("Bombing/CAK_Mussel.csv")
+summary(cak.muss)
+
+# mass = wetTotalMass
+#length = length
+# moisture = 
+cak.muss$moisture <- (cak.muss$wetTotalMass-cak.muss$DryTotalMass)/cak.muss$wetTotalMass
+# cal dry = CalGram
+cak.muss$kcal.dry <-cak.muss$CalGram/1000
+#cal wet
+cak.muss$kcal.wet <- (1-(cak.muss$moisture))*cak.muss$kcal.dry
+cak.muss$percent.edible <- cak.muss$wetTotalMass/cak.muss$TOTALWET
+
+cak.mean <- cak.muss %>%
+  drop_na(kcal.wet) %>%
+  summarise(mean = mean(kcal.wet), sd = sd(kcal.wet), 
+            edible = mean(percent.edible, na.rm = TRUE), sd.ed = sd(percent.edible, na.rm = TRUE))
+
+cak.n <- cak.muss %>%
+  drop_na(kcal.wet) %>%
+  count() #334
+
+
+cak.mean
+#	       mean        sd    edible      sd.ed
+#   0.7379483 0.2067092 0.2972606 0.08937244
+
+
+###    SHRIMP     ###
+shrimp <- summary.w %>%
+  filter(Species == "pas")
+
+shrimp <- rename(shrimp, "weight.g"="Frozen.Weight")
+
+shrimp$weight.g <- as.numeric(as.character(shrimp$weight.g))
+
+shrimp <- dplyr::select(shrimp, Species, weight.g, Size.mm)
+
+shrimp.new <- read.csv("Bombing/shrimp.csv")
+shrimp.new$weight.g <- as.numeric(as.character(shrimp.new$weight.g))
+shrimp.new$Size.mm <- as.numeric(as.character(shrimp.new$Size.mm))
+
+shrimp <- bind_rows(shrimp, shrimp.new)
+
+shrimp.mod <- nlsLM(weight.g ~ a*Size.mm^b, start = list(a=1, b=3), data=shrimp)
+summary(shrimp.mod)
+
+#a         b
+#3.163e-06 3.272
+#4.116e-06 0.2544
+
+#std.dev a
+0.000004116*sqrt(30)
+#2.254426e-05
+
+#std.dev b
+0.2544*sqrt(30)
+#1.393406
+
+#shrimp sizes
+#adding sizes
+#new data frame
+df <- data.frame(Speices = "pas", n = 30, a = 3.163e-06, b = 3.272)
+df$x.1a <- (df$a*(13^df$b))
+df$x.1b <- (df$a*(26^df$b))
+df$x.1c <- (df$a*(43.3^df$b))
+df$x.2a <- (df$a*(60.7^df$b))
+df$x.2b <- (df$a*(78^df$b))
+df$x.2c <- (df$a*(95.3^df$b))
+df$x.3a <- (df$a*(112.7^df$b))
+df$x.3b <- (df$a*(130^df$b))
+df$x.3c <- (df$a*(147.3^df$b))
+df$x.4 <- (df$a*(170^df$b))
+
+#save df
+write.csv(df, "Bombing/shrimp_ab.csv")
+
+# This is not right
+#print stds
+std.dev <- pow.mod.n %>%
+  select(Species, term, std.dev) %>%
+  pivot_wider(names_from = term, values_from = std.dev)
+
+#adding sizes stds 
+std.dev$x.1a <- (std.dev$a*(13^std.dev$b))
+std.dev$x.1b <- (std.dev$a*(26^std.dev$b))
+std.dev$x.1c <- (std.dev$a*(43.3^std.dev$b))
+std.dev$x.2a <- (std.dev$a*(60.7^std.dev$b))
+std.dev$x.2b <- (std.dev$a*(78^std.dev$b))
+std.dev$x.2c <- (std.dev$a*(95.3^std.dev$b))
+std.dev$x.3a <- (std.dev$a*(112.7^std.dev$b))
+std.dev$x.3b <- (std.dev$a*(130^std.dev$b))
+std.dev$x.3c <- (std.dev$a*(147.3^std.dev$b))
+std.dev$x.4 <- (std.dev$a*(170^std.dev$b))
+
+#write
+write.csv(std.dev, "bombing/stddev.csv")
+
+# trying SD for one species
+
+cln <- filter(pow.mod.n, Species == "cln")
+cln.power <- filter(power, Species == "cln")
+
+ggplot(data=cln.power, aes(x=Size.mm, y=Dissected.Weight)) +
+  geom_point() +
+  geom_smooth(method = "nls", formula = (y~a*x^b), se = FALSE)+
+  labs(x = "Size (mm)", y = "Weight (g)") + theme_bw()
+
+
+residuals(pow.mod.n)
+
+
+#Making a table by season and species
+table <- plab %>%
+  group_by(Species, Season) %>%
+  summarise(mean.moist = mean(moisture, na.rm = TRUE), sd.moist = sd(moisture, na.rm = TRUE),
+            mean.kcald = mean(kcal.dry, na.rm = TRUE), sd.kcald = sd(kcal.dry, na.rm = TRUE),
+            mean.kcalw = mean(kcal.wet, na.rm = TRUE), sd.kcalw = sd(kcal.wet, na.rm = TRUE),
+            mean.lipid = mean(lipid.dry, na.rm = TRUE), sd.lipid = sd(lipid.dry, na.rm = TRUE),
+            mean.protein = mean(protein_dry, na.rm = TRUE), sd.protein = sd(protein_dry, na.rm = TRUE))
+
+table.n <- plab %>%
+  group_by(Species, Season) %>%
+  count()
+
+table <- left_join(table.n, table)
+
+write.csv(table, "Bombing/table.csv")
+
+table2 <- plab %>%
+  group_by(Species) %>%
+  summarise(mean.moist = mean(moisture, na.rm = TRUE), sd.moist = sd(moisture, na.rm = TRUE),
+            mean.kcald = mean(kcal.dry, na.rm = TRUE), sd.kcald = sd(kcal.dry, na.rm = TRUE),
+            mean.kcalw = mean(kcal.wet, na.rm = TRUE), sd.kcalw = sd(kcal.wet, na.rm = TRUE),
+            mean.lipid = mean(lipid.dry, na.rm = TRUE), sd.lipid = sd(lipid.dry, na.rm = TRUE),
+            mean.protein = mean(protein_dry, na.rm = TRUE), sd.protein = sd(protein_dry, na.rm = TRUE))
+
+table.n2 <- plab %>%
+  group_by(Species) %>%
+  count()
+
+table2 <- left_join(table.n2, table2)
+
+write.csv(table2, "Bombing/table2.csv")
+
+# New table - wet energy, %edible
+plab$Frozen.Weight <- as.numeric(as.character(plab$Frozen.Weight))
+plab$percent.edible <- plab$Dissected.Weight/plab$Frozen.Weight
+table3 <- plab %>%
+  group_by(Species) %>%
+  summarise(mean.kcalw = mean(kcal.wet, na.rm = TRUE), sd.kcalw = sd(kcal.wet, na.rm = TRUE),
+            mean.edible = mean(percent.edible, na.rm = TRUE), sd.edible = sd(percent.edible, na.rm = TRUE))
+
+table3 <- left_join(table.n2, table3)
+
+write.csv(table3, "Bombing/table3.csv")
+
+
+#Calculating energy means and sds
+
+#First read plab from macronutrients.rmd
+
+means.energy <- plab %>% 
+  group_by(Species) %>%
+  summarise(mean=mean(kcal.wet, na.rm = T), sd=sd(kcal.wet, na.rm = T))
+
+means.energy.group <- plab %>%
+  group_by(PreyCat) %>%
+  summarise(mean=mean(kcal.wet, na.rm = T), sd=sd(kcal.wet, na.rm = T))
+
+means.energy <- bind_rows(means.energy, means.energy.group)
+
+can <- plab %>%
+  filter(Species == "cam" | Species == "cap" | Species == "cao") %>%
+  summarise(mean=mean(kcal.wet, na.rm = T), sd=sd(kcal.wet, na.rm = T))
+
+write_csv(means.energy, "Bombing/new.means.csv")
+
+
+## Extracting fit for models
+
+apc <- filter(power.sp, Species == "apc")
+
+apc.mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+        start = list(a=0, b=3), data = apc)
+newdata <- data.frame(Size.mm=c(13, 26, 43.3, 60.7, 78, 95.3, 112.7, 130, 147.3, 170))
+predict.se <- predictNLS(apc.mod, newdata, interval= "confidence")
+
+sd.low <- predict.se$summary[,3]
+sd.high <-predict.se$summary[,4]
+
+apc.sd <- data.frame(species = "apc", newdata, sd=sd.high-sd.low)
+
+cln <- filter(power.sp, Species == "cln")
+
+cln.mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+                 start = list(a=0, b=3), data = cln)
+predict.se <- predictNLS(cln.mod, newdata, interval= "confidence")
+sd.low <- predict.se$summary[,3]
+sd.high <-predict.se$summary[,4]
+
+cln.sd <- data.frame(Species = "cln", newdata, sd=sd.high-sd.low)
+
+
+#now see if I can do for all???
+
+pow.mod <- power.sp %>%
+  nest(-Species) %>%
+  mutate(fit=map(data, ~nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+                              start = list(a=0, b=3),data=.)))
+
+#this doesn't work....
+predict <- pow.mod %>%
+  mutate(sd=map(fit, ~predictNLS(., newdata, interval= "confidence")))
+  
+##################################################################
+##################################################################
+#one by one
+apc <- filter(power.sp, Species == "apc")
+apc.mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+                 start = list(a=0, b=3), data = apc)
+newdata <- data.frame(Size.mm=c(13, 26, 43.3, 60.7, 78, 95.3, 112.7, 130, 147.3, 170))
+predict.se <- predictNLS(apc.mod, newdata)
+apc.sd <- data.frame(species = "apc", newdata, sd = predict.se$summary[,3])
+
+cam <- filter(power.sp, Species == "cam")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+                 start = list(a=0, b=3), data = cam)
+predict.se <- predictNLS(mod, newdata)
+cam.sd <- data.frame(species = "cam", newdata, sd = predict.se$summary[,3])
+
+cao <- filter(power.sp, Species == "cao")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = cao)
+predict.se <- predictNLS(mod, newdata)
+cao.sd <- data.frame(species = "cao", newdata, sd = predict.se$summary[,3])
+
+cap <- filter(power.sp, Species == "cap")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = cap)
+predict.se <- predictNLS(mod, newdata)
+cap.sd <- data.frame(species = "cap", newdata, sd = predict.se$summary[,3])
+
+chr <- filter(power.sp, Species == "chr")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = chr)
+predict.se <- predictNLS(mod, newdata)
+chr.sd <- data.frame(species = "chr", newdata, sd = predict.se$summary[,3])
+
+cln <- filter(power.sp, Species == "cln")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = cln)
+predict.se <- predictNLS(mod, newdata)
+cln.sd <- data.frame(species = "cln", newdata, sd = predict.se$summary[,3])
+
+cum <- filter(power.sp, Species == "cum")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = cum)
+predict.se <- predictNLS(mod, newdata)
+cum.sd <- data.frame(species = "cum", newdata, sd = predict.se$summary[,3])
+
+eul <- filter(power.sp, Species == "eul")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = eul)
+predict.se <- predictNLS(mod, newdata)
+eul.sd <- data.frame(species = "eul", newdata, sd = predict.se$summary[,3])
+
+evt <- filter(power.sp, Species == "evt")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = evt)
+predict.se <- predictNLS(mod, newdata)
+evt.sd <- data.frame(species = "evt", newdata, sd = predict.se$summary[,3])
+
+hak <- filter(power.sp, Species == "hak")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=1, b=3), data = hak)
+predict.se <- predictNLS(mod, newdata)
+hak.sd <- data.frame(species = "hak", newdata, sd = predict.se$summary[,3])
+
+mtr <- filter(power.sp, Species == "mtr")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = mtr)
+predict.se <- predictNLS(mod, newdata)
+mtr.sd <- data.frame(species = "mtr", newdata, sd = predict.se$summary[,3])
+
+pio <- filter(power.sp, Species == "pio")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = pio)
+predict.se <- predictNLS(mod, newdata)
+pio.sd <- data.frame(species = "pio", newdata, sd = predict.se$summary[,3])
+
+pom <- filter(power.sp, Species == "pom")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = pom)
+predict.se <- predictNLS(mod, newdata)
+pom.sd <- data.frame(species = "pom", newdata, sd = predict.se$summary[,3])
+
+prs <- filter(power.sp, Species == "prs")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = prs)
+predict.se <- predictNLS(mod, newdata)
+prs.sd <- data.frame(species = "prs", newdata, sd = predict.se$summary[,3])
+
+pup <- filter(power.sp, Species == "pup")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = pup)
+predict.se <- predictNLS(mod, newdata)
+pup.sd <- data.frame(species = "pup", newdata, sd = predict.se$summary[,3])
+
+sag <- filter(power.sp, Species == "sag")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = sag)
+predict.se <- predictNLS(mod, newdata)
+sag.sd <- data.frame(species = "sag", newdata, sd = predict.se$summary[,3])
+
+std <- filter(power.sp, Species == "std")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = std)
+predict.se <- predictNLS(mod, newdata)
+std.sd <- data.frame(species = "std", newdata, sd = predict.se$summary[,3])
+
+tec <- filter(power.sp, Species == "tec")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = tec)
+predict.se <- predictNLS(mod, newdata)
+tec.sd <- data.frame(species = "tec", newdata, sd = predict.se$summary[,3])
+
+sd <- bind_rows(apc.sd, cam.sd, cao.sd, cap.sd, chr.sd, cln.sd, cum.sd, eul.sd, 
+                evt.sd, hak.sd, mtr.sd, pio.sd, pom.sd, prs.sd, pup.sd, sag.sd, std.sd, tec.sd)
+
+#prey cats
+cla <- filter(power.sp, PreyCat == "Clam")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = cla)
+predict.se <- predictNLS(mod, newdata)
+cla.sd <- data.frame(species = "cla", newdata, sd = predict.se$summary[,3])
+
+cra <- filter(power.sp, PreyCat == "Crab")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = cra)
+predict.se <- predictNLS(mod, newdata)
+cra.sd <- data.frame(species = "cra", newdata, sd = predict.se$summary[,3])
+
+sna <- filter(power.sp, PreyCat == "Herb Snail")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = sna)
+predict.se <- predictNLS(mod, newdata)
+sna.sd <- data.frame(species = "sna", newdata, sd = predict.se$summary[,3])
+
+sta <- filter(power.sp, PreyCat == "Star")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = sta)
+predict.se <- predictNLS(mod, newdata)
+sta.sd <- data.frame(species = "sta", newdata, sd = predict.se$summary[,3])
+
+cuc <- filter(power.sp, PreyCat == "Cucumber")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = cuc)
+predict.se <- predictNLS(mod, newdata)
+cuc.sd <- data.frame(species = "cuc", newdata, sd = predict.se$summary[,3])
+
+sd <- bind_rows(sd, cla.sd, cra.sd, sna.sd, sta.sd, cuc.sd)
+
+
+#mods
+predict.se <- predictNLS(can.mod, newdata)
+can.sd <- data.frame(species = "can", newdata, sd = predict.se$summary[,3])
+
+predict.se <- predictNLS(shrimp.mod, newdata)
+pas.sd <- data.frame(species = "pas", newdata, sd = predict.se$summary[,3])
+
+sca <- filter(power.sp, PreyCat == "Scallop")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+             start = list(a=0, b=3), data = sca)
+newdata <- data.frame(Size.mm=c(13, 26, 43.3, 60.7, 78, 95.3, 112.7, 130, 147.3, 170))
+predict.se <- predictNLS(mod, newdata)
+sca.sd <- data.frame(species = "sca", newdata, sd = predict.se$summary[,3])
+
+newdata <- data.frame(daimeter_mm=c(13, 26, 43.3, 60.7, 78, 95.3, 112.7, 130, 147.3, 170))
+predict.se <- predictNLS(urch.mod, newdata)
+stf.sd <- data.frame(species = "stf", newdata, sd = predict.se$summary[,3])
+stf.sd <- rename(stf.sd, "Size.mm" = "daimeter_mm")
+
+
+sd <- bind_rows(sd, can.sd, pas.sd, stf.sd, sca.sd)
+sd <- pivot_wider(sd, names_from = Size.mm, values_from = sd)
+write_csv(sd, "Bombing/sd.csv")
+
+
+
+sca <- filter(power.sp, PreyCat == "Scallop")
+mod <- nlsLM(Dissected.Weight ~ a*Size.mm^b, 
+                 start = list(a=0, b=3), data = sca)
+newdata <- data.frame(Size.mm=c(13, 26, 43.3, 60.7, 78, 95.3, 112.7, 130, 147.3, 170))
+predict.se <- predictNLS(mod, newdata)
+sca.sd <- data.frame(species = "sca", newdata, sd = predict.se$summary[,3])

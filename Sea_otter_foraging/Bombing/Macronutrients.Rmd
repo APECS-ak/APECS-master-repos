@@ -16,17 +16,18 @@ library(tidyr)
 library(ggplot2)
 library(ggthemes)
 library(lubridate)
+library(scales)
 
 
 plab <- read.csv("plab.csv")
 summary <- read.csv("Summary_PC.csv")
+
 ```
 
 Converting Seasons into quarters/months
 ```{r, season to quarter}
 summary$Date.Collected <- parse_date_time(summary$Date.Collected, orders = "mdy")
 summary$Date.Collected <- as.Date(summary$Date.Collected)
-summary$quarter <- quarter(summary$Date.Collected, with_year = TRUE)
 summary$month <- floor_date(summary$Date.Collected, unit = "month")
 summary$month[summary$month == "2018-07-01"] <- "2018-08-01"
 ```
@@ -52,16 +53,18 @@ plab$kcal.wet <- plab$KJ.wetgram*0.2390057361
 
 Converting from lipid/wet mass to lipid/dry mass
 ```{r, converting wet lipid to dry lipid}
-plab$lipid.dry <-NA
-plab$lipid.dry <- (1-(plab$moisture/100))*plab$KJ
+plab$lipid_wet <-NA
+plab$lipid_wet <- (1-(plab$moisture/100))*plab$lipid_dry
 ```
 
 
 I want to combine info from the summary file into the Moisure, bomb, and lipid files
-```{r, new file with no nas and one with nas, message=FALSE}
-#summary.short <- select(summary, SIN, Size.mm, Species, Frozen.Weight,
-                        #Live.Weight, Dissected.Weight, Site.location, Season, PreyCat) # this isn't working and I don't know why
-summary.w <-   filter(summary, Tissue == "whole")
+```{r, new file with no nas and one with nas, message=FALSE, warning=FALSE}
+summary.w <- filter(summary, Tissue == "whole")
+summary.w$Frozen.Weight <- as.numeric(as.character(summary.w$Frozen.Weight))
+summary.w$whole.weight <-ifelse(is.na(summary.w$Frozen.Weight), 
+                                summary.w$Live.Weight, summary.w$Frozen.Weight)
+summary.w$edible <- (summary.w$Dissected.Weight/summary.w$whole.weight)*100
 all <- drop_na(plab)
 all <- left_join(all, summary.w, by="SIN")
 plab <- left_join(plab, summary.w, by="SIN")
@@ -84,9 +87,9 @@ ggplot(data= plab, aes(x=Size.mm, y=KJ), na.rm=TRUE) +
 ```{r, graph lipid vs length, echo= FALSE, message=FALSE, warning=FALSE}
 plab.lip <- plab %>%
   filter(PreyCat== "Clam" | PreyCat == "Crab" | PreyCat == "Herb Snail" | PreyCat == "Cucumber" | PreyCat == "Urchin") %>%
-  drop_na(lipid.dry)
+  drop_na(lipid_dry)
 
-ggplot(data= plab.lip, aes(x=Size.mm, y=lipid.dry)) +
+ggplot(data= plab.lip, aes(x=Size.mm, y=lipid_dry)) +
   geom_point() + theme_few() +
   stat_smooth(method= "lm") +
   labs(x= "Length (in mm)", y="% Lipid (dry mass)")  +
@@ -110,8 +113,8 @@ ggplot(data= plab.prot, aes(x=Size.mm, y=protein_dry)) +
 ## lipid and overall energy together
 ```{r, KJ and Lipid vs length, echo = FALSE, Message = FALSE, warning=FALSE}
 ggplot(data= plab.lip) + theme_few() +
-  geom_point(aes(x=Size.mm, y=lipid.dry, color= "% Lipid (dry mass)")) + 
-  stat_smooth(aes(x=Size.mm, y=lipid.dry, color= "% Lipid (dry mass)"), method= "lm") +
+  geom_point(aes(x=Size.mm, y=lipid_dry, color= "% Lipid (dry mass)")) + 
+  stat_smooth(aes(x=Size.mm, y=lipid_dry, color= "% Lipid (dry mass)"), method= "lm") +
   labs(x= "Length (in mm)", y="% Lipid (dry mass)")  +
   geom_point(aes(x=Size.mm, y=KJ, color="KJ/g (dry mass)")) +
   stat_smooth(aes(x=Size.mm, y=KJ, color="KJ/g (dry mass)"), method= "lm") +
@@ -120,10 +123,11 @@ ggplot(data= plab.lip) + theme_few() +
   facet_wrap(vars(Species), nrow = 4, scales= "free")
 ```
 
+
+
 ### % Lipid vs % Protein (dry mass values)
 ```{r, lipid v protein, echo=FALSE}
-plab.lp <- plab.lip %>% drop_na(protein_dry)
-ggplot(data= plab.lp, aes(x=protein_dry, y=lipid.dry, color = PreyCat)) +
+ggplot(data= plab.lip, aes(x=protein_dry, y=lipid_dry, color = PreyCat)) +
   theme_few() +
   geom_point() +
   stat_smooth(formula = y~x, se= FALSE, method= lm)
@@ -132,9 +136,9 @@ ggplot(data= plab.lp, aes(x=protein_dry, y=lipid.dry, color = PreyCat)) +
 
 ## % Lipid by sesason
 ```{r, season - lipid, echo=FALSE, warning=FALSE, message = FALSE}
-ggplot(data= plab.lip, aes(x=month, y=lipid.dry)) +
+ggplot(data= plab.lip, aes(x=month, y=lipid_dry)) +
   geom_boxplot(aes(color = Season)) + theme_few() +
-  stat_summary(aes(y = lipid.dry,group=1), fun.y=mean, colour="black", geom="line",group=1) +
+  stat_summary(aes(y = lipid_dry,group=1), fun.y=mean, colour="black", geom="line",group=1) +
   labs(x= "", y="% Lipid (dry mass)")  +
   facet_wrap(vars(PreyCat), scales = "free", nrow=2)
 ```
@@ -163,7 +167,7 @@ Creating energy means for each season
 means <-plab %>%
     filter(PreyCat == "Clam" | PreyCat == "Crab" | PreyCat == "Herb Snail" | PreyCat == "Cucumber" | PreyCat == "Urchin") %>%
   group_by(PreyCat, month) %>% 
-  summarise(kcal.m=mean(kcal.dry, na.rm = T), kcal.sd= sd(kcal.dry, na.rm = T), protein.m=mean(protein_dry, na.rm = T), protein.sd=sd(protein_dry, na.rm = T), lipid.m=mean(lipid.dry, na.rm = T), lipid.sd=sd(lipid.dry, na.rm = T), moisture.m=mean(moisture, na.rm = T), moisture.sd=sd(moisture, na.rm = T), ash.m=mean(ash, na.rm = T), ash.sd=sd(ash, na.rm = T))
+  summarise(kcal.m=mean(kcal.dry, na.rm = T), kcal.sd= sd(kcal.dry, na.rm = T), protein.m=mean(protein_dry, na.rm = T), protein.sd=sd(protein_dry, na.rm = T), lipid.m=mean(lipid_dry, na.rm = T), lipid.sd=sd(lipid_dry, na.rm = T), moisture.m=mean(moisture, na.rm = T), moisture.sd=sd(moisture, na.rm = T), ash.m=mean(ash, na.rm = T), ash.sd=sd(ash, na.rm = T))
 ```
 
 
@@ -236,8 +240,106 @@ ggplot(data= means , aes(y=ash.m, x=month, color=PreyCat), na.rm=TRUE) +
     labs(x="", y="% Ash") + theme_few()
 ```
 
+```{r, proportions of protein and lipid, echo=FALSE}
+all$prop.lipid <- 36.43*(all$lipid_dry/100)
+all$prop.prot <- 20.1*(all$protein_dry/100)
+all$prop.compare <- all$prop.lipid+all$prop.prot
+all$prop.diff <- abs(all$prop.compare-all$KJ)
+all$percent.lip <- all$prop.lipid/all$prop.compare
+all$percent.prot <- all$prop.prot/all$prop.compare
+```
 
 
+```{r proportion graph by season, echo=FALSE}
+lip <- all %>%
+  group_by(PreyCat, Season) %>%
+  summarise(mean = mean(percent.lip, na.rm = TRUE), 
+            sd = sd(percent.lip, na.rm = TRUE))
+prot <- all %>%
+  group_by(PreyCat, Season) %>%
+  summarise(mean = mean(percent.prot, na.rm = TRUE),
+            sd = sd(percent.prot, na.rm = TRUE))
 
+lip$macro <- "lipid"
+prot$macro <- "protein"
+graph <- bind_rows(lip, prot)
 
+ggplot(data = graph, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
+  geom_bar(stat="identity", position = "fill") +
+  geom_errorbar(data = filter(graph, macro == "protein"), aes(ymin = mean-sd, ymax = mean+sd), width=.2) +
+  facet_wrap(vars(Season))
+
+ggplot(data = graph, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
+  geom_bar(stat="identity", position = position_dodge()) +
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=0.2, position = position_dodge(.9)) +
+  facet_wrap(vars(Season))
+```
+
+```{r proportion graph, echo=FALSE}
+lip.all <- all %>%
+  group_by(PreyCat) %>%
+  summarise(mean = mean(percent.lip, na.rm = TRUE), 
+            sd = sd(percent.lip, na.rm = TRUE))
+prot.all <- all %>%
+  group_by(PreyCat) %>%
+  summarise(mean = mean(percent.prot, na.rm = TRUE),
+            sd = sd(percent.prot, na.rm = TRUE))
+
+lip.all$macro <- "lipid"
+prot.all$macro <- "protein"
+graph.all <- bind_rows(lip.all, prot.all)
+
+ggplot(data = graph.all, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
+  geom_bar(stat="identity", position = "fill", color = "black") +
+  geom_errorbar(data = filter(graph.all, macro == "protein"), 
+                aes(ymin = mean-sd, ymax = mean+sd), width=.2, color = "white") +
+  scale_fill_manual(values= c("black", "gray"), name="Macronutrient") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(x= "", y="Percent of total energy")  
+
+ggplot(data = graph.all, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
+  geom_bar(stat="identity", position = position_dodge()) +
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=0.2, position = position_dodge(.9))
+```
+
+```{r, energy and seasonality, warning= FALSE}
+# box and whisker plot main y axis, mean percent in smooth on secondary axis - I think this plot doesn't look intersting... maybe could improve? I am stepping away from it at the moment
+
+si.otter <- read.csv("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging/SI/all_mixing.csv")
+si.otter$month <- ifelse(si.otter$Season == "Spring", "2018-05-01", ifelse(si.otter$Season == "Summer", 
+                            "2018-08-01", ifelse(si.otter$Season == "Fall", "2018-11-01", "2019-02-01")))
+si.otter$month <- as_date(si.otter$month)
+si.otter$quarter <- quarter(si.otter$month, with_year = F)
+
+si.mean <- si.otter %>%
+  group_by(Season, quarter, source) %>%
+  summarise(mean=mean(value), sd=sd(value)) %>%
+  rename(PreyCat = source)
+
+plab.energ <- plab %>%
+  filter(PreyCat == "Clam" | PreyCat == "Crab" | PreyCat == "Cucumber" | PreyCat == "Mussel" | 
+           PreyCat == "Herb Snail" | PreyCat == "Urchin") 
+  
+
+si.mean$Season<-factor(si.mean$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
+plab.energ$Season<-factor(plab.energ$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
+
+ggplot(data=plab.energ, aes(x=Season, y=kcal.wet)) +
+  geom_boxplot(color= "blue") +
+  labs(x= NULL, y="Kcal/gram (wet mass)") +
+  facet_wrap(vars(PreyCat)) +
+  theme_few()
+
+ggplot(data= si.mean, aes(x=Season, y= mean)) +
+ # geom_point(color = "red") +
+ # geom_errorbar(aes(x=Season, ymin= mean-sd, ymax=mean+sd), color = "red", width = .1) +
+  geom_smooth(data=si.mean, aes(x=quarter, y=mean), color="red") +
+  labs(x= NULL, y="Proportion of diet") +
+  facet_wrap(vars(PreyCat)) +
+  theme_few()
+```
+
+```{r}
+
+```
 

@@ -6,6 +6,7 @@ library(lubridate)
 library(lattice)
 library(dplyr)
 library(scales)
+library(tidyr)
 
 ###  OLD DATA  ###
 #s.prop <- read.csv("s_prop.csv") # import a file with the male/female proportions
@@ -328,18 +329,18 @@ ggsave("fo_season.png", device = "png", path = "Visual/", width = 8,
 
 #####################################################################################################
 #FO for each dive
-forage<- forage %>% unite("dive.no", BoutID, DiveNo, sep="-")
+forage.dive<- forage %>% unite("dive.no", BoutID, DiveNo, sep="-")
 
 #How many dives
-forage %>% 
-  na.omit() %>% 
+count.dive<- forage.dive %>% 
+  filter(Suc != "N" & Suc != "I") %>%
   count(dive.no) 
 
 #3,522 inlcuding no success
-#2,419 not including no success
+#3,178 not including no success
 
 #need to group by dive, and preycat then count
-count.forage<- forage %>%
+count.forage<- forage.dive %>%
   count(dive.no, PreyCat) %>%
   na.omit() %>%
   count(PreyCat)
@@ -348,10 +349,62 @@ count.forage<- forage %>%
 count.forage$fo<-NA
 count.forage$fo.s<-NA
 count.forage$fo<-(count.forage$n / 3522)
-count.forage$fo.s<-(count.forage$n / 2419)
+count.forage$fo.s<-(count.forage$n / 3167)
 
-#Make the same thing for each season
+# ENTER GRAPH HERE?
 
+#FO by dive by season
+sp.dive<- forage.dive %>% 
+  filter(forage.dive$Season == "Spring") %>%
+  filter(Suc != "N" & Suc != "I") %>%
+  count(dive.no)
+sp.dive #1610
+
+su.dive<- forage.dive %>% 
+  filter(forage.dive$Season == "Summer") %>%
+  filter(Suc != "N" & Suc != "I") %>%
+  count(dive.no)
+su.dive #1557
+
+
+count.season<- forage.dive %>%
+  count(dive.no, PreyCat, Season) %>%
+  na.omit() %>%
+  count(PreyCat, Season)
+
+count.season$fo<-NA
+count.season$fo<-ifelse(count.season$Season== "Summer", count.season$n / 1557, count.season$n / 1610)
+
+#make csv, if needed 
+write.csv(count.season, "Visual/fo_season.csv")
+
+#graphing the seasons by dive
+ggplot(data= count.season, aes(x= PreyCat, y=fo)) +
+  geom_col(aes(fill=Season), position = "dodge") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  labs(y= "Frequency of Occurrence (per dive)", x=NULL) +
+  scale_fill_grey() +
+  theme_classic()
+
+ggsave("fo_season_dive.png", device = "png", path = "Visual/", width = 8, 
+       height = 7, units = "in", dpi = 300)
+
+
+
+
+#FO by bout
+forage.filter <- filter(forage, PreyCat != is.na(PreyCat))
+f.count<- forage.filter %>%
+  count(BoutID, PreyCat) %>%
+  na.omit() %>%
+  count(PreyCat)
+
+
+f.count$fo<-NA
+f.count$fo<-(f.count$n / 362)
+
+
+#FO for each season by bout
 #first find out how many bouts for each season:
 
 sp<- forage %>% 
@@ -433,3 +486,29 @@ size.forage2<-size.forage2[,-1]
 chisq.test(size.forage2)
 #data:  size.forage2
 #X-squared = 37.764, df = 9, p-value = 1.922e-05
+
+
+
+#####################
+##  Compare to mix model
+#####################
+
+#need biomass values
+
+ggplot(aes(y = value, x = source, fill = source), data = forage.all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  facet_grid(Season~Site) +
+  theme( axis.title=element_text(size=16), legend.position = "none", 
+         axis.text.x = element_text(angle = -45, hjust=0, size =12), 
+         axis.text.y = element_text(size = 12),
+         strip.text=element_text(size = 12, face="bold"))
+
+
+#list species
+species.count <- forage %>%
+  group_by(PreyItem) %>%
+  count()

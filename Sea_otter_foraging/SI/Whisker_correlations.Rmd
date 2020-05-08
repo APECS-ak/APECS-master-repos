@@ -37,6 +37,8 @@ cor.whis<- whisker%>%
 
 cor.whis<-cor.whis[order(cor.whis$correlation),]
 cor.whis
+mean(cor.whis$correlation)
+
 ```
 
 Now check to make sure that these values are correct
@@ -84,7 +86,7 @@ Another visualization of the distribution
 
 ```{r}
 ggplot(cor.whis, aes(x=correlation)) +
-  geom_bar(color="red") +
+  geom_bar(color="gray") +
   xlim(-1,1) +
   theme_classic()
 ```

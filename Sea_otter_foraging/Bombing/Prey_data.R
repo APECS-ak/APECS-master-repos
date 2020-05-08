@@ -39,14 +39,19 @@ ggplot(data= filter(summary, Tissue == "whole"), aes(x=Size.mm, y=Dissected.Weig
   facet_wrap(vars(Species), nrow = 6, scales = "free")
 
   
-summary.short <- select(summary, SIN, Species, PreyCat)
-bomb<- left_join(plab, summary.short, by="SIN")
+summary.short <- summary %>%
+  filter(Tissue== "whole") %>%
+  select(SIN, Species, Date.Collected, Size.mm, Dissected.Weight, SEX, Site.location, Season, PreyCat)
+
+bomb<- full_join(plab, summary.short, by="SIN")
 bomb <- bomb %>% drop_na(KJ)
 bomb <- bomb %>% drop_na(PreyCat)
 bomb$KJ.wetgram <-NA
 bomb$KJ.wetgram <- (1-(bomb$moisture/100))*bomb$KJ
 bomb$kcal <- NA
 bomb$kcal <- bomb$KJ.wetgram*0.2390057361
+
+write.csv(bomb, "Bombing/NLL_data.csv")
 
 # kcal means for each species
 bomb.mean <- bomb %>%

@@ -195,26 +195,60 @@ siberDensityPlot(cbind(layman.B[[1]][,"TA"], layman.B[[2]][,"TA"]),
 ##                            MixSIAR                                 ##
 ########################################################################
 library(tidyr)
+library(dplyr)
+library(ggplot2)
 library(MixSIAR)
-#browseVignettes("MixSIAR")
-#mixsiar_gui() # this won't work and I cannot figure out why
+
 mixsiar.dir <- find.package("MixSIAR")
-#paste0(mixsiar.dir,"/example_scripts")
-#source(paste0(mixsiar.dir,"/example_scripts/mixsiar_script_wolves.R"))
+
+#make consumer file
+whisker <- read.csv("SI/whiskers.csv")
+whisker$OtterID <- as.character(whisker$OtterID)
+whisker <- filter(whisker, OtterID != "163532")
+whisker.consumer <- whisker %>%
+  select(C, N, Season, Site)
+write.csv(whisker.consumer, "SI/whisker_consumer.csv")
+
+#make source file with cucs and snails combined
+si.test <- read.csv("SI/SI.csv")
+si.test$PreyCat <- ifelse(si.test$Species == "apc" | si.test$Species == "tes", "Cucumber_Snail", 
+                          ifelse(si.test$Species == "cln" | si.test$Species == "prs" | si.test$Species == "sag", "Clam", 
+                                 ifelse(si.test$Species == "cam" | si.test$Species == "cap" | si.test$Species == "cao" | 
+                                          si.test$Species == "tec" | si.test$Species == "pup",  "Crab", 
+                                        ifelse(si.test$Species == "std" | si.test$Species == "stf", "Urchin",""))))
+### Fixing C for high fat critters. Anything above 3.5:1 ratio
+si.test$Cnorm <- NA
+si.test$Cnorm<- ifelse(si.test$CN >= 3.5, si.test$C-3.32+(0.99*si.test$CN), si.test$C)
+si.test <- filter(si.test, PreyCat != is.na(PreyCat))
+
+si.mean <-si.test %>%
+  group_by(PreyCat) %>% 
+  summarise(MeanC=mean(Cnorm), SDC=sd(Cnorm), MeanN=mean(N), SDN=sd(N))
+si.mean<-si.mean[-1,] #removing blank
+
+si.count <- si.test %>%
+  group_by(PreyCat) %>%
+  count()
+si.count<-si.count[-1,] #removing blank
+
+#join count and mean
+si.mean <- left_join(si.mean, si.count)
+
+write.csv(si.mean, "SI/prey_sources.csv")
 
 #working dir for consumer (whisker)
-mix.filename <- "/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging/SI/whis_consumer.csv"
+mix.filename <- "SI/whisker_consumer.csv"
 
 # Load the mixture/consumer data
 mix <- load_mix_data(filename=mix.filename, 
                      iso_names=c("C","N"), 
-                     factors=c("OtterID"), 
-                     fac_random=FALSE, 
-                     fac_nested=FALSE, 
+                     factors=c("Season", "Site"), 
+                     fac_random=c(FALSE,FALSE),
+                     fac_nested=c(FALSE,FALSE), 
                      cont_effects=NULL)
 
 # working dir for source (prey)
-source.filename <- "/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging/SI/prey_sources.csv"
+source.filename <- "SI/prey_sources.csv"
 
 # Load the source data
 source <- load_source_data(filename=source.filename,
@@ -224,7 +258,7 @@ source <- load_source_data(filename=source.filename,
                            mix)
 
 # working dir for discrimination factors (prey)
-discr.filename <- "/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging/SI/prey_discrimination.csv"
+discr.filename <- "SI/prey_discrimination.csv"
 
 # Load the discrimination/TDF data
 discr <- load_discr_data(filename=discr.filename, mix)
@@ -238,14 +272,10 @@ plot_data(filename="isospace_plot",
 # Calculate the convex hull area, standardized by source variance
 calc_area(source=source,mix=mix,discr=discr)
 
-# default "UNINFORMATIVE" / GENERALIST prior (alpha = 1)
-plot_prior(alpha.prior=1,source)
-
-
 
 #Run with an informative primer
 # Our 14 fecal samples were 10, 1, 0, 0, 3
-mix.alpha <- c(69.2,14.0,3.4,1.1,7.9,3.3)
+mix.alpha <- c(72,13,5,3)
 
 
 # Plot your informative prior
@@ -256,7 +286,7 @@ plot_prior(alpha.prior=mix.alpha,
            filename="prior_plot_inf")
 
 # Write the JAGS model file
-model_filename <- "MixSIAR_model.txt"   # Name of the JAGS model file
+model_filename <- "MixSIAR_model_2.txt"   # Name of the JAGS model file
 resid_err <- TRUE
 process_err <- TRUE
 write_JAGS_model(model_filename, resid_err, process_err, mix, source)
@@ -265,10 +295,10 @@ write_JAGS_model(model_filename, resid_err, process_err, mix, source)
 run <- list(chainLength=200000, burn=150000, thin=50, chains=3, calcDIC=TRUE)
 
 
-jags.1 <- run_model(run="test", mix, source, discr, model_filename,
+jags.2 <- run_model(run="test", mix, source, discr, model_filename,
                     alpha.prior = mix.alpha, resid_err, process_err)
 
-jags.1 <- run_model(run="long", mix, source, discr, model_filename,
+jags.2 <- run_model(run="normal", mix, source, discr, model_filename,
                     alpha.prior = mix.alpha, resid_err, process_err)
 
 output_options <- list(summary_save = TRUE,
@@ -292,7 +322,7 @@ output_options <- list(summary_save = TRUE,
                        plot_pairs_save_png = FALSE,
                        plot_xy_save_png = FALSE)
 
-output_JAGS(jags.1, mix, source, output_options)
+output_JAGS(jags.2, mix, source, output_options)
 
 
 ########################################################################
@@ -402,14 +432,16 @@ output_JAGS(jags.1, mix, source, output_options)
 #########################################################################
 ####                    Looking at the outputs                       ####  
 #########################################################################
+#using code from the mantis shrimp example
 
 library(MixSIAR)
 library(ggplot2)
 library(R2jags)
 library(tidyr)
+library(ggthemes)
 
 #Load image Very long seasons (this is converged)
-load(file="SI/season_verylong.RData")
+load(file="SI/Old Model Runs/season_verylong.RData")
 
 attach.jags(jags.1) # adding model
 
@@ -573,3 +605,283 @@ mussel.aov <- aov(value~Season, data = mussel)
 summary(mussel.aov)
 pairwise.t.test(x=mussel$value, g=mussel$Season, p.adj="bonferroni")
 
+
+##############################################################################
+## 45 samples, 7 sources with season only very long run
+##############################################################################
+
+load(file="SI/Old Model Runs/season/Run_0403-2020/season_verylong_45.RData")
+attach.jags(jags.1)
+
+jags.1[["parameters.to.save"]]
+
+##############################################################################
+## 45 samples, 5 sources
+##############################################################################
+
+library(MixSIAR)
+library(ggplot2)
+library(R2jags)
+library(tidyr)
+
+#TONOWEK - very long
+
+#Load image Very long seasons (this is converged)
+load(file="SI/tonowek_verylong.RData")
+
+attach.jags(jags.tonowek) # adding model
+
+dim(p.fac1) # 3000, 4, 5 -> 3000 iterations of 4 seasons and 5 sources
+mean(p.fac1[,1,1]) #median of season 1, source 1
+p.fac1[,2,1]
+
+
+#Making data frame for graph
+ton.fall <- data.frame(Site = "Tonowek", Season = "Fall",Clam = p.fac1[,1,1], Crab = p.fac1[,1,2], 
+                        Cucumber.Snail = p.fac1[,1,3], Mussel = p.fac1[,1,4], Urchin = p.fac1[,1,5])
+ton.spring <- data.frame(Site = "Tonowek", Season = "Spring",Clam = p.fac1[,2,1], Crab = p.fac1[,2,2], 
+                         Cucumber.Snail = p.fac1[,2,3], Mussel = p.fac1[,2,4], Urchin = p.fac1[,2,5])
+ton.summer <- data.frame(Site = "Tonowek", Season = "Summer",Clam = p.fac1[,3,1], Crab = p.fac1[,3,2], 
+                         Cucumber.Snail = p.fac1[,3,3], Mussel = p.fac1[,3,4], Urchin = p.fac1[,3,5])
+ton.winter <- data.frame(Site = "Tonowek", Season = "Winter",Clam = p.fac1[,4,1], Crab = p.fac1[,4,2], 
+                         Cucumber.Snail = p.fac1[,4,3], Mussel = p.fac1[,4,4], Urchin = p.fac1[,4,5])
+fall.ton <- ton.fall %>% gather(source,value,3:7)
+spring.ton <- ton.spring %>% gather(source,value,3:7)
+summer.ton <- ton.summer %>% gather(source,value,3:7)
+winter.ton <- ton.winter %>% gather(source,value,3:7)
+all.ton <- rbind(spring.ton, summer.ton, fall.ton, winter.ton)
+
+ggplot(aes(y = value, x = source, fill = Season), data = all.ton) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  #scale_fill_manual(values=c("black","white"), name="") + # Seagrass is black, coral is white
+  theme( axis.title=element_text(size=16), legend.position = "none")
+
+detach.jags(jags.tonowek)
+
+#Load image 
+load(file="SI/tonowek_extreme.RData")
+
+attach.jags(jags.tonowek) # adding model
+
+dim(p.fac1) # 3000, 4, 5 -> 3000 iterations of 4 seasons and 5 sources
+mean(p.fac1[,1,1]) #median of season 1, source 1
+p.fac1[,2,1]
+
+
+#Making data frame for graph
+ton.fall <- data.frame(Site = "Tonowek", Season = "Fall",Clam = p.fac1[,1,1], Crab = p.fac1[,1,2], 
+                       Cucumber.Snail = p.fac1[,1,3], Mussel = p.fac1[,1,4], Urchin = p.fac1[,1,5])
+ton.spring <- data.frame(Site = "Tonowek", Season = "Spring",Clam = p.fac1[,2,1], Crab = p.fac1[,2,2], 
+                         Cucumber.Snail = p.fac1[,2,3], Mussel = p.fac1[,2,4], Urchin = p.fac1[,2,5])
+ton.summer <- data.frame(Site = "Tonowek", Season = "Summer",Clam = p.fac1[,3,1], Crab = p.fac1[,3,2], 
+                         Cucumber.Snail = p.fac1[,3,3], Mussel = p.fac1[,3,4], Urchin = p.fac1[,3,5])
+ton.winter <- data.frame(Site = "Tonowek", Season = "Winter",Clam = p.fac1[,4,1], Crab = p.fac1[,4,2], 
+                         Cucumber.Snail = p.fac1[,4,3], Mussel = p.fac1[,4,4], Urchin = p.fac1[,4,5])
+fall.ton <- ton.fall %>% gather(source,value,3:7)
+spring.ton <- ton.spring %>% gather(source,value,3:7)
+summer.ton <- ton.summer %>% gather(source,value,3:7)
+winter.ton <- ton.winter %>% gather(source,value,3:7)
+all.ton <- rbind(spring.ton, summer.ton, fall.ton, winter.ton)
+
+write.csv(all.ton, "SI/tonowek_extreme.csv")
+
+ggplot(aes(y = value, x = source, fill = Season), data = all.ton) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  #scale_fill_manual(values=c("black","white"), name="") + # Seagrass is black, coral is white
+  theme( axis.title=element_text(size=16), legend.position = "none")
+
+
+detach.jags(jags.tonowek)
+
+#SHINKAKU
+
+#Load image Very long seasons (this is converged)
+load(file="SI/shinaku_verylong.RData") 
+
+attach.jags(jags.shinaku) # adding model
+
+dim(p.fac1) # 3000, 4, 5 -> 3000 iterations of 4 seasons and 5 sources
+median(p.fac1[,1,1]) #median of season 1, source 1
+p.fac1[,2,1]
+
+#Making data frame for graph
+shin.fall <- data.frame(Site = "Shinaku", Season = "Fall",Clam = p.fac1[,1,1], Crab = p.fac1[,1,2], 
+                       Cucumber.Snail = p.fac1[,1,3], Mussel = p.fac1[,1,4], Urchin = p.fac1[,1,5])
+shin.spring <- data.frame(Site = "Shinaku", Season = "Spring",Clam = p.fac1[,2,1], Crab = p.fac1[,2,2], 
+                         Cucumber.Snail = p.fac1[,2,3], Mussel = p.fac1[,2,4], Urchin = p.fac1[,2,5])
+shin.summer <- data.frame(Site = "Shinaku", Season = "Summer",Clam = p.fac1[,3,1], Crab = p.fac1[,3,2], 
+                         Cucumber.Snail = p.fac1[,3,3], Mussel = p.fac1[,3,4], Urchin = p.fac1[,3,5])
+shin.winter <- data.frame(Site = "Shinaku", Season = "Winter",Clam = p.fac1[,4,1], Crab = p.fac1[,4,2], 
+                         Cucumber.Snail = p.fac1[,4,3], Mussel = p.fac1[,4,4], Urchin = p.fac1[,4,5])
+fall.shin <- shin.fall %>% gather(source,value,3:7)
+spring.shin <- shin.spring %>% gather(source,value,3:7)
+summer.shin <- shin.summer %>% gather(source,value,3:7)
+winter.shin <- shin.winter %>% gather(source,value,3:7)
+
+
+all.shin <- rbind(spring.shin, summer.shin, fall.shin, winter.shin)
+
+ggplot(aes(y = value, x = source, fill = Season), data = all.shin) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  #scale_fill_manual(values=c("black","white"), name="") + # Seagrass is black, coral is white
+  theme( axis.title=element_text(size=16), legend.position = "none")
+
+detach.jags(jags.shinaku)
+
+#SUKKWAN
+
+#Load image Very long seasons (this is converged)
+load(file="SI/sukkwan_verylong.RData")
+
+attach.jags(jags.sukkwan) # adding model
+
+median(p.fac1[,1,1]) #median of season 1, source 1
+
+#Making data frame for graph
+suk.fall <- data.frame(Site = "Sukkwan", Season = "Fall",Clam = p.fac1[,1,1], Crab = p.fac1[,1,2], 
+                        Cucumber.Snail = p.fac1[,1,3], Mussel = p.fac1[,1,4], Urchin = p.fac1[,1,5])
+suk.spring <- data.frame(Site = "Sukkwan", Season = "Spring",Clam = p.fac1[,2,1], Crab = p.fac1[,2,2], 
+                          Cucumber.Snail = p.fac1[,2,3], Mussel = p.fac1[,2,4], Urchin = p.fac1[,2,5])
+suk.summer <- data.frame(Site = "Sukkwan", Season = "Summer",Clam = p.fac1[,3,1], Crab = p.fac1[,3,2], 
+                          Cucumber.Snail = p.fac1[,3,3], Mussel = p.fac1[,3,4], Urchin = p.fac1[,3,5])
+suk.winter <- data.frame(Site = "Sukkwan", Season = "Winter",Clam = p.fac1[,4,1], Crab = p.fac1[,4,2], 
+                          Cucumber.Snail = p.fac1[,4,3], Mussel = p.fac1[,4,4], Urchin = p.fac1[,4,5])
+fall.suk <- suk.fall %>% gather(source,value,3:7)
+spring.suk <- suk.spring %>% gather(source,value,3:7)
+summer.suk <- suk.summer %>% gather(source,value,3:7)
+winter.suk <- suk.winter %>% gather(source,value,3:7)
+
+
+all.suk <- rbind(spring.suk, summer.suk, fall.suk, winter.suk)
+
+ggplot(aes(y = value, x = source, fill = Season), data = all.suk) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  #scale_fill_manual(values=c("black","white"), name="") + # Seagrass is black, coral is white
+  theme( axis.title=element_text(size=16), legend.position = "none")
+
+all <- bind_rows(all.ton, all.shin, all.suk)
+write.csv(all, "SI/all_mixing.csv")
+
+##READ
+all <- read.csv("SI/all_mixing.csv")
+
+#facet wrap by prey
+ggplot(aes(y = value, x = Site, fill = Season), data = all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  facet_wrap(vars(source), nrow = 2) +
+  theme( axis.title=element_text(size=16))
+
+#facet wrap by season
+ggplot(aes(y = value, x = source, fill = Site), data = all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  facet_wrap(vars(Season), nrow = 2) +
+  theme( axis.title=element_text(size=16))
+
+
+#facet wrap by site
+ggplot(aes(y = value, x = source, fill = Season), data = all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  facet_wrap(vars(Site), nrow = 2) +
+  theme( axis.title=element_text(size=16))
+
+ggsave("mixing_sites.png", device = "png", path = "SI/", width = 9, 
+       height = 5, units = "in", dpi = 300)
+
+
+#trying to get them all on the same graph
+ggplot(aes(y = value, x = source, fill = Season, color = Site), data = all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  theme( axis.title=element_text(size=16))
+
+
+ggplot(aes(y = value, x = source, fill = source), data = all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  facet_grid(Season~Site) +
+  theme( axis.title=element_text(size=16), legend.position = "none", 
+         axis.text.x = element_text(angle = -45, hjust=0, size =12), 
+         axis.text.y = element_text(size = 12),
+         strip.text=element_text(size = 12, face="bold"))
+
+ggsave("mixing_sites_grid.png", device = "png", path = "SI/", width = 9, 
+       height = 7, units = "in", dpi = 300)
+
+
+##############################################################
+## Checking Tonowek very long vs extreme
+
+# Load files
+all <- read.csv("SI/all_mixing.csv")
+tonowek <- read.csv("SI/tonowek_extreme.csv")
+
+long <- all %>%
+  filter(Site == "Tonowek") %>%
+  group_by(source, Season) %>%
+  summarise(mean=mean(value), sd=(sd(value)))
+long$model <- "long"
+
+extreme <- tonowek %>%
+  group_by(source, Season) %>%
+  summarise(mean=mean(value), sd=(sd(value)))
+extreme$model <- "extreme"
+
+all.mean <- bind_rows(long, extreme)
+
+all.mean <- pivot_longer(all.mean, cols = c(starts_with("mean."), starts_with("sd.")), names_to = "model", 
+                         names_prefix = c("mean.", "sd."), values_to = c("mean","sd"))
+
+ggplot(data=all.mean, aes(x=source, y=mean, color=model)) +
+  theme_few() +
+  geom_point(position=position_dodge(width=0.5)) +
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=0, position = position_dodge(width=0.5)) +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  facet_wrap(vars(Season))
+
+
+## looking at means for paper
+all <- read.csv("SI/all_mixing.csv")
+
+all.mean <- all%>%
+  group_by(source, Season, Site) %>%
+  summarise(mean=mean(value), sd=(sd(value)))
+
+
+all.lm <- lm(value~Season*source, data=all)
+summary(all.lm)

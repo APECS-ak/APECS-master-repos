@@ -34,11 +34,19 @@ si.test$PreyCat <- ifelse(si.test$Species == "apc", "Cucumber",
                    ifelse(si.test$Species == "cln" | si.test$Species == "prs" | si.test$Species == "sag", "Clam", 
                    ifelse(si.test$Species == "cam" | si.test$Species == "cap" | si.test$Species == "cao" | 
                           si.test$Species == "tec" | si.test$Species == "pup",  "Crab", 
-                   ifelse(si.test$Species ==  "tes" , "Tegula", 
-                   ifelse(si.test$Species == "cef" | si.test$Species == "nul", "Snail",
+                   ifelse(si.test$Species == "tes" , "Herb Snail", 
+                   ifelse(si.test$Species == "cef" | si.test$Species == "nul", "Carn Snail",
                    ifelse(si.test$Species == "pio" | si.test$Species == "evt", "Star",
                    ifelse(si.test$Species == "std" | si.test$Species == "stf", "Urchin",
                    ifelse(si.test$Species == "mtr", "Mussel",""))))))))
+
+## New PreyCat only 5 catagories including Cucumber.Snail
+si.test$PreyCat <- ifelse(si.test$Species == "apc" | si.test$Species == "tes", "Cucumber.Snail", 
+                          ifelse(si.test$Species == "cln" | si.test$Species == "prs" | si.test$Species == "sag", "Clam", 
+                                 ifelse(si.test$Species == "cam" | si.test$Species == "cap" | si.test$Species == "cao" | 
+                                          si.test$Species == "tec" | si.test$Species == "pup",  "Crab", 
+                                                             ifelse(si.test$Species == "std" | si.test$Species == "stf", "Urchin",
+                                                                    ifelse(si.test$Species == "mtr", "Mussel","")))))
 
 ### Fixing C for high fat critters. Anything above 3.5:1 ratio
 si.test$Cnorm <- NA
@@ -48,6 +56,9 @@ si.test$SiteNumber<-as.character(si.test$SiteNumber)
 #make final CSV
 write.csv(si.test, "SI/sifinal.csv")
 
+si.prey <- si.test
+
+#_______________________________________________________________________________________
 ## load final CSV 
 si.prey <- read.csv("SI/sifinal.csv")
 
@@ -64,14 +75,6 @@ whisker<- filter(whisker, OtterID != "163532")
 #Shortening to only 8cm max for graphs
 whisker.short<-filter(whisker, distance <= 8)
 
-
-#reduce si file to just clam/crab/snail/urchin - Not needed anymore because I can just select from PreyCat
-si.clam<- filter(si.test, Species== "cln" | Species == "sag" | Species == "prs")
-si.crab<- filter(si.test, Species== "cam" | Species == "cao" | Species== "cap" | Species== "tec" | Species == "pup")
-si.snail<- filter(si.test, Species =="tes" | Species == "cef" | Species == "nul")
-si.urch<- filter(si.test, Species =="std" | Species == "stf")
-si.star<- filter(si.test, Species =="pio" | Species == "evt")
-si.mus<- filter(si.test, Species =="mtr")
 
 #################################################################################
 #####                          Prey Visualizations                          #####
@@ -99,14 +102,14 @@ ggplot(data=si.test, aes(x=Cnorm)) +
 
 #CLAM - CLN different,
 #       Sites differ, but nossuk overlaps SB and Craig
-ggplot(data= si.clam, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Clam"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Species, shape= Site)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
   stat_ellipse(mapping=aes(color=Species)) +
   theme_classic()
 
-ggplot(data= si.clam, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Clam"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Site, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -114,13 +117,13 @@ ggplot(data= si.clam, aes(x=C, y=N)) +
   theme_classic()
 
 #site
-ggplot(data= si.clam, aes(x=Size, y=C)) +
+ggplot(data= filter(si.test, PreyCat== "Clam"), aes(x=Size, y=Cnorm)) +
   geom_point(aes(color=Site, shape= Species)) +
   labs(x="Size", y=expression(paste(delta^13, "C (\u2030)" ))) +
   theme_classic()
 
 #season
-ggplot(data= si.clam, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Clam"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Season, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -128,7 +131,7 @@ ggplot(data= si.clam, aes(x=C, y=N)) +
   theme_classic()
 
 #CRAB  - Nossuk and Soda Bay overlap
-ggplot(data= si.crab, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Crab"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Site, shape=Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -136,7 +139,7 @@ ggplot(data= si.crab, aes(x=C, y=N)) +
   theme_classic()
 
 #Crab - species/site
-ggplot(data= si.crab, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Crab"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Species, shape=Site)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -144,7 +147,7 @@ ggplot(data= si.crab, aes(x=C, y=N)) +
   theme_classic()
 
 #Crab - season, mostly full overlap
-ggplot(data= si.crab, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Crab"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Season, shape=Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -152,16 +155,16 @@ ggplot(data= si.crab, aes(x=C, y=N)) +
   theme_classic()
 
 #URCHIN - Species don't differ, season doesn't differ?, site very different
-ggplot(data= si.urch, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Urchin"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Site, shape=Season)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
   stat_ellipse(mapping=aes(color=Site)) +
   theme_classic()
 
-#Urchin only Craig - not enough STD!
-urch.craig<-filter(si.urch, Site == "Craig")
-ggplot(data= urch.craig, aes(x=C, y=N)) +
+#Urchin only Craig - not enough!
+urch.craig<-filter(si.test, Site == "Craig" & PreyCat == "Urchin")
+ggplot(data= urch.craig, aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Season, shape=Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -169,14 +172,14 @@ ggplot(data= urch.craig, aes(x=C, y=N)) +
   theme_classic()
 
 #SNAIL
-ggplot(data= si.snail, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Herb Snail" | PreyCat == "Carn Snail"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Species, shape=Season)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
   theme_classic()
 
 #STAR - Tissue differences
-ggplot(data=si.star, aes(x=Cnorm, y=N)) +
+ggplot(data= filter(si.test, PreyCat== "Star"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Tissue, shape=Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -184,17 +187,14 @@ ggplot(data=si.star, aes(x=Cnorm, y=N)) +
   theme_classic()
 
 #look at seasonal changes in one site for clams - NO DIFFERENCE for Craig
-sb.si.clam <-filter(si.clam, Site=="Soda Bay")
-c.si.clam <- filter(si.clam, Site=="Craig")
-
-ggplot(data= sb.si.clam, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, Site=="Soda Bay" & PreyCat == "Clam"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Season, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
   stat_ellipse(mapping=aes(color=Season)) +
   theme_classic()
 
-ggplot(data= c.si.clam, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, Site=="Craig" & PreyCat == "Clam"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Season, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -203,7 +203,7 @@ ggplot(data= c.si.clam, aes(x=C, y=N)) +
 
 #Mussel - difference in sites
 
-ggplot(data= si.mus, aes(x=C, y=N)) +
+ggplot(data = filter(si.test, PreyCat == "Mussel"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Site)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
@@ -214,24 +214,27 @@ ggsave("mussel.png", device = "png", path = "SI/", width = 8,
        height = 6, units = "in", dpi = 300)
 
 
-ggplot(data= si.mus, aes(x=C, y=N)) +
+ggplot(data= filter(si.test, PreyCat == "Mussel"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Season, shape= Site)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
   stat_ellipse(mapping=aes(color=Season)) +
   theme_classic()
 
-#look at seasonal changes in one site for crab - Not enough data
-sb.si.crab <-filter(si.crab, Site=="Soda Bay")
-c.si.crab <- filter(si.crab, Site=="Craig") # not enough crabs
-
-ggplot(data= sb.si.crab, aes(x=C, y=N)) +
+#look at seasonal changes in one site for crab
+ggplot(data= filter(si.test, Site=="Soda Bay" & PreyCat == "Crab"), aes(x=Cnorm, y=N)) +
   geom_point(aes(color=Season, shape= Species)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" ))) +
   stat_ellipse(mapping=aes(color=Season)) +
   theme_classic()
 
+ggplot(data= filter(si.test, Site=="Craig" & PreyCat == "Crab"), aes(x=Cnorm, y=N)) +
+  geom_point(aes(color=Season, shape= Species)) +
+  labs(x=expression(paste(delta^13, "C (\u2030)")), 
+       y=expression(paste(delta^15, "N (\u2030)" ))) +
+  stat_ellipse(mapping=aes(color=Season)) +
+  theme_classic()
 
 #################################################################################
 #####                                 ANOVA                                 #####
@@ -301,13 +304,22 @@ plot(si.test$Species, si.test$C)
 #Making mean and min/max for each prey type using Cnorm
 si.mean <-si.prey %>%
   group_by(PreyCat) %>% 
-  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
-            Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
+  summarise(Cmean=mean(Cnorm), Csd=sd(Cnorm), Nmean=mean(N), Nsd=sd(N))
 si.mean<-si.mean[-1,] #removing blank
-si.mean<-si.mean[-6,] #removing stars
+#si.mean<-si.mean[-6,] #removing stars
 
+#TDF
+si.mean$Cmean <- si.mean$Cmean+2
+si.mean$Nmean <- si.mean$Nmean+2.8
+
+si.count <- si.prey %>%
+  group_by(PreyCat) %>%
+  count()
+si.count<-si.count[-1,] #removing blank
+
+si.mean<- left_join(si.mean, si.count)
 #make csv
-write.csv(si.mean, "si.mean.csv")
+write.csv(si.mean, "SI/si.mean_TDF.csv")
 
 # seasonal means
 si.season <-si.prey %>%
@@ -321,13 +333,13 @@ si.season<-si.season[-1,] #removing blank row
 si.summer <- filter(si.season, Season == "Summer")
 write.csv(si.summer, "SI/si.season.csv")
 
-#prey with SE as errorbars
+#prey with SD as errorbars
 ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
   geom_point(aes(color=PreyCat)) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" )))  +
-  geom_errorbar(aes(ymin = Nmean-Nse, ymax = Nmean+Nse, color= PreyCat), width=0) + 
-  geom_errorbarh(aes(xmin = Cmean-Cse,xmax = Cmean+Cse, color= PreyCat), height=0) +
+  geom_errorbar(aes(ymin = Nmean-Nsd, ymax = Nmean+Nsd, color= PreyCat), width=0) + 
+  geom_errorbarh(aes(xmin = Cmean-Csd,xmax = Cmean+Csd, color= PreyCat), height=0) +
   theme_classic()
 
 ggsave("prey.png", device = "png", path = "SI/", width = 8, 
@@ -446,10 +458,19 @@ ggplot(data= si.mean, aes(x=Cmean, y=Nmean)) +
 
 #Adding Mean, SD, AND SE
 whis.mean<-whisker %>%
+  group_by(OtterID, Site) %>%
+  summarise(Cmean=mean(C), Csd=sd(C), Nmean=mean(N), Nsd=sd(N)) 
+
+#make counts
+whis.count <- whisker %>%
   group_by(OtterID) %>%
-  summarise(Cmean=mean(C), Nmean=mean(N), Csd=sd(C), Nsd=sd(N), 
-            Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
-            Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
+  count()
+
+whis.mean <- left_join(whis.mean, whis.count)
+
+#Not using SE right now            
+#Cse=sd(C)/sqrt(length(C)), Nse=sd(N)/sqrt(length(N)), 
+#Crange=(max(C)-min(C)), Nrange=max((N)-min(N)))
 
 #print csv vof means (for table)
 write.csv(whis.mean, "SI/whis.mean.csv")

@@ -1,6 +1,5 @@
 ---
 title: "LME for Sea Otter vibrissae"
-author: "Nicole LaRoche"
 updated: "3/30/2020"
 output: html_document
 ---
@@ -15,9 +14,11 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyr)
 library(ggplot2)
 library(dplyr)
-library(broom)
 library(ggthemes)
-library(nlme)
+library(nlme) #lme model
+library(emmeans)
+library(MuMIn) #r.squaredGLMM
+
 
 #load whisker data
 whisker <- read.csv("whiskers.csv")
@@ -72,80 +73,209 @@ plot(LM)
 
 Factors: Season and Site are fixed and OtterID is random
 
+There are interactions between season and site, so best to separate out by site.
+
 ```{r lmmc}
-lmmc <- lme(C ~ Season + Site, data=whisker,
+lmmc <- lme(C ~ Season*Site, data=whisker,
 random = ~1|OtterID)
 anova(lmmc)
 summary(lmmc)
 ```
 
 ```{r lmmn}
-lmmn <- lme(N ~ Season + Site, data=whisker,
+lmmn <- lme(N ~ Season*Site, data=whisker,
 random = ~1|OtterID)
 anova(lmmn)
 summary(lmmn)
 ```
-```{r lmm per site not working, warning=FALSE, echo=FALSE}
-#lmmn2 <- whisker %>%
-#  nest(-Site) %>%
-#  mutate(fit=map(data, ~lme(N ~ Season , random = ~1|OtterID, data=.)),
-#         results = map(fit, glance)) %>%
-#  unnest(results)
-#lmmn2
 
-```
 
 From the boxplot of N means, I can see there are diferences in sites for only one or two of the sites, I wanted to see what the p-values are for individual sites, but wasn't sure how to account for this in one model, so I ran three seperate models with site filtered.
 
 #### Tonowek Narrows
 
-```{r lmmn tonowek}
-lmmn.ton <- lme(N ~ Season, data=filter(whisker, Site == "Tonowek"),
+```{r model for Carbon TONOWEK}
+
+whisk.ton <- filter(whisker, Site == "Tonowek")
+lmmc.ton <- lme(C ~ Season, data=whisk.ton,
+random = ~1|OtterID)
+anova(lmmc.ton)
+summary(lmmc.ton)
+r.squaredGLMM(lmmc.ton)
+
+```
+
+```{r model for Nitrogen TONOWEK}
+lmmn.ton <- lme(N ~ Season, data=whisk.ton,
 random = ~1|OtterID)
 anova(lmmn.ton)
 summary(lmmn.ton)
+r.squaredGLMM(lmmn.ton)
 ```
 
 
 #### Shinaku Inlet
 
+```{r lmmc shinaku}
+whisk.sh <- filter(whisker, Site == "Shinaku")
+lmmc.sh <- lme(C ~ Season, data=whisk.sh,
+random = ~1|OtterID)
+anova(lmmc.sh)
+summary(lmmc.sh)
+r.squaredGLMM(lmmc.sh)
+```
+
+
 ```{r lmmn shinaku}
-lmmn.sh <- lme(N ~ Season, data=filter(whisker, Site == "Shinaku"),
+lmmn.sh <- lme(N ~ Season, data=whisk.sh,
 random = ~1|OtterID)
 anova(lmmn.sh)
 summary(lmmn.sh)
+r.squaredGLMM(lmmn.sh)
 ```
 
 
 #### Sukkwan Strait
 
+
+
+```{r lmmc sukkwan}
+whisk.suk <- filter(whisker, Site == "Sukkwan Strait") 
+lmmc.suk <- lme(C ~ Season, data=whisk.suk,
+random = ~1|OtterID)
+anova(lmmc.suk)
+summary(lmmc.suk)
+r.squaredGLMM(lmmc.suk)
+```
+
+
 ```{r lmmn sukkwan}
-lmmn.suk <- lme(N ~ Season, data=filter(whisker, Site == "Sukkwan Strait"),
+lmmn.suk <- lme(N ~ Season, data= whisk.suk,
 random = ~1|OtterID)
 anova(lmmn.suk)
 summary(lmmn.suk)
+r.squaredGLMM(lmmn.suk)
 ```
 
 #### Residuals and QQ plots from original C and N LMEs
 
 ```{r residuals}
-plot(lmmc)
-plot(lmmn)
+plot(lmmc.ton)
+plot(lmmn.ton)
+plot(lmmc.suk)
+plot(lmmn.suk)
+plot(lmmc.sh)
+plot(lmmn.sh)
 ```
 
 ```{r qq plot}
-qqnorm(resid(lmmc, type = "normalized"), main = "lmmc")
-qqnorm(resid(lmmn, type = "normalized"), main = "lmmn")
+qqnorm(resid(lmmc.sh, type = "normalized"), main = "lmmc Shinaku")
+qqnorm(resid(lmmn.sh, type = "normalized"), main = "lmmn Shinaku")
+qqnorm(resid(lmmc.ton, type = "normalized"), main = "lmmc Tonowek")
+qqnorm(resid(lmmn.ton, type = "normalized"), main = "lmmn Tonowek")
+qqnorm(resid(lmmc.suk, type = "normalized"), main = "lmmc Sukkwan")
+qqnorm(resid(lmmn.suk, type = "normalized"), main = "lmmn Sukkwan")
 ```
+
+
+```{r predict and ranef for lmmn.suk}
+fixef(lmmn.suk)
+ott.suk.n <- ranef(lmmn.suk)
+mean(ott.suk.n$`(Intercept)`)
+whisk.suk$predictN <- predict(lmmn.suk, level=1)
+ggplot(data=whisk.suk, aes(x=N, y=predictN)) +
+  geom_point() +
+    geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(se=FALSE, method= "lm") +
+  xlim(11.75, 13.75) + ylim(11.75, 13.75) +
+  facet_wrap(vars(Season)) +
+  theme_few()
+
+fixef(lmmc.suk)
+ott.suk.c <- ranef(lmmc.suk)
+mean(ott.suk.c$`(Intercept)`)
+whisk.suk$predictC <- predict(lmmc.suk, level=1)
+ggplot(data=whisk.suk, aes(x=C, y=predictC)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(se=FALSE, method= "lm") +
+    xlim(-16, -12) + ylim(-16, -12) +
+  facet_wrap(vars(Season)) +
+  theme_few()
+```
+
+```{r predict and randf for sh}
+fixef(lmmn.sh)
+ott.sh.n <- ranef(lmmn.sh)
+mean(ott.sh.n$`(Intercept)`)
+whisk.sh$predictN <- predict(lmmn.sh, level=1)
+ggplot(data=whisk.sh, aes(x=N, y=predictN)) +
+  geom_point() +
+    geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(se=FALSE, method= "lm") +
+  xlim(10.9, 14.75) + ylim(10.9, 14.75) +
+  facet_wrap(vars(Season)) +
+  theme_few()
+
+fixef(lmmc.sh)
+ott.sh.c <- ranef(lmmc.sh)
+mean(ott.sh.c$`(Intercept)`)
+predictC <- predict(lmmc.sh, level=1)
+ggplot(data=whisk.sh, aes(x=C, y=predictC)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(se=FALSE, method= "lm") +
+    xlim(-16.2, -12) + ylim(-16.2, -12) +
+  facet_wrap(vars(Season)) +
+  theme_few()
+```
+
+```{r predict and randf for ton}
+fixef(lmmn.ton)
+ott.ton.n <- ranef(lmmn.ton)
+mean(ott.sh.n$`(Intercept)`)
+whisk.ton$predictN <- predict(lmmn.ton, level=1)
+ggplot(data=whisk.ton, aes(x=N, y=predictN)) +
+  geom_point() +
+    geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(se=FALSE, method= "lm") +
+  #xlim(10.9, 14.75) + ylim(10.9, 14.75) +
+  facet_wrap(vars(Season)) +
+  theme_few()
+
+fixef(lmmc.ton)
+ott.ton.c <- ranef(lmmc.ton)
+mean(ott.ton.c$`(Intercept)`)
+predictC <- predict(lmmc.ton, level=1)
+ggplot(data=whisk.ton, aes(x=C, y=predictC)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0) +
+  geom_smooth(se=FALSE, method= "lm") +
+    #xlim(-16.2, -12) + ylim(-16.2, -12) +
+  facet_wrap(vars(Season)) +
+  theme_few()
+```
+
+
 
 ### Post hoc Tukey's test
 
 I wanted to know what seasons fall out together in the Nitrogen data. I am not sure if Tukey's is the correct test for this? Also not sure how to do for both Season and Site together or separate like I did below.
 
 
-```{r tukey}
-library(lsmeans)
-lsmeans(lmmn, pairwise~Season, adjust="tukey")
-lsmeans(lmmn, pairwise~Site, adjust="tukey")
+```{r tukey ton}
+lsmeans(lmmc.ton, pairwise~Season, adjust="tukey")
+lsmeans(lmmn.ton, pairwise~Season, adjust="tukey")
+```
+
+```{r tukey sh}
+lsmeans(lmmc.sh, pairwise~Season, adjust="tukey")
+lsmeans(lmmn.sh, pairwise~Season, adjust="tukey")
+```
+
+
+```{r tukey suk}
+lsmeans(lmmc.suk, pairwise~Season, adjust="tukey")
+lsmeans(lmmn.suk, pairwise~Season, adjust="tukey")
 ```
 
