@@ -32,15 +32,6 @@ bomb.test$PreyCat <- ifelse(bomb.test$Species == "apc", "Cucumber",
 #removing squid eggs
 bomb.test<- filter(bomb.test, PreyCat != is.na(PreyCat))
 
-#STARS and CRABS - Want to only look at whole parts in total bomb.test analysis
-bomb.star<-filter(bomb.test, PreyCat == "Star")
-bomb.crab<- filter(bomb.test, PreyCat == "Crab")
-bomb.clam<- filter(bomb.test, Species == "cln" | Species == "sag" | Species == "prs")
-bomb.urch<- filter(bomb.test, Species == "std" | Species == "stf")
-bomb.snail<- filter(bomb.test, PreyCat == "Snail")
-bomb.mussel<- filter (bomb.test, PreyCat == "Mussel")
-bomb.bivalve <- filter(bomb.test, PreyCat == "Clam" | PreyCat == "Scallop")
-bomb.urchin <- filter (bomb.test, PreyCat == "Urchin")
 
 bomb.test<-filter(bomb.test, Tissue == "whole" )
 
@@ -78,7 +69,6 @@ ggplot(data= bomb.test) +
   geom_boxplot(aes(x=Season, y=KJ)) +
   labs(x="Season", y="KJ (g)") +
   theme_classic()
-
 
 #### In this graph I want to draw a line with the averages and the light bands for the SD?
 #KJ for each species by season
@@ -230,30 +220,9 @@ urchin$calorie <-urchin$KJ.wetgram*239.006
 urchin$calorie.dry <- urchin$Gross.Heat*239.006
 
 
-
-## Making summary file with PreyCat
-summary <- read.csv("Bombing/Summary.csv")
-summary$PreyCat <- NA
-summary$PreyCat <- ifelse(summary$Species == "apc", "Cucumber", 
-                            ifelse(summary$Species == "cln" | summary$Species == "prs" | summary$Species == "sag" |
-                                   summary$Species == "pab", "Clam", 
-                             ifelse(summary$Species == "cam" | summary$Species == "cap" | summary$Species == "cao" | 
-                                    summary$Species == "tec"| summary$Species == "pas" | summary$Species == "pup", "Crab", 
-                              ifelse(summary$Species == "cef"  | summary$Species == "nul" | summary$Species == "lid", "Carn Snail",
-                               ifelse(summary$Species == "map"| summary$Species == "tes", "Herb Snail",
-                                ifelse(summary$Species == "pio" | summary$Species == "evt", "Star", 
-                                 ifelse(summary$Species == "stf"| summary$Species == "std", "Urchin",
-                                  ifelse(summary$Species == "mtr", "Mussel",
-                                   ifelse(summary$Species == "hak", "Abalone", 
-                                    ifelse(summary$Species == "crs", "Chiton" ,
-                                     ifelse(summary$Species == "crg" | summary$Species == "pom" | 
-                                            summary$Species == "chr", "Scallop", NA)))))))))))
-
-
-
-
-write.csv(summary, "Bombing/Summary_PC.csv")
-
+#####################################################################################
+#
+#####################################################################################
 #load new summary file
 summary <- read.csv("Bombing/Summary_PC.csv")
 plab <- read.csv("Bombing/plab.csv")

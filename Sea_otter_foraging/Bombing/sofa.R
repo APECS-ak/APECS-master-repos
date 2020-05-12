@@ -337,39 +337,8 @@ df$x.4 <- (df$a*(170^df$b))
 #save df
 write.csv(df, "Bombing/shrimp_ab.csv")
 
-# This is not right
-#print stds
-std.dev <- pow.mod.n %>%
-  select(Species, term, std.dev) %>%
-  pivot_wider(names_from = term, values_from = std.dev)
-
-#adding sizes stds 
-std.dev$x.1a <- (std.dev$a*(13^std.dev$b))
-std.dev$x.1b <- (std.dev$a*(26^std.dev$b))
-std.dev$x.1c <- (std.dev$a*(43.3^std.dev$b))
-std.dev$x.2a <- (std.dev$a*(60.7^std.dev$b))
-std.dev$x.2b <- (std.dev$a*(78^std.dev$b))
-std.dev$x.2c <- (std.dev$a*(95.3^std.dev$b))
-std.dev$x.3a <- (std.dev$a*(112.7^std.dev$b))
-std.dev$x.3b <- (std.dev$a*(130^std.dev$b))
-std.dev$x.3c <- (std.dev$a*(147.3^std.dev$b))
-std.dev$x.4 <- (std.dev$a*(170^std.dev$b))
-
-#write
-write.csv(std.dev, "bombing/stddev.csv")
-
-# trying SD for one species
-
-cln <- filter(pow.mod.n, Species == "cln")
-cln.power <- filter(power, Species == "cln")
-
-ggplot(data=cln.power, aes(x=Size.mm, y=Dissected.Weight)) +
-  geom_point() +
-  geom_smooth(method = "nls", formula = (y~a*x^b), se = FALSE)+
-  labs(x = "Size (mm)", y = "Weight (g)") + theme_bw()
 
 
-residuals(pow.mod.n)
 
 
 #Making a table by season and species

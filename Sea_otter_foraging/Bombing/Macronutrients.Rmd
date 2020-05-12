@@ -26,8 +26,6 @@ summary <- read.csv("Summary_PC.csv")
 
 Converting Seasons into quarters/months
 ```{r, season to quarter}
-summary$Date.Collected <- parse_date_time(summary$Date.Collected, orders = "mdy")
-summary$Date.Collected <- as.Date(summary$Date.Collected)
 summary$month <- floor_date(summary$Date.Collected, unit = "month")
 summary$month[summary$month == "2018-07-01"] <- "2018-08-01"
 ```
