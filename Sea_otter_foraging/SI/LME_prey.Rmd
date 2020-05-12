@@ -29,27 +29,38 @@ si.prey <- si.prey %>%
 si.prey$PreyCat <- fct_collapse(si.prey$PreyCat, Cucumber.Snail = c("Cucumber","Tegula"))
 ```
 
-```{r carbon graph}
-ggplot(data=si.prey) +
-  geom_boxplot(aes(x=Season, y=Cnorm, fill=Season)) +
-  labs(y=expression(paste(delta^13, "C" ))) +
-  scale_fill_brewer(palette = "Greens") +
-  facet_wrap(vars(PreyCat)) +
-  theme_few()
+## Carbon by functional prey group
+this is for each functional prey group by season for the two sites. 
+```{r carbon graph, echo=FALSE}
+si.prey %>%
+  filter(Site == "Craig" | Site == "Soda Bay") %>%
+  ggplot(aes(x=Season, y=Cnorm, fill=Site)) +
+  geom_boxplot() +   theme_few() +
+  labs(y=expression(paste(delta^13, "C" )), x= NULL) +
+  scale_fill_brewer(palette = "Set2") +
+  facet_wrap(vars(PreyCat), labeller = labeller(PreyCat = c("Clam" = "Clam", "Crab" = "Crab", 
+                                                            "Cucumber.Snail" = "Cucumber and Snail", 
+                                                            "Mussel" = "Mussel", "Urchin" = "Urchin"))) 
+```
+
+## Nitrogen by functional prey group
+this is for each functional prey group by season for the two sites. 
+```{r nitrogen graph, echo=FALSE}
+si.prey %>%
+  filter(Site == "Craig" | Site == "Soda Bay") %>%
+  ggplot(aes(x=Season, y=N, fill=Site)) +
+  geom_boxplot() +   theme_few() +
+  labs(y=expression(paste(delta^15, "N" )), x=NULL) +
+  scale_fill_brewer(palette = "Set2") +
+  facet_wrap(vars(PreyCat),labeller = labeller(PreyCat = c("Clam" = "Clam", "Crab" = "Crab", 
+                                                           "Cucumber.Snail" = "Cucumber and Snail", 
+                                                           "Mussel" = "Mussel", "Urchin" = "Urchin")))
 ```
 
 
-```{r nitrogen graph}
-ggplot(data=si.prey) +
-  geom_boxplot(aes(x=Season, y=N, fill=Season)) +
-  labs(y=expression(paste(delta^15, "N" ))) +
-  scale_fill_brewer(palette = "Purples") +
-  facet_wrap(vars(PreyCat)) +
-  theme_few()
-```
+## Linear Mixed Effects Model
 
-
-### Linear Mixed Effects Model
+First, I am making a model for carbon with season and site as factors with prey catagory as a random factor
 
 ```{r lmmc}
 lmmc <- lme(Cnorm ~ Season+Site, data=si.prey,
@@ -59,6 +70,16 @@ summary(lmmc)
 r.squaredGLMM(lmmc)
 ```
 
+#### Takeaways from this model: 
+
+* Both site and season are significant (p < 0.01)
+* Residual from random effects are lower than the fixed effects (model = 1.74, residual = 1.14)
+* Fixed effects explain about 60%
+* Craig is higher for filter feeders, but not for grazers and higher level consumers
+
+
+Next, a model for nitrogen with the same factors 
+
 ```{r lmmn}
 lmmn <- lme(N ~ Season+Site, data=si.prey,
 random = ~1|PreyCat)
@@ -66,6 +87,16 @@ anova(lmmn)
 summary(lmmn)
 r.squaredGLMM(lmmn)
 ```
+
+#### Takeaways from this model: 
+
+* Season is not significant (p > 0.01)
+* Site is significant (p < 0.01)
+* Residual from random effects are lower than the fixed effects (model = 1.39, residual = .91)
+* % of explaination from fixed effects is about the same as carbon (60%)
+* Craig is higher for filter feeders, but not for grazers and higher level consumers (same as carbon!)
+
+
 
 #### Residuals and QQ plots from original C and N LMEs
 
@@ -79,6 +110,7 @@ qqnorm(resid(lmmc, type = "normalized"), main = "lmmc")
 qqnorm(resid(lmmn, type = "normalized"), main = "lmmn")
 ```
 
+This is where things start to confuse me. I don't understand why the predictors are so far off of the 1:1 line (in black) that it should theoretically follow. 
 
 ```{r predict and ranef for lmmn}
 fixef(lmmn)
@@ -104,7 +136,7 @@ ggplot(data=si.prey, aes(x=C, y=predictC)) +
   theme_few()
 ```
 
-### Post hoc Tukey's test
+### Post hoc Tukey's procedure
 
 ```{r tukey ton}
 lsmeans(lmmc, pairwise~Season, adjust="tukey")
@@ -112,6 +144,9 @@ lsmeans(lmmn, pairwise~Season, adjust="tukey")
 ```
 
 ### LM with separate models for each Prey Cat
+
+this is a linear model where I separated out each prey catagory. It looks as if the season and site only have one predicted value so it does not follow the 1:1 line (gray) that it theoretically should.
+
 ```{r seaparate Prey Cats, message=FALSE, warning=FALSE}
 si.prey.2 <- si.prey %>% select(SIN, Cnorm, N, Season, Site, PreyCat)
 si.prey.2 %>%
