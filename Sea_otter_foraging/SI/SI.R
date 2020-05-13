@@ -62,6 +62,7 @@ si.prey <- si.test
 ## load final CSV 
 si.prey <- read.csv("SI/sifinal.csv")
 
+
 #load whisker data
 whisker <- read.csv("SI/whiskers.csv")
 whisker$OtterID<-as.factor(whisker$OtterID)
