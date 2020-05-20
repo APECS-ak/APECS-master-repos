@@ -33,15 +33,9 @@ summary$PreyCat <- ifelse(summary$Species == "apc", "Cucumber",
 
 
 
-#Frozen.Weight is a character - should be numeric
-summary$Frozen.Weight <- as.numeric(as.character(summary$Frozen.Weight))
 
-#Making dates into date format
-summary$Date.Collected <- parse_date_time(summary$Date.Collected, orders = "mdy")
-summary$Date.Collected <- as.Date(summary$Date.Collected)
 
-summary$Date.Dissected <- parse_date_time(summary$Date.Dissected, orders = "mdy")
-summary$Date.Dissected <- as.Date(summary$Date.Dissected)
+
 
 #######
 #add shrimp to summary

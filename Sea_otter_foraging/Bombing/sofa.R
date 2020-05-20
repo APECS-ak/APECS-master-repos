@@ -78,7 +78,7 @@ ggsave("sofa_prop.png", device = "png", path = "Bombing/", width = 8,
        height = 7, units = "in", dpi = 300) 
 
 
-####################### Creating power functions for SOFA #####################
+#3                     Creating power functions for SOFA                      #
 ###############################################################################
 
 library(tidyverse)
@@ -616,7 +616,6 @@ stf.sd <- rename(stf.sd, "Size.mm" = "daimeter_mm")
 sd <- bind_rows(sd, can.sd, pas.sd, stf.sd, sca.sd)
 sd <- pivot_wider(sd, names_from = Size.mm, values_from = sd)
 write_csv(sd, "Bombing/sd.csv")
-
 
 
 sca <- filter(power.sp, PreyCat == "Scallop")

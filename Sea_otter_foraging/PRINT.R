@@ -8,6 +8,10 @@ library(cowplot)
 library(gridExtra) # making multi pane graphs
 library(grid) # making multi pane graphs
 
+#Run these first!
+prey <- c("Clam", "Crab", "Cucumber/Snail", "Mussel", "Urchin")
+sites <- c("Shiaku Inlet", "Sukkwan Strait", "Tonowek Narrows")
+
 #Chapter 2 - FIGURE xx - Seasonal Enegery
 #data from macronutrients.rmd
 a <- ggplot(data= means , aes(y=kcal.m, x=month, color=PreyCat), na.rm=TRUE) + 
@@ -176,24 +180,33 @@ g <- grid.arrange(a, b, nrow = 2, heights = c(2, 2), widths = 7)
 
 ggsave("sex_status.png", g, device = "png", path = "Visual/", width = 7, 
        height = 9, units = "in", dpi = 300)
+
+
+
+
 #########################################################################################
 #########################################################################################
 
-#Chapter 1 - FIGURE 4
-#Carbon and nitrogen for site and season
+#Chapter 1 
+
+#########################################################################################
+#########################################################################################
+
+
+#Carbon and nitrogen for site and season - Sea otter whiskers
 #data from LME.Rmd
 A <- ggplot(data=whisker) +
-  geom_boxplot(aes(x=Season, y=C, fill=Site)) +
-  labs(y=expression(paste(delta^13, "C" )), x = NULL, tag = "A") +
-  scale_fill_brewer(palette = "Greys") +
+  geom_boxplot(aes(x=Season, y=C, fill=Site), color = "black") +
+  labs(y=expression(paste(delta^13, "C (\u2030)" )), x = NULL, tag = "A") +
+  scale_fill_grey(start=1, end=0.3) +
   theme_few() +
   theme(legend.position="none", axis.text.x = element_blank(), axis.title.y = element_text(size = 16), 
         axis.text.y = element_text(size = 14))
 
 B <- ggplot(data=whisker) +
-  geom_boxplot(aes(x=Season, y=N, fill=Site)) +
-  labs(y=expression(paste(delta^15, "N" )), tag = "B") +
-  scale_fill_brewer(palette = "Greys") +
+  geom_boxplot(aes(x=Season, y=N, fill=Site), color ="black") +
+  labs(y=expression(paste(delta^15, "N (\u2030)" )), tag = "B") +
+  scale_fill_grey(start=1, end=0.3, labels = sites) +
   theme_few() +
   theme(legend.position="bottom", axis.text = element_text(size = 14), 
         axis.title = element_text(size = 16), legend.text = element_text(size = 16), 
@@ -206,8 +219,8 @@ ggsave("CN_season_site.png", g, device = "png", path = "SI/", width = 9,
 
 
 
-# Capter 1 - FIGURE 2
-#Diet Proportion
+## FIGURE 2 ##
+#Diet Proportion bar graph 
 # data comes from biomass.Rmd
 
 biomass %>%
@@ -229,41 +242,54 @@ ggsave("prop_season_dive.png", device = "png", path = "Visual/", width = 8,
        height = 7, units = "in", dpi = 300)
 
 
-## Chapter 1 - FIGURE 3
-#BIPLOT
-#data from SI.R
-si.mean <-read.csv("SI/si.mean_TDF.csv")
-#whisker from above
 
-ggplot() +
-  geom_point(data=si.mean, aes(x=Cmean, y=Nmean), size = 3) +
+# BIPLOT #
+#Data from SI.R, whisker, and si.mean (346)
+#Adding TDFs in graph (new as of 5/19/20)
+#Make sure to run labels at top of script
+
+ggplot() +   theme_few() +
+  geom_point(data=whisker, aes(x=C, y=N, shape=Site, color=Season), size=2) +
+  geom_point(data=si.mean, aes(x=Cmean+2, y=Nmean+2.8), size = 3) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" )))  +
-  geom_errorbar(data= si.mean, aes(x= Cmean, y= Nmean, ymin = Nmean-Nsd, ymax = Nmean+Nsd, linetype= PreyCat), width=0) + 
-  geom_errorbarh(data= si.mean, aes(x= Cmean, y=Nmean, xmin = Cmean-Csd,xmax = Cmean+Csd, linetype= PreyCat), height=0) +
-  geom_point(data=whisker, aes(x=C, y=N, shape=Site, color=Season), size=2)+
-  geom_text(data= si.mean, aes(x= Cmean, y=Nmean, label=PreyCat),hjust=-0.2, vjust=1.8, size = 6) +
-  theme_few() +
+  geom_errorbar(data= si.mean, aes(x= Cmean+2, y= Nmean+2.8, 
+                                   ymin = Nmean-Nsd+2.8, ymax = Nmean+Nsd+2.8, 
+                                   linetype= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x= Cmean+2, y=Nmean+2.8, 
+                                    xmin = Cmean-Csd+2,xmax = Cmean+Csd+2, 
+                                    linetype= PreyCat), height=0) +
+  geom_text(data= si.mean, aes(x= Cmean+2, y=Nmean+2.8, 
+                               label= prey),hjust=-0.2, vjust=1.8, size = 6) +
   labs(colour = "Season", shape = "Site") +
   guides(linetype=FALSE) +
-  theme(axis.text = element_text(size = 14), axis.title = element_text(size = 16), legend.text = element_text(size = 16), 
+  scale_shape_discrete(name = "Site", labels = sites) +
+  theme(axis.text = element_text(size = 14), axis.title = element_text(size = 16), 
+        legend.text = element_text(size = 16), 
         legend.title = element_text(size = 16, face = "bold"))
 
 ggsave("biplot.png", device = "png", path = "SI/", width = 9, 
        height = 6, units = "in", dpi = 300)
 
 
-# Chapter 1 - FIGURE 5
-#Mixing model
+
+# Mixing model #
 ## data from SI_Mixing.R
 all <- read.csv("SI/all_mixing.csv")
+all$Season<-factor(all$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
+
 ggplot(aes(y = value, x = source, fill = source), data = all) + 
   geom_boxplot(outlier.colour = NA) +
   theme_few() +
   xlab(NULL) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   ylab("Diet proportion") +
-  facet_grid(Season~Site) +
+  scale_x_discrete(labels=c("Clam" = "Clam", "Crab" = "Crab", 
+                            "Cucumber.Snail" = "Cucumber/Snail",
+                            "Mussel" = "Mussel", "Urchin" = "Urchin")) +
+  facet_grid(Season~Site, labeller = labeller(Site = c("Shinaku" = "Shinaku Inlet",
+                                                       "Sukkwan" = "Sukkwan Strait",
+                                                       "Tonowek" = "Tonowek Narrows"))) +
   theme( axis.title=element_text(size=16), legend.position = "none", 
          axis.text.x = element_text(angle = -45, hjust=0, size =12), 
          axis.text.y = element_text(size = 12),
@@ -272,8 +298,8 @@ ggplot(aes(y = value, x = source, fill = source), data = all) +
 ggsave("mixing_sites_grid.png", device = "png", path = "SI/", width = 9, 
        height = 7, units = "in", dpi = 300)
 
-#Chapter 1 - FIGURE 6
-#Individual otters
+
+# Individual otters #
 ## data from SI.R
 
 a <- ggplot(data=filter(whisker, OtterID=="163520")) +   theme_few() +
@@ -341,37 +367,59 @@ ggsave("INDIV.png", gr, device = "png", path = "SI/", width = 9,
        height = 7.5, units = "in", dpi = 300)
 
 
-# Chapter 1 - figure 8 
+# Chapter 1 - figure xx 
 # Prey Seasonal changes 
-# Data from LME_prey.Rmd
 
 A <- si.prey %>%
   filter(Site == "Craig" | Site == "Soda Bay") %>%
+  drop_na(PreyCat) %>%
   ggplot(aes(x=Season, y=Cnorm, fill=Site)) +
   geom_boxplot() +   theme_few() +
-  labs(y=expression(paste(delta^13, "C" )), x= NULL, tag = "A") +
-  scale_fill_grey() +
+  labs(y=expression(paste(delta^13, "C (\u2030)" )), x= NULL, tag = "A") +
+  scale_fill_grey(start=0.3, end=1) +
+  ylim(-20,-9) +
   facet_wrap(vars(PreyCat), labeller = labeller(PreyCat = c("Clam" = "Clam", "Crab" = "Crab", 
-                                                            "Cucumber.Snail" = "Cucumber and Snail", 
+                                                            "Cucumber.Snail" = "Cucumber/Snail", 
                                                             "Mussel" = "Mussel", "Urchin" = "Urchin"))) +
   theme(legend.position = "none", axis.text = element_text(size = 14), 
         axis.title = element_text(size = 16), strip.text = element_text(size = 14))
 
 B <- si.prey %>%
   filter(Site == "Craig" | Site == "Soda Bay") %>%
+  drop_na(PreyCat) %>%
   ggplot(aes(x=Season, y=N, fill=Site)) +
   geom_boxplot() +   theme_few() +
-  labs(y=expression(paste(delta^15, "N" )), x=NULL, tag = "B") +
-  scale_fill_grey() +
+  labs(y=expression(paste(delta^15, "N (\u2030)" )), x=NULL, tag = "B") +
+  scale_fill_grey(start=0.3, end=1) +
   facet_wrap(vars(PreyCat),labeller = labeller(PreyCat = c("Clam" = "Clam", "Crab" = "Crab", 
-                                                           "Cucumber.Snail" = "Cucumber and Snail", 
+                                                           "Cucumber.Snail" = "Cucumber/Snail", 
                                                            "Mussel" = "Mussel", "Urchin" = "Urchin"))) +
   theme(legend.position = "bottom", axis.text = element_text(size = 14), 
         axis.title = element_text(size = 16), strip.text = element_text(size = 14), 
         legend.title = element_text(size = 16), legend.text = element_text(size = 14))
 
-g <- grid.arrange(A, B, nrow = 2, heights = c(1.5, 2))
+g <- grid.arrange(A, B, nrow = 2, heights = c(1.75, 2))
 ggsave("CN_Prey_season_site.png", g, device = "png", path = "SI/", width = 9, 
        height = 8, units = "in", dpi = 300)
 
 
+
+## Correlations ##
+#data in Whisker_correlations.rmd
+ggplot(data=corr.2, aes(x= OtterID, y = correlation, fill = Site)) +
+  geom_bar(stat="identity", color = "black") +
+  scale_fill_grey(start=1, end=0) +
+  labs(x= "Individual sea otter", y = "C:N correlation") +
+  geom_abline(slope = 0, intercept = 0) +
+  facet_wrap(vars(Site), nrow = 3, 
+             labeller = labeller(Site = c("Shinaku" = "Shinaku Inlet",
+                                          "Sukkwan Strait" = "Sukkwan Strait",
+                                          "Tonowek" = "Tonowek Narrows"))) +
+  theme_few() +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), legend.position = "none", 
+        strip.text = element_text(size=16))
+
+
+ggsave("correlation.png", device = "png", path = "SI/", width = 9, 
+       height = 7, units = "in", dpi = 300)

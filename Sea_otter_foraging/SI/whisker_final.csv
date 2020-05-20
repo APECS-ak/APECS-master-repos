@@ -1,0 +1,422 @@
+OtterID,SIN,N,C,distance,Season,Site
+163533,414111,12.28,-13.56,0,Summer,Tonowek
+163533,414112,12.08,-13.57,0.7,Summer,Tonowek
+163533,414113,11.91,-13.97,1.4,Spring,Tonowek
+163533,414114,11.95,-14.13,2.1,Spring,Tonowek
+163533,414115,12.16,-14.05,2.5,Spring,Tonowek
+163533,414116,12.06,-14.06,3.2,Winter,Tonowek
+163533,414117,12.07,-13.9,3.6,Winter,Tonowek
+163533,414118,12.7,-13.14,4.2,Winter,Tonowek
+163534,414119,12.9,-13.37,0,Summer,Tonowek
+163534,414120,12.77,-13.25,0.7,Summer,Tonowek
+163534,414121,12.63,-13.77,1.4,Spring,Tonowek
+163534,414122,12.67,-14.58,2.2,Spring,Tonowek
+163534,414123,12.34,-16.44,3,Winter,Tonowek
+163534,414124,12.62,-16.32,3.7,Winter,Tonowek
+163534,414125,13.48,-15.13,4.4,Winter,Tonowek
+163534,414126,13.43,-15.14,5.3,Fall,Tonowek
+163534,414127,12.68,-13.95,6.4,Fall,Tonowek
+163535,414129,12.26,-13.32,0.8,Summer,Tonowek
+163535,414134,13.2,-13.5,4.3,Winter,Tonowek
+163535,414135,13.55,-13.04,5,Fall,Tonowek
+163535,414136,13.43,-13.16,5.6,Fall,Tonowek
+163535,414137,13.42,-13.3,6.5,Fall,Tonowek
+163520,414138,13.27,-12.91,0,Summer,Shinaku
+163520,414139,12.65,-12.81,0.7,Summer,Shinaku
+163520,414140,12.81,-12.78,1.4,Spring,Shinaku
+163520,414141,12.59,-12.95,2.1,Spring,Shinaku
+163520,414142,13.14,-12.72,2.8,Spring,Shinaku
+163520,414143,13.39,-12.57,3.5,Winter,Shinaku
+163520,414144,13.54,-12.71,4.3,Winter,Shinaku
+163520,414145,13.57,-12.88,4.8,Fall,Shinaku
+163520,414146,13.59,-13.18,5.6,Fall,Shinaku
+163520,414147,13.58,-13.17,6.2,Fall,Shinaku
+163520,414148,13.76,-13.01,7,Summer,Shinaku
+163520,414149,13.58,-13.38,7.7,Summer,Shinaku
+163525,414150,12.41,-13.61,0,Summer,Tonowek
+163525,414151,12.43,-13.18,0.7,Summer,Tonowek
+163525,414152,12.32,-13.01,1.4,Spring,Tonowek
+163525,414153,12.22,-12.98,2.1,Spring,Tonowek
+163525,414154,12.28,-12.56,2.8,Spring,Tonowek
+163525,414155,12.56,-12.05,3.5,Winter,Tonowek
+163525,414156,12.25,-12.37,4.2,Winter,Tonowek
+163525,414157,12.06,-11.5,4.9,Fall,Tonowek
+163525,414158,12.05,-11.67,5.6,Fall,Tonowek
+163525,414159,12.14,-11.8,6,Fall,Tonowek
+163525,414160,12.44,-12.35,7,Summer,Tonowek
+163521,414161,13.22,-12.65,0,Summer,Shinaku
+163521,414162,12.8,-13.01,0.7,Summer,Shinaku
+163521,414163,12.33,-13.7,1.7,Spring,Shinaku
+163521,414164,10.95,-15.63,2.2,Spring,Shinaku
+163521,414165,11.85,-15.74,2.9,Winter,Shinaku
+163521,414166,13.46,-14.55,3.5,Winter,Shinaku
+163521,414167,11.46,-16.1,4.2,Winter,Shinaku
+163521,414168,11.42,-15,5,Fall,Shinaku
+163521,414169,12.48,-12.78,5.7,Fall,Shinaku
+163521,414170,13.3,-12.15,6.4,Fall,Shinaku
+163521,414171,13.11,-13.16,7.1,Summer,Shinaku
+163521,414172,12.74,-13.89,7.8,Summer,Shinaku
+163522,414173,13.89,-13.57,0,Summer,Shinaku
+163522,414174,13.47,-12.96,0.7,Summer,Shinaku
+163522,414175,12.74,-13.58,1.4,Spring,Shinaku
+163522,414176,13.74,-13.51,2.1,Spring,Shinaku
+163522,414177,13.43,-13.4,2.8,Spring,Shinaku
+163522,414178,14.01,-13.27,3.7,Winter,Shinaku
+163522,414179,13.96,-13.14,4.2,Winter,Shinaku
+163522,414180,13.62,-13.03,4.9,Fall,Shinaku
+163522,414181,13.54,-12.76,5.6,Fall,Shinaku
+163522,414182,13.39,-12.75,6.3,Fall,Shinaku
+163522,414183,13.9,-12.77,7,Summer,Shinaku
+160480,414184,12.41,-13.83,0,Summer,Tonowek
+160480,414185,12.61,-13.13,0.7,Summer,Tonowek
+160480,414186,13.03,-13.18,1.4,Spring,Tonowek
+160480,414187,12.88,-13.45,2.2,Spring,Tonowek
+160480,414188,12.5,-14.04,2.8,Spring,Tonowek
+160480,414189,12.27,-14.28,3.5,Winter,Tonowek
+160480,414190,12.94,-14.25,4.2,Winter,Tonowek
+160480,414191,12.54,-14.79,4.9,Fall,Tonowek
+160480,414192,12.33,-14.59,5.7,Fall,Tonowek
+163523,414202,13.38,-12.88,0,Summer,Shinaku
+163523,414203,12.63,-12.92,0.7,Summer,Shinaku
+163523,414204,13.46,-12.92,1.4,Spring,Shinaku
+163523,414205,13.61,-12.58,2.1,Spring,Shinaku
+163523,414206,13.81,-13.03,2.8,Spring,Shinaku
+163523,414207,14.05,-13.59,3.5,Winter,Shinaku
+163523,414208,14.16,-13.63,4.2,Winter,Shinaku
+163523,414209,13.99,-13.81,5,Fall,Shinaku
+163523,414210,13.87,-12.84,5.7,Fall,Shinaku
+163523,414211,13.75,-12.41,6.4,Fall,Shinaku
+163524,414212,14.2,-12.91,0,Summer,Shinaku
+163524,414213,13.35,-12.37,0.7,Summer,Shinaku
+163524,414214,13.79,-12.29,1.4,Spring,Shinaku
+163524,414215,14.26,-12.63,2.1,Spring,Shinaku
+163524,414216,14.42,-12.91,2.8,Spring,Shinaku
+163524,414217,14.33,-13.08,3.5,Winter,Shinaku
+163524,414218,14.33,-13.39,4.2,Winter,Shinaku
+163524,414219,14.54,-13.05,4.9,Fall,Shinaku
+163524,414220,14.58,-12.45,5.7,Fall,Shinaku
+163526,414221,12.44,-13.1,0,Summer,Tonowek
+163526,414222,12.07,-13.06,0.7,Summer,Tonowek
+163526,414223,12.36,-13.53,1.4,Spring,Tonowek
+163526,414224,12.86,-13.8,2.1,Spring,Tonowek
+163526,414225,13.09,-13.1,2.8,Spring,Tonowek
+163526,414226,12.92,-13.36,3.5,Winter,Tonowek
+163526,414227,12.85,-12.21,4.2,Winter,Tonowek
+163526,414228,12.45,-12.87,4.8,Fall,Tonowek
+163526,414229,12.87,-13.02,5.6,Fall,Tonowek
+163526,414230,12.61,-12.78,6.2,Fall,Tonowek
+160479,414231,12.47,-13.32,0,Winter,Tonowek
+160479,414232,12.19,-13.44,0.7,Fall,Tonowek
+160479,414233,12.4,-13.61,1.3,Fall,Tonowek
+160479,414234,12.76,-13.08,2.1,Fall,Tonowek
+160479,414235,13.26,-12.55,2.8,Summer,Tonowek
+160479,414236,13.39,-12.87,3.5,Summer,Tonowek
+160479,414237,13.35,-12.76,4.2,Winter,Tonowek
+160479,414238,13.57,-12.6,4.9,Fall,Tonowek
+160479,414239,13.45,-12.73,5.6,Fall,Tonowek
+163527,414240,12.75,-13.22,0,Summer,Tonowek
+163527,414241,12.65,-13.28,0.7,Summer,Tonowek
+163527,414242,12.83,-13.33,1.3,Spring,Tonowek
+163527,414243,13.34,-12.82,2.1,Spring,Tonowek
+163527,414244,13.66,-12.33,2.8,Spring,Tonowek
+163527,414245,13.12,-12.64,3.5,Winter,Tonowek
+163527,414246,13.4,-12.67,4.2,Winter,Tonowek
+163527,414247,12.73,-13.01,4.9,Fall,Tonowek
+163527,414248,12.67,-13.02,5.5,Fall,Tonowek
+163528,414249,12.56,-13.04,0,Summer,Tonowek
+163528,414250,12.31,-13.22,0.7,Summer,Tonowek
+163528,414251,12.42,-13.24,1.4,Spring,Tonowek
+163528,414252,12.52,-13.52,2.1,Spring,Tonowek
+163528,414253,12.94,-13.17,2.8,Spring,Tonowek
+163528,414254,13.05,-13.25,3.5,Winter,Tonowek
+163528,414255,13.29,-13.13,4.2,Winter,Tonowek
+163528,414256,13.23,-13.04,4.9,Fall,Tonowek
+163528,414257,13.35,-13.03,5.5,Fall,Tonowek
+163528,414258,13.54,-13.01,6.2,Fall,Tonowek
+163529,414259,12.5,-13.87,0,Summer,Tonowek
+163529,414260,12.34,-14.85,0.5,Summer,Tonowek
+163529,414261,12.37,-15.3,1.2,Spring,Tonowek
+163529,414262,12.17,-15.89,2,Spring,Tonowek
+163529,414263,12.08,-16.03,2.7,Spring,Tonowek
+163529,414264,11.93,-16.05,3.4,Winter,Tonowek
+163529,414265,12,-16.4,4,Winter,Tonowek
+163529,414266,12.29,-15.95,4.7,Winter,Tonowek
+163535,414267,12.55,-13.29,0,Summer,Tonowek
+163535,414269,12.18,-13.46,1.4,Spring,Tonowek
+163535,414270,12.95,-13.4,2.3,Spring,Tonowek
+163535,414271,13.4,-12.72,2.9,Winter,Tonowek
+163535,414272,13.06,-12.73,3,Winter,Tonowek
+77281,414281,12.79,-13.65,0,Summer,Tonowek
+77281,414282,12.4,-13.88,0.7,Spring,Tonowek
+77281,414283,12.77,-13.74,1.5,Spring,Tonowek
+77281,414284,13.49,-13.47,2.2,Winter,Tonowek
+77281,414285,14.11,-13.21,2.8,Winter,Tonowek
+77281,414286,14.04,-13.9,2.9,Winter,Tonowek
+77281,414287,14.06,-13.54,3.6,Winter,Tonowek
+77281,414288,13.95,-13.59,4.2,Fall,Tonowek
+77281,414289,14.04,-13.7,5,Fall,Tonowek
+163530,414290,12.46,-13.63,0,Summer,Tonowek
+163530,414291,12.16,-13.59,0.6,Summer,Tonowek
+163530,414292,12.18,-14.13,1.3,Spring,Tonowek
+163530,414293,12.29,-13.8,2,Spring,Tonowek
+163530,414294,13.57,-12.83,2.7,Spring,Tonowek
+163530,414295,13.64,-12.63,3.4,Winter,Tonowek
+163530,414296,13.23,-12.97,4.1,Winter,Tonowek
+163530,414297,13.18,-13.32,4.7,Winter,Tonowek
+163530,414298,12.46,-14.01,5.5,Fall,Tonowek
+77284,414299,12.31,-13.39,0,Summer,Tonowek
+77284,414300,11.85,-13.5,0.7,Spring,Tonowek
+77284,414301,12.31,-13.54,1.5,Spring,Tonowek
+77284,414302,13.09,-13,2.1,Winter,Tonowek
+77284,414303,13.23,-12.9,2.8,Winter,Tonowek
+77284,414304,12.94,-13.27,3.4,Winter,Tonowek
+77284,414305,12.99,-13.2,4.1,Fall,Tonowek
+77284,414306,12.94,-13.43,4.8,Fall,Tonowek
+77284,414307,12.34,-13.27,5.5,Fall,Tonowek
+77284,414308,12.49,-14.38,6.2,Summer,Tonowek
+77284,414309,12.36,-13.59,6.9,Summer,Tonowek
+77284,414310,12.27,-13.34,7.5,Summer,Tonowek
+163536,414311,12.69,-13.44,0,Summer,Tonowek
+163536,414312,12.09,-13.61,0.8,Summer,Tonowek
+163536,414313,11.94,-13.87,1.4,Spring,Tonowek
+163536,414314,12.08,-13.83,2.1,Spring,Tonowek
+163536,414315,12.22,-14.09,2.8,Spring,Tonowek
+163536,414316,12.24,-14.28,3.4,Winter,Tonowek
+163536,414317,12.48,-14.77,4.2,Winter,Tonowek
+163536,414318,12.96,-14.28,4.9,Fall,Tonowek
+163536,414319,11.7,-15.2,5.5,Fall,Tonowek
+163536,414320,12.76,-13.95,6.3,Fall,Tonowek
+163536,414321,12.96,-14,7,Summer,Tonowek
+77280,414322,11.96,-14.09,0,Summer,Tonowek
+77280,414323,11.9,-13.95,0.7,Spring,Tonowek
+77280,414324,12.28,-13.69,1.5,Spring,Tonowek
+77280,414325,12.45,-13.64,2.1,Winter,Tonowek
+77280,414326,12.96,-13.39,2.8,Winter,Tonowek
+77280,414327,13.27,-13.24,3.5,Winter,Tonowek
+77280,414328,13.06,-13.34,4.2,Fall,Tonowek
+77280,414329,12.65,-13.41,4.9,Fall,Tonowek
+77280,414330,12.53,-13.58,5.6,Fall,Tonowek
+77280,414331,12.28,-13.79,6.3,Summer,Tonowek
+77280,414332,11.96,-13.82,7,Summer,Tonowek
+77280,414333,12.37,-13.75,7.7,Summer,Tonowek
+77280,414334,11.74,-14.09,8.4,Winter,Tonowek
+77280,414335,12.15,-13.26,9.1,Winter,Tonowek
+77298,414336,11.89,-14.18,0,Summer,Tonowek
+77298,414337,11.87,-14.19,0.6,Spring,Tonowek
+77298,414338,11.96,-13.99,1.4,Spring,Tonowek
+77298,414339,12.02,-13.24,2.1,Winter,Tonowek
+77298,414340,11.61,-14.53,2.7,Winter,Tonowek
+77298,414341,12.03,-14.33,3.5,Winter,Tonowek
+77298,414342,13.04,-13.63,4.4,Fall,Tonowek
+77298,414343,12.83,-13.71,5,Fall,Tonowek
+77298,414344,12.63,-13.89,5.6,Fall,Tonowek
+77298,414345,12.48,-13.55,6.3,Summer,Tonowek
+77298,414346,11.71,-14.15,7.6,Summer,Tonowek
+77298,414347,12.06,-13.75,8.4,Winter,Tonowek
+77297,414348,12.07,-13.4,0,Summer,Tonowek
+77297,414349,12.27,-13.46,0.7,Spring,Tonowek
+77297,414350,12.34,-13.37,1.5,Spring,Tonowek
+77297,414351,12.61,-13.64,2.2,Winter,Tonowek
+77297,414352,12.71,-13.8,2.9,Winter,Tonowek
+77297,414353,13.15,-13.48,3.6,Winter,Tonowek
+77297,414354,13.77,-12.5,4.4,Fall,Tonowek
+77297,414355,13.77,-12.39,5.1,Fall,Tonowek
+77297,414356,14,-12.5,5.9,Fall,Tonowek
+77297,414357,14.08,-12.03,6.6,Summer,Tonowek
+163531,414358,12.72,-13.61,0,Summer,Tonowek
+163531,414359,12.55,-13.89,0.7,Summer,Tonowek
+163531,414360,12.41,-14.37,1.3,Spring,Tonowek
+163531,414361,12.8,-13.85,2.1,Spring,Tonowek
+163531,414362,12.74,-13.77,2.7,Spring,Tonowek
+163531,414363,12.72,-13.87,3.5,Winter,Tonowek
+163531,414364,13.08,-14.05,4.2,Winter,Tonowek
+163531,414365,13.22,-13.91,5.5,Fall,Tonowek
+77285,414366,11.73,-13.66,0,Summer,Tonowek
+77285,414367,11.85,-13.48,0.8,Spring,Tonowek
+77285,414368,13.03,-13.47,1.4,Spring,Tonowek
+77285,414369,13.58,-13.01,2.2,Winter,Tonowek
+77285,414370,13.34,-12.69,2.9,Winter,Tonowek
+77285,414371,13.32,-12.98,3.6,Winter,Tonowek
+77285,414372,13.16,-13.13,4.3,Fall,Tonowek
+77285,414373,13.06,-13.1,5.1,Fall,Tonowek
+77285,414374,12.89,-12.88,5.8,Fall,Tonowek
+77285,414375,12.37,-13.38,6.4,Summer,Tonowek
+77285,414376,12.19,-13.24,7.1,Summer,Tonowek
+77286,414377,12.38,-13.89,0,Summer,Tonowek
+77286,414378,12.58,-13.77,0.8,Spring,Tonowek
+77286,414379,12.86,-13.58,1.4,Spring,Tonowek
+77286,414380,13.24,-13.03,2.1,Winter,Tonowek
+77286,414381,13.21,-13.06,2.8,Winter,Tonowek
+77286,414382,13.11,-13.17,3.6,Winter,Tonowek
+77286,414383,12.5,-13.38,4.3,Fall,Tonowek
+77286,414384,12.26,-13.52,5,Fall,Tonowek
+77286,414385,12.38,-13.62,5.7,Fall,Tonowek
+77286,414386,12.26,-13.51,6.4,Summer,Tonowek
+77287,414387,12.16,-13.63,0,Summer,Tonowek
+77287,414388,12.47,-13.48,0.8,Spring,Tonowek
+77287,414389,12.41,-13.28,1.4,Spring,Tonowek
+77287,414390,13.18,-12.78,2.1,Winter,Tonowek
+77287,414391,13.54,-12.48,2.8,Winter,Tonowek
+77287,414392,13.4,-12.61,3.5,Winter,Tonowek
+77287,414393,13.12,-12.79,4.3,Fall,Tonowek
+77287,414394,13.34,-12.37,5,Fall,Tonowek
+77287,414395,13.6,-12.15,5.6,Fall,Tonowek
+77300,414396,12.37,-14,0,Summer,Tonowek
+77300,414397,12.06,-14.1,0.9,Spring,Tonowek
+77300,414398,12.01,-14.03,1.4,Spring,Tonowek
+77300,414399,12.01,-14.74,2.2,Winter,Tonowek
+77300,414400,12.53,-14.11,2.9,Winter,Tonowek
+77300,414401,12.99,-13.46,3.7,Winter,Tonowek
+77300,414402,13.08,-13.42,4.3,Fall,Tonowek
+77300,414403,12.79,-13.4,5,Fall,Tonowek
+77300,414404,13.27,-12.96,5.7,Fall,Tonowek
+77299,414405,12.51,-13.68,0,Summer,Tonowek
+77299,414406,12.1,-13.27,0.7,Spring,Tonowek
+77299,414407,12.29,-13.13,1.4,Spring,Tonowek
+77299,414408,13.19,-12.69,2.1,Winter,Tonowek
+77299,414409,13.03,-12.95,3,Winter,Tonowek
+77299,414410,13.07,-13.29,3.5,Winter,Tonowek
+77299,414411,13.38,-13.24,4.2,Fall,Tonowek
+77299,414412,13.72,-13.22,5,Fall,Tonowek
+77299,414413,13.99,-13.13,5.7,Fall,Tonowek
+77299,414414,13.64,-12.53,6.3,Summer,Tonowek
+160478,414415,12.7,-12.35,0,Summer,Tonowek
+160478,414416,12.16,-12.99,0.7,Summer,Tonowek
+160478,414417,11.71,-13.7,1.4,Spring,Tonowek
+160478,414418,11.88,-13.86,2.1,Spring,Tonowek
+160478,414419,12.5,-13.23,2.8,Spring,Tonowek
+160478,414420,12.43,-12.9,3.5,Winter,Tonowek
+160478,414199,12.43,-12.15,4.2,Winter,Tonowek
+160478,414200,12.05,-13.84,4.9,Fall,Tonowek
+200768,419200,13.04,-13.3,0.1,Fall,Sukkwan Strait
+200768,419201,13.12,-13.84,0.7,Summer,Sukkwan Strait
+200768,419202,12.62,-12.83,2.1,Summer,Sukkwan Strait
+200768,419203,12.45,-12.86,2.7,Spring,Sukkwan Strait
+200768,419204,12.92,-13.43,1.3,Summer,Sukkwan Strait
+200768,419205,12.55,-12.94,3.5,Spring,Sukkwan Strait
+200768,419206,12.28,-13,4.3,Spring,Sukkwan Strait
+200768,419207,12.02,-12.81,4.9,Winter,Sukkwan Strait
+200768,419208,11.96,-13.24,5.6,Winter,Sukkwan Strait
+200768,419209,12.1,-13.51,6.3,Fall,Sukkwan Strait
+200769,419210,13.25,-13.1,0.1,Fall,Sukkwan Strait
+200769,419211,13.18,-13.03,0.7,Summer,Sukkwan Strait
+200769,419212,13.17,-13.41,1.4,Summer,Sukkwan Strait
+200769,419213,13.27,-13.59,2.1,Summer,Sukkwan Strait
+200769,419214,13.18,-14.1,2.8,Spring,Sukkwan Strait
+200767,419215,12.84,-13.31,0,Fall,Sukkwan Strait
+200767,419216,13,-12.53,0.7,Summer,Sukkwan Strait
+200767,419217,12.9,-13.31,1.4,Summer,Sukkwan Strait
+200767,419218,12.3,-12.78,2.1,Summer,Sukkwan Strait
+200767,419219,12.52,-12.88,2.8,Spring,Sukkwan Strait
+200767,419220,12.72,-12.9,3.5,Spring,Sukkwan Strait
+200767,419221,12.88,-12.7,4.2,Spring,Sukkwan Strait
+200767,419222,12.74,-12.85,4.9,Winter,Sukkwan Strait
+200766,419223,12.77,-13.67,0.1,Fall,Sukkwan Strait
+200766,419224,12.08,-15.83,0.8,Summer,Sukkwan Strait
+200766,419225,12.08,-15.85,1.5,Summer,Sukkwan Strait
+200766,419226,11.97,-15.8,2.1,Summer,Sukkwan Strait
+200766,419227,12.84,-13.84,2.8,Spring,Sukkwan Strait
+200766,419228,12.77,-14.03,3.6,Spring,Sukkwan Strait
+200766,419229,13.4,-13.67,4.2,Spring,Sukkwan Strait
+200766,419230,13.26,-14.42,4.9,Winter,Sukkwan Strait
+200766,419231,13.17,-13.42,5.7,Winter,Sukkwan Strait
+200766,419232,13.41,-13.9,6.3,Fall,Sukkwan Strait
+200772,419233,12.25,-13.55,0,Fall,Sukkwan Strait
+200772,419234,11.8,-13.29,0.7,Summer,Sukkwan Strait
+200772,419235,12.35,-13.07,1.4,Summer,Sukkwan Strait
+200772,419236,13.31,-12.08,2.1,Summer,Sukkwan Strait
+200772,419237,13.04,-12.13,2.8,Spring,Sukkwan Strait
+200772,419238,12.62,-12.33,3.5,Spring,Sukkwan Strait
+200772,419239,12.54,-12.15,4.2,Spring,Sukkwan Strait
+200771,419240,11.84,-13.47,0.1,Fall,Sukkwan Strait
+200771,419241,12.88,-13.37,0.8,Summer,Sukkwan Strait
+200771,419242,13.03,-13.26,1.5,Summer,Sukkwan Strait
+200771,419243,13.47,-13.25,2.2,Summer,Sukkwan Strait
+200771,419244,13.23,-12.92,2.8,Spring,Sukkwan Strait
+200771,419245,13.09,-12.62,3.5,Spring,Sukkwan Strait
+200754,419246,12.99,-13.74,0.1,Fall,Sukkwan Strait
+200754,419247,12.99,-13.52,0.7,Summer,Sukkwan Strait
+200754,419248,13.38,-13.4,1.4,Summer,Sukkwan Strait
+200754,419251,13.13,-13.19,3.5,Spring,Sukkwan Strait
+200754,419252,12.67,-13.17,4.2,Spring,Sukkwan Strait
+200754,419253,12.28,-13.63,4.9,Winter,Sukkwan Strait
+200754,419254,12.78,-13.52,5.6,Winter,Sukkwan Strait
+200754,419255,12.83,-13.38,6.3,Fall,Sukkwan Strait
+200755,419256,13.26,-13.38,0.2,Fall,Sukkwan Strait
+200755,419257,13.03,-13.63,0.8,Summer,Sukkwan Strait
+200755,419258,12.95,-13.21,1.4,Summer,Sukkwan Strait
+200755,419259,12.46,-12.95,2.1,Summer,Sukkwan Strait
+200755,419260,12.39,-13.1,2.8,Spring,Sukkwan Strait
+200755,419261,12.54,-13.16,3.5,Spring,Sukkwan Strait
+200755,419262,13.06,-13.14,4.2,Spring,Sukkwan Strait
+200755,419263,12.73,-13.05,5.6,Winter,Sukkwan Strait
+200757,419264,13.11,-13.61,0.1,Fall,Sukkwan Strait
+200757,419265,12.88,-13.3,0.7,Summer,Sukkwan Strait
+200757,419266,12.81,-13.57,1.4,Summer,Sukkwan Strait
+200757,419267,12.78,-13.3,2.1,Summer,Sukkwan Strait
+200757,419268,12.47,-13.46,2.9,Spring,Sukkwan Strait
+200757,419269,12.54,-13.55,3.6,Spring,Sukkwan Strait
+200751,419270,13.11,-14.07,0.1,Fall,Sukkwan Strait
+200751,419271,12.93,-14.08,0.7,Summer,Sukkwan Strait
+200751,419272,13.11,-13.39,1.4,Summer,Sukkwan Strait
+200751,419273,13.19,-13.85,2.1,Summer,Sukkwan Strait
+200751,419274,13.1,-13.48,2.8,Spring,Sukkwan Strait
+200751,419275,13.09,-13.77,3.6,Spring,Sukkwan Strait
+200751,419276,12.84,-13.62,4.2,Spring,Sukkwan Strait
+200751,419277,12.93,-13.57,5,Winter,Sukkwan Strait
+200751,419278,12.93,-13.08,5.7,Winter,Sukkwan Strait
+200751,419279,12.81,-13.06,6.4,Fall,Sukkwan Strait
+200752,419280,12.93,-13.02,0.1,Fall,Sukkwan Strait
+200752,419281,12.84,-12.21,0.7,Summer,Sukkwan Strait
+200752,419282,13.54,-13.32,1.5,Summer,Sukkwan Strait
+200752,419283,13.35,-13.3,2.1,Summer,Sukkwan Strait
+200752,419284,13.4,-13.26,2.8,Spring,Sukkwan Strait
+200752,419285,13.46,-13.42,3.5,Spring,Sukkwan Strait
+200752,419286,12.79,-12.42,4.2,Spring,Sukkwan Strait
+200752,419287,13.34,-12.54,5,Winter,Sukkwan Strait
+200758,419288,13.11,-13.37,0.2,Fall,Sukkwan Strait
+200758,419289,13.19,-13.34,0.7,Summer,Sukkwan Strait
+200758,419290,13.02,-13.43,1.4,Summer,Sukkwan Strait
+200758,419291,12.16,-13.51,2.1,Summer,Sukkwan Strait
+200758,419292,12.31,-13.81,2.8,Spring,Sukkwan Strait
+200758,419293,12.4,-13.83,3.5,Spring,Sukkwan Strait
+200758,419294,12.19,-13.73,4.2,Spring,Sukkwan Strait
+200758,419295,11.8,-13.68,4.9,Winter,Sukkwan Strait
+200760,419296,13.3,-13.95,0.1,Fall,Sukkwan Strait
+200760,419297,13.18,-13.81,0.7,Summer,Sukkwan Strait
+200760,419298,13.55,-13.81,1.4,Summer,Sukkwan Strait
+200760,419299,13.62,-13.5,2,Summer,Sukkwan Strait
+200760,419300,13.45,-13.27,2.8,Spring,Sukkwan Strait
+200760,419301,13.32,-14.08,3.5,Spring,Sukkwan Strait
+200760,419302,13.73,-13.34,4.2,Spring,Sukkwan Strait
+200760,419303,13.72,-13.53,4.9,Winter,Sukkwan Strait
+200762,419304,12.88,-13.43,0.1,Fall,Sukkwan Strait
+200762,419305,12.81,-13.78,0.7,Summer,Sukkwan Strait
+200762,419306,13.33,-13.33,1.4,Summer,Sukkwan Strait
+200762,419307,13.52,-13.36,2.1,Summer,Sukkwan Strait
+200762,419308,13.25,-13.35,2.8,Spring,Sukkwan Strait
+200762,419309,13.24,-13.34,3.5,Spring,Sukkwan Strait
+200762,419310,13.1,-13.17,4.2,Spring,Sukkwan Strait
+200762,419311,13.34,-13.18,4.9,Winter,Sukkwan Strait
+200762,419312,13.22,-13.19,5.6,Winter,Sukkwan Strait
+200762,419313,13.03,-13.38,6.4,Fall,Sukkwan Strait
+200763,419314,12.69,-13.56,0,Fall,Sukkwan Strait
+200763,419315,12.61,-13.02,0.7,Summer,Sukkwan Strait
+200763,419316,12.82,-12.58,1.4,Summer,Sukkwan Strait
+200763,419317,12.64,-12.64,2,Summer,Sukkwan Strait
+200763,419318,12.53,-12.68,2.7,Spring,Sukkwan Strait
+200763,419319,12.75,-13.21,3.5,Spring,Sukkwan Strait
+200763,419320,12.79,-13.14,4.2,Spring,Sukkwan Strait
+200763,419321,12.59,-13.65,4.9,Winter,Sukkwan Strait
+200763,419322,12.71,-13.4,5.5,Winter,Sukkwan Strait
+200765,419323,13.16,-13.39,0,Fall,Sukkwan Strait
+200765,419324,12.86,-13.19,0.6,Summer,Sukkwan Strait
+200765,419325,13.07,-13.31,1.3,Summer,Sukkwan Strait
+200765,419326,13.13,-13.88,2,Summer,Sukkwan Strait
+200765,419327,12.87,-13.54,2.7,Spring,Sukkwan Strait
+200765,419328,12.64,-13.05,3.4,Spring,Sukkwan Strait
+200765,419329,12.68,-12.77,4.1,Spring,Sukkwan Strait
+200765,419330,12.73,-13.01,4.8,Winter,Sukkwan Strait
+200765,419331,12.56,-12.82,5.5,Winter,Sukkwan Strait
+200765,419332,12.56,-12.86,6.1,Winter,Sukkwan Strait
+200765,419333,12.35,-13.1,6.8,Fall,Sukkwan Strait

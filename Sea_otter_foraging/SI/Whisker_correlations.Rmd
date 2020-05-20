@@ -13,18 +13,17 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r, message= FALSE}
 library(stats)
 library(ggplot2)
+library(tidyr)
 library(dplyr)
 library(ggthemes)
 library(corrgram)
-
+library(cluster)    # clustering algorithms
+library(factoextra) # clustering algorithms & visualization
 
 
 #load whisker data
-whisker <- read.csv("whiskers.csv")
+whisker <- read.csv("whisker_final.csv")
 whisker$OtterID<-as.character(whisker$OtterID)
-# for right now, I want to remove 163532 as it has issues
-whisker<- filter(whisker, OtterID != "163532")
-
 ```
 
 
@@ -56,6 +55,10 @@ cor524 <- whisker %>%
   
 corrgram(cor524, lower.panel = panel.cor)
 
+Shinaku <- whisker %>%
+  filter(Site=="Shinaku") %>%
+  select(distance, C, N)
+corrgram(Shinaku, lower.panel = panel.cor)
 ```
 
 
@@ -85,9 +88,121 @@ ggplot(data=whisker, aes(C,N)) +
 Another visualization of the distribution
 
 ```{r}
-ggplot(cor.whis, aes(x=correlation)) +
-  geom_bar(color="gray") +
+whis <- whisker %>%
+  select(OtterID, Site) %>%
+  count(OtterID, Site)
+
+corr.2 <- left_join(cor.whis, whis)
+
+ggplot(corr.2, aes(x=correlation)) +
+  geom_bar(aes(fill=Site), position = "dodge", width = .01) +
   xlim(-1,1) +
   theme_classic()
+```
+
+
+```{r, make a matrix, echo=FALSE}
+whisker$ratio <- whisker$C+whisker$N
+
+rank <- whisker %>%
+  group_by(OtterID) %>%
+  mutate(rank=rank(distance, ties.method = "first", na.last = TRUE)) %>%
+    select(OtterID, Site, ratio, rank)
+
+matrix <- pivot_wider(rank, names_from = rank, values_from = ratio)
+matrix <- matrix %>%
+  subset(select = -c(11,12,13,14,15,16)) %>% # removing samples > 8 
+  drop_na()# removing otters w/ < 8 samples
+  
+site <- as.factor(matrix$Site)
+name <- as.factor(matrix$OtterID)
+matrix2 <- subset(matrix, select=-c(1,2))
+
+
+```
+
+```{r, cluster}
+d <- dist(matrix2)
+h <- hclust(d, method = "single")
+plot(h)
+cutree(h, 3)
+cbind(site, cluster=cutree(h, 3))	# Compare species to clusters
+table(site, cluster=cutree(h, 3))
+```
+```{r k means with matrix}
+matrix3 <- matrix %>% 
+  column_to_rownames(var="OtterID") %>%
+  subset(select=-1)
+
+k2 <- kmeans(matrix3, centers= 3, nstart = 25)
+str(k2)
+k2
+fviz_cluster(k2, data = matrix3)
+```
+
+```{r}
+
+```
+
+
+```{r, distance calc, echo=FALSE}
+distance <- whisker %>%
+  group_by(OtterID, Site)%>%
+  summarize(dc=mean(cor(C,distance)), dn=mean(cor(N,distance)))
+
+```
+
+```{r, dist graph, echo=FALSE}
+ggplot(data=distance, aes(x=dc, y=dn, color = Site, fill = Site)) +
+  geom_point() +
+  stat_ellipse(type = "norm", segments = 10, level = .5 ) + 
+  xlim(-1,1) + ylim(-1,1) +
+  geom_abline(slope = 1, intercept = 0, color = "gray") +
+  geom_abline(slope = -1, intercept = 0, , color = "gray") +
+  theme_few()
+```
+
+```{r}
+d3 <- distance %>% 
+  column_to_rownames(var="OtterID")%>%
+  subset(select=-1)
+
+k3 <- kmeans(d3, centers= 3, nstart = 25)
+str(k3)
+k3
+fviz_cluster(k3, data = d3)
+
+distance %>%
+  as_tibble() %>%
+  mutate(cluster = k3$cluster) %>%
+  ggplot(aes(x=dc, y=dn, shape = factor(cluster), color = Site)) +
+  geom_point(size =3) +
+  theme_classic()
+```
+
+```{r}
+corr.2$OtterID <- as.factor(corr.2$OtterID)
+corr.2<-corr.2[order(corr.2$correlation),]
+corr.2$OtterID <- factor(corr.2$OtterID, levels = corr.2$OtterID[order(corr.2$correlation)])
+
+ggplot(data=corr.2, aes(x= OtterID, y = correlation, fill = Site)) +
+  geom_bar(stat="identity", color = "black") +
+    labs(x= "Individual sea otter", y = "C:N correlation") +
+  scale_fill_brewer(palette = "PRGn") +
+  theme_few()+
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
+```
+
+```{r}
+ggplot(data=corr.2, aes(x= OtterID, y = correlation, fill = Site)) +
+  geom_bar(stat="identity", color = "black") +
+  scale_fill_brewer() +
+  labs(x= "Individual sea otter", y = "C:N correlation") +
+  geom_abline(slope = 0, intercept = 0) +
+  facet_wrap(vars(Site), nrow = 3) +
+  theme_few() +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), legend.position = "none")
 ```
 

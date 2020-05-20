@@ -11,48 +11,35 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 # Introduction
-I am working on sea otter whisker analysis over time from the root to the tip of the whisker. As my analysis is not complete, this is includes 29 sea otters as a population between Klawock and Naukati on Prince of Wales Island. Sea otter whiskers were collected from June 26- August 6, 2019. 
+Here are some graphs from my chapter 1 analysis of sea otter vibrissae and prey through stable isotope analysis
 
-# Analysis
 
-First, loading programs and files. Otter ID should be read as a factor.
+### Libraries and data
 
 ```{r, libraries and data, message= FALSE}
 library(ggplot2)
 library(dplyr)
+library(tidyr)
 library(ggthemes)
 library(scales)
+library(cowplot)
+library(gridExtra)
+library(grid)
 
 #load whisker data
-whisker <- read.csv("whiskers.csv")
+whisker <- read.csv("whisker_final.csv")
 whisker$OtterID<-as.character(whisker$OtterID)
-oddotter <- read.csv("oddotter.csv")
-oddotter$OtterID<-as.factor(oddotter$OtterID)
-oddotter$Run<-as.factor(oddotter$Run)
-
-
 
 #load prey data
 si.prey <- read.csv("sifinal.csv")
 ```
 
 
-#### Data Cleaning - Temp until final decision is made for the odd otter
+# All otters over time
 
-Otter 163532 has very odd values, while it is being re-run I have seperated out the values and am going to make the whisker file without this sea otter. I also want the seasons to print in date order, as opposed to alphabetical order
+Sea otter vibrissae from root to tip with varying δ15N (red line, primary y-axis) and δ13C (green line, secondary y-axis) patterns. The x-axis is the distance from the root of vibrissa (closest to muzzle) to tip with the maximum length of 8 cm. 
 
-```{r, data cleaning}
-whisker<- filter(whisker, OtterID != "163532")
-
-whisker$Season<-factor(whisker$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
-```
-
-
-## Results 
-
-Here is each individual sea otter from the root to the tip for Carbon in Teal and Nitrogen in Red. 
-
-```{r, graph indiv otters, echo= FALSE}
+```{r, graph indiv otters, warning= FALSE}
 ggplot(data=whisker) +
   geom_line(aes(x=distance, y=N), colour="tomato") +
   geom_line(aes(x=distance, y=C+25), colour="lightseagreen") +
@@ -65,250 +52,160 @@ ggplot(data=whisker) +
   theme_light()
 ```
 
+## More in depth vibrissae over time
 
-### Odd otter graphs - for reference
+Individual 520 (A) shows little variation of both carbon and nitrogen with a negative correlation closer to the root and positive correlation closer to the tip. Individual 521 (B) shows a high variation in both carbon and nitrogen which are positively correlated. Individual 524 (C) does not exhibit a correlation between carbon and nitrogen. Individual 287 (D) has a high correlation between carbon and nitrogen.
 
+```{r, graph 4 otters over time, message = FALSE, warning= FALSE, error=FALSE}
+a <- ggplot(data=filter(whisker, OtterID=="163520")) +   theme_few() +
+  geom_line(aes(x=distance, y=N)) +
+  geom_point(aes(x=distance, y=N)) +
+  geom_line(aes(x=distance, y=C+25), linetype = "dashed") +
+  geom_point(aes(x=distance, y=C+25)) +
+  labs(x= NULL, y=expression(paste(delta^15, "N (\u2030)" )), tag = "A")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, name = NULL), 
+                     breaks= c(9, 11, 13, 15), limits = c(8.5,15)) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"), 
+        legend.position = "none", legend.title = element_blank(), 
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  ggtitle("520")
 
-#### Carbon
+b <- ggplot(data=filter(whisker, OtterID=="163521")) +   theme_few() +
+  geom_line(aes(x=distance, y=N)) + 
+  geom_point(aes(x=distance, y=N)) +
+  geom_line(aes(x=distance, y=C+25), linetype = "dashed") +
+  geom_point(aes(x=distance, y=C+25)) +
+  labs(x= NULL, y= NULL, tag = "B")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25,
+                                         name = expression(paste(delta^13, "C (\u2030)" ))), 
+                     breaks= c(9, 11, 13, 15), limits = c(8.5,15)) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"),
+        legend.position = "none", legend.title = element_blank(),
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  ggtitle("521")
 
-```{r, odd otter carbon, echo= FALSE}
-ggplot(data=oddotter, aes(x=distance, y=C, colour=Run)) +
-  geom_line() +
-  geom_point() +
-  labs(x= "Distance from root (cm)", 
-       y=expression(paste(delta^13, "C (\u2030)" )))  +
-  theme_few()
+c <- ggplot(data=filter(whisker,OtterID=="200752")) +   theme_few() +
+  geom_line(aes(x=distance, y=N)) + 
+  geom_point(aes(x=distance, y=N)) +
+  geom_line(aes(x=distance, y=C+25), linetype = "dashed") +
+  geom_point(aes(x=distance, y=C+25)) +
+  labs(x= "Distance from root (cm)", y=expression(paste(delta^15, "N (\u2030)" )), tag = "C")  +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, name = NULL), 
+                     breaks= c(9, 11, 13, 15), limits = c(8.5,15)) +
+  xlim(0,6) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"), 
+        legend.position = "none", legend.title = element_blank(), 
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  ggtitle("524")
 
+d <-ggplot(data=filter(whisker, OtterID=="77287")) +   theme_few() +
+  geom_line(aes(x=distance, y=N)) + 
+  geom_point(aes(x=distance, y=N)) + 
+  geom_line(aes(x=distance, y=C+25), linetype = "dashed") +
+  geom_point(aes(x=distance, y=C+25)) +
+  labs(x= "Distance from root (cm)", y=NULL, tag = "D")  +
+  xlim(0,6) +
+  scale_y_continuous(sec.axis = sec_axis(~.-25, 
+                                         name = expression(paste(delta^13, "C (\u2030)" ))), 
+                     breaks= c(9, 11, 13, 15), limits = c(8.5,15)) +
+  theme(axis.title = element_text(size=18, face = "bold"), 
+        axis.text= element_text(size = 14, face = "bold"), 
+        legend.position = "none", legend.title = element_blank(),
+        plot.title = element_text(size = 18, face = "bold", hjust = 0.5)) +
+  ggtitle("287")
+
+return(grid.arrange(a, b, c, d, nrow=2))
 ```
 
-#### Nitrogen
-
-```{r, odd otter nitrogen, echo=FALSE}
-ggplot(data=oddotter, aes(x=distance, y=N, colour=Run)) +
-  geom_line() +
-  geom_point() +
-  labs(x= "Distance from root (cm)", 
-       y=expression(paste(delta^15, "N (\u2030)" )))  +
-  theme_few()
-```
 
 
-## Seasons
+# Seasonal changes 
 
-#### Carbon
+δ13C and δ15N means for each season as derived from sea otter vibrissae segments and site where the sea otter was harvested. Seasons were estimated from vibrissae growth rates and sample distance from the root.
 
-```{r, overlay carbon graph by season, echo=FALSE, message=FALSE}
-ggplot() +   
-  theme_few() +
-  geom_density(data=filter(whisker, Season == "Summer"), 
-                 aes(x=C), alpha=.5, fill= "darkgoldenrod1") +
-  geom_density(data=filter(whisker, Season == "Spring"), 
-                 aes(x=C), alpha=.5, fill= "palegreen3") +
-  geom_density(data=filter(whisker, Season == "Fall"), 
-                 aes(x=C), alpha=.5, fill= "darkorange3") +
-  geom_density(data=filter(whisker, Season == "Winter"), 
-                 aes(x=C), alpha=.5, fill = "paleturquoise1") +
-  labs(x=expression(paste(delta^13, "C" )), y="Kernel Density") 
+### Carbon
 
-```
-
-
-#### Nitrogen
-
-```{r, overlay nitrogen graph by season, echo=FALSE, message=FALSE}
-ggplot() +   
-  theme_few() +
-  geom_density(data=filter(whisker, Season == "Summer"), 
-               aes(x=N), alpha=.9, fill= "darkgoldenrod1") +
-  geom_density(data=filter(whisker, Season == "Spring"), 
-               aes(x=N), alpha=.6, fill= "palegreen3") +
-  geom_density(data=filter(whisker, Season == "Fall"), 
-               aes(x=N), alpha=.5, fill= "darkorange3") +
-  geom_density(data=filter(whisker, Season == "Winter"), 
-               aes(x=N), alpha=.4, fill = "paleturquoise1") +
-  labs(x=expression(paste(delta^15, "N" )), y="Kernel Density") 
-```
-
-
-
-The graphs above are ok, but too messy for a paper, and the kernel density is not what I want to talk about, so here are some boxplots of the same data. 
-
-#### Carbon
-
-```{r, boxplot Carbon seasons, echo=FALSE, message=FALSE}
+```{r, boxplot Carbon seasons, warning=FALSE, message=FALSE}
 ggplot(data=whisker) +
-  geom_boxplot(aes(x=Season, y=C)) +
+  geom_boxplot(aes(x=Season, y=C, fill=Site)) +
   labs(y=expression(paste(delta^13, "C" ))) +
+  scale_fill_brewer(palette = "Greens") +
   theme_few()
 ```
 
-#### Nitrogen
+### Nitrogen
 
-```{r, boxplot Nitrogen seasons, echo=FALSE, message=FALSE}
+```{r, boxplot Nitrogen seasons, warning=FALSE, message=FALSE}
 ggplot(data=whisker) +
-  geom_boxplot(aes(x=Season, y=N)) +
+  geom_boxplot(aes(x=Season, y=N, fill=Site)) +
   labs(y=expression(paste(delta^15, "N" ))) +
+  scale_fill_brewer(palette = "Purples") +
   theme_few()
 ```
 
 
-## Stats for Seasons
+# Sea otter Biplot
 
-#### Anova 
-```{r, anova seasons, message=FALSE}
-cseason.aov <- aov(C~Season*OtterID, data = whisker)
-summary(cseason.aov)
-
-nseason.aov <- aov(N~Season, data = whisker)
-summary(nseason.aov)
-```
-
-Season for both C and N are significant. 
-
-#### Pairwise test for seasons 
-```{r, pairwise seasons, message=FALSE}
-pairwise.t.test(x=whisker$C, g=whisker$Season, p.adj="none")
-pairwise.t.test(x=whisker$N, g=whisker$Season, p.adj="none")
-```
-
-
-Carbon: Spring/Fall, Spring/Summer, Winter/Fall, and Winter/Summer are significant. This doesn't match with how I originally matched the seasons. 
-
-Nitrogen: Spring/Fall, Spring/Winter, Summer/Fall, and Winter/Summer are significant, which is how I originally matched up the seasons. 
-
-
-```{r, pairwise bonferroni seasons, message=FALSE}
-pairwise.t.test(x=whisker$C, g=whisker$Season, p.adj="bonferroni")
-pairwise.t.test(x=whisker$N, g=whisker$Season, p.adj="bonferroni")
-```
-
-Using bonferrroni, SPring/Fall are significant for carbon, but nothing else. And all the same Nitrogen seasons remain the same as above.
-
-
-```{r, pairwise holm, message=FALSE}
-pairwise.t.test(x=whisker$C, g=whisker$Season, p.adj="holm")
-pairwise.t.test(x=whisker$N, g=whisker$Season, p.adj="holm")
-```
-
-This method is generally considered superior to the Bonferroni adjustment, and adds Winter/Fall as stat sig for Carbon.
-
-
-#### Tukey HSD
-```{r, tukey, message=FALSE}
-TukeyHSD(aov(C~Season, data=whisker))
-TukeyHSD(aov(N~Season, data=whisker))
-```
-
-Tukey's gives similar as Bonferroni and Holm. There are significant values here, but really - the main takeaway needs to be that these means are only .3-.5. which is VERY SMALL. 
-
-
-
-### Biplot by season
-
-Making mean values for Prey and adding in TDFs for prey
-
-```{r, prey means and TDFs, message=FALSE}
+```{r, prey means and TDFs, include=FALSE}
 si.mean <-si.prey %>%
   group_by(PreyCat) %>% 
-  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N), 
-            Cse=sd(Cnorm)/sqrt(length(Cnorm)), Nse=sd(N)/sqrt(length(N)))
-si.mean<-si.mean[-1,] #removing blank
-si.mean<-si.mean[-6,] #removing stars
+  summarise(Cmean=mean(Cnorm), Nmean=mean(N), Csd=sd(Cnorm), Nsd=sd(N)) %>%
+  drop_na(PreyCat)
 
-si.mean$Ctdf<-si.mean$Cmean+2
-si.mean$Ntdf<-si.mean$Nmean+2.8
+si.mean$Cmean<-si.mean$Cmean+2
+si.mean$Nmean<-si.mean$Nmean+2.8
 ```
 
 
-#### Biplot with sea otters separated by season (error bars are standard error)
+δ13C and δ15N values for sea otters (as determined by vibrissae) and their prey (with standard deviation error bars). Sea otter prey values are corrected for trophic discrimination by subtracting 2‰ and 2.8‰ from carbon and nitrogen isotope values respectively. Carbon values are normalized for lipid content. Each season is derived from estimated growth rates of sea otter vibrissae and sample distance from the root. Each site is where the sea otter was harvested. 
 
-Folling Newsome et al. 2009, this is how they portrayed their data. I don't like that some of the sea otter points fall outside of the prey, but I do like that the graph is a tighter x-axis. 
-
-```{r, seasonal biplot se, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, seasonal biplot sd, message=FALSE, warning=FALSE}
 ggplot() +
-  geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, color=PreyCat), size=3) +
+  geom_point(data=si.mean, aes(x=Cmean, y=Nmean), size = 3) +
   labs(x=expression(paste(delta^13, "C (\u2030)")), 
        y=expression(paste(delta^15, "N (\u2030)" )))  +
-  scale_color_discrete(name  ="Prey Group") +
-  geom_errorbar(data= si.mean, aes(x=Ctdf, y=Ntdf, ymin = Ntdf-Nse, ymax = Ntdf+Nse,
-                                   color= PreyCat), width=0) + 
-  geom_errorbarh(data= si.mean, aes(x=Ctdf, y=Ntdf, xmin = Ctdf-Cse,xmax = Ctdf+Cse,
-                                    color= PreyCat), height=0) +
-  geom_point(data=whisker, aes(x=C, y=N, shape=Season), size=2)+
-  theme_few()
+  geom_errorbar(data= si.mean, aes(x= Cmean, y= Nmean, ymin = Nmean-Nsd, ymax = Nmean+Nsd, linetype= PreyCat), width=0) + 
+  geom_errorbarh(data= si.mean, aes(x= Cmean, y=Nmean, xmin = Cmean-Csd,xmax = Cmean+Csd, linetype= PreyCat), height=0) +
+  geom_point(data=whisker, aes(x=C, y=N, shape=Site, color=Season), size=2)+
+  geom_text(data= si.mean, aes(x= Cmean, y=Nmean, label=PreyCat),hjust=-0.2, vjust=1.8, size = 6) +
+  theme_few() +
+  labs(colour = "Season", shape = "Site") +
+  guides(linetype=FALSE) +
+  theme(axis.text = element_text(size = 14), axis.title = element_text(size = 16), legend.text = element_text(size = 16), 
+        legend.title = element_text(size = 16, face = "bold"))
 ```
 
 
-#### Biplot in BW
-
-this is in case there is a requrement for a black and white figure, I'm open to feedback on what would make things stand out more.
-
-```{r, biplot bw, echo=FALSE, message=FALSE, warning=FALSE}
-ggplot() +
-  geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, shape=PreyCat), size =4) +
-  scale_shape_manual(values=c(6, 4, 16, 17, 18, 8, 9), name="Prey Group")+
-  labs(x=expression(paste(delta^13, "C (\u2030)")), 
-       y=expression(paste(delta^15, "N (\u2030)" )))  +
-  geom_errorbar(data= si.mean, aes(x=Ctdf, y=Ntdf, ymin = Ntdf-Nse, ymax = Ntdf+Nse,
-                                   shape= PreyCat), width=0) + 
-  geom_errorbarh(data= si.mean, aes(x=Ctdf, y=Ntdf, xmin = Ctdf-Cse,xmax = Ctdf+Cse,
-                                    shape= PreyCat), height=0) +
-  geom_point(data=whisker, aes(x=C, y=N, color=Season), size=2)+
-  scale_color_grey()+
-  theme_few()
-```
+# Mixing Model Results
 
 
-#### Biplot with sea otters separated by season (error bars are standard dev)
-
-This is the plot I prefer, as it shows all points are within one sd of the prey means. 
-
-```{r, seasonal biplot sd, echo=FALSE, message=FALSE, warning=FALSE}
-ggplot() +
-  geom_point(data= si.mean, aes(x=Ctdf, y=Ntdf, color=PreyCat), size=3) +
-  labs(x=expression(paste(delta^13, "C (\u2030)")), 
-       y=expression(paste(delta^15, "N (\u2030)" )))  +
-  scale_color_discrete(name  ="Prey Group") +
-  geom_errorbar(data= si.mean, aes(x=Ctdf, y=Ntdf, ymin = Ntdf-Nsd, ymax = Ntdf+Nsd,
-                                   color= PreyCat), width=0) + 
-  geom_errorbarh(data= si.mean, aes(x=Ctdf, y=Ntdf, xmin = Ctdf-Csd,xmax = Ctdf+Csd,
-                                    color= PreyCat), height=0) +
-  geom_point(data=whisker, aes(x=C, y=N, shape=Season), size=2)+
-  theme_few()
-```
-
-
-## Mixing Model Results
-
-#### Loading data and prepping for graphing
-
-I made the seasons facors so they will show in order of the months of the year and not alphabetically.
-
-```{r, mixing model, message=FALSE}
+```{r, mixing model, include=FALSE}
 #load prey data
-mix.mod <- read.csv("mix_season.csv")
-
-mix.mod$Season<-factor(mix.mod$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
-
+all <- read.csv("all_mixing_new.csv")
+all$Season<-factor(all$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
 ```
 
 
-### Box and whisker stand in for the moment
+### Sea otter diets by Site and Season
 
-I would like this to be a box and whisker plot separated similar to what I have below, but I didn't save all the correct files from the output, and so am rerunning the model. 
+Boxplots showing estimated diets by harvest location and season for the five functional prey groups from an informed mixing model. Boxes are upper and lower quantiles with a mean horizontal line, and whisker is 95% credible interval.
 
-```{r, box whisker mixing, message=FALSE, echo=FALSE, warning=FALSE}
-ggplot(aes(y = Mean, x = Season), data = mix.mod) +
-  theme_bw() +
-  geom_point(aes(color=Season), size =4) +
-  geom_errorbar(aes(ymin = Mean-SD,ymax = Mean+SD), width=.5) +
-  scale_y_continuous(labels = percent_format(accuracy = 1)) +
-  ylab("Diet proportion") + theme(legend.position = "none") +
-  facet_wrap(vars(PreyCat), nrow = 2)
+```{r, box whisker mixing, message=FALSE, warning=FALSE}
+ggplot(aes(y = value, x = source, fill = source), data = all) + 
+  geom_boxplot(outlier.colour = NA) +
+  theme_few() +
+  xlab(NULL) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  ylab("Diet proportion") +
+  facet_grid(Season~Site) +
+  theme( axis.title=element_text(size=16), legend.position = "none", 
+         axis.text.x = element_text(angle = -45, hjust=0, size =12), 
+         axis.text.y = element_text(size = 12),
+         strip.text=element_text(size = 12, face="bold"))
 ```
 
 
-```{r, Anova for mixing model}
-
-```
 

@@ -1,0 +1,86 @@
+---
+title: "LM_Prey"
+author: "Nicole LaRoche"
+date: "5/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, libraries and data, warning= FALSE, message=FALSE}
+library(tidyverse)
+library(ggthemes)
+library(nlme) #lme model
+library(emmeans)
+library(MuMIn) #r.squaredGLMM
+library(forcats) # condense factors
+library(broom)
+library(minpack.lm)
+```
+
+```{r, load data, message=FALSE, warning=FALSE}
+#load prey data
+si.prey <- read.csv("sifinal.csv")
+si.prey <- si.prey %>% 
+  filter(PreyCat != "Star" & Species != "map" & PreyCat != "Snail" & Species != "squid eggs")
+
+si.prey$PreyCat <- fct_collapse(si.prey$PreyCat, Cucumber.Snail = c("Cucumber","Tegula"))
+```
+
+## Carbon by functional prey group
+this is for each functional prey group by season for the two sites. 
+```{r carbon graph, echo=FALSE}
+si.prey %>%
+  filter(Site == "Craig" | Site == "Soda Bay") %>%
+  drop_na(PreyCat) %>%
+  ggplot(aes(x=Season, y=Cnorm, fill=Site)) +
+  geom_boxplot() +   theme_few() +
+  labs(y=expression(paste(delta^13, "C" )), x= NULL) +
+  scale_fill_brewer(palette = "Set2") +
+  facet_wrap(vars(PreyCat), labeller = labeller(PreyCat = c("Clam" = "Clam", "Crab" = "Crab", 
+                                                            "Cucumber.Snail" = "Cucumber and Snail", 
+                                                            "Mussel" = "Mussel", "Urchin" = "Urchin"))) 
+```
+
+## Nitrogen by functional prey group
+this is for each functional prey group by season for the two sites. 
+```{r nitrogen graph, echo=FALSE}
+si.prey %>%
+  filter(Site == "Craig" | Site == "Soda Bay") %>%
+  ggplot(aes(x=Season, y=N, fill=Site)) +
+  geom_boxplot() +   theme_few() +
+  labs(y=expression(paste(delta^15, "N" )), x=NULL) +
+  scale_fill_brewer(palette = "Set2") +
+  facet_wrap(vars(PreyCat),labeller = labeller(PreyCat = c("Clam" = "Clam", "Crab" = "Crab", 
+                                                           "Cucumber.Snail" = "Cucumber and Snail", 
+                                                           "Mussel" = "Mussel", "Urchin" = "Urchin")))
+```
+
+
+# Linear Model - Clams
+
+
+```{r seaparate Prey Cats, message=FALSE, warning=FALSE}
+clam <- si.prey %>%
+  filter(Site == "Craig" | Site == "Soda Bay") %>%
+  filter(PreyCat =="Clam")
+clam.lm<- lm(Cnorm ~ Season*Site, data=clam)
+summary(clam.lm)
+plot(clam.lm)
+anova(clam.lm)
+```
+
+# Linear Model - Crabs
+
+```{r lm crab, message=FALSE, warning=FALSE}
+crab <- si.prey %>%
+  filter(Site == "Craig" | Site == "Soda Bay") %>%
+  filter(PreyCat =="Crab")
+crab.lm<- lm(Cnorm ~ Season*Site, data=crab)
+summary(crab.lm)
+plot(crab.lm)
+anova(crab.lm)
+```

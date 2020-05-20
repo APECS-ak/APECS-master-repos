@@ -153,7 +153,9 @@ si.prey.2 %>%
   nest(-PreyCat) %>%
   mutate(fit=map(data, ~lm(Cnorm ~ Season*Site,data=.)),
                  results = map(fit, augment)) %>% 
-  unnest(results) %>% 
+  unnest(results)
+
+
   ggplot(aes(x = Cnorm, y = .fitted)) +
   geom_abline(intercept = 0, slope = 1, alpha = .2) +  # Line of perfect fit
   geom_point() +

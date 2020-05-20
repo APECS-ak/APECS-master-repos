@@ -1,7 +1,7 @@
 #Kj Lipid Protein Moisture Ash
 #calculate a dissimilarity matrix
 #look at diffrerences between row 1
-# this would show what is driving the differences
+#this would show what is driving the differences
 #Each sample is a row
 #Each column is KJ Lipid Protein Moisture Ash 
 #Then use species, site, season, size
@@ -68,3 +68,5 @@ bomb.PC.mean <- bomb %>%
 
 #make csv
 write.csv(bomb.PC.mean, "Bombing/kcal_PC_mean.csv")
+
+

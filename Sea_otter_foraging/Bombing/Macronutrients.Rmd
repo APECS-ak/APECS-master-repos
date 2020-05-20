@@ -22,6 +22,15 @@ library(scales)
 plab <- read.csv("plab.csv")
 summary <- read.csv("Summary_PC.csv")
 
+#Frozen.Weight is a character - should be numeric
+summary$Frozen.Weight <- as.numeric(as.character(summary$Frozen.Weight))
+
+#Making dates into date format
+summary$Date.Collected <- parse_date_time(summary$Date.Collected, orders = "mdy")
+summary$Date.Collected <- as.Date(summary$Date.Collected)
+
+summary$Date.Dissected <- parse_date_time(summary$Date.Dissected, orders = "mdy")
+summary$Date.Dissected <- as.Date(summary$Date.Dissected)
 ```
 
 Converting Seasons into quarters/months
@@ -135,8 +144,9 @@ ggplot(data= plab.lip, aes(x=protein_dry, y=lipid_dry, color = PreyCat)) +
 ## % Lipid by sesason
 ```{r, season - lipid, echo=FALSE, warning=FALSE, message = FALSE}
 ggplot(data= plab.lip, aes(x=month, y=lipid_dry)) +
-  geom_boxplot(aes(color = Season)) + theme_few() +
+  geom_boxplot(aes(color= Season)) + theme_few() +
   stat_summary(aes(y = lipid_dry,group=1), fun.y=mean, colour="black", geom="line",group=1) +
+  scale_color_grey() +
   labs(x= "", y="% Lipid (dry mass)")  +
   facet_wrap(vars(PreyCat), scales = "free", nrow=2)
 ```
@@ -146,6 +156,7 @@ ggplot(data= plab.lip, aes(x=month, y=lipid_dry)) +
 ggplot(data= plab.prot, aes(x=month, y=protein_dry)) +
   geom_boxplot(aes(color = Season)) + theme_few() +
   stat_summary(aes(y = protein_dry,group=1), fun.y=mean, colour="black", geom="line",group=1) +
+  scale_color_grey() +
   labs(x= "", y="% Protein (dry mass)")  +
   facet_wrap(vars(PreyCat), scales = "free", nrow=2)
 ```
@@ -155,6 +166,7 @@ ggplot(data= plab.prot, aes(x=month, y=protein_dry)) +
 ggplot(data= filter(plab, PreyCat== "Clam" | PreyCat == "Crab" | PreyCat == "Herb Snail" | PreyCat == "Cucumber" | PreyCat == "Urchin"), aes(y=kcal.dry, x=month), na.rm=TRUE) +
   geom_boxplot(aes(color= Season)) + theme_few() +
   stat_summary(aes(y = kcal.dry,group=1), fun.y=mean, colour="black", geom="line",group=1) +
+  scale_color_grey() +
   labs(x="", y="Kcal (per dry gram)") +
   facet_wrap(vars(PreyCat), scales = "free", nrow = 2)
 ```
@@ -307,10 +319,10 @@ si.otter <- read.csv("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging
 si.otter$month <- ifelse(si.otter$Season == "Spring", "2018-05-01", ifelse(si.otter$Season == "Summer", 
                             "2018-08-01", ifelse(si.otter$Season == "Fall", "2018-11-01", "2019-02-01")))
 si.otter$month <- as_date(si.otter$month)
-si.otter$quarter <- quarter(si.otter$month, with_year = F)
+
 
 si.mean <- si.otter %>%
-  group_by(Season, quarter, source) %>%
+  group_by(Season, month, source) %>%
   summarise(mean=mean(value), sd=sd(value)) %>%
   rename(PreyCat = source)
 
@@ -322,19 +334,24 @@ plab.energ <- plab %>%
 si.mean$Season<-factor(si.mean$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
 plab.energ$Season<-factor(plab.energ$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
 
-ggplot(data=plab.energ, aes(x=Season, y=kcal.wet)) +
-  geom_boxplot(color= "blue") +
+ggplot(data=plab.energ, aes(x=month, y=kcal.wet)) +
+  geom_point() +
   labs(x= NULL, y="Kcal/gram (wet mass)") +
-  facet_wrap(vars(PreyCat)) +
-  theme_few()
+  facet_wrap(vars(PreyCat), scales = "free") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./2, name = "Proportion of diet")) +
+  geom_smooth(data=si.mean, aes(x=month, y=mean*2), color="red") +
+  theme_few()+
+  theme(legend.position = "none")
 
-ggplot(data= si.mean, aes(x=Season, y= mean)) +
+ggplot(data= si.mean, aes(x=month, y= mean)) +
  # geom_point(color = "red") +
  # geom_errorbar(aes(x=Season, ymin= mean-sd, ymax=mean+sd), color = "red", width = .1) +
-  geom_smooth(data=si.mean, aes(x=quarter, y=mean), color="red") +
+  geom_smooth(data=si.mean, aes(x=month, y=mean), color="red") +
   labs(x= NULL, y="Proportion of diet") +
   facet_wrap(vars(PreyCat)) +
-  theme_few()
+  theme_few() +
+  theme(legend.position = "none")
 ```
 
 ```{r}
