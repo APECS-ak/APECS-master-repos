@@ -15,14 +15,14 @@ forage<-read.csv("Visual/forage_final.csv")
 #### Save this for stats later (comment made 5/12/20)
 ### Chi Sq for years by clams
 
-clam <- filter(ott.raw, PreyCat=="Clam")
+clam <- filter(forage, PreyCat=="Clam")
 
 chisq.test(ott.raw$Size, ott.raw$Occupation, simulate.p.value = TRUE)
 
 chisq.test(ott.raw$PreySz, ott.raw$Occupation)
 
-hist(clam$Size)
-plot(clam$where)
+hist(ott.raw$Size)
+plot(ott.raw$where)
 
 ###############################################################
 ##                    Frequency of Occurance                 ##
@@ -256,3 +256,40 @@ ggplot(aes(y = value, x = source, fill = source), data = forage.all) +
 species.count <- forage %>%
   group_by(PreyItem) %>%
   count()
+
+
+## Looking at intertidal dives
+forage$where <- as.factor(forage$where)
+summary(forage$where)
+
+intertidal <- filter(forage, where == "IN" | where == "ER")
+
+ggplot(data= intertidal) +
+  theme_few() +
+  geom_bar(aes(x= Region))
+
+
+# dive times for females with pup
+## biomass from biomass.Rmd
+
+status <- biomass %>%
+  drop_na(Status) %>%
+  drop_na(MnDvTm)
+
+ggplot(status, aes(x = Status, y= MnDvTm))+
+  theme_few()+
+  geom_bar(stat="identity") +
+  geom_errorbar(aes(ymin=MnDvTm-sdDvTm, ymax=MnDvTm+sdDvTm), width = .2)
+
+
+
+crab <- plab %>%
+  filter(PreyCat == "Crab") %>%
+  group_by(Species, Season, SEX) %>%
+  summarise(mean= mean(lipid_dry, na.rm=T), sd= sd(lipid_dry, na.rm=T))
+
+lipid <- plab %>%
+  group_by(Species, Season, SEX) %>%
+  summarise(mean= mean(lipid_dry, na.rm=T), sd= sd(lipid_dry, na.rm=T))
+
+

@@ -21,8 +21,6 @@ library(viridis)
 
 ```{r, import files, warning=FALSE, message=FALSE}
 biomass <- read.csv("sofa_output.csv", header=T, na.strings=c(""))
-#run plab and summary from macronutrients.rmd
-
 ```
 
 
@@ -61,8 +59,6 @@ biomass %>%
     labs(y= "Proportion of diet (by biomass)", x=NULL) +
   scale_fill_brewer(palette = "RdYlBu", name="Prey Catagory", direction = -1)+
   theme_few()
-
-
 ```
 
 ## By Status
@@ -93,10 +89,10 @@ biomass %>%
   filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
            Prey.Cat == "Urchin") %>%
   ggplot(aes(x=Status, y=Proportion, fill = Prey.Cat)) +
-  geom_bar(stat="identity", position = position_fill(reverse = TRUE), color= "black") +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   labs(y= "Proportion of diet (by biomass)", x=NULL) +
-  scale_fill_brewer(palette = "Set2", name="Prey Catagory") +
+  scale_fill_brewer(palette = "RdYlBu", name="Prey Catagory", direction = -1)+
   theme_few() +
   theme(legend.position="top")
 ```
@@ -128,10 +124,10 @@ biomass %>%
   filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
            Prey.Cat == "Urchin") %>%
   ggplot(aes(x=Age, y=Proportion, fill = Prey.Cat)) +
-  geom_bar(stat="identity", position = position_fill(reverse = TRUE), color="black") +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
   labs(y= "Proportion of diet (by biomass)", x=NULL) +
-    scale_fill_brewer(palette = "Set2", name= "Prey Catagory") +
+  scale_fill_brewer(palette = "RdYlBu", name="Prey Catagory", direction = -1) +
   theme_few() +
   theme(legend.position="top")
 ```
@@ -156,10 +152,10 @@ biomass %>%
   filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
            Prey.Cat == "Urchin") %>%
   ggplot(aes(x=Season, y=Proportion, fill = Prey.Cat)) +
-  geom_bar(stat="identity", position = position_fill(reverse = TRUE), color = "black") +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
     scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
     labs(y= "Proportion of diet (by biomass)", x=NULL) +
-    scale_fill_brewer(palette = "Set2", name = "Prey Catagory") +
+  scale_fill_brewer(palette = "RdYlBu", name="Prey Catagory", direction = -1)+
   theme_few() +
   theme(legend.position="top")
 ```
@@ -190,14 +186,13 @@ biomass %>%
   filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
            Prey.Cat == "Urchin") %>%
   ggplot(aes(x=Zone, y=Proportion, fill = Prey.Cat)) +
-  geom_bar(stat="identity", position = position_fill(reverse = TRUE), color= "black") +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
     scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
     labs(y= "Proportion of diet (by biomass)", x=NULL) +
-      scale_fill_brewer(palette = "Set2", name= "Prey Catagory") +
+    scale_fill_brewer(palette = "RdYlBu", name="Prey Catagory", direction = -1)+
   theme_few()
 ```
 
-### STATS
 
 ```{r}
 

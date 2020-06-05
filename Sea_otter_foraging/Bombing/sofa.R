@@ -287,6 +287,25 @@ cak.mean
 #	       mean        sd    edible      sd.ed
 #   0.7379483 0.2067092 0.2972606 0.08937244
 
+#Sizes
+mussel.mod <- nlsLM( wetTotalMass~ a*Length^b, start = list(a=1, b=3), data=cak.muss)
+summary(mussel.mod)
+#            se
+#a .0001197  6.518e-05 
+#b 2.467     0.1530
+
+mus <- data.frame(Speices = "mtr", a = .0001197, b = 2.467)
+mus$x.1a <- (mus$a*(13^mus$b))
+mus$x.1b <- (mus$a*(26^mus$b))
+mus$x.1c <- (mus$a*(43.3^mus$b))
+mus$x.2a <- (mus$a*(60.7^mus$b))
+mus$x.2b <- (mus$a*(78^mus$b))
+mus$x.2c <- (mus$a*(95.3^mus$b))
+mus$x.3a <- (mus$a*(112.7^mus$b))
+mus$x.3b <- (mus$a*(130^mus$b))
+mus$x.3c <- (mus$a*(147.3^mus$b))
+mus$x.4 <- (mus$a*(170^mus$b))
+mus
 
 ###    SHRIMP     ###
 shrimp <- summary.w %>%

@@ -17,6 +17,7 @@ library(ggplot2)
 library(ggthemes)
 library(lubridate)
 library(scales)
+library(gridExtra)
 
 
 plab <- read.csv("plab.csv")
@@ -60,8 +61,11 @@ plab$kcal.wet <- plab$KJ.wetgram*0.2390057361
 
 Converting from lipid/wet mass to lipid/dry mass
 ```{r, converting wet lipid to dry lipid}
-plab$lipid_wet <-NA
-plab$lipid_wet <- (1-(plab$moisture/100))*plab$lipid_dry
+plab$lipid_dry <-NA
+plab$lipid_dry <- plab$lipid_wet/(1-(plab$moisture/100))
+
+#Now need to remove the weird high values
+plab <-filter(plab, lipid_dry<=80)
 ```
 
 
@@ -99,7 +103,7 @@ plab.lip <- plab %>%
 ggplot(data= plab.lip, aes(x=Size.mm, y=lipid_dry)) +
   geom_point() + theme_few() +
   stat_smooth(method= "lm") +
-  labs(x= "Length (in mm)", y="% Lipid (dry mass)")  +
+  labs(x= "Length (in mm)", y="% Lipid (dry mass)") +
   facet_wrap(vars(Species), scales= "free")
 ```
 
@@ -175,7 +179,7 @@ ggplot(data= filter(plab, PreyCat== "Clam" | PreyCat == "Crab" | PreyCat == "Her
 Creating energy means for each season
 ```{r, energy means for seasons, message=FALSE, warning=FALSE}
 means <-plab %>%
-    filter(PreyCat == "Clam" | PreyCat == "Crab" | PreyCat == "Herb Snail" | PreyCat == "Cucumber" | PreyCat == "Urchin") %>%
+    filter(PreyCat == "Clam" | PreyCat == "Crab" |  PreyCat == "Cucumber" | PreyCat == "Herb Snail" | PreyCat == "Urchin") %>%
   group_by(PreyCat, month) %>% 
   summarise(kcal.m=mean(kcal.dry, na.rm = T), kcal.sd= sd(kcal.dry, na.rm = T), protein.m=mean(protein_dry, na.rm = T), protein.sd=sd(protein_dry, na.rm = T), lipid.m=mean(lipid_dry, na.rm = T), lipid.sd=sd(lipid_dry, na.rm = T), moisture.m=mean(moisture, na.rm = T), moisture.sd=sd(moisture, na.rm = T), ash.m=mean(ash, na.rm = T), ash.sd=sd(ash, na.rm = T))
 ```
@@ -188,7 +192,7 @@ ggplot(data= means , aes(y=kcal.m, x=month, color=PreyCat), na.rm=TRUE) +
   geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
   geom_errorbar(aes(ymin = kcal.m-kcal.sd, ymax = kcal.m+kcal.sd), position=position_dodge(width=25), width = 25) + 
   scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
-  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17, 18)) +
   scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
   scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
     labs(x="", y="Kcal (per dry gram)") + theme_few()
@@ -250,22 +254,24 @@ ggplot(data= means , aes(y=ash.m, x=month, color=PreyCat), na.rm=TRUE) +
     labs(x="", y="% Ash") + theme_few()
 ```
 
-```{r, proportions of protein and lipid, echo=FALSE}
-all$prop.lipid <- 36.43*(all$lipid_dry/100)
-all$prop.prot <- 20.1*(all$protein_dry/100)
-all$prop.compare <- all$prop.lipid+all$prop.prot
-all$prop.diff <- abs(all$prop.compare-all$KJ)
-all$percent.lip <- all$prop.lipid/all$prop.compare
-all$percent.prot <- all$prop.prot/all$prop.compare
+
+```{r, proportions of protein and lipid in plab, message=FALSE, echo=FALSE, warning=FALSE}
+plab$prop.lipid <- 36.43*(plab$lipid_dry/100)
+plab$prop.prot <- 20.1*(plab$protein_dry/100)
+plab$prop.compare <- plab$prop.lipid+plab$prop.prot
+plab$prop.diff <- abs(plab$prop.compare-plab$KJ)
+plab$percent.lip <- plab$prop.lipid/plab$prop.compare
+plab$percent.prot <- plab$prop.prot/plab$prop.compare
 ```
 
-
-```{r proportion graph by season, echo=FALSE}
-lip <- all %>%
+```{r proportion graph by season, message=FALSE, echo=FALSE, warning=FALSE}
+lip <- plab %>%
+    filter(PreyCat != "Carn Snail") %>%
   group_by(PreyCat, Season) %>%
   summarise(mean = mean(percent.lip, na.rm = TRUE), 
             sd = sd(percent.lip, na.rm = TRUE))
-prot <- all %>%
+prot <- plab %>%
+    filter(PreyCat != "Carn Snail") %>%
   group_by(PreyCat, Season) %>%
   summarise(mean = mean(percent.prot, na.rm = TRUE),
             sd = sd(percent.prot, na.rm = TRUE))
@@ -285,12 +291,14 @@ ggplot(data = graph, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
   facet_wrap(vars(Season))
 ```
 
-```{r proportion graph, echo=FALSE}
-lip.all <- all %>%
+```{r proportion graph, message=FALSE, echo=FALSE, warning=FALSE}
+lip.all <- plab %>%
+  filter(PreyCat != "Carn Snail") %>%
   group_by(PreyCat) %>%
   summarise(mean = mean(percent.lip, na.rm = TRUE), 
             sd = sd(percent.lip, na.rm = TRUE))
-prot.all <- all %>%
+prot.all <- plab %>%
+   filter(PreyCat != "Carn Snail") %>%
   group_by(PreyCat) %>%
   summarise(mean = mean(percent.prot, na.rm = TRUE),
             sd = sd(percent.prot, na.rm = TRUE))
@@ -312,7 +320,7 @@ ggplot(data = graph.all, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
   geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=0.2, position = position_dodge(.9))
 ```
 
-```{r, energy and seasonality, warning= FALSE}
+```{r, energy and seasonality, message=FALSE, echo=FALSE, warning=FALSE, error=FALSE}
 # box and whisker plot main y axis, mean percent in smooth on secondary axis - I think this plot doesn't look intersting... maybe could improve? I am stepping away from it at the moment
 
 si.otter <- read.csv("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging/SI/all_mixing.csv")
@@ -334,6 +342,8 @@ plab.energ <- plab %>%
 si.mean$Season<-factor(si.mean$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
 plab.energ$Season<-factor(plab.energ$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
 
+si.mean$PreyCat <- ifelse(si.mean$PreyCat == "Cucumber.Snail", "Cucumber", si.mean$PreyCat)
+
 ggplot(data=plab.energ, aes(x=month, y=kcal.wet)) +
   geom_point() +
   labs(x= NULL, y="Kcal/gram (wet mass)") +
@@ -343,18 +353,401 @@ ggplot(data=plab.energ, aes(x=month, y=kcal.wet)) +
   geom_smooth(data=si.mean, aes(x=month, y=mean*2), color="red") +
   theme_few()+
   theme(legend.position = "none")
+```
 
-ggplot(data= si.mean, aes(x=month, y= mean)) +
- # geom_point(color = "red") +
- # geom_errorbar(aes(x=Season, ymin= mean-sd, ymax=mean+sd), color = "red", width = .1) +
-  geom_smooth(data=si.mean, aes(x=month, y=mean), color="red") +
-  labs(x= NULL, y="Proportion of diet") +
-  facet_wrap(vars(PreyCat)) +
-  theme_few() +
+```{r same as above- only clam, message=FALSE, echo=FALSE, warning=FALSE, error=FALSE}
+clam.energy <- plab.energ %>%
+  filter(PreyCat == "Clam") %>%
+  select(SIN, kcal.wet, lipid_wet, protein_wet, month, Season)
+
+ggplot(data=clam.energy, aes(x=month, y=kcal.wet)) +
+  geom_point() +
+  labs(x= NULL, y="Kcal/gram (wet mass)") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./1.5, name = "Proportion of diet", labels = percent_format(accuracy = 1))) +
+  geom_smooth(data=filter(si.mean, PreyCat =="Clam"), aes(x=month, y=mean*1.5), color="red") +
+  theme_few()+
   theme(legend.position = "none")
 ```
 
-```{r}
+```{r clam dry mass, message=FALSE, echo=FALSE, warning=FALSE, error=FALSE}
+clam.energy.dry <- plab.energ %>%
+  filter(PreyCat == "Clam") %>%
+  select(SIN, kcal.dry, lipid_dry, protein_dry, month, Season)
+
+ggplot(data=clam.energy.dry, aes(x=month, y=kcal.dry)) +
+  geom_point() +
+  labs(x= NULL, y="Kcal/gram (dry mass)") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./9, name = "Proportion of diet", labels = percent_format(accuracy = 1))) +
+  geom_smooth(data=filter(si.mean, PreyCat =="Clam"), aes(x=month, y=mean*9), color="red") +
+  theme_few()+
+  theme(legend.position = "none")
+```
+
+
+```{r cuc/clam, message=FALSE, echo=FALSE, warning=FALSE, error=FALSE}
+c.energy <- plab.energ %>%
+  filter(PreyCat == "Cucumber" | PreyCat =="Clam") %>%
+  select(SIN, PreyCat, kcal.wet, lipid_wet, protein_wet, month, Season)
+
+c.mean <- filter(si.mean, PreyCat == "Cucumber" | PreyCat =="Clam")
+
+ggplot(data=c.energy, aes(x=month, y=kcal.wet)) +
+  geom_point() +
+  labs(x= NULL, y="Kcal/gram (wet mass)") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./1.75, name = "Proportion of diet", labels = percent_format(accuracy = 1))) +
+  geom_smooth(data=c.mean, aes(x=month, y=mean*1.75), color="red") +
+  theme_few()+
+  facet_wrap(vars(PreyCat), nrow = 2, scales = "free") +
+  theme(legend.position = "none")
+```
+
+
+```{r cuc/clam dry, message=FALSE, echo=FALSE, warning=FALSE, error=FALSE}
+c.energy.dry <- plab.energ %>%
+  filter(PreyCat == "Cucumber" | PreyCat =="Clam") %>%
+  select(SIN, PreyCat, kcal.dry, lipid_dry, protein_dry, month, Season)
+
+ggplot(data=c.energy.dry, aes(x=month, y=kcal.dry)) +
+  geom_point() +
+  labs(x= NULL, y="Kcal/gram (dry mass)") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./9, name = "Proportion of diet", labels = percent_format(accuracy = 1))) +
+  geom_smooth(data=c.mean, aes(x=month, y=mean*9), color="red") +
+  theme_few()+
+  facet_wrap(vars(PreyCat), nrow = 2, scales = "free") +
+  theme(legend.position = "none")
+```
+
+
+```{r lipid cuc, message=FALSE, echo=FALSE, error=FALSE, warning=FALSE}
+ggplot(data=filter(c.energy, PreyCat == "Cucumber"), aes(x=month, y=lipid_wet)) +
+  geom_point() +
+  labs(x= NULL, y="% Lipid (wet mass)") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./3, name = "Proportion of diet", labels = percent_format(accuracy = 1))) +
+  geom_smooth(data=filter(c.mean, PreyCat == "Cucumber"), aes(x=month, y=mean*3), color="red") +
+  theme_few()+
+  theme(legend.position = "none")
+```
+
+
+```{r lipid cuc dry, message=FALSE, echo=FALSE, error=FALSE, warning=FALSE}
+ggplot(data=filter(c.energy.dry, PreyCat == "Cucumber"), aes(x=month, y=lipid_dry)) +
+  geom_point() +
+  labs(x= NULL, y="% Lipid (dry mass)") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./35, name = "Proportion of diet", labels = percent_format(accuracy = 1))) +
+  geom_smooth(data=filter(c.mean, PreyCat == "Cucumber"), aes(x=month, y=mean*35), color="red") +
+  theme_few()+
+  theme(legend.position = "none")
+```
+
+
+```{r calculating nutrient composition, echo=FALSE, message=FALSE, warning= FALSE }
+comp <- plab %>%
+  drop_na(lipid_wet, protein_wet)
+comp.mean <- comp %>% 
+  group_by(PreyCat) %>%
+  summarise(mean_kcal_wet = mean(kcal.wet, na.rm = T), 
+            mean_prot_wet  = mean(protein_wet, na.rm = T), 
+            mean_lipid_wet = mean(lipid_wet, na.rm = T), 
+            mean_moist = mean(moisture, na.rm = T)) %>%
+  filter(PreyCat != "Carn Snail")
+comp.mean$PreyCat <- ifelse(comp.mean$PreyCat == "Herb Snail", "Snail", comp.mean$PreyCat)
+
+#load sofa output from Biomass.rmd
+biomass <- read.csv("../Visual/sofa_output.csv", header=T, na.strings=c(""))
+biomass$Year.since <- ifelse(biomass$Year==1988, "30 years", 
+                  ifelse(biomass$Year== 2010, "7 years", "15 years"))
+biomass$Year.since <- factor(biomass$Year.since, levels = c("30 years", "15 years", "7 years"))
+
+#Year
+year_comp <- biomass %>%
+  drop_na(Year, Proportion) %>%
+  select(Year.since, Prey.Cat, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat =="Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin")
+year_comp <- full_join(year_comp, comp.mean, by = c("Prey.Cat"="PreyCat"))
+year_comp$Rep_kcal_wet <- year_comp$Proportion*year_comp$mean_kcal_wet
+year_comp$Rep_lip_wet <- year_comp$Proportion*year_comp$mean_lipid_wet
+year_comp$Rep_prot_wet <- year_comp$Proportion*year_comp$mean_prot_wet
+year_comp$Rep_kcal_dry <- year_comp$Rep_kcal_wet/(1-(year_comp$mean_moist/100))
+year_comp$Rep_lip_dry <- year_comp$Rep_lip_wet/(1-(year_comp$mean_moist/100))/100
+year_comp$Rep_prot_dry <- year_comp$Rep_prot_wet/(1-(year_comp$mean_moist/100))/100
+
+year_all <- year_comp %>%
+  group_by(Year.since) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+  
+
+#Zone
+zone_comp <- biomass %>%
+  drop_na(Zone, Proportion) %>%
+  select(Zone, Prey.Cat, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat =="Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin")
+zone_comp <- full_join(zone_comp, comp.mean, by = c("Prey.Cat"="PreyCat"))
+zone_comp$Rep_kcal_wet <- zone_comp$Proportion*zone_comp$mean_kcal_wet
+zone_comp$Rep_lip_wet <- zone_comp$Proportion*zone_comp$mean_lipid_wet
+zone_comp$Rep_prot_wet <- zone_comp$Proportion*zone_comp$mean_prot_wet
+zone_comp$Rep_kcal_dry <- zone_comp$Rep_kcal_wet/(1-(zone_comp$mean_moist/100))
+zone_comp$Rep_lip_dry <- zone_comp$Rep_lip_wet/(1-(zone_comp$mean_moist/100))/100
+zone_comp$Rep_prot_dry <- zone_comp$Rep_prot_wet/(1-(zone_comp$mean_moist/100))/100
+
+zone_all <- zone_comp %>%
+  group_by(Zone) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+
+#Reproductive status
+status_comp <- biomass %>%
+  drop_na(Status, Proportion) %>%
+  select(Status, Prey.Cat, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat =="Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin")
+status_comp <- full_join(status_comp, comp.mean, by = c("Prey.Cat"="PreyCat"))
+status_comp$Rep_kcal_wet <- status_comp$Proportion*status_comp$mean_kcal_wet
+status_comp$Rep_lip_wet <- status_comp$Proportion*status_comp$mean_lipid_wet
+status_comp$Rep_prot_wet <- status_comp$Proportion*status_comp$mean_prot_wet
+status_comp$Rep_kcal_dry <- status_comp$Rep_kcal_wet/(1-(status_comp$mean_moist/100))
+status_comp$Rep_lip_dry <- status_comp$Rep_lip_wet/(1-(status_comp$mean_moist/100))/100
+status_comp$Rep_prot_dry <- status_comp$Rep_prot_wet/(1-(status_comp$mean_moist/100))/100
+
+status_all <- status_comp %>%
+  group_by(Status) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+
+#Age
+age_comp <- biomass %>%
+  drop_na(Age, Proportion) %>%
+  select(Age, Prey.Cat, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat =="Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin")
+age_comp <- full_join(age_comp, comp.mean, by = c("Prey.Cat"="PreyCat"))
+age_comp$Rep_kcal_wet <- age_comp$Proportion*age_comp$mean_kcal_wet
+age_comp$Rep_lip_wet <- age_comp$Proportion*age_comp$mean_lipid_wet
+age_comp$Rep_prot_wet <- age_comp$Proportion*age_comp$mean_prot_wet
+age_comp$Rep_kcal_dry <- age_comp$Rep_kcal_wet/(1-(age_comp$mean_moist/100))
+age_comp$Rep_lip_dry <- age_comp$Rep_lip_wet/(1-(age_comp$mean_moist/100))/100
+age_comp$Rep_prot_dry <- age_comp$Rep_prot_wet/(1-(age_comp$mean_moist/100))/100
+
+age_all <- age_comp %>%
+  group_by(Age) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+
+
+#Season
+season_comp <- si.mean %>%
+  ungroup() %>%
+  select(Season, PreyCat, mean)
+comp.mean2 <- filter(comp.mean, PreyCat != "Snail")
+season_comp <- full_join(season_comp, comp.mean2, by = "PreyCat")
+season_comp<- filter(season_comp, PreyCat!= "Mussel")
+season_comp$Rep_kcal_wet <- season_comp$mean*season_comp$mean_kcal_wet
+season_comp$Rep_lip_wet <- season_comp$mean*season_comp$mean_lipid_wet
+season_comp$Rep_prot_wet <- season_comp$mean*season_comp$mean_prot_wet
+season_comp$Rep_kcal_dry <- season_comp$Rep_kcal_wet/(1-(season_comp$mean_moist/100))
+season_comp$Rep_lip_dry <- season_comp$Rep_lip_wet/(1-(season_comp$mean_moist/100))/100
+season_comp$Rep_prot_dry <- season_comp$Rep_prot_wet/(1-(season_comp$mean_moist/100))/100
+
+season_all <- season_comp %>%
+  group_by(Season) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
 
 ```
 
+
+# Years Occupied
+
+### Means using proportion of diet and average energy values
+
+```{r year comp graph, echo=FALSE, message=FALSE, warning=FALSE}
+
+A <- ggplot(data = year_all, aes(x= Year.since, y=kcal_dry, fill = Year.since)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "Kcal/gram (dry mass)", x=NULL, tag= "A") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+A
+
+B <- ggplot(data = year_all, aes(x= Year.since, y=lip_dry, fill = Year.since)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Lipid (dry mass)", x=NULL, tag= "B") +
+  scale_y_continuous(labels = percent_format(accuracy = .1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+B
+
+C <- ggplot(data = year_all, aes(x= Year.since, y=prot_dry, fill = Year.since)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Protein (dry mass)", x=NULL, tag= "C") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+C
+
+grid.arrange(A,B,C,nrow=1)
+```
+
+
+# Forage Zones 
+
+### Means using proportion of diet and average energy values
+
+```{r, zone comp graphs, echo=FALSE, message=FALSE}
+A <- ggplot(data = zone_all, aes(x= Zone, y=kcal_dry, fill = Zone)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "Kcal/gram (dry mass)", x=NULL, tag= "A") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+A
+
+B <- ggplot(data = zone_all, aes(x= Zone, y=lip_dry, fill = Zone)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Lipid (dry mass)", x=NULL, tag= "B") +
+  scale_y_continuous(labels = percent_format(accuracy = .1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+B
+
+C <- ggplot(data = zone_all, aes(x= Zone, y=prot_dry, fill = Zone)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Protein (dry mass)", x=NULL, tag= "C") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+C
+
+grid.arrange(A,B,C,nrow=1)
+```
+
+# Reproductive Status
+
+### Means using proportion of diet and average energy values
+
+
+```{r, status comp graphs, echo=FALSE, message=FALSE}
+A <- ggplot(data = status_all, aes(x= Status, y=kcal_dry, fill = Status)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "Kcal/gram (dry mass)", x=NULL, tag= "A") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+A
+
+B <- ggplot(data = status_all, aes(x= Status, y=lip_dry, fill = Status)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Lipid (dry mass)", x=NULL, tag= "B") +
+  scale_y_continuous(labels = percent_format(accuracy = .1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+B
+
+C <- ggplot(data = status_all, aes(x= Status, y=prot_dry, fill = Status)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Protein (dry mass)", x=NULL, tag= "C") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+C
+
+grid.arrange(A,B,C,nrow=1)
+```
+
+# Age
+
+### Means using proportion of diet and average energy values
+
+```{r, age comp graphs, echo=FALSE, message=FALSE}
+A <- ggplot(data = age_all, aes(x= Age, y=kcal_dry, fill = Age)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "Kcal/gram (dry mass)", x=NULL, tag= "A") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+A
+
+B <- ggplot(data = age_all, aes(x= Age, y=lip_dry, fill = Age)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Lipid (dry mass)", x=NULL, tag= "B") +
+  scale_y_continuous(labels = percent_format(accuracy = .1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+B
+
+C <- ggplot(data = age_all, aes(x= Age, y=prot_dry, fill = Age)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Protein (dry mass)", x=NULL, tag= "C") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+C
+
+grid.arrange(A,B,C,nrow=1)
+```
+
+#Season 
+
+### Means using proportion of diet from mixing model output and average energy values
+
+```{r, sesason comp graphs, echo=FALSE, message=FALSE}
+A <- ggplot(data = season_all, aes(x= Season, y=kcal_dry, fill = Season)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "Kcal/gram (dry mass)", x=NULL, tag= "A") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+A
+
+B <- ggplot(data = season_all, aes(x= Season, y=lip_dry, fill = Season)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Lipid (dry mass)", x=NULL, tag= "B") +
+  scale_y_continuous(labels = percent_format(accuracy = .1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+B
+
+C <- ggplot(data = season_all, aes(x= Season, y=prot_dry, fill = Season)) +
+  geom_bar(stat="identity") +
+  theme_few() +
+  scale_fill_brewer(palette = "Dark2") +
+  labs(y = "% Protein (dry mass)", x=NULL, tag= "C") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), axis.text.x = element_text(size = 14))
+C
+
+grid.arrange(A,B,C,nrow=1)
+```

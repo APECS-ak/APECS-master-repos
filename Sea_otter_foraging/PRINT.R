@@ -5,46 +5,51 @@ library(dplyr)
 library(ggthemes)
 library(ggpubr)
 library(cowplot)
+library(scales)
 library(gridExtra) # making multi pane graphs
 library(grid) # making multi pane graphs
 
 #Run these first!
 prey <- c("Clam", "Crab", "Cucumber/Snail", "Mussel", "Urchin")
 sites <- c("Shiaku Inlet", "Sukkwan Strait", "Tonowek Narrows")
+labels <- c("Clam", "Crab", "Cucumber", "Snail", "Urchin")
 
-#Chapter 2 - FIGURE xx - Seasonal Enegery
+#Chapter 2 - FIGURE xx - Seasonal Enegery of prey catagories
 #data from macronutrients.rmd
-a <- ggplot(data= means , aes(y=kcal.m, x=month, color=PreyCat), na.rm=TRUE) + 
+a <- ggplot(data= means, aes(y=kcal.m, x=month, color=PreyCat), na.rm=TRUE) + 
   geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
   geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
   geom_errorbar(aes(ymin = kcal.m-kcal.sd, ymax = kcal.m+kcal.sd), position=position_dodge(width=25), width = 25) + 
-  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
-  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
-  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
+  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20"), labels = labels) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18), labels = labels) +
+  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash"), labels = labels) +
   scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
-  labs(x="", y="Kcal (per dry gram)", tag = "A") + theme_few() +
-  theme(legend.position = "none")
+  labs(x="", y="Kcal (dry gram)", tag = "A") + theme_few() +
+  theme(legend.position = "none", axis.title = element_text(size = 18), axis.text = element_text(size = 16))
 
 b <- ggplot(data= means , aes(y=lipid.m, x=month, color=PreyCat), na.rm=TRUE) + 
   geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
   geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
   geom_errorbar(aes(ymin = lipid.m-lipid.sd, ymax = lipid.m+lipid.sd), position=position_dodge(width=25), width = 25) + 
-  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
-  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
-  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
+  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20"), labels = labels) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18), labels = labels) +
+  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash"), labels = labels) +
   scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
-  labs(x="", y="% Lipid (per dry gram)", tag = "B") + theme_few() +
-  theme(legend.position = "none")
+  labs(x="", y="% Lipid (dry gram)", tag = "B") + theme_few() +
+  theme(legend.position = "none", axis.title = element_text(size = 18), axis.text = element_text(size = 16))
 
 c <- ggplot(data= means , aes(y=protein.m, x=month, color=PreyCat), na.rm=TRUE) + 
   geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
   geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
   geom_errorbar(aes(ymin = protein.m-protein.sd, ymax = protein.m+protein.sd), position=position_dodge(width=25), width = 25) + 
-  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20")) +
-  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18)) +
-  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash")) +
+  scale_color_manual(name="Prey Catagory", values= c("Black", "gray30", "gray40", "gray60", "gray20"), labels = labels) +
+  scale_shape_manual(name="Prey Catagory", values = c(1,15,16,17,18), labels = labels) +
+  scale_linetype_manual(name ="Prey Catagory", values=c("solid", "dashed", "dotted", "dotdash", "longdash"), labels = labels) +
   scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
-  labs(x="", y="% Protein (per dry gram)", tag = "C") + theme_few()
+  labs(x="", y="% Protein (dry gram)", tag = "C") + theme_few() +
+  theme(legend.text = element_text(size=18), legend.position = "bottom", legend.title = element_text(size = 18),
+        axis.title = element_text(size = 20), axis.text = element_text(size = 16))
+
 
 #function for legend
 get_legend<-function(myggplot){
@@ -65,9 +70,9 @@ blankPlot <- ggplot()+geom_blank(aes(1,1)) +
   cowplot::theme_nothing()
 
 #make grid
-fig2 <- grid.arrange(a, blankPlot, b, legend, c, blankPlot, ncol=2, nrow=3, widths=c(4, 1), heights=c(6,6,6))
+prey.plm <- grid.arrange(a, b, c, blankPlot, legend, blankPlot, ncol=3, nrow=2, widths=c(4, 4, 4), heights=c(4,1))
 
-save_plot("Figure2.png", fig2, base_height = 10, base_width = 6)
+save_plot("prey_plm.png", prey.plm, base_height = 5, base_width = 12)
 
 #Moisture and Ash - not using
 d <- ggplot(data= means , aes(y=moisture.m, x=month, color=PreyCat), na.rm=TRUE) + 
@@ -92,97 +97,276 @@ e <- ggplot(data= means , aes(y=ash.m, x=month, color=PreyCat), na.rm=TRUE) +
 
 
 
-
-#Figure xx, Proportion of lipid and protein
+#Figure - Proportion of lipid and protein
 #data from macronutrients.rmd
 
 ggplot(data = graph.all, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
-  geom_bar(stat="identity", position = "fill", color = "black") +
-  geom_errorbar(data = filter(graph.all, macro == "protein"), 
-                aes(ymin = mean-sd, ymax = mean+sd), width=.2, color = "white") +
-  scale_fill_manual(values= c("black", "gray"), name="Macronutrient") +
+  geom_bar(stat="identity",position = position_dodge(), color = "black") +
+  geom_errorbar(aes(ymin = mean-sd, ymax = mean+sd), width=0.2, 
+                position = position_dodge(.9)) +
+  scale_fill_grey(start = .3, end = .9, name="Macronutrient") +
   scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = labels) +
   labs(x= "", y="Percent of total energy") +
-  theme(axis.text = element_text(size=14), legend.text = element_text(size = 12))
+  theme(axis.text = element_text(size=14), legend.text = 
+          element_text(size=16), legend.title = element_text(size= 16), axis.title = element_text(size=16))
 
-ggsave("Figure3.png", device = "png", path = "Bombing/", width = 9, 
+ggsave("percent_lp.png", device = "png",  width = 9, 
        height = 6, units = "in", dpi = 300)
 
-#Figure 2, Proportions for year and zone
+
+
+## Figure 2 ## 
+#Visual obs, Sex and Status
 #load data from biomass.rmd
 
-a <- biomass %>%
+A <- biomass %>%
   drop_na(Year.since, Proportion) %>%
-  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
-           Prey.Cat == "Urchin") %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin") %>%
   ggplot(aes(x=Year.since, y=Proportion, fill = Prey.Cat)) +
   geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(y= "Proportion of diet (by biomass)", x=NULL, tag = "A") +
+  labs(y= "Proportion of diet", x=NULL, tag = "A") +
   scale_fill_brewer(palette = "RdYlBu", name= "Prey Catagory", direction = -1) +
   theme_few()+
-  theme(axis.text = element_text(size=14), legend.position = "right", axis.title = element_text(size = 14))
+  theme(axis.text = element_text(size=14), legend.position = "none", axis.title = element_text(size = 14))
 
-
-b <- biomass %>%
-  drop_na(Zone, Proportion) %>%
-  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
-           Prey.Cat == "Urchin") %>%
-  ggplot(aes(x=Zone, y=Proportion, fill = Prey.Cat)) +
-  geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(y= "Proportion of diet (by biomass)", x=NULL, tag = "B") +
-  scale_fill_brewer(palette = "RdYlBu", name= "Prey Catagory", direction = -1) +
-  scale_x_discrete(labels=c("ZONE 1" = "1", "ZONE 2" = "2", "ZONE 3" = "3", "ZONE 4" = "4", 
-                            "ZONE 5" = "5", "ZONE 6" = "6", "ZONE 7" = "7")) +
-  theme_few() +
-  theme(axis.text = element_text(size=14), legend.position = "none", 
-        axis.title = element_text(size = 14)) +
-  guides(fill = guide_legend(nrow = 1))
-
-g <- grid.arrange(a, b, nrow = 2, widths= 7, heights = c(2, 2) )
-
-ggsave("Year_and_zone.png", g, device = "png", path = "Visual/", width = 7, 
-       height = 9, units = "in", dpi = 300)
-
-#FIGURE 3
-#Sex and status
-#Same as 2. 
-
-b <- biomass %>%
-  drop_na(Status, Proportion) %>%
-  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
-           Prey.Cat == "Urchin") %>%
-  ggplot(aes(x=Status, y=Proportion, fill = Prey.Cat)) +
-  geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
-  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(y= "Proportion of diet (by biomass)", x=NULL, tag= "B") +
-  scale_fill_brewer(palette = "RdYlBu", name= "Prey Catagory", direction = -1) +
-  scale_x_discrete(labels=c("Female_no_pup" = "Female, no pup", 
-                            "Female_w_pup" = "Female, with pup", "Male" = "Male"))+
-  theme_few() +
-  theme(legend.position="none", axis.text = element_text(size=14), axis.title = element_text(size = 14)) +
-  guides(fill = guide_legend(nrow = 1))
-
-a <- biomass %>%
+B <- biomass %>%
   drop_na(Age, Proportion) %>%
-  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | Prey.Cat == "Snail" | 
-           Prey.Cat == "Urchin") %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin") %>%
   ggplot(aes(x=Age, y=Proportion, fill = Prey.Cat)) +
   geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(y= "Proportion of diet (by biomass)", x=NULL, tag= "A") +
+  labs(y= "Proportion of diet", x=NULL, tag= "B") +
   scale_fill_brewer(palette = "RdYlBu", name= "Prey Catagory", direction = -1) +
   theme_few() +
-  theme(legend.position="right", axis.text = element_text(size=14), axis.title = element_text(size = 14))
+  theme(legend.position="right", axis.text = element_text(size=14), 
+        axis.title = element_text(size = 14))
 
-g <- grid.arrange(a, b, nrow = 2, heights = c(2, 2), widths = 7)
+C <- biomass %>%
+  drop_na(Status, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat == "Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin") %>%
+  ggplot(aes(x=Status, y=Proportion, fill = Prey.Cat)) +
+  geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
+  scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  labs(y= "Proportion of diet", x=NULL, tag= "C") +
+  scale_fill_brewer(palette = "RdYlBu", name= "Prey Catagory", direction = -1) +
+  scale_x_discrete(labels=c("Female_no_pup" = "Female w/o pup", 
+                            "Female_w_pup" = "Female, w/ pup", "Male" = "Male"))+
+  theme_few() +
+  theme(legend.position="none", axis.text = element_text(size=14), 
+        axis.title = element_text(size = 14)) +
+  guides(fill = guide_legend(nrow = 1))
 
-ggsave("sex_status.png", g, device = "png", path = "Visual/", width = 7, 
+g <- grid.arrange(A,B,C, nrow = 3)
+
+ggsave("visual_prop.png", g, device = "png", width = 7, 
        height = 9, units = "in", dpi = 300)
 
 
+#Figure xx - Kcal/ wetmass by season with percent diet overlaid
+#clam and cuc only
+#data from Macronutrients.Rmd
 
+a <- ggplot(data=clam.energy, aes(x=month, y=kcal.wet)) +
+  geom_point(shape = 1) +
+  labs(x= NULL, y="Kcal/gram (wet mass)", tag = "A") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", 
+               limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./1.5, name = "Proportion of diet", 
+                                         labels = percent_format(accuracy = 1))) +
+  geom_smooth(color="black", linetype = 2, se = F) +
+  geom_smooth(data=filter(si.mean, PreyCat =="Clam"), aes(x=month, y=mean*1.5), 
+              color="red") +
+  theme_few()+
+  theme(legend.position = "none")
+
+b <- ggplot(data=filter(c.energy, PreyCat == "Cucumber"), aes(x=month, y=kcal.wet)) +
+  geom_point(shape = 1) +
+  labs(x= NULL, y="Kcal/gram (wet mass)", tag= "B") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", 
+               limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./1.8, name = "Proportion of diet", 
+                                         labels = percent_format(accuracy = 1))) +
+  geom_smooth(color="black", linetype = 2, se = F) +
+  geom_smooth(data=filter(c.mean, PreyCat == "Cucumber"), aes(x=month, y=mean*1.8), 
+              color="red") +
+  theme_few()+
+  theme(legend.position = "none")
+
+c <- ggplot(data=filter(c.energy, PreyCat == "Cucumber"), aes(x=month, y=lipid_wet)) +
+  geom_point(shape = 1) +
+  labs(x= NULL, y="% Lipid (wet mass)") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), 
+               expand = c(0.1,0))+
+  scale_y_continuous(sec.axis = sec_axis(~ ./3, name = "Proportion of diet", labels = percent_format(accuracy = 1))) +
+  geom_smooth(color="black", linetype = 2, se = F) +
+  geom_smooth(data=filter(c.mean, PreyCat == "Cucumber"), aes(x=month, y=mean*3), color="red") +
+  theme_few()+
+  theme(legend.position = "none")
+
+g <- grid.arrange(a, b, c, nrow = 3, heights = c(3,3,3), ncol = 1, widths = 3)
+
+ggsave("kcal_biomass.png", g, device = "png", width = 5, 
+       height = 9, units = "in", dpi = 300)
+
+
+## SUPER LONG CODE WARNING ##
+# Figure 3 - Sea otter macronutrient consumption
+#data from Macronutrients.Rmd
+
+a <- ggplot(data = year_all, aes(x= Year.since, y=kcal_dry, fill = Year.since)) +
+  geom_bar(stat="identity", color= "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Greens") +
+  labs(y = "Kcal/g", x=NULL, tag= "A") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+b <- ggplot(data = year_all, aes(x= Year.since, y=lip_dry, fill = Year.since)) +
+  geom_bar(stat="identity", color= "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Greens") +
+  labs(y = "Lipid", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+c <- ggplot(data = year_all, aes(x= Year.since, y=prot_dry, fill = Year.since)) +
+  geom_bar(stat="identity", color= "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Greens") +
+  labs(y = "Protein", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+recol <- grid.arrange(a,b,c,nrow=1, widths = c(2.9,3,3.1))
+
+status_all$Status <- factor(status_all$Status,levels = c("Female_w_pup", "Female_no_pup", 
+                                                  "Male"))
+status.labels <- c("Female \nw/ pup", "Female \nw/o pup", "Male")
+
+d <- ggplot(data = status_all, aes(x= Status, y=kcal_dry, fill = Status)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Purples") +
+  labs(y = "Kcal/g", x=NULL, tag= "C") +
+  scale_x_discrete(labels= status.labels) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+e <- ggplot(data = status_all, aes(x= Status, y=lip_dry, fill = Status)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Purples") +
+  labs(y = "Lipid", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels= status.labels) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+f <- ggplot(data = status_all, aes(x= Status, y=prot_dry, fill = Status)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Purples") +
+  labs(y = "Protein", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels= status.labels) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+status <- grid.arrange(d,e,f,nrow=1, widths = c(2.9,3,3.1))
+
+age_all$Age <- factor(age_all$Age,levels = c("Juvenile", "Adult"))
+
+g <- ggplot(data = age_all, aes(x= Age, y=kcal_dry, fill = Age)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Oranges") +
+  labs(y = "Kcal/g", x=NULL, tag= "B") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+h <- ggplot(data = age_all, aes(x= Age, y=lip_dry, fill = Age)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Oranges") +
+  labs(y = "Lipid", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+i <- ggplot(data = age_all, aes(x= Age, y=prot_dry, fill = Age)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Oranges") +
+  labs(y = "Protein", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+
+sex <- grid.arrange(g,h,i,nrow=1, widths = c(2.9,3,3.1))
+
+j <- ggplot(data = season_all, aes(x= Season, y=kcal_dry, fill = Season)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Blues") +
+  labs(y = "Kcal/g", x=NULL, tag= "D") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+k <- ggplot(data = season_all, aes(x= Season, y=lip_dry, fill = Season)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Blues") +
+  labs(y = "Lipid", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+l <- ggplot(data = season_all, aes(x= Season, y=prot_dry, fill = Season)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Blues") +
+  labs(y = "Protein", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+season <- grid.arrange(j,k,l,nrow=1, widths = c(2.9,3,3.1))
+
+macros <- grid.arrange(recol, sex, status, season, nrow=4)
+ggsave("macros.png", plot = macros, device = "png", width = 9, 
+       height = 12, dpi = 300 )
 
 #########################################################################################
 #########################################################################################
