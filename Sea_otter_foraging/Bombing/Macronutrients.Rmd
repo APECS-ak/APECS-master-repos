@@ -378,9 +378,11 @@ clam.energy.dry <- plab.energ %>%
 ggplot(data=clam.energy.dry, aes(x=month, y=kcal.dry)) +
   geom_point() +
   labs(x= NULL, y="Kcal/gram (dry mass)") +
-  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
-  scale_y_continuous(sec.axis = sec_axis(~ ./9, name = "Proportion of diet", labels = percent_format(accuracy = 1))) +
-  geom_smooth(data=filter(si.mean, PreyCat =="Clam"), aes(x=month, y=mean*9), color="red") +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", 
+               limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0)) +
+  scale_y_continuous(sec.axis = sec_axis(~ ./8, name = "Proportion of diet", 
+                                         labels = percent_format(accuracy = 1))) +
+  geom_smooth(data=filter(si.mean, PreyCat =="Clam"), aes(x=month, y=mean*8), color="red") +
   theme_few()+
   theme(legend.position = "none")
 ```

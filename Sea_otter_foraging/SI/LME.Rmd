@@ -21,7 +21,7 @@ library(MuMIn) #r.squaredGLMM
 
 
 #load whisker data
-whisker <- read.csv("whiskers.csv")
+whisker <- read.csv("whisker_final.csv")
 whisker$OtterID<-as.character(whisker$OtterID)
 whisker<- filter(whisker, OtterID != "163532")
 whisker$Season<-factor(whisker$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
