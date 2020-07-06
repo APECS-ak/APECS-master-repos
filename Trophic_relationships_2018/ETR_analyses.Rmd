@@ -3499,28 +3499,28 @@ fa_grp_c <- rbind(fa_BAC_c, fa_ALA.LIN_c, fa_C18PUFA_c, fa_PUFA_c, fa_PAL_c, fa_
 fa_grp_c$FA_grp <- factor(fa_grp_c$FA_grp, levels = c("BAC", "ALA.LIN", "C18PUFA", "PUFA", "PAL", "ARA", "EPA", "DHA"))
 fa_grp_c$Species_common <- factor(fa_grp_c$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Idotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
 
-fa_grp_high_wide <- fa_grp %>% 
-  dplyr::select(-prop_sum_sd) %>% 
+fa_grp_high_wide <- fa_grp_c %>% 
+  dplyr::select(-conc_sum_sd) %>% 
   filter(Sea_otter_region == "High") %>% 
-  spread(key = FA_grp, value = prop_sum_m)
+  spread(key = FA_grp, value = conc_sum_m)
 fa_grp_high_wide[, 3:10] <- round(fa_grp_high_wide[, 3:10], 3)
 
-fa_grp_low_wide <- fa_grp %>% 
-  dplyr::select(-prop_sum_sd) %>% 
+fa_grp_low_wide <- fa_grp_c %>% 
+  dplyr::select(-conc_sum_sd) %>% 
   filter(Sea_otter_region == "Low") %>% 
-  spread(key = FA_grp, value = prop_sum_m, 3)
+  spread(key = FA_grp, value = conc_sum_m, 3)
 fa_grp_low_wide[, 3:10] <- round(fa_grp_low_wide[, 3:10], 3)
   
-fa_grp_high_sd_wide <- fa_grp %>% 
-  dplyr::select(-prop_sum_m) %>% 
+fa_grp_high_sd_wide <- fa_grp_c %>% 
+  dplyr::select(-conc_sum_m) %>% 
   filter(Sea_otter_region == "High") %>% 
-  spread(key = FA_grp, value = prop_sum_sd)
+  spread(key = FA_grp, value = conc_sum_sd)
 fa_grp_high_sd_wide[, 3:10] <- round(fa_grp_high_sd_wide[, 3:10], 3)
 
-fa_grp_low_sd_wide <- fa_grp %>% 
-  dplyr::select(-prop_sum_m) %>% 
+fa_grp_low_sd_wide <- fa_grp_c %>% 
+  dplyr::select(-conc_sum_m) %>% 
   filter(Sea_otter_region == "Low") %>% 
-  spread(key = FA_grp, value = prop_sum_sd)
+  spread(key = FA_grp, value = conc_sum_sd)
 fa_grp_low_sd_wide[, 3:10] <- round(fa_grp_low_sd_wide[, 3:10], 3)
 ```
 
@@ -3593,6 +3593,13 @@ fa_grp_MWU_c_t <- tidyr::spread(fa_grp_MWU_c_t, key = FA_grp, value = statistic)
 
 ##### Plots
 ```{r}
+## Simple Names ##
+sp_simp <- c("BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "LMP", "MAC", "POM", "SHN", "SNK", "STG", "SK", "UL")
+
+fa_grp_c$sp_simp <- sp_simp
+fa_grp_c$sp_simp <- factor(fa_grp_c$sp_simp, levels = c("EG", "EP", "FU", "POM", "SK", "UL", "IDO", "LMP", "BUT", "MAC", "DSH", "HEL", "GRC", "RRC", "SHN", "SNK", "STG"))
+
+## Facet Species ##
 ggplot(fa_grp_c, aes(x = FA_grp, y = conc_sum_m, fill = Sea_otter_region)) +
   geom_bar(position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(ymin = conc_sum_m - conc_sum_sd, ymax = conc_sum_m + conc_sum_sd), width = 0, position = position_dodge(.9)) +
@@ -3602,6 +3609,16 @@ ggplot(fa_grp_c, aes(x = FA_grp, y = conc_sum_m, fill = Sea_otter_region)) +
   xlab("Fatty acid") +
   ylab("Mean concentration (ug/mg DW)") +
   facet_wrap(~Species_common, scales = "free_x")
+
+## Facet FA ##
+ggplot(fa_grp_c, aes(x = sp_simp, y = conc_sum_m, fill = Sea_otter_region)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(ymin = conc_sum_m - conc_sum_sd, ymax = conc_sum_m + conc_sum_sd), width = 0, position = position_dodge(.9)) +
+  scale_fill_manual("Sea otter \n region", c("High", "Low"), values = so.pal) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  xlab("Fatty acid") +
+  ylab("Mean concentration (ug/mg DW)") +
+  facet_wrap(~FA_grp, scales = "free_y")
 ```
 
 ```{r}
@@ -3621,5 +3638,13 @@ ggplot(epa.conc.sp.tr, aes(x = Sea_otter_region, y = mean, fill = Sea_otter_regi
   xlab("Sea otter region") +
   ylab("Mean Concentration (ug/mg DW)") +
   facet_wrap(~Species_common, scales = "free_x")
+```
+
+#### FA Conc X Biomass
+Individual FA concentration is interesting but what happens when we multiply that by the biomass of the taxa that we measured.
+
+##### Combine FA conc and biomass data
+```{r}
+
 ```
 
