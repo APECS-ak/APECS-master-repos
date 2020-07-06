@@ -139,6 +139,12 @@ FA_ac$Area <- as.numeric(FA_ac$Area)
 FA_ac$Conc <- as.numeric(FA_ac$Conc)
 ```
 
+write
+```{r}
+write.csv(FA_ac, "FA_all_batch_RAW.csv", row.names = FALSE)
+```
+
+
 ## Calculate proportion by area
 For a sample, calculate the proportion of each unique FA as the area of that FA divided my the total area of all FAs of that sample. NOTE that C19 is removed for this calculation. NOTE any area and concentration data that is imported at a negative number will be converted to a zero.
 
