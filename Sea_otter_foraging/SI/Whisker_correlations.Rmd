@@ -39,6 +39,24 @@ cor.whis<-cor.whis[order(cor.whis$correlation),]
 cor.whis
 mean(cor.whis$correlation)
 
+c<- cor.test(whisker$C,whisker$N)
+cor(whisker$C,whisker$N)
+
+library(tidyverse)
+library(broom)
+
+corr.all <- whisker %>%
+  select(OtterID,C,N, Site) %>%
+  nest(-OtterID, Site) %>% 
+  mutate(fit = map(data, ~ cor.test(.$C,.$N)),
+         results = map(fit, glance)) %>%
+  unnest(results)
+
+site <- whisker %>%
+  select(OtterID,Site) %>%
+  distinct()
+corr.all<- left_join(corr.all, site)
+
 ```
 
 Now check to make sure that these values are correct
@@ -207,3 +225,17 @@ ggplot(data=corr.2, aes(x= OtterID, y = correlation, fill = Site)) +
         axis.ticks.x=element_blank(), legend.position = "none")
 ```
 
+```{r}
+corr.all$OtterID <- factor(corr.all$OtterID, levels = corr.all$OtterID[order(corr.all$estimate)])
+
+ggplot(data=corr.all, aes(x= OtterID, y = estimate, fill = Site)) +
+  geom_bar(stat="identity", color = "black") +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .2) +
+  scale_fill_brewer() +
+  labs(x= "Individual sea otter", y = "C:N correlation") +
+  geom_abline(slope = 0, intercept = 0) +
+  facet_wrap(vars(Site), nrow = 3) +
+  theme_few() +
+  theme(axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(), legend.position = "none")
+```

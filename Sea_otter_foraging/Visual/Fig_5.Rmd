@@ -1,0 +1,306 @@
+---
+title: "multi-panel graph"
+author: "Nicole LaRoche"
+date: "7/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Libraries I use for printing (all) my graphs
+```{r, message= FALSE, warning=FALSE}
+library(ggplot2)
+library(dplyr) 
+library(tidyr)
+library(ggthemes)
+library(lubridate)
+library(scales)
+library(gridExtra) # making multi panel graphs
+library(grid) # making multi panel graphs
+```
+
+Data (It's kind of long - have to make the calculations from the raw data)
+```{r}
+biomass <- read.csv("sofa_output.csv", header=T, na.strings=c(""))
+biomass$Year.since <- ifelse(biomass$Year==1988, "30 years", 
+                  ifelse(biomass$Year== 2010, "7 years", "15 years"))
+biomass$Year.since <- factor(biomass$Year.since, levels = c("30 years", "15 years", "7 years"))
+
+plab <- read.csv("plab_2.csv")
+comp <- plab %>%
+  drop_na(lipid_wet, protein_wet)
+comp.mean <- comp %>% 
+  group_by(PreyCat) %>%
+  summarise(mean_kcal_wet = mean(kcal.wet, na.rm = T), 
+            mean_prot_wet  = mean(protein_wet, na.rm = T), 
+            mean_lipid_wet = mean(lipid_wet, na.rm = T), 
+            mean_moist = mean(moisture, na.rm = T)) %>%
+  filter(PreyCat != "Carn Snail")
+comp.mean$PreyCat <- ifelse(comp.mean$PreyCat == "Herb Snail", "Snail", comp.mean$PreyCat)
+
+si.otter <- read.csv("/Users/nila/Documents/UAF/RStudio/APECS/Sea_otter_foraging/SI/all_mixing.csv")
+si.otter$month <- ifelse(si.otter$Season == "Spring", "2018-05-01", ifelse(si.otter$Season == "Summer", 
+                            "2018-08-01", ifelse(si.otter$Season == "Fall", "2018-11-01", "2019-02-01")))
+si.otter$month <- as_date(si.otter$month)
+
+si.mean <- si.otter %>%
+  group_by(Season, month, source) %>%
+  summarise(mean=mean(value), sd=sd(value)) %>%
+  rename(PreyCat = source)
+
+si.mean$Season<-factor(si.mean$Season , levels=c("Spring", "Summer", "Fall", "Winter"))
+si.mean$PreyCat <- ifelse(si.mean$PreyCat == "Cucumber.Snail", "Cucumber", si.mean$PreyCat)
+
+#Year
+year_comp <- biomass %>%
+  drop_na(Year, Proportion) %>%
+  select(Year.since, Prey.Cat, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat =="Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin")
+year_comp <- full_join(year_comp, comp.mean, by = c("Prey.Cat"="PreyCat"))
+year_comp$Rep_kcal_wet <- year_comp$Proportion*year_comp$mean_kcal_wet
+year_comp$Rep_lip_wet <- year_comp$Proportion*year_comp$mean_lipid_wet
+year_comp$Rep_prot_wet <- year_comp$Proportion*year_comp$mean_prot_wet
+year_comp$Rep_kcal_dry <- year_comp$Rep_kcal_wet/(1-(year_comp$mean_moist/100))
+year_comp$Rep_lip_dry <- year_comp$Rep_lip_wet/(1-(year_comp$mean_moist/100))/100
+year_comp$Rep_prot_dry <- year_comp$Rep_prot_wet/(1-(year_comp$mean_moist/100))/100
+
+year_all <- year_comp %>%
+  group_by(Year.since) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+  
+
+#Zone
+zone_comp <- biomass %>%
+  drop_na(Zone, Proportion) %>%
+  select(Zone, Prey.Cat, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat =="Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin")
+zone_comp <- full_join(zone_comp, comp.mean, by = c("Prey.Cat"="PreyCat"))
+zone_comp$Rep_kcal_wet <- zone_comp$Proportion*zone_comp$mean_kcal_wet
+zone_comp$Rep_lip_wet <- zone_comp$Proportion*zone_comp$mean_lipid_wet
+zone_comp$Rep_prot_wet <- zone_comp$Proportion*zone_comp$mean_prot_wet
+zone_comp$Rep_kcal_dry <- zone_comp$Rep_kcal_wet/(1-(zone_comp$mean_moist/100))
+zone_comp$Rep_lip_dry <- zone_comp$Rep_lip_wet/(1-(zone_comp$mean_moist/100))/100
+zone_comp$Rep_prot_dry <- zone_comp$Rep_prot_wet/(1-(zone_comp$mean_moist/100))/100
+
+zone_all <- zone_comp %>%
+  group_by(Zone) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+
+#Reproductive status
+status_comp <- biomass %>%
+  drop_na(Status, Proportion) %>%
+  select(Status, Prey.Cat, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat =="Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin")
+status_comp <- full_join(status_comp, comp.mean, by = c("Prey.Cat"="PreyCat"))
+status_comp$Rep_kcal_wet <- status_comp$Proportion*status_comp$mean_kcal_wet
+status_comp$Rep_lip_wet <- status_comp$Proportion*status_comp$mean_lipid_wet
+status_comp$Rep_prot_wet <- status_comp$Proportion*status_comp$mean_prot_wet
+status_comp$Rep_kcal_dry <- status_comp$Rep_kcal_wet/(1-(status_comp$mean_moist/100))
+status_comp$Rep_lip_dry <- status_comp$Rep_lip_wet/(1-(status_comp$mean_moist/100))/100
+status_comp$Rep_prot_dry <- status_comp$Rep_prot_wet/(1-(status_comp$mean_moist/100))/100
+
+status_all <- status_comp %>%
+  group_by(Status) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+
+#Age
+age_comp <- biomass %>%
+  drop_na(Age, Proportion) %>%
+  select(Age, Prey.Cat, Proportion) %>%
+  filter(Prey.Cat == "Clam" | Prey.Cat == "Crab" | Prey.Cat =="Cucumber" | 
+           Prey.Cat == "Snail" | Prey.Cat == "Urchin")
+age_comp <- full_join(age_comp, comp.mean, by = c("Prey.Cat"="PreyCat"))
+age_comp$Rep_kcal_wet <- age_comp$Proportion*age_comp$mean_kcal_wet
+age_comp$Rep_lip_wet <- age_comp$Proportion*age_comp$mean_lipid_wet
+age_comp$Rep_prot_wet <- age_comp$Proportion*age_comp$mean_prot_wet
+age_comp$Rep_kcal_dry <- age_comp$Rep_kcal_wet/(1-(age_comp$mean_moist/100))
+age_comp$Rep_lip_dry <- age_comp$Rep_lip_wet/(1-(age_comp$mean_moist/100))/100
+age_comp$Rep_prot_dry <- age_comp$Rep_prot_wet/(1-(age_comp$mean_moist/100))/100
+
+age_all <- age_comp %>%
+  group_by(Age) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+
+
+#Season
+season_comp <- si.mean %>%
+  ungroup() %>%
+  select(Season, PreyCat, mean)
+comp.mean2 <- filter(comp.mean, PreyCat != "Snail")
+season_comp <- full_join(season_comp, comp.mean2, by = "PreyCat")
+season_comp<- filter(season_comp, PreyCat!= "Mussel")
+season_comp$Rep_kcal_wet <- season_comp$mean*season_comp$mean_kcal_wet
+season_comp$Rep_lip_wet <- season_comp$mean*season_comp$mean_lipid_wet
+season_comp$Rep_prot_wet <- season_comp$mean*season_comp$mean_prot_wet
+season_comp$Rep_kcal_dry <- season_comp$Rep_kcal_wet/(1-(season_comp$mean_moist/100))
+season_comp$Rep_lip_dry <- season_comp$Rep_lip_wet/(1-(season_comp$mean_moist/100))/100
+season_comp$Rep_prot_dry <- season_comp$Rep_prot_wet/(1-(season_comp$mean_moist/100))/100
+
+season_all <- season_comp %>%
+  group_by(Season) %>%
+  summarise(kcal_dry = sum(Rep_kcal_dry), lip_dry = sum(Rep_lip_dry), 
+            prot_dry = sum(Rep_prot_dry))
+```
+
+code
+```{r}
+a <- ggplot(data = year_all, aes(x= Year.since, y=kcal_dry, fill = Year.since)) +
+  geom_bar(stat="identity", color= "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Greens") +
+  labs(y = "Kcal/g (dry gram)", x=NULL, tag= "A") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+b <- ggplot(data = year_all, aes(x= Year.since, y=lip_dry, fill = Year.since)) +
+  geom_bar(stat="identity", color= "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Greens") +
+  labs(y = "Lipid (dry gram)", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+c <- ggplot(data = year_all, aes(x= Year.since, y=prot_dry, fill = Year.since)) +
+  geom_bar(stat="identity", color= "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Greens") +
+  labs(y = "Protein (dry gram)", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+recol <- grid.arrange(a,b,c,nrow=1, widths = c(2.9,3,3.1))
+
+status_all$Status <- factor(status_all$Status,levels = c("Female_w_pup", "Female_no_pup", 
+                                                  "Male"))
+status.labels <- c("Female \nw/ pup", "Female \nw/o pup", "Male")
+
+d <- ggplot(data = status_all, aes(x= Status, y=kcal_dry, fill = Status)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Purples") +
+  labs(y = "Kcal/g (dry gram)", x=NULL, tag= "C") +
+  scale_x_discrete(labels= status.labels) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+e <- ggplot(data = status_all, aes(x= Status, y=lip_dry, fill = Status)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Purples") +
+  labs(y = "Lipid (dry gram)", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels= status.labels) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+f <- ggplot(data = status_all, aes(x= Status, y=prot_dry, fill = Status)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Purples") +
+  labs(y = "Protein (dry gram)", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_x_discrete(labels= status.labels) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+status <- grid.arrange(d,e,f,nrow=1, widths = c(2.9,3,3.1))
+
+age_all$Age <- factor(age_all$Age,levels = c("Juvenile", "Adult"))
+
+g <- ggplot(data = age_all, aes(x= Age, y=kcal_dry, fill = Age)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Oranges") +
+  labs(y = "Kcal/g (dry gram)", x=NULL, tag= "B") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+h <- ggplot(data = age_all, aes(x= Age, y=lip_dry, fill = Age)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Oranges") +
+  labs(y = "Lipid (dry gram)", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+i <- ggplot(data = age_all, aes(x= Age, y=prot_dry, fill = Age)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Oranges") +
+  labs(y = "Protein (dry gram)", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+
+sex <- grid.arrange(g,h,i,nrow=1, widths = c(2.9,3,3.1))
+
+j <- ggplot(data = season_all, aes(x= Season, y=kcal_dry, fill = Season)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Blues") +
+  labs(y = "Kcal/g (dry gram)", x=NULL, tag= "D") +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+k <- ggplot(data = season_all, aes(x= Season, y=lip_dry, fill = Season)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Blues") +
+  labs(y = "Lipid (dry gram)", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+l <- ggplot(data = season_all, aes(x= Season, y=prot_dry, fill = Season)) +
+  geom_bar(stat="identity", color = "black") +
+  theme_few() +
+  scale_fill_brewer(palette = "Blues") +
+  labs(y = "Protein (dry gram)", x=NULL, tag= " ") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  theme(legend.position = "none", axis.title = element_text(size=16), 
+        axis.text.y = element_text(size = 14), 
+        axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
+        axis.ticks.x = element_blank())
+
+season <- grid.arrange(j,k,l,nrow=1, widths = c(2.9,3,3.1))
+
+macros <- grid.arrange(recol, sex, status, season, nrow=4)
+ggsave("macros.png", plot = macros, device = "png", width = 9, 
+       height = 12, dpi = 300 )
+```
+

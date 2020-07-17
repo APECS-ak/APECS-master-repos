@@ -362,34 +362,86 @@ write.csv(df, "Bombing/shrimp_ab.csv")
 
 #Making a table by season and species
 table <- plab %>%
-  group_by(Species, Season) %>%
+  group_by(Species, Season, PreyCat) %>%
   summarise(mean.moist = mean(moisture, na.rm = TRUE), sd.moist = sd(moisture, na.rm = TRUE),
             mean.kcald = mean(kcal.dry, na.rm = TRUE), sd.kcald = sd(kcal.dry, na.rm = TRUE),
             mean.kcalw = mean(kcal.wet, na.rm = TRUE), sd.kcalw = sd(kcal.wet, na.rm = TRUE),
-            mean.lipid = mean(lipid.dry, na.rm = TRUE), sd.lipid = sd(lipid.dry, na.rm = TRUE),
+            mean.lipid = mean(lipid_dry, na.rm = TRUE), sd.lipid = sd(lipid_dry, na.rm = TRUE),
             mean.protein = mean(protein_dry, na.rm = TRUE), sd.protein = sd(protein_dry, na.rm = TRUE))
 
-table.n <- plab %>%
+table.ne <- plab %>%
+  drop_na(kcal.dry) %>%
   group_by(Species, Season) %>%
-  count()
+  count() %>%
+  rename(ne = n)
 
-table <- left_join(table.n, table)
+table.np <- plab %>%
+  drop_na(protein_dry) %>%
+  group_by(Species, Season) %>%
+  count() %>%
+  rename(np = n)
+
+table.nl <- plab %>%
+  drop_na(lipid_dry) %>%
+  group_by(Species, Season) %>%
+  count() %>%
+  rename(nl = n)
+
+table.nm <- plab %>%
+  drop_na(moisture) %>%
+  group_by(Species, Season) %>%
+  count() %>%
+  rename(nm = n)
+
+table.na <- plab %>%
+  drop_na(ash) %>%
+  group_by(Species, Season) %>%
+  count() %>%
+  rename(nash = n)
+
+table <- left_join(table, table.ne)
+table <- left_join(table, table.nl)
+table <- left_join(table, table.np)
+table <- left_join(table, table.nm)
+table <- left_join(table, table.na)
 
 write.csv(table, "Bombing/table.csv")
 
 table2 <- plab %>%
-  group_by(Species) %>%
+  group_by(Season, PreyCat) %>%
   summarise(mean.moist = mean(moisture, na.rm = TRUE), sd.moist = sd(moisture, na.rm = TRUE),
             mean.kcald = mean(kcal.dry, na.rm = TRUE), sd.kcald = sd(kcal.dry, na.rm = TRUE),
-            mean.kcalw = mean(kcal.wet, na.rm = TRUE), sd.kcalw = sd(kcal.wet, na.rm = TRUE),
-            mean.lipid = mean(lipid.dry, na.rm = TRUE), sd.lipid = sd(lipid.dry, na.rm = TRUE),
+            mean.lipid = mean(lipid_dry, na.rm = TRUE), sd.lipid = sd(lipid_dry, na.rm = TRUE),
             mean.protein = mean(protein_dry, na.rm = TRUE), sd.protein = sd(protein_dry, na.rm = TRUE))
 
-table.n2 <- plab %>%
-  group_by(Species) %>%
-  count()
+table.ne2 <- plab %>%
+  drop_na(kcal.dry) %>%
+  group_by(Season, PreyCat) %>%
+  count() %>%
+  rename(ne = n)
 
-table2 <- left_join(table.n2, table2)
+table.nl2 <- plab %>%
+  drop_na(lipid_dry) %>%
+  group_by(Season, PreyCat) %>%
+  count() %>%
+  rename(nl = n)
+
+table.np2 <- plab %>%
+  drop_na(protein_dry) %>%
+  group_by(Season, PreyCat) %>%
+  count() %>%
+  rename(np = n)
+
+table.nm2 <- plab %>%
+  drop_na(moisture) %>%
+  group_by(Season, PreyCat) %>%
+  count() %>%
+  rename(nm = n)
+
+table2 <- left_join(table2, table.ne2)
+table2 <- left_join(table2, table.nl2)
+table2 <- left_join(table2, table.np2)
+table2 <- left_join(table2, table.nm2)
 
 write.csv(table2, "Bombing/table2.csv")
 

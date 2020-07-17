@@ -19,6 +19,7 @@ library(tidyr)
 library(dplyr)
 library(lubridate)
 library(scales)
+library(vegan)
 
 plab <- read.csv("plab.csv")
 summary <- read.csv("Summary_PC.csv")
@@ -50,7 +51,6 @@ plab$kcal.wet <- plab$KJ.wetgram*0.2390057361
 plab$lipid_dry <-NA
 plab$lipid_dry <- plab$lipid_wet/(1-(plab$moisture/100))
 
-plab <-filter(plab, lipid_dry<=80)
 
 summary.w <- filter(summary, Tissue == "whole")
 summary.w$Frozen.Weight <- as.numeric(as.character(summary.w$Frozen.Weight))
@@ -79,13 +79,14 @@ ggplot(data=clams) + theme_few() +
 
 ggplot(data=clams, aes(x= protein_dry, y= lipid_dry, color = Season)) + 
   theme_few() +
-  geom_point()
+  geom_point() +
+  geom_smooth(se = FALSE, method = "lm")
 
-protein.mod <- lm(protein_dry~Season, data = clams)
+protein.mod <- lm(protein_dry^2~Season, data = clams)
 
 (prot.sum <- summary(protein.mod))
 anova(protein.mod)
-clam.aov <- aov(protein_dry~Season, data = clams)
+clam.aov <- aov(protein_dry^2~Season, data = clams)
 summary(clam.aov)
 TukeyHSD(clam.aov)
 
@@ -96,7 +97,7 @@ r <- e/s
 d <- rstudent(protein.mod)
 
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~clams$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
+#plot(e~clams$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
 qqnorm(e)
 shapiro.test(e)
 
@@ -105,10 +106,10 @@ shapiro.test(e)
 
 ```{r basic regression clams lipid}
 
-lipid.mod <- lm(lipid_dry~Season, data = clams)
+lipid.mod <- lm(lipid_dry^2~Season, data = clams)
 (lipid.sum <- summary(lipid.mod))
 anova(lipid.mod)
-claml.aov <- aov(lipid_dry~Season, data = clams)
+claml.aov <- aov(lipid_dry^2~Season, data = clams)
 summary(claml.aov)
 TukeyHSD(claml.aov)
 
@@ -119,16 +120,15 @@ r <- e/s
 d <- rstudent(lipid.mod)
 
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~clams$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
+#plot(e~clams$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
 shapiro.test(e)
 
 ```
-```{r}
-energy.mod <- lm(kcal.dry~Season, data = clams)
-
+```{r clam energy}
+energy.mod <- lm(kcal.dry^2~Season, data = clams)
 (energy.sum <- summary(energy.mod))
 anova(energy.mod)
-clame.aov <- aov(kcal.dry~Season, data = clams)
+clame.aov <- aov(kcal.dry^2~Season, data = clams)
 summary(clame.aov)
 TukeyHSD(clame.aov)
 
@@ -146,7 +146,11 @@ shapiro.test(e)
 
 
 ```{r basic regression crabs protein}
-crabs <- filter(plab, PreyCat == "Crab")
+crabs <- plab %>%
+  filter(PreyCat == "Crab") %>%
+  filter(Species != "pas")
+
+crabs$SEX <- ifelse(crabs$SEX == "m", "m","f")
 
 ggplot(data=crabs) + theme_few() +
   geom_histogram(aes(x= protein_dry), bins = 5) 
@@ -159,56 +163,27 @@ ggplot(data=crabs) + theme_few() +
 
 ggplot(data=crabs, aes(x= protein_dry, y= lipid_dry, color = Season)) + 
   theme_few() +
-  geom_point()
-
-protein.mod <- lm(protein_dry~Season, data = crabs)
-(prot.sum <- summary(protein.mod))
-anova(protein.mod)
-crab.aov <- aov(protein_dry~Season, data = crabs)
-summary(crab.aov)
-TukeyHSD(crab.aov)
-
-e <- residuals(protein.mod)
-y.hat <- fitted.values(protein.mod)
-s <- prot.sum$sigma
-r <- e/s
-d <- rstudent(protein.mod)
-
-plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~crabs$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
-shapiro.test(e)
-```
-
-
-```{r basic regression crabs lipid}
-
-lipid.mod <- lm(lipid_dry~Season, data = crabs)
-(lipid.sum <- summary(lipid.mod))
-anova(lipid.mod)
-
-e <- residuals(lipid.mod)
-y.hat <- fitted.values(lipid.mod)
-s <- lipid.sum$sigma
-r <- e/s
-d <- rstudent(lipid.mod)
-
-plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~crabs$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
-shapiro.test(e)
+  geom_point()+
+  geom_smooth(se = FALSE, method = "lm")
 ```
 
 
 ```{r multiple regression crabs protein}
 
-protein.multi <- lm(protein_dry~Season+SEX, data = crabs)
+protein.multi <- lm(protein_dry^2~Season+SEX, data = crabs)
 (prot.summ <- summary(protein.multi))
 anova(protein.multi)
+
+crabp.aov <- aov(protein_dry^2~Season+SEX, data = crabs)
+summary(crabp.aov)
+TukeyHSD(crabp.aov)
 
 e <- residuals(protein.multi)
 y.hat <- fitted.values(protein.multi)
 s <- prot.summ$sigma
 r <- e/s
 d <- rstudent(protein.multi)
+
 
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
 plot(e~crabs$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
@@ -219,9 +194,12 @@ qqnorm(e)
 
 ```{r multi regression crabs lipid}
 
-lipid.multi <- lm(lipid_dry~Season+SEX, data = crabs)
+lipid.multi <- lm(lipid_dry^2~Season+SEX, data = crabs)
 (lipid.summ <- summary(lipid.multi))
 anova(lipid.multi)
+crabl.aov <- aov(lipid_dry^2~Season+SEX, data = crabs)
+summary(crabl.aov)
+TukeyHSD(crabl.aov)
 
 e <- residuals(lipid.multi)
 y.hat <- fitted.values(lipid.multi)
@@ -230,15 +208,15 @@ r <- e/s
 d <- rstudent(lipid.multi)
 
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~crabs$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
+#plot(e~crabs$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals") #This isn't working right now
 shapiro.test(e)
 ```
-```{r}
-energy.multi <- lm(kcal.dry~Season+SEX, data = crabs)
+```{r energy crabs multi}
+energy.multi <- lm(kcal.dry^2~Season+SEX, data = crabs)
 
 (energy.summ <- summary(energy.multi))
 anova(energy.multi)
-crabem.aov <- aov(kcal.dry~Season+SEX, data = crabs)
+crabem.aov <- aov(kcal.dry^2~Season+SEX, data = crabs)
 summary(crabem.aov)
 TukeyHSD(crabem.aov)
 
@@ -249,7 +227,7 @@ r <- e/s
 d <- rstudent(energy.multi)
 
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~crabs$kcal.dry, xlab= "kcal/gram (dry)", ylab = "Residuals")
+#plot(e~crabs$kcal.dry, xlab= "kcal/gram (dry)", ylab = "Residuals")
 qqnorm(e)
 shapiro.test(e)
 ```
@@ -258,20 +236,22 @@ shapiro.test(e)
 urchin <- filter(plab, PreyCat == "Urchin")
 
 ggplot(data=urchin) + theme_few() +
-  geom_histogram(aes(x= protein_dry)) +
-  facet_wrap(vars(Season))
+  geom_histogram(aes(x= protein_dry)) 
 
 ggplot(data=urchin) + theme_few() +
-  geom_histogram(aes(x= lipid_dry)) +
-  facet_wrap(vars(Season))
+  geom_histogram(aes(x= lipid_dry)) 
 
 ggplot(data=urchin, aes(x= protein_dry, y= lipid_dry, color = Season)) + 
   theme_few() +
-  geom_point()
+  geom_point() +
+  geom_smooth(se = FALSE, method = "lm")
 
 protein.mod <- lm(protein_dry~Season, data = urchin)
 (prot.sum <- summary(protein.mod))
 anova(protein.mod)
+urchin.aov <- aov(protein_dry~Season, data = urchin)
+summary(urchin.aov)
+TukeyHSD(urchin.aov)
 
 e <- residuals(protein.mod)
 y.hat <- fitted.values(protein.mod)
@@ -280,7 +260,7 @@ r <- e/s
 d <- rstudent(protein.mod)
 
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~urchin$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
+#plot(e~urchin$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
 shapiro.test(e)
 
 ```
@@ -291,6 +271,9 @@ shapiro.test(e)
 lipid.mod <- lm(lipid_dry~Season, data = urchin)
 (lipid.sum <- summary(lipid.mod))
 anova(lipid.mod)
+urchinl.aov <- aov(lipid_dry~Season, data = urchin)
+summary(urchinl.aov)
+TukeyHSD(urchinl.aov)
 
 e <- residuals(lipid.mod)
 y.hat <- fitted.values(lipid.mod)
@@ -299,7 +282,27 @@ r <- e/s
 d <- rstudent(lipid.mod)
 
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~urchin$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
+#plot(e~urchin$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
+shapiro.test(e)
+```
+
+```{r basic regression urchin energy}
+
+lipid.mod <- lm(kcal.dry~Season, data = urchin)
+(lipid.sum <- summary(lipid.mod))
+anova(lipid.mod)
+urchin.aov <- aov(kcal.dry~Season, data = urchin)
+summary(urchin.aov)
+TukeyHSD(urchin.aov)
+
+e <- residuals(lipid.mod)
+y.hat <- fitted.values(lipid.mod)
+s <- lipid.sum$sigma
+r <- e/s
+d <- rstudent(lipid.mod)
+
+plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
+#plot(e~urchin$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
 shapiro.test(e)
 ```
 
@@ -316,11 +319,15 @@ ggplot(data=cuc) + theme_few() +
 
 ggplot(data=cuc, aes(x= protein_dry, y= lipid_dry, color = Season)) + 
   theme_few() +
-  geom_point()
+  geom_point() +
+  geom_smooth(se = FALSE, method = "lm")
 
-protein.mod <- lm(protein_dry~Season, data = cuc)
+protein.mod <- lm(protein_dry^2~Season, data = cuc)
 (prot.sum <- summary(protein.mod))
 anova(protein.mod)
+cuc.aov <- aov(protein_dry^2~Season, data = cuc)
+summary(cuc.aov)
+TukeyHSD(cuc.aov)
 
 e <- residuals(protein.mod)
 y.hat <- fitted.values(protein.mod)
@@ -331,14 +338,18 @@ d <- rstudent(protein.mod)
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
 plot(e~cuc$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
 shapiro.test(e)
+qqnorm(e)
 ```
 
 
 ```{r basic regression cucumber lipid}
 
-lipid.mod <- lm(lipid_dry~Season, data = cuc)
+lipid.mod <- lm(lipid_dry^2~Season, data = cuc)
 (lipid.sum <- summary(lipid.mod))
 anova(lipid.mod)
+cuc.aov <- aov(lipid_dry^2~Season, data = cuc)
+summary(cuc.aov)
+TukeyHSD(cuc.aov)
 
 e <- residuals(lipid.mod)
 y.hat <- fitted.values(lipid.mod)
@@ -349,27 +360,52 @@ d <- rstudent(lipid.mod)
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
 plot(e~cuc$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
 shapiro.test(e)
+qqnorm(e)
 ```
+
+```{r basic regression cucumber energy}
+
+kcal.mod <- lm(kcal.dry^2~Season, data = cuc)
+(kcal.sum <- summary(kcal.mod))
+anova(kcal.mod)
+cuc.aov <- aov(kcal.dry^2~Season, data = cuc)
+summary(cuc.aov)
+TukeyHSD(cuc.aov)
+
+e <- residuals(lipid.mod)
+y.hat <- fitted.values(lipid.mod)
+s <- lipid.sum$sigma
+r <- e/s
+d <- rstudent(lipid.mod)
+
+plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
+plot(e~cuc$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
+shapiro.test(e)
+qqnorm(e)
+```
+
 
 
 ```{r basic regression snails protein}
 snail <- filter(plab, PreyCat == "Herb Snail")
 
 ggplot(data=snail) + theme_few() +
-  geom_histogram(aes(x= protein_dry)) +
-  facet_wrap(vars(Season))
+  geom_histogram(aes(x= protein_dry), bins = 5) 
 
 ggplot(data=snail) + theme_few() +
-  geom_histogram(aes(x= lipid_dry)) +
-  facet_wrap(vars(Season))
+  geom_histogram(aes(x= lipid_dry), bins = 5) 
 
 ggplot(data=snail, aes(x= protein_dry, y= lipid_dry, color = Season)) + 
   theme_few() +
-  geom_point()
+  geom_point() +
+  geom_smooth(se = FALSE, method = "lm")
 
-protein.mod <- lm(protein_dry~Season, data = snail)
+protein.mod <- lm(protein_dry^2~Season, data = snail)
 (prot.sum <- summary(protein.mod))
 anova(protein.mod)
+snail.aov <- aov(protein_dry^2~Season, data = snail)
+summary(snail.aov)
+TukeyHSD(snail.aov)
 
 e <- residuals(protein.mod)
 y.hat <- fitted.values(protein.mod)
@@ -380,6 +416,7 @@ d <- rstudent(protein.mod)
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
 plot(e~snail$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
 shapiro.test(e)
+qqnorm(e)
 ```
 
 
@@ -396,8 +433,88 @@ r <- e/s
 d <- rstudent(lipid.mod)
 
 plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
-plot(e~snail$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
+#plot(e~snail$lipid_dry, xlab= "Lipid (dry)", ylab = "Residuals")
 shapiro.test(e)
 ```
 
+```{r basic regression snail lipid}
+
+kcal.mod <- lm(kcal.dry~Season, data = snail)
+(kcal.sum <- summary(kcal.mod))
+anova(kcal.mod)
+
+e <- residuals(kcal.mod)
+y.hat <- fitted.values(kcal.mod)
+s <- kcal.sum$sigma
+r <- e/s
+d <- rstudent(kcal.mod)
+
+plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
+#plot(e~snail$kcal.dry, xlab= "Lipid (dry)", ylab = "Residuals")
+shapiro.test(e)
+```
+
+
+```{r}
+mussel <- filter(plab, PreyCat == "Mussel")
+
+ggplot(data=mussel) + theme_few() +
+  geom_histogram(aes(x= protein_dry, fill = Season), bins = 5) 
+
+ggplot(data=mussel) + theme_few() +
+  geom_histogram(aes(x= kcal.dry), bins = 5) 
+
+protein.mod <- lm(protein_dry~Season, data = mussel)
+(prot.sum <- summary(protein.mod))
+anova(protein.mod)
+mussel.aov <- aov(protein_dry~Season, data = mussel)
+summary(mussel.aov)
+TukeyHSD(mussel.aov)
+
+e <- residuals(protein.mod)
+y.hat <- fitted.values(protein.mod)
+s <- prot.sum$sigma
+r <- e/s
+d <- rstudent(protein.mod)
+
+plot(e~y.hat, xlab="Fitted Values", ylab= "Residuals")
+#plot(e~snail$protein_dry, xlab= "Protein (dry)", ylab = "Residuals")
+shapiro.test(e)
+qqnorm(e)
+```
+
+```{r making files for Emily}
+energy <- plab %>%
+  filter(PreyCat == "Clam" | PreyCat == "Cucumber" | PreyCat == "Herb Snail" | 
+           PreyCat == "Urchin" | PreyCat == "Crab") %>%  
+  filter(Species != "pas") %>%
+  select(PreyCat, kcal.dry, Season, SEX) %>%
+  drop_na(kcal.dry)
+
+energy$SEX <- ifelse(energy$SEX == "m", "m","f")
+
+write.csv(energy, "energy.csv")
+
+lipid <- plab %>%
+  filter(PreyCat == "Clam" | PreyCat == "Cucumber" | PreyCat == "Herb Snail" | 
+           PreyCat == "Urchin" | PreyCat == "Crab") %>%  
+  filter(Species != "pas") %>%
+  select(PreyCat, lipid_dry, Season, SEX) %>%
+  drop_na(lipid_dry)
+
+lipid$SEX <- ifelse(lipid$SEX == "m", "m","f")
+
+write.csv(lipid, "lipid.csv")
+
+protein <- plab %>%
+  filter(PreyCat == "Clam" | PreyCat == "Cucumber" | PreyCat == "Herb Snail" | 
+           PreyCat == "Urchin" | PreyCat == "Crab") %>%  
+  filter(Species != "pas") %>%
+  select(PreyCat, protein_dry, Season, SEX) %>%
+  drop_na(protein_dry)
+
+protein$SEX <- ifelse(protein$SEX == "m", "m","f")
+write.csv(protein, "protein.csv")
+
+```
 

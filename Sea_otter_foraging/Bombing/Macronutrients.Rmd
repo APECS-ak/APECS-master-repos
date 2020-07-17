@@ -64,8 +64,6 @@ Converting from lipid/wet mass to lipid/dry mass
 plab$lipid_dry <-NA
 plab$lipid_dry <- plab$lipid_wet/(1-(plab$moisture/100))
 
-#Now need to remove the weird high values
-plab <-filter(plab, lipid_dry<=80)
 ```
 
 
@@ -184,6 +182,12 @@ means <-plab %>%
   summarise(kcal.m=mean(kcal.dry, na.rm = T), kcal.sd= sd(kcal.dry, na.rm = T), protein.m=mean(protein_dry, na.rm = T), protein.sd=sd(protein_dry, na.rm = T), lipid.m=mean(lipid_dry, na.rm = T), lipid.sd=sd(lipid_dry, na.rm = T), moisture.m=mean(moisture, na.rm = T), moisture.sd=sd(moisture, na.rm = T), ash.m=mean(ash, na.rm = T), ash.sd=sd(ash, na.rm = T))
 ```
 
+```{r, energy means for seasons with standard error, message=FALSE, warning=FALSE}
+means.se <-plab %>%
+    filter(PreyCat == "Clam" | PreyCat == "Crab" |  PreyCat == "Cucumber" | PreyCat == "Herb Snail" | PreyCat == "Urchin") %>%
+  group_by(PreyCat, month) %>% 
+  summarise(kcal.m=mean(kcal.dry, na.rm = T), kcal.se= sd(kcal.dry, na.rm = T)/sqrt(length(kcal.dry)), protein.m=mean(protein_dry, na.rm = T), protein.se=sd(protein_dry, na.rm = T)/sqrt(length(protein_dry)), lipid.m=mean(lipid_dry, na.rm = T), lipid.se=sd(lipid_dry, na.rm = T)/sqrt(length(lipid_dry)))
+```
 
 ## Energy by Season, means only
 ```{r energy by season all in one graph, message=FALSE, echo=FALSE, warning=FALSE}
@@ -266,12 +270,14 @@ plab$percent.prot <- plab$prop.prot/plab$prop.compare
 
 ```{r proportion graph by season, message=FALSE, echo=FALSE, warning=FALSE}
 lip <- plab %>%
-    filter(PreyCat != "Carn Snail") %>%
+    filter(PreyCat != "Carn Snail" & PreyCat != "Abalone" & PreyCat != "Scallop" & 
+             PreyCat != "Star" & PreyCat != "Chiton" & PreyCat != "Mussel") %>%
   group_by(PreyCat, Season) %>%
   summarise(mean = mean(percent.lip, na.rm = TRUE), 
             sd = sd(percent.lip, na.rm = TRUE))
 prot <- plab %>%
-    filter(PreyCat != "Carn Snail") %>%
+    filter(PreyCat != "Carn Snail" & PreyCat != "Abalone" & PreyCat != "Scallop" & 
+             PreyCat != "Star" & PreyCat != "Chiton" & PreyCat != "Mussel") %>%
   group_by(PreyCat, Season) %>%
   summarise(mean = mean(percent.prot, na.rm = TRUE),
             sd = sd(percent.prot, na.rm = TRUE))
@@ -293,12 +299,14 @@ ggplot(data = graph, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
 
 ```{r proportion graph, message=FALSE, echo=FALSE, warning=FALSE}
 lip.all <- plab %>%
-  filter(PreyCat != "Carn Snail") %>%
+  filter(PreyCat != "Carn Snail" & PreyCat != "Abalone" & PreyCat != "Scallop" & 
+             PreyCat != "Star" & PreyCat != "Chiton" & PreyCat != "Mussel") %>%
   group_by(PreyCat) %>%
   summarise(mean = mean(percent.lip, na.rm = TRUE), 
             sd = sd(percent.lip, na.rm = TRUE))
 prot.all <- plab %>%
-   filter(PreyCat != "Carn Snail") %>%
+   filter(PreyCat != "Carn Snail" & PreyCat != "Abalone" & PreyCat != "Scallop" & 
+             PreyCat != "Star" & PreyCat != "Chiton" & PreyCat != "Mussel")  %>%
   group_by(PreyCat) %>%
   summarise(mean = mean(percent.prot, na.rm = TRUE),
             sd = sd(percent.prot, na.rm = TRUE))

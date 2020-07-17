@@ -12,11 +12,14 @@ library(grid) # making multi pane graphs
 
 #Run these first!
 prey <- c("Clam", "Crab", "Cucumber/Snail", "Mussel", "Urchin")
-sites <- c("Shiaku Inlet", "Sukkwan Strait", "Tonowek Narrows")
+sites <- c("Shinaku Inlet", "Sukkwan Strait", "Tonowek Narrows")
 labels <- c("Clam", "Crab", "Cucumber", "Snail", "Urchin")
+years <-c("Zone 1", "Zone 2", "Zone 3")
 
-#Chapter 2 - FIGURE xx - Seasonal Enegery of prey catagories
+#Chapter 2 - FIGURE 5 - Seasonal Enegery of prey catagories
 #data from macronutrients.rmd
+
+#### SD
 a <- ggplot(data= means, aes(y=kcal.m, x=month, color=PreyCat), na.rm=TRUE) + 
   geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
   geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
@@ -51,6 +54,45 @@ c <- ggplot(data= means , aes(y=protein.m, x=month, color=PreyCat), na.rm=TRUE) 
   theme(legend.text = element_text(size=18), legend.position = "bottom", legend.title = element_text(size = 18),
         axis.title = element_text(size = 20), axis.text = element_text(size = 16))
 
+#### SE
+a <- ggplot(data= means.se, aes(y=kcal.m, x=month, color=PreyCat), na.rm=TRUE) + 
+  geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
+  geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
+  geom_errorbar(aes(ymin = kcal.m-kcal.se, ymax = kcal.m+kcal.se), position=position_dodge(width=25), width = 25) + 
+  scale_color_manual(name="Prey Group", values= c("Black", "gray30", "gray40", "gray60", "gray20"), labels = labels) +
+  scale_shape_manual(name="Prey Group", values = c(1,15,16,17,18), labels = labels) +
+  scale_linetype_manual(name ="Prey Group", values=c("solid", "dashed", "dotted", "dotdash", "longdash"), labels = labels) +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  labs(x="", y="Kcal", tag = "A") + 
+  ylim(1.5,5.5) +
+  theme_few() +
+  theme(legend.position = "none", axis.title = element_text(size = 18), axis.text = element_text(size = 16))
+
+b <- ggplot(data= means.se, aes(y=lipid.m, x=month, color=PreyCat), na.rm=TRUE) + 
+  geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
+  geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
+  geom_errorbar(aes(ymin = lipid.m-lipid.se, ymax = lipid.m+lipid.se), position=position_dodge(width=25), width = 25) + 
+  scale_color_manual(name="Prey Group", values= c("Black", "gray30", "gray40", "gray60", "gray20"), labels = labels) +
+  scale_shape_manual(name="Prey Group", values = c(1,15,16,17,18), labels = labels) +
+  scale_linetype_manual(name ="Prey Group", values=c("solid", "dashed", "dotted", "dotdash", "longdash"), labels = labels) +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  labs(x="", y="% Lipid", tag = "B") + 
+  ylim(0,30) +
+  theme_few() +
+  theme(legend.position = "none", axis.title = element_text(size = 18), 
+        axis.text = element_text(size = 16))
+
+c <- ggplot(data= means.se, aes(y=protein.m, x=month, color=PreyCat), na.rm=TRUE) + 
+  geom_line(aes(linetype=PreyCat), position=position_dodge(width=25)) + 
+  geom_point(aes(shape= PreyCat), size =4, position=position_dodge(width=25)) +
+  geom_errorbar(aes(ymin = protein.m-protein.se, ymax = protein.m+protein.se), position=position_dodge(width=25), width = 25) + 
+  scale_color_manual(name="Prey Group", values= c("Black", "gray30", "gray40", "gray60", "gray20"), labels = labels) +
+  scale_shape_manual(name="Prey Group", values = c(1,15,16,17,18), labels = labels) +
+  scale_linetype_manual(name ="Prey Group", values=c("solid", "dashed", "dotted", "dotdash", "longdash"), labels = labels) +
+  scale_x_date(date_breaks = "3 months" , date_labels = "%b", limits = as.Date(c("2018-04-01","2019-03-01")), expand = c(0.1,0))+
+  labs(x="", y="% Protein", tag = "C") + theme_few() +
+  theme(legend.text = element_text(size=18), legend.position = "bottom", legend.title = element_text(size = 18),
+        axis.title = element_text(size = 18), axis.text = element_text(size = 16))
 
 #function for legend
 get_legend<-function(myggplot){
@@ -98,7 +140,7 @@ e <- ggplot(data= means , aes(y=ash.m, x=month, color=PreyCat), na.rm=TRUE) +
 
 
 
-#Figure - Proportion of lipid and protein
+#Figure 5 - Proportion of lipid and protein
 #data from macronutrients.rmd
 
 ggplot(data = graph.all, aes(x=PreyCat, y=mean, fill = macro)) + theme_few() +
@@ -128,6 +170,7 @@ A <- biomass %>%
   ggplot(aes(x=Year.since, y=Proportion, fill = Prey.Cat)) +
   geom_bar(stat="identity", position = position_fill(reverse = TRUE)) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
+  scale_x_discrete(labels = years) +
   labs(y= "Proportion of diet", x=NULL, tag = "A") +
   scale_fill_brewer(palette = "RdYlBu", name= "Prey Group", direction = -1) +
   theme_few()+
@@ -168,7 +211,7 @@ ggsave("visual_prop.png", g, device = "png", width = 7,
        height = 9, units = "in", dpi = 300)
 
 
-#Figure xx - Kcal/ wetmass by season with percent diet overlaid
+#Figure 6 - Kcal/ wetmass by season with percent diet overlaid
 #clam and cuc only
 #data from Macronutrients.Rmd
 clam.energy$lipid_wet <-clam.energy$lipid_wet/100
@@ -248,6 +291,7 @@ a <- ggplot(data = year_all, aes(x= Year.since, y=kcal_dry, fill = Year.since)) 
   theme_few() +
   scale_fill_brewer(palette = "Greens") +
   labs(y = "Kcal/g (dry gram)", x=NULL, tag= "A") +
+  scale_x_discrete(labels = years) +
   theme(legend.position = "none", axis.title = element_text(size=16), 
         axis.text.y = element_text(size = 14), 
         axis.text.x = element_text(size = 14, angle= 45, hjust = 1),
@@ -258,6 +302,7 @@ b <- ggplot(data = year_all, aes(x= Year.since, y=lip_dry, fill = Year.since)) +
   theme_few() +
   scale_fill_brewer(palette = "Greens") +
   labs(y = "Lipid (dry gram)", x=NULL, tag= " ") +
+  scale_x_discrete(labels = years) +
   scale_y_continuous(labels = percent_format(accuracy = 1)) +
   theme(legend.position = "none", axis.title = element_text(size=16), 
         axis.text.y = element_text(size = 14), 
@@ -269,6 +314,7 @@ c <- ggplot(data = year_all, aes(x= Year.since, y=prot_dry, fill = Year.since)) 
   theme_few() +
   scale_fill_brewer(palette = "Greens") +
   labs(y = "Protein (dry gram)", x=NULL, tag= " ") +
+  scale_x_discrete(labels = years) +
   scale_y_continuous(labels = percent_format(accuracy = 1)) +
   theme(legend.position = "none", axis.title = element_text(size=16), 
         axis.text.y = element_text(size = 14), 
@@ -423,10 +469,33 @@ B <- ggplot(data=whisker) +
 
 g <- grid.arrange(A, B, nrow = 2, heights = c(1.5, 2))
 #g <- arrangeGrob(A, B, nrow=2) #generates g
-ggsave("CN_season_site.png", g, device = "png", path = "SI/", width = 9, 
+ggsave("CN_season_site.png", g, device = "png", width = 9, 
        height = 6, units = "in", dpi = 300)
 
+#Same graph, grouping by season and site on x axis
 
+A <- ggplot(data=whisker) +
+  geom_boxplot(aes(x=Site, y=C, fill=Season), color = "black") +
+  labs(y=expression(paste(delta^13, "C (\u2030)" )), x = NULL, tag = "A") +
+  scale_fill_grey(start=1, end=0.3) +
+  theme_few() +
+  theme(legend.position="none", axis.text.x = element_blank(), axis.title.y = element_text(size = 16), 
+        axis.text.y = element_text(size = 14))
+
+B <- ggplot(data=whisker) +
+  geom_boxplot(aes(x=Site, y=N, fill=Season), color ="black") +
+  labs(y=expression(paste(delta^15, "N (\u2030)" )), x = NULL, tag = "B") +
+  scale_fill_grey(start=1, end=0.3) +
+  scale_x_discrete(labels = sites) +
+  theme_few() +
+  theme(legend.position="bottom", axis.text = element_text(size = 14), 
+        axis.title = element_text(size = 16), legend.text = element_text(size = 16), 
+        legend.title = element_text(size = 16))
+
+g <- grid.arrange(A, B, nrow = 2, heights = c(1.5, 2))
+
+ggsave("CN_site_season.png", g, device = "png", width = 9, 
+       height = 6, units = "in", dpi = 300)
 
 ## FIGURE 2 ##
 #Diet Proportion bar graph 
@@ -439,7 +508,7 @@ biomass %>%
   ggplot(aes(x=Prey.Cat, y=Proportion, fill = Season)) +
   geom_bar(stat="identity", position = position_dodge()) +
   scale_y_continuous(labels = scales::percent_format(accuracy = 1)) +
-  labs(y= "Proportion of diet (by biomass)", x=NULL) +
+  labs(y= "Percent of diet (by biomass)", x=NULL) +
   scale_fill_grey() +
   theme_few() +
   theme(axis.text = element_text(size = 14), axis.title = element_text(size = 16), 
@@ -447,7 +516,7 @@ biomass %>%
         legend.title = element_text(size = 16))
 
 
-ggsave("prop_season_dive.png", device = "png", path = "Visual/", width = 8, 
+ggsave("prop_season_dive.png", device = "png", width = 8, 
        height = 7, units = "in", dpi = 300)
 
 
@@ -456,6 +525,7 @@ ggsave("prop_season_dive.png", device = "png", path = "Visual/", width = 8,
 #Data from SI.R, whisker, and si.mean (346)
 #Adding TDFs in graph (new as of 5/19/20)
 #Make sure to run labels at top of script
+
 
 ggplot() +   theme_few() +
   geom_point(data=whisker, aes(x=C, y=N, shape=Site, color=Season), size=2) +
@@ -477,7 +547,7 @@ ggplot() +   theme_few() +
         legend.text = element_text(size = 16), 
         legend.title = element_text(size = 16, face = "bold"))
 
-ggsave("biplot.png", device = "png", path = "SI/", width = 9, 
+ggsave("biplot.png", device = "png", width = 9, 
        height = 6, units = "in", dpi = 300)
 
 
@@ -576,9 +646,11 @@ ggsave("INDIV.png", gr, device = "png", path = "SI/", width = 9,
        height = 7.5, units = "in", dpi = 300)
 
 
-# Chapter 1 - figure xx 
+# Chapter 1 - figure 4 (becoming a supplemental graph) 
 # Prey Seasonal changes 
 
+#In this one Ginny suggested that the bar in the urchin graph have an NA for Craig so that 
+## all the bars are the same size. I don't know how to do this!! 
 A <- si.prey %>%
   filter(Site == "Craig" | Site == "Soda Bay") %>%
   drop_na(PreyCat) %>%
@@ -612,13 +684,46 @@ ggsave("CN_Prey_season_site.png", g, device = "png", path = "SI/", width = 9,
        height = 8, units = "in", dpi = 300)
 
 
+# now with sesason as the color and site as the x-axis
+A <- si.prey %>%
+  filter(Site == "Craig" | Site == "Soda Bay") %>%
+  drop_na(PreyCat) %>%
+  ggplot(aes(x=Site, y=Cnorm, fill=Season)) +
+  geom_boxplot() +   theme_few() +
+  labs(y=expression(paste(delta^13, "C (\u2030)" )), x= NULL, tag = "A") +
+  scale_fill_grey(start=0.3, end=1) +
+  ylim(-20,-9) +
+  facet_wrap(vars(PreyCat), labeller = labeller(PreyCat = c("Clam" = "Clam", "Crab" = "Crab", 
+                                                            "Cucumber.Snail" = "Cucumber/Snail", 
+                                                            "Mussel" = "Mussel", "Urchin" = "Urchin"))) +
+  theme(legend.position = "none", axis.text = element_text(size = 14), 
+        axis.title = element_text(size = 16), strip.text = element_text(size = 14))
+
+B <- si.prey %>%
+  filter(Site == "Craig" | Site == "Soda Bay") %>%
+  drop_na(PreyCat) %>%
+  ggplot(aes(x=Site, y=N, fill=Season)) +
+  geom_boxplot() +   theme_few() +
+  labs(y=expression(paste(delta^15, "N (\u2030)" )), x=NULL, tag = "B") +
+  scale_fill_grey(start=0.3, end=1) +
+  facet_wrap(vars(PreyCat),labeller = labeller(PreyCat = c("Clam" = "Clam", "Crab" = "Crab", 
+                                                           "Cucumber.Snail" = "Cucumber/Snail", 
+                                                           "Mussel" = "Mussel", "Urchin" = "Urchin"))) +
+  theme(legend.position = "bottom", axis.text = element_text(size = 14), 
+        axis.title = element_text(size = 16), strip.text = element_text(size = 14), 
+        legend.title = element_text(size = 16), legend.text = element_text(size = 14))
+
+g <- grid.arrange(A, B, nrow = 2, heights = c(1.75, 2))
+ggsave("CN_Prey_season_site.png", g, device = "png",  width = 9, 
+       height = 8, units = "in", dpi = 300)
 
 ## Correlations ##
 #data in Whisker_correlations.rmd
-ggplot(data=corr.2, aes(x= OtterID, y = correlation, fill = Site)) +
-  geom_bar(stat="identity", color = "black") +
-  scale_fill_grey(start=1, end=0) +
-  labs(x= "Individual sea otter", y =expression(paste(delta^13, "C:", delta^15, "N correlation"))) +
+ggplot(data=corr.all, aes(x= OtterID, y = estimate, fill = Site)) +
+         geom_bar(stat="identity", color = "black") +
+         geom_errorbar(aes(ymin = conf.low, ymax = conf.high), width = .2) +
+         scale_fill_brewer() + 
+         labs(x= "Individual sea otter", y =expression(paste(delta^13, "C:", delta^15, "N Correlation"))) +
   geom_abline(slope = 0, intercept = 0) +
   facet_wrap(vars(Site), nrow = 3, 
              labeller = labeller(Site = c("Shinaku" = "Shinaku Inlet",
@@ -631,5 +736,5 @@ ggplot(data=corr.2, aes(x= OtterID, y = correlation, fill = Site)) +
         axis.text.y = element_text(size = 14))
 
 
-ggsave("correlation.png", device = "png", path = "SI/", width = 9, 
+ggsave("correlation.png", device = "png", width = 9, 
        height = 7, units = "in", dpi = 300)

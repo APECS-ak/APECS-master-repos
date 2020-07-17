@@ -28,8 +28,8 @@ biomass <- read.csv("sofa_output.csv", header=T, na.strings=c(""))
 
 ```{r, year, echo=FALSE}
 biomass$Year.since <- ifelse(biomass$Year==1988, "> 30 years", 
-                  ifelse(biomass$Year== 2010, "> 8 years", "> 15 years"))
-biomass$Year.since <- factor(biomass$Year.since, levels = c("> 30 years", "> 15 years", "> 8 years"))
+                  ifelse(biomass$Year== 2010, "> 7 years", "> 15 years"))
+biomass$Year.since <- factor(biomass$Year.since, levels = c("> 30 years", "> 15 years", "> 7 years"))
 biomass %>%
   drop_na(Year, Long.Term) %>%
   ggplot(aes(x=Year, y=Long.Term)) +
