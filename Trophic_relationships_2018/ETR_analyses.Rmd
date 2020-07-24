@@ -2191,18 +2191,6 @@ fa_grp_low_sd_wide[, 3:10] <- round(fa_grp_low_sd_wide[, 3:10], 3)
 
 ##### Mann-Whitney tests
 ```{r}
-## ALA.LIN ##
-ALA.LIN.MWU <- fa_ALA.LIN_all %>% 
-  group_by(Species_common) %>% 
-  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
-ALA.LIN.MWU$FA_grp <- "ALA.LIN"
-
-## C18PUFA ##
-C18PUFA.MWU  <- fa_C18PUFA_all %>% 
-  group_by(Species_common) %>% 
-  do(broom::tidy(wilcox.test(prop_sum ~ Sea_otter_region, exact = FALSE, data = .)))
-C18PUFA.MWU$FA_grp <- "C18PUFA"
-
 ## PUFA ##
 PUFA.MWU <- fa_PUFA_all %>% 
   group_by(Species_common) %>% 
@@ -2252,7 +2240,7 @@ DHA.MWU <- fa_DHA_all %>%
 DHA.MWU$FA_grp <- "DHA"
 
 ## Clean up ##
-fa_grp_MWU <- rbind(ALA.LIN.MWU, C18PUFA.MWU, PUFA.MWU, BAC.MWU, PAL.MWU, ALA.MWU, LIN.MWU, ARA.MWU, EPA.MWU, DHA.MWU)
+fa_grp_MWU <- rbind(PUFA.MWU, BAC.MWU, PAL.MWU, ALA.MWU, LIN.MWU, ARA.MWU, EPA.MWU, DHA.MWU)
 
 fa_grp_MWU_p <- fa_grp_MWU[, c(1, 3, 6)]
 fa_grp_MWU_p$p.value <- round(fa_grp_MWU_p$p.value, 3)
@@ -3612,18 +3600,6 @@ fa_grp_low_sd_wide[, 3:10] <- round(fa_grp_low_sd_wide[, 3:10], 3)
 
 ##### Mann-Whitney tests
 ```{r}
-## ALA.LIN ##
-ALA.LIN.MWU_c <- fa_ALA.LIN_c_all %>% 
-  group_by(Species_common) %>% 
-  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
-ALA.LIN.MWU_c$FA_grp <- "ALA.LIN"
-
-## C18PUFA ##
-C18PUFA.MWU_c  <- fa_C18PUFA_c_all %>% 
-  group_by(Species_common) %>% 
-  do(broom::tidy(wilcox.test(conc_sum ~ Sea_otter_region, exact = FALSE, data = .)))
-C18PUFA.MWU_c$FA_grp <- "C18PUFA"
-
 ## PUFA ##
 PUFA.MWU_c <- fa_PUFA_c_all %>% 
   group_by(Species_common) %>% 
@@ -3673,7 +3649,7 @@ DHA.MWU_c <- fa_DHA_c_all %>%
 DHA.MWU_c$FA_grp <- "DHA"
 
 ## Clean up ##
-fa_grp_MWU_c <- rbind(ALA.LIN.MWU_c, C18PUFA.MWU_c, PUFA.MWU_c, BAC.MWU_c, PAL.MWU_c, ALA.MWU_c, LIN.MWU_c, ARA.MWU_c, EPA.MWU_c, DHA.MWU_c)
+fa_grp_MWU_c <- rbind(UFA.MWU_c, BAC.MWU_c, PAL.MWU_c, ALA.MWU_c, LIN.MWU_c, ARA.MWU_c, EPA.MWU_c, DHA.MWU_c)
 
 fa_grp_MWU_c_p <- fa_grp_MWU_c[, c(1, 3, 6)]
 fa_grp_MWU_c_p$p.value <- round(fa_grp_MWU_c_p$p.value, 3)
