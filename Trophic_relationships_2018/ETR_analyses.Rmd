@@ -478,7 +478,7 @@ Eelgrass
 mod.eg.1 <- lme(log(shoot_mass_m) ~ sea_otter_tr, random = ~1|site, data = eg)
 plot(mod.eg.1)
 summary(mod.eg.1)
-summ(mod.eg.1, scale = TRUE)
+summary(mod.eg.1, scale = TRUE)
 ```
 
 Epiphytes
@@ -612,8 +612,8 @@ eg.sum <- eg %>%
             epi_load_sd = sd(epi_load),
             grz_load_mean = mean(grazer_load),
             grz_load_sd = sd(grazer_load),
-            ido_load_mean = mean(Pentidotea_load),
-            ido_load_sd = sd(Pentidotea_load ),
+            ido_load_mean = mean(idotea_load),
+            ido_load_sd = sd(idotea_load ),
             lmp_load_mean = mean(limpet_load),
             lmp_load_sd = sd(limpet_load))
 
@@ -625,8 +625,8 @@ eg.sum.tr <- eg %>%
             epi_load_sd = sd(epi_load),
             grz_load_mean = mean(grazer_load),
             grz_load_sd = sd(grazer_load),
-            ido_load_mean = mean(Pentidotea_load),
-            ido_load_sd = sd(Pentidotea_load ),
+            ido_load_mean = mean(idotea_load),
+            ido_load_sd = sd(idotea_load ),
             lmp_load_mean = mean(limpet_load),
             lmp_load_sd = sd(limpet_load))
 ```
@@ -779,7 +779,7 @@ ggplot() +
   geom_point(data = eg.sum, aes(x = sea_otter_tr, y = shoot_mass_m_mean), size = 2, pch = 1, position = position_nudge(x = 0.2)) +
   scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100))
   
-elg.m <-ggplot() +
+elg.m <- ggplot() +
   geom_errorbar(data = eg.sum, aes(x = site, ymin = shoot_mass_m_mean - shoot_mass_m_sd, ymax = shoot_mass_m_mean + shoot_mass_m_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = eg.sum, aes(x = site, y = shoot_mass_m_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
@@ -862,7 +862,7 @@ pom.m <- ggplot() +
   geom_segment(data = subset(pom.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = pc_om_m + pc_om_sd, xend = 6, yend = pc_om_m + pc_om_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
   geom_segment(data = subset(pom.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = pc_om_m - pc_om_sd, xend = 6, yend = pc_om_m - pc_om_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
-  scale_y_continuous(limits = c(0, 3.2), breaks = seq(0, 3.2, by = 0.5)) +
+  #scale_y_continuous(limits = c(0, 3.2), breaks = seq(0, 3.2, by = 0.5)) +
   ylab("Percent organic matter") +
   xlab("") +
   theme(legend.position = "none", text = element_text(size = 8))
@@ -3754,6 +3754,8 @@ hist(sqrt(fa_c_tll_epa$conc))
 epa.mod.1 <- lm(sqrt(conc) ~ Sea_otter_region * Species_common, data = fa_c_tll_epa)
 
 anova(epa.mod.1)
+
+plot(epa.mod.1)
 
 epa.mod.2 <- lm(conc ~ Sea_otter_region, data = fa_c_tll_epa) 
 
