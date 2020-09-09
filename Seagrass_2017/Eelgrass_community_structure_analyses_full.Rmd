@@ -299,6 +299,14 @@ hist(sqrt(dat$Ntotal_site))
 shapiro.test(sqrt(dat$Ntotal_site))
 ```
 
+Nitrate is somewhat non-normal. Square-root tranformation improves.
+```{r}
+hist(dat$NOx_site)
+hist(sqrt(dat$NOx_site))
+```
+
+Pit density is non-normal. Standard transformations do not help much. 
+
 Light availability is normal. I may not use this variable at all though. See below.
 ```{r li avil norm, echo=FALSE}
 hist(dat$light_avail)
@@ -457,27 +465,13 @@ Another check after doing transfomarions etc.
 The suspect grazer v diatom relationships does not look that good at all. 
 ```{r multi check, echo = FALSE}
 ## Calculate correlations ##
-dat.cor <- dat[, c(4, 15, 17, 19, 94, 99, 81, 127, 126, 123, 90, 92, 124, 35, 37)]
-colnames(dat.cor) <- c("Julianday", "SO_dens", "total_pits", "SOI", "Crabs", "Fish", "Epifauna", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light", "Pits", "Macroalgae", "Diatoms")
+dat.cor <- dat[, c(19, 125, 94, 99, 81, 35, 37, 127, 126, 123, 90, 92)]
+
+colnames(dat.cor) <- c("SOI", "Pits", "Crabs", "Fish", "Epifauna", "Macroalgae", "Diatoms", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light")
 
 ## Transform as necessary ##
-dat.cor <- as.data.frame(cbind(dat.cor$Julianday, 
-                               dat.cor$SO_dens,
-                               dat.cor$total_pits,
-                               dat.cor$SOI,
-                               dat.cor$Crabs,
-                               dat.cor$Fish,
-                               dat.cor$Epifauna, 
-                               dat.cor$Epiphytes, 
-                               dat.cor$Seagrass, 
-                               dat.cor$Nitrate, 
-                               dat.cor$Sediment,
-                               dat.cor$Light,
-                               dat.cor$Pits,
-                               dat.cor$Macroalgae,
-                               dat.cor$Diatoms))
-
-colnames(dat.cor) <- c("Julianday", "SO_dens", "total_pits", "SOI", "Crabs", "Fish", "Epifauna", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light", "inside_pits", "Macroalgae", "Diatoms")
+dat.cor$Macroalgae <- dat.cor$Macroalgae / 100
+dat.cor$Diatoms <- dat.cor$Diatoms / 100
 
 correl <- cor(dat.cor)
 
@@ -863,20 +857,12 @@ Model 5.1: grazers
 mod5.1 <- lm(log(fish_mass) ~  grazermass_shootmass, data = dat)
 ```
 
-Dredge and filter models
+Forego dredge models because only one predictor
 ```{r mod5 dr, echo=FALSE}
-## Dredge ##
-mod5.1.dr <- dredge(mod5.1, rank = "AICc", evaluate = TRUE, extra = c("BIC", "R^2","adjR^2"), beta = "sd")
+## Summary ##
+summary(mod5.1)
 
-## Filter top models ##
-mod5.1.dr.top <- mod5.1.dr %>% 
-  filter(delta <= 2)
-
-mod5.dr.top <- mod5.dr.top[,colSums(is.na(mod5.dr.top)) < nrow(mod5.dr.top)] # remove columns with 0s
-datatable(round(mod5.dr.top, 4))
-
-## Model average ##
-mod5.1.avg <- model.avg(mod5.1.dr, subset = delta < 2, fit = TRUE, beta = "sd")
+data.frame(std.coef(mod5.1, partial.sd = FALSE))
 ```
 
 Extract coefficents 
