@@ -480,6 +480,38 @@ corrplot(correl, method = "color", type = "lower", addCoef.col =  "black", numbe
 
 ```
 
+One-to-one plots
+```{r}
+## SOI and seagrass ##
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt)) +
+  scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
+  labs(x = "Sea otter index", y = "Seagrass biomass") +
+  theme(text = element_text(size = 10))
+
+## SOI and sediment ##
+ggplot(dat) +
+  geom_point(aes(x = sea_otter_index_tr, y = sed_inside_prim)) +
+  scale_y_continuous(limits = c(1, 6), breaks = seq(1, 6, by = 1)) +
+  labs(x = "Sea otter index", y = "Sediment size score") +
+  theme(text = element_text(size = 10))
+
+## Sediment and diatoms ##
+ggplot(dat) +
+  geom_point(aes(x = sed_inside_prim, y = diatom_dens / 100)) +
+  scale_y_continuous(limits = c(0, 1.00), breaks = seq(0, 1.00, by = 0.25)) +
+  labs(x = "Sediment size score", y = "Proportion diatom cover") +
+  theme(text = element_text(size = 10))
+
+## Sediment and crabs ##
+ggplot(dat) +
+  geom_point(aes(x = sed_inside_prim, y = crab_mass)) +
+  scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
+  labs(x = "Sediment size score", y = "Crab biomass (g/site)") +
+  theme(text = element_text(size = 10))
+```
+
+
 SOI, seagrass biomass, sediment grain size
 ```{r}
 dat.cor.sed <- dat[, c(19, 126, 90)] 
