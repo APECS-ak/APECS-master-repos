@@ -459,7 +459,7 @@ ggplot(dat) +
   geom_smooth(aes(x = dens_surv_avg, y = log(grazermass_shootmass)), method = "loess")
 ```
 
-## Multicolinearity
+## Correlation
 Another check after doing transfomarions etc.
 
 The suspect grazer v diatom relationships does not look that good at all. 
@@ -467,7 +467,7 @@ The suspect grazer v diatom relationships does not look that good at all.
 ## Calculate correlations ##
 dat.cor <- dat[, c(19, 125, 94, 99, 81, 35, 37, 127, 126, 123, 90, 92)]
 
-colnames(dat.cor) <- c("SOI", "Pits", "Crabs", "Fish", "Epifauna", "Macroalgae", "Diatoms", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light")
+colnames(dat.cor) <- c("Sea otter index", "Pits", "Crabs", "Fish", "Epifauna", "Macroalgae", "Diatoms", "Epiphytes", "Seagrass", "Nitrate", "Sediment", "Light")
 
 ## Transform as necessary ##
 dat.cor$Macroalgae <- dat.cor$Macroalgae / 100
@@ -476,40 +476,48 @@ dat.cor$Diatoms <- dat.cor$Diatoms / 100
 correl <- cor(dat.cor)
 
 ## Plotting correlations ##
-corrplot(correl, method = "color", type = "lower", addCoef.col =  "black", number.cex = 0.75, tl.cex = 0.8, cl.cex = 0.75, tl.col = "black")
+corr.all <- corrplot(correl, method = "color", type = "lower", addCoef.col =  "black", number.cex = 0.75, tl.cex = 0.8, cl.cex = 0.75, tl.col = "black")
 
 ```
 
 One-to-one plots
 ```{r}
 ## SOI and seagrass ##
-ggplot(dat) +
+eg.soi <- ggplot(dat) +
   geom_point(aes(x = sea_otter_index_tr, y = abvgnd_mass_dt)) +
   scale_y_continuous(limits = c(-51, 50), breaks = seq(-50, 50, by = 25)) +
-  labs(x = "Sea otter index", y = "Seagrass biomass") +
+  labs(x = "Sea otter index", y = bquote(atop("Seagrass", 'mass*' ~(g/m^2)))) +
   theme(text = element_text(size = 10))
 
 ## SOI and sediment ##
-ggplot(dat) +
+sed.soi <- ggplot(dat) +
   geom_point(aes(x = sea_otter_index_tr, y = sed_inside_prim)) +
   scale_y_continuous(limits = c(1, 6), breaks = seq(1, 6, by = 1)) +
   labs(x = "Sea otter index", y = "Sediment size score") +
   theme(text = element_text(size = 10))
 
 ## Sediment and diatoms ##
-ggplot(dat) +
+dia.sed <- ggplot(dat) +
   geom_point(aes(x = sed_inside_prim, y = diatom_dens / 100)) +
   scale_y_continuous(limits = c(0, 1.00), breaks = seq(0, 1.00, by = 0.25)) +
   labs(x = "Sediment size score", y = "Proportion diatom cover") +
   theme(text = element_text(size = 10))
 
 ## Sediment and crabs ##
-ggplot(dat) +
+crb.sed <- ggplot(dat) +
   geom_point(aes(x = sed_inside_prim, y = crab_mass)) +
   scale_y_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
-  labs(x = "Sediment size score", y = "Crab biomass (g/site)") +
+  labs(x = "Sediment size score", y = "Crab biomass (g)") +
   theme(text = element_text(size = 10))
 ```
+
+Correlation one-to-one panel
+```{r}
+plot_grid(eg.soi, sed.soi,
+          dia.sed, crb.sed,
+          nrow = 2, ncol = 2, align = "hv")
+```
+
 
 
 SOI, seagrass biomass, sediment grain size
@@ -962,7 +970,7 @@ crb.soi <- ggplot(data = dat) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
 ## Grazers and Crabs ##
-ggplot(data = dat) +
+grz.crb <- ggplot(data = dat) +
   geom_point(aes(x = crab_mass, y = log(grazermass_shootmass + 1)), size = 1.5) +
   labs(x = "Crab mass (g)", y = "Log \n Epifauna load (g/g)") +
   scale_x_continuous(limits = c(0, 300), breaks = seq(0, 300, by = 100)) +
@@ -1096,11 +1104,10 @@ eg.sed <- ggplot(data = dat) +
 
 Cowplot
 ```{r}
-plot_grid(crb.soi, grz.epi, eg.epi, epi.nox,
-          eg.nox, eg.soi, epi.soi, fsh.crb,
-          epi.fsh, fsh.dia, grz.dia, fsh.nox,
-          eg.dia, fsh.sed, eg.sed, fsh.eg, 
-          nrow = 4, ncol = 4, align = "hv", scale = 0.95)
+plot_grid(crb.soi, epi.nox,
+          grz.dia, eg.epi,
+          grz.epi, 
+          nrow = 3, ncol = 2, align = "hv", scale = 0.95)
 ```
 
 
