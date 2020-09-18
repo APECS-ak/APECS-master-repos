@@ -60,6 +60,9 @@ tran.dat <- read.csv("../ALL_DATA/eelgrass_and_grazer_2017_derived.csv", header 
 ## Sea Otter Impact Index ##
 so.index <- read.csv("../ALL_DATA/sea_otter_impact_index_new.csv", stringsAsFactors = FALSE, header = TRUE)
 
+## Pits ##
+pits <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
+
 ## Sediment ##
 sed.site <- read.csv("../ALL_DATA/TIFF_seagrass_carbon_disturbance/2017_data_efforts/seagrass_seaotter_pit_sediment_2017_RAW.csv", stringsAsFactors = FALSE, header = TRUE)
 
@@ -75,35 +78,35 @@ fish.tax <- read.csv("../ALL_DATA/fish_taxonomy_RAW.csv", header = TRUE, strings
 
 ## RAW Nutrient Data ##
 nut.dat <- read.csv("../ALL_DATA/seagrass_nutrients_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+nut.temp <- read.csv("../ALL_DATA/site_abiotic_template_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
 
 ### Data Prep
-Sediment data preparation. Average by site.
+Sediment data preparation. We will assign the average sediment score from the inside eelgrass bed transect to each site.
 ```{r seds by site, echo=FALSE}
 seds <- sed.site %>% 
   filter(trans_type == "Inside") %>% 
   group_by(site) %>% 
-  summarise(sed_inside_prim = mean(sed1_no, na.rm = TRUE))
+  summarise(sed_inside_prim = mean(sed1_no, na.rm = TRUE),
+            sed_inside_prim_se = st.er(sed1_no))
 
 dat <- merge(tran.dat, seds, by = "site")
 ```
 
-Light availability calculation
-```{r light avail, echo=FALSE, message=FALSE, warning=FALSE}
+Light availability calculation. Taken as the ratio of light intensity at the eelgrass canopy to the light intensity at the surface.
+```{r light avail, echo=FALSE}
 dat$light_avail <- (dat$light_intensity_umol.m2.sec_transect / dat$light_intensity_umol.m2.sec_surface)
 ```
 
 Crab data preparation. This needs to be done to summarise by site and string (i.e. loose species information). Average by site.
-```{r crab sites string, echo=FALSE, message=FALSE, warning=FALSE}
+```{r crab sites string, echo=FALSE}
 crab.site <- crab.dat %>% 
   group_by(site) %>% 
   summarise(crab_count = mean(count, na.rm = TRUE),
-            crab_mass = mean(mass_g, na.rm = TRUE))
+            crab_mass = mean(mass_g, na.rm = TRUE),
+            crab_mass_se = st.er(mass_g, na.rm = TRUE))
 
 dat <- merge(dat, crab.site, by = "site")
-
-crab.site.fuk <- crab.dat %>% 
-  filter()
 ```
 
 Crab data preparation. Summarize counts and mass of cancer/rock crabs. Average by site.
@@ -118,12 +121,12 @@ dat <- merge(dat, crab.rock, by = "site")
 ```
 
 Fish data preparation. 
-append taxonomy
-```{r fish dat, echo=FALSE}
+Append taxonomy
+```{r fish tax, echo=FALSE}
 fish.dat <- merge(fish.dat, fish.tax, by.x = "species_scientific", by.y = "scientific_name", all = TRUE)
 ```
 
-This needs to be done to summarise by site across all species.
+This needs to be done to summarise count as mass by site across all species. Further the sum of fish predator mass will be caluclated.
 ```{r fish site, echo = FALSE}
 ## Full species List ##
 # prep #
@@ -142,8 +145,8 @@ fish.site.sp[is.na(fish.site.sp)] <- 0
 fish.site.sp$fish_SW_diverse <- diversity(fish.site.sp[,2:56], index = "shannon")
 fish.site.sp$fish_rich <- rowSums(fish.site.sp[, 2:56] != 0)
 
-# Sum predators # NOW INCLUDES SHINER PERCH #
-fish.site.sp$fish_preds <- rowSums(fish.site.sp[, c(2, 7:9, 13, 14, 20, 31:40, 51, 53:55)])
+# Sum predators #
+fish.site.sp$fish_preds <- rowSums(fish.site.sp[, c(2, 7:9, 13, 20, 31:40, 51, 53:55)])
 
 fish.site <- merge(fish.site, fish.site.sp[, c(1, 57:59)], by = "site")
 
@@ -174,6 +177,80 @@ fishmass.site.fam <- fish.dat %>%
 fishmass.site.fam[is.na(fishmass.site.fam)] <- 0
 
 dat <- merge(dat, fishmass.site.fam, by = "site")
+```
+
+Look at nutrient data
+```{r}
+## Summarize good data by site and sampling type ##
+nut.sum <- nut.dat %>% 
+  filter(site_full != "2017_M_01") %>% 
+  filter(quality == "G") %>% 
+  group_by(site_full, sampling_type, depth_m) %>% 
+  summarise(NOx_umol = mean(nox_umol),
+            NH4_umol = mean(nh4_umol),
+            PO4_umol = mean(po4_umol),
+            NTotal_umol = mean(tot_N),
+            N_P = mean(N.P))
+
+## Merge with template ##
+abiot.final <- nut.temp[, 1:7]
+
+abiot.final$NOx_umol <- c(nut.sum$NOx_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$NOx_umol[nut.sum$sampling_type == "nutday"])
+
+abiot.final$NH4_umol <- c(nut.sum$NH4_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$NH4_umol[nut.sum$sampling_type == "nutday"])
+
+abiot.final$PO4_umol <- c(nut.sum$PO4_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$PO4_umol[nut.sum$sampling_type == "nutday"])
+
+abiot.final$NTotal_umol <- c(nut.sum$NTotal_umol[nut.sum$sampling_type == "eelgrass"], nut.sum$NTotal_umol[nut.sum$sampling_type == "nutday"])
+
+abiot.final$N_P <- c(nut.sum$N_P[nut.sum$sampling_type == "eelgrass"], nut.sum$N_P[nut.sum$sampling_type == "nutday"])
+```
+
+Append total N to dat
+```{r}
+dat$Ntotal_site <- abiot.final$NTotal_umol[abiot.final$sample_type == "site"]
+dat$NOx_site <- abiot.final$NOx_umol[abiot.final$sample_type == "site"]
+```
+
+Pits
+```{r}
+pits.site <- pits %>%
+    filter(trans_type == "Inside") %>% 
+    group_by(site) %>% 
+    summarise(pit_mean= mean(pit_bin),
+              pit_se = st.er(pit_bin))
+
+dat$pits_inside <- pits.site$pit_mean
+
+pits.all.site <- pits %>%
+    group_by(site) %>% 
+    summarise(pit_all_mean= mean(pit_bin),
+              pit_all_se = st.er(pit_bin))
+
+pits.all.site <- pits.all.site[2:22,]
+dat$pits_all <- pits.all.site$pit_all_mean
+```
+
+### Missing data
+The diatom cover data does not have a value for one site. There are a few ways to deal with this. One is to omit the data entirely which means omitting the site. I don't really want to do that. The overall mean of the observed could also work. Seeing that the transformation does reasonable well to normalize the data and there is reasonable spread across sites I think we can proceed with this approach. Note that later interpretation will need to address this. Another approach is to take the mean value from sites sampled close in time to site with missing data. This makes logical sense, but then again we did not find a significant time effect. We could also use multiple imputation, but thats hold off.. for now. 
+So lets add the mean value. And check normality again. Looks good.
+```{r dia missing, echo = FALSE}
+ggplot(dat[2:21,]) +
+  geom_col(aes(x = site, y = asin(sqrt(diatom_dens/ 100)))) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+## add mean value ##
+dat[1, 37] <- mean(dat$diatom_dens, na.rm = TRUE)
+## assess normality again ##
+hist(dat$diatom_dens)
+hist(asin(sqrt(dat$diatom_dens / 100)))
+shapiro.test(asin(sqrt(dat$diatom_dens / 100)))
+```
+
+## Percent cover
+transform wiht arcsine square root in the data frame
+```{r}
+dat$macro_dens_as <- asin(sqrt(dat$macro_dens / 100))
+dat$diatom_dens_as <- asin(sqrt(dat$diatom_dens / 100))
 ```
 
 ## Analytical Approach
@@ -378,9 +455,11 @@ dat.redu$grazermass_shoot_ln <- log(dat$grazermass_shootmass)
 dat.redu$fish_mass_ln <- log(dat$fish_mass)
 dat.redu$crab_mass_sq <- sqrt(dat$crab_mass)
 dat.redu$sea_otter_index_tr <- dat$sea_otter_index_tr
-dat.redu$sed_inside_prim <- dat$sed_inside_prim
-dat.redu$Ntotal_site <- dat$Ntotal_site
+dat.redu$diatom_dens <- dat$diatom_dens
+dat.redu$macro_dens <- dat$macro_dens
 dat.redu$light_avail <- dat$light_avail
+dat.redu$NOx_site <- dat$NOx_site
+dat.redu$n_pits <- dat$n_pits
 ```
 
 #### 5. Full SEM
@@ -388,13 +467,13 @@ dat.redu$light_avail <- dat$light_avail
 Following paths indicated in figure
 ```{r full sem}
 sem.1 <- psem(
-  lm(crab_mass_sq ~ sea_otter_index_tr + fish_mass_ln, data = dat.redu),
+  lm(crab_mass_sq ~ sea_otter_index_tr, data = dat.redu),
 
-  lm(grazermass_shoot_ln ~ crab_mass_sq + fish_mass_ln, data = dat.redu),
+  lm(grazermass_shoot_ln ~ crab_mass_sq + fish_mass_ln + macro_dens + diatom_dens, data = dat.redu),
   
-  lm(epiphmass_shootmass_ln_dt ~ grazermass_shoot_ln + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu),
+  lm(epiphmass_shootmass_ln_dt ~ grazermass_shoot_ln + NOx_site + light_avail, data = dat.redu),
   
-  lm(abvgnd_mass_dt ~ epiphmass_shootmass_ln_dt + sed_inside_prim + Ntotal_site + light_avail, data = dat.redu)
+  lm(abvgnd_mass_dt ~ epiphmass_shootmass_ln_dt + NOx_site + light_avail + n_pits, data = dat.redu)
 
 )
 ```
