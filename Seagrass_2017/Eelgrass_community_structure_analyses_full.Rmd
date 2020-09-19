@@ -944,17 +944,12 @@ plot_grid(p.crb, p.fsh, p.grz, p.epi, p.abv, ncol = 1, labels = "auto", align = 
 For manuscripts and the like
 ```{r export dredge}
 write.csv(mod1.1.dr.top, "abv_raw_dredge_1.1.csv", row.names = FALSE)
-write.csv(mod1.2.dr.top, "abv_raw_dredge_1.2.csv", row.names = FALSE)
 
 write.csv(mod2.1.dr.top, "epi_raw_dredge.csv", row.names = FALSE)
-write.csv(mod2.2.dr.top, "epi_raw_dredge_2.2.csv", row.names = FALSE)
 
 write.csv(mod3.1.dr.top, "grz_raw_dredge.csv", row.names = FALSE)
-write.csv(mod3.2.dr.top, "grz_raw_dredge_3.2.csv", row.names = FALSE)
 
 write.csv(mod4.1.dr.top, "crb_raw_dredge.csv", row.names = FALSE)
-
-write.csv(mod5.1.dr.top, "fsh_raw_dredge_1.1.csv", row.names = FALSE)
 ```
 
 ## Trophic cascade: major results plots
