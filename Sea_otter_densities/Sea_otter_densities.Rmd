@@ -1,0 +1,33 @@
+---
+title: "Sea_otter_densities"
+author: "Wendel Raymond"
+date: "October 3, 2020"
+output: html_document
+---
+
+Assemble APECS sea otter survey data for 2017 and 2018 and Tinker model data
+
+```{r libraries}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(rgdal)
+library(rgeos)
+library(raster)
+library(gdistance)
+library(spatstat)
+library(leaflet)
+library(DT)
+library(sf)
+library(compare)
+library(corrgram)
+library(cowplot)
+
+theme_set(theme_classic())
+```
+
+Load data
+```{r data}
+
+```
+
