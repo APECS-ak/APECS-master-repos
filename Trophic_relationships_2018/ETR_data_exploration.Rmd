@@ -170,6 +170,21 @@ ggplot(dat) +
   labs(x = "Site", y = "Proportion snake prickleback mass")
 ```
 
+#### More clams
+percent by weight of butter and macoma clams
+```{r}
+# clean up species #
+clm.sp$sp_code <- ifelse(clm.sp$sp_code == "CLMBNT", "CLMMAC", clm.sp$sp_code)
+
+clm.sp$sp_code <- ifelse(clm.sp$sp_code == "CLMPOI", "CLMMAC", clm.sp$sp_code)
+
+clm.tmp <- clm.sp %>%
+  group_by(site, sp_code) %>%
+  summarise(mass.sp = sum(mass)) %>%
+  mutate(rel_mass = (mass.sp / sum(mass.sp)*100))
+```
+
+
 ### Size frequency
 Size-frequency distributions of crabs and fishes
 ```{r size-fq, echo = FALSE}
