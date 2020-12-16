@@ -1205,3 +1205,20 @@ ggplot(dat) +
   geom_histogram(aes(pits_inside), bins = 12)
 ```
 
+## SEM
+
+```{r}
+library(piecewiseSEM)
+
+sem1 <- psem(
+  lm(grazermass_shootmass ~ crab_mass, data = dat),
+  lm(epiphmass_shootmass_dt ~ grazermass_shootmass + NOx_site + light_avail, data = dat),
+  lm(abvgnd_mass_dt ~ epiphmass_shootmass_dt + NOx_site + pits_all + sed_inside_prim + light_avail, data = dat)
+)
+
+(d.sep1 <- dSep(sem1))
+fisherC(d.sep1)
+
+summary(sem1)
+```
+
