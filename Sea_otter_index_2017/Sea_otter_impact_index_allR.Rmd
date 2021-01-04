@@ -90,13 +90,14 @@ for(i in unique(1:21)){
   s <- sites.eg[i,] # subset sites 
   b <- gBuffer(s, byid = TRUE, width = 3704, quadsegs = 10) # create 3704 meter radius buffer around site
   b <- spTransform(b, CRS("+init=epsg:4326")) # change projection to for next step
-  bw <- gIntersection(h2o.latlong, b, byid = TRUE) # clip the buffer area by water so we only have water area left
+  w <- gBuffer(h2o.latlong, width = 0)
+  bw <- gIntersection(w, b, byid = TRUE) # clip the buffer area by water so we only have water area left
   bw <- spTransform(bw, CRS("+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0")) # change projection back to UTM
   e <- extent(bw) # save the extent of the polygon for later use
   r <- raster(xmn = e@xmin, xmx = e@xmax, ymn = e@ymin, ymx = e@ymax, ncol = (e@xmax - e@xmin) / 50, nrow = (e@ymax - e@ymin) / 50, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # create a raster with 50 X 50 meter grid cells. This raster is "empty"
   wr <- rasterize(bw, r, crs = "+proj=utm +zone=8 +ellps=GRS80 +towgs84=0,0,0") # append water polygon data to raster. This raster is "full"
   wr[wr] <- 50 # convert all raster cell values to a value of 50 (because 50 meters)
-  wt <- transition(wr, transitionFunction = function(x){50}, directions = 8) # conver raster to transition layer (required for accCost() below)
+  wt <- transition(wr, transitionFunction = function(x){50}, directions = 16) # conver raster to transition layer (required for accCost() below)
   wt <- geoCorrection(wt, type = "r", scl = FALSE) # not really sure what this actually does but you have to do it
   sa <- accCost(wt, s) # calculate the cumulative cost distance
   values(sa) <- (values(sa) * 50) # multiply cost values by 50 to reflect cost in terms of actual distance
@@ -113,15 +114,21 @@ for(i in unique(1:21)){
 
 Now we need to clean up the data frame generated in the for loop so that it is usable. *This will differ for everyone*.
 ```{r clean up data from above}
+# save area values for latter
+ar <- d[is.na(d$site), ]
+
+# Remove NA row produced for each site
+d <- na.omit(d)
+
 # Rename L05 to 2017_L_05
-levels(d$site)[levels(d$site) == "L05"] <- "2017_L_05"
+d$site[d$site == "L05"] <- "2017_L_05"
 
 # Count total otters are each site survey date
 ott.dat <- d %>% 
   group_by(site, survey_dat) %>% 
   summarise(n = sum(n_otters))
 
-# Clean up NA row and funky site names
+# Clean up NA row and funky site names. These are sites not in the study or double counts
 ott.dat <- ott.dat[c(1:8, 10:20, 22:30),]
 
 # Fill in data. These are instances where multiple sites were surveyed at the same time.
@@ -140,7 +147,7 @@ ott.dat.wide <- spread(ott.dat2[,c(1,3,4)], key = survey, value = n_otters)
 
 # Merge with site data
 site.dat <- sites.eg@data[,c(1,2,6:9)]
-site.dat$area <- unique(d$area)
+site.dat$area <- unique(ar$area)
 site.dat <- merge(site.dat, ott.dat.wide, by = "site", all.x = TRUE)
 colnames(site.dat)[8] <- "n_surv1"
 colnames(site.dat)[9] <- "n_surv2"
