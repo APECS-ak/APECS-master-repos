@@ -1211,9 +1211,8 @@ ggplot(dat) +
 library(piecewiseSEM)
 
 sem1 <- psem(
-  lm(grazermass_shootmass ~ crab_mass, data = dat),
-  lm(epiphmass_shootmass_dt ~ grazermass_shootmass + NOx_site + light_avail, data = dat),
-  lm(abvgnd_mass_dt ~ epiphmass_shootmass_dt + NOx_site + pits_all + sed_inside_prim + light_avail, data = dat)
+  lm(epiphmass_shootmass_dt ~ grazermass_shootmass + NOx_site, data = dat),
+  lm(abvgnd_mass_dt ~ epiphmass_shootmass_dt + NOx_site + sed_inside_prim, data = dat)
 )
 
 (d.sep1 <- dSep(sem1))
