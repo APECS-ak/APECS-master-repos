@@ -192,6 +192,13 @@ nut.sum <- nut.dat %>%
             NTotal_umol = mean(tot_N),
             N_P = mean(N.P))
 
+nut.dat.2 <- read.csv("E:/wraymond2/Downloads/Nutrients_2017_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+nut.sum.2 <- nut.dat.2 %>% 
+  group_by(site_code, depth_m) %>% 
+  summarise(NOx_umol = mean(nox_umol),
+            NH4_umol = mean(nh4_umol),
+            PO4_umol = mean(po4_umol))
+
 ## Merge with template ##
 abiot.final <- nut.temp[, 1:7]
 
