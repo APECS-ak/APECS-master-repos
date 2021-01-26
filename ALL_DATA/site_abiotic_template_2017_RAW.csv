@@ -1,64 +1,64 @@
-site,site_number,place_name,depth,sample_type,temperature_c,salinity_ppt,,,,,,,,,
-2017_H_06,1,Guktu Bay,1,site,11.8,31.4,,,,,,,,,
-2017_H_01,2,Salt Lake Bay,1,site,8,28,,,,,,,,,
-2017_H_04,3,Kaguk Cove,1,site,11,30.6,,,,,,,,,
-2017_H_02,4,Nossuk Bay,1,site,10.3,30.9,,,,,,,,,
-2017_H_05,5,Naukati Bay,1,site,13.7,29.7,,,,,,,,,
-2017_H_07,6,Blanquizal Point,1,site,12.9,30.6,,,,,,,,,
-2017_H_03,7,Chusini Cove,1,site,12.8,29.5,,,,,,,,,
-2017_M_07,8,Garcia Bay,1,site,16.6,31.5,,,,,,,,,
-2017_M_03,9,South Fish Egg Island,1,site,10.7,30.3,,,,,,,,,
-2017_M_05,10,Shinaku Inlet,1,site,13.5,28,,,,,,,,,
-2017_M_04,11,South Wadleigh Island,1,site,12.4,29.7,,,,,,,,,
-2017_M_02,12,North Fish Egg Island,1,site,10,24.3,,,,,,,,,
-2017_L_07,13,Hetta Cove,1,site,13.4,29.3,,,,,,,,,
-2017_L_01,14,Soda Bay,1,site,10,30,,,,,,,,,
-2017_L_03,15,North Pass,1,site,9.9,30,,,,,,,,,
-2017_L_02,16,Goat Mouth Inlet,1,site,11.1,30.9,,,,,,,,,
-2017_M_06,17,Trocadero Bay,1,site,12.4,31.1,,,,,,,,,
-2017_L_04,18,Natzuhini Bay,1,site,12.5,29.8,,,,,,,,,
-2017_L_05,19,Dunbar Inlet,1,site,13.1,30.1,,,,,,,,,
-2017_L_06,20,Farallon Bay,1,site,12.4,28.7,,,,,,,,,
-2017_M_08,21,Port Refugio,1,site,12.6,29.4,,,,,,,,,
-2017_H_06,1,Guktu Bay,1,1m,12.3,31.4,,,,,,,,,
-2017_H_01,2,Salt Lake Bay,1,1m,14,30.6,,,,,,,,,
-2017_H_04,3,Kaguk Cove,1,1m,12.5,31.4,,,,,,,,,
-2017_H_02,4,Nossuk Bay,1,1m,13.6,30.6,,,,,,,,,
-2017_H_05,5,Naukati Bay,1,1m,14.9,29.7,,,,,,,,,
-2017_H_07,6,Blanquizal Point,1,1m,13.3,30.3,,,,,,,,,
-2017_H_03,7,Chusini Cove,1,1m,14.5,30,,,,,,,,,
-2017_M_07,8,Garcia Bay,1,1m,12.4,32,,,,,,,,,
-2017_M_03,9,South Fish Egg Island,1,1m,14.7,31,,,,,,,,,
-2017_M_05,10,Shinaku Inlet,1,1m,14,29,,,,,,,,,
-2017_M_04,11,South Wadleigh Island,1,1m,14,31,,,,,,,,,
-2017_M_02,12,North Fish Egg Island,1,1m,14,31,,,,,,,,,
-2017_L_07,13,Hetta Cove,1,1m,13.4,19,,,,,,,,,
-2017_L_01,14,Soda Bay,1,1m,14.3,24,,,,,,,,,
-2017_L_03,15,North Pass,1,1m,13,30,,,,,,,,,
-2017_L_02,16,Goat Mouth Inlet,1,1m,14.1,28,,,,,,,,,
-2017_M_06,17,Trocadero Bay,1,1m,13.6,31,,,,,,,,,
-2017_L_04,18,Natzuhini Bay,1,1m,13.4,27,,,,,,,,,
-2017_L_05,19,Dunbar Inlet,1,1m,14,21,,,,,,,,,
-2017_L_06,20,Farallon Bay,1,1m,12.9,29,,,,,,,,,
-2017_M_08,21,Port Refugio,1,1m,12.4,32,,,,,,,,,
-2017_H_06,1,Guktu Bay,4,4m,12.1,31.5,,,,,,,,,
-2017_H_01,2,Salt Lake Bay,4,4m,14.1,31,,,,,,,,,
-2017_H_04,3,Kaguk Cove,4,4m,12.4,31.3,,,,,,,,,
-2017_H_02,4,Nossuk Bay,4,4m,12.8,31.4,,,,,,,,,
-2017_H_05,5,Naukati Bay,4,4m,14,30.4,,,,,,,,,
-2017_H_07,6,Blanquizal Point,4,4m,13.3,30.7,,,,,,,,,
-2017_H_03,7,Chusini Cove,4,4m,14.2,30.7,,,,,,,,,
-2017_M_07,8,Garcia Bay,4,4m,12,33,,,,,,,,,
-2017_M_03,9,South Fish Egg Island,4,4m,14.7,31,,,,,,,,,
-2017_M_05,10,Shinaku Inlet,4,4m,14.6,31,,,,,,,,,
-2017_M_04,11,South Wadleigh Island,4,4m,13.9,32,,,,,,,,,
-2017_M_02,12,North Fish Egg Island,4,4m,13.8,32,,,,,,,,,
-2017_L_07,13,Hetta Cove,4,4m,13.6,31,,,,,,,,,
-2017_L_01,14,Soda Bay,4,4m,13.7,32,,,,,,,,,
-2017_L_03,15,North Pass,4,4m,12.8,31,,,,,,,,,
-2017_L_02,16,Goat Mouth Inlet,4,4m,13.7,32,,,,,,,,,
-2017_M_06,17,Trocadero Bay,4,4m,12.6,32,,,,,,,,,
-2017_L_04,18,Natzuhini Bay,4,4m,12.7,31,,,,,,,,,
-2017_L_05,19,Dunbar Inlet,4,4m,13.7,31,,,,,,,,,
-2017_L_06,20,Farallon Bay,4,4m,12.2,32,,,,,,,,,
-2017_M_08,21,Port Refugio,4,4m,12,33,,,,,,,,,
+site,site_number,place_name,depth,sample_type,temperature_c,salinity_ppt
+2017_H_06,1,Guktu Bay,1,site,11.8,31.4
+2017_H_01,2,Salt Lake Bay,1,site,8,28
+2017_H_04,3,Kaguk Cove,1,site,11,30.6
+2017_H_02,4,Nossuk Bay,1,site,10.3,30.9
+2017_H_05,5,Naukati Bay,1,site,13.7,29.7
+2017_H_07,6,Blanquizal Point,1,site,12.9,30.6
+2017_H_03,7,Chusini Cove,1,site,12.8,29.5
+2017_M_07,8,Garcia Bay,1,site,16.6,31.5
+2017_M_03,9,South Fish Egg Island,1,site,10.7,30.3
+2017_M_05,10,Shinaku Inlet,1,site,13.5,28
+2017_M_04,11,South Wadleigh Island,1,site,12.4,29.7
+2017_M_02,12,North Fish Egg Island,1,site,10,24.3
+2017_L_07,13,Hetta Cove,1,site,13.4,29.3
+2017_L_01,14,Soda Bay,1,site,10,30
+2017_L_03,15,North Pass,1,site,9.9,30
+2017_L_02,16,Goat Mouth Inlet,1,site,11.1,30.9
+2017_M_06,17,Trocadero Bay,1,site,12.4,31.1
+2017_L_04,18,Natzuhini Bay,1,site,12.5,29.8
+2017_L_05,19,Dunbar Inlet,1,site,13.1,30.1
+2017_L_06,20,Farallon Bay,1,site,12.4,28.7
+2017_M_08,21,Port Refugio,1,site,12.6,29.4
+2017_H_06,1,Guktu Bay,1,1m,12.3,31.4
+2017_H_01,2,Salt Lake Bay,1,1m,14,30.6
+2017_H_04,3,Kaguk Cove,1,1m,12.5,31.4
+2017_H_02,4,Nossuk Bay,1,1m,13.6,30.6
+2017_H_05,5,Naukati Bay,1,1m,14.9,29.7
+2017_H_07,6,Blanquizal Point,1,1m,13.3,30.3
+2017_H_03,7,Chusini Cove,1,1m,14.5,30
+2017_M_07,8,Garcia Bay,1,1m,12.4,32
+2017_M_03,9,South Fish Egg Island,1,1m,14.7,31
+2017_M_05,10,Shinaku Inlet,1,1m,14,29
+2017_M_04,11,South Wadleigh Island,1,1m,14,31
+2017_M_02,12,North Fish Egg Island,1,1m,14,31
+2017_L_07,13,Hetta Cove,1,1m,13.4,19
+2017_L_01,14,Soda Bay,1,1m,14.3,24
+2017_L_03,15,North Pass,1,1m,13,30
+2017_L_02,16,Goat Mouth Inlet,1,1m,14.1,28
+2017_M_06,17,Trocadero Bay,1,1m,13.6,31
+2017_L_04,18,Natzuhini Bay,1,1m,13.4,27
+2017_L_05,19,Dunbar Inlet,1,1m,14,21
+2017_L_06,20,Farallon Bay,1,1m,12.9,29
+2017_M_08,21,Port Refugio,1,1m,12.4,32
+2017_H_06,1,Guktu Bay,4,4m,12.1,31.5
+2017_H_01,2,Salt Lake Bay,4,4m,14.1,31
+2017_H_04,3,Kaguk Cove,4,4m,12.4,31.3
+2017_H_02,4,Nossuk Bay,4,4m,12.8,31.4
+2017_H_05,5,Naukati Bay,4,4m,14,30.4
+2017_H_07,6,Blanquizal Point,4,4m,13.3,30.7
+2017_H_03,7,Chusini Cove,4,4m,14.2,30.7
+2017_M_07,8,Garcia Bay,4,4m,12,33
+2017_M_03,9,South Fish Egg Island,4,4m,14.7,31
+2017_M_05,10,Shinaku Inlet,4,4m,14.6,31
+2017_M_04,11,South Wadleigh Island,4,4m,13.9,32
+2017_M_02,12,North Fish Egg Island,4,4m,13.8,32
+2017_L_07,13,Hetta Cove,4,4m,13.6,31
+2017_L_01,14,Soda Bay,4,4m,13.7,32
+2017_L_03,15,North Pass,4,4m,12.8,31
+2017_L_02,16,Goat Mouth Inlet,4,4m,13.7,32
+2017_M_06,17,Trocadero Bay,4,4m,12.6,32
+2017_L_04,18,Natzuhini Bay,4,4m,12.7,31
+2017_L_05,19,Dunbar Inlet,4,4m,13.7,31
+2017_L_06,20,Farallon Bay,4,4m,12.2,32
+2017_M_08,21,Port Refugio,4,4m,12,33
