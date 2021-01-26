@@ -2350,7 +2350,7 @@ fa_snk_dist <- vegdist(fa_snk_trs, method = "euclidean")
 fa_stg_dist <- vegdist(fa_stg_trs, method = "euclidean")
 ```
 
-#### PERMANOVA
+#### PERMANOVA - All FA
 Test for the effect of sea otter nested by species. Then within species sea otter tests.
 
 ##### Primary Producers
@@ -2803,8 +2803,6 @@ simp.90.tab <- data.frame(TI = simp.90$taxa,
                             AVG = paste(round(simp.90$average * 100, 1), "(",round(simp.90$sd * 100, 1),")"), 
                             CUM = round(simp.90$cumsum * 100, 1))
 ```
-
-
 
 Helmet crabs
 -- remove undetermined FA
@@ -3379,6 +3377,535 @@ ggplot(fa_grc_mds_dat) +
   theme(legend.position = "none")
 ```
 
+
+#### Long-chain essential FA
+Preform PERMANOVA of the effect of sea otter region on EFAs only for each species.
+
+##### Filter to LCEFA
+Reduce _fa files from above to only include LCEFA. LCEFA are defines here as >20C w3 and w6 FA.
+18:2w6, 18:3w3, 18:3w6, 18:4w3, C20:2w3, C20:2w6, 20:3w3, 20:3w6, 20:4w3, 20:4w6, 20:5w3, 22:6w3
+```{r}
+LCEFA <- c("C18.2w6", "C18.3w3", "C18.3w6", "C18.4w3", "C20.2w3", "C20.2w6", "C20.3w3", "C20.3w6", "C20.4w3", "C20.4w6", "C20.5w3", "C22.6w3")
+
+## Primray producers ##
+lcefa_eg <- dplyr::select(fa_eg, c(1:10, one_of(LCEFA)))
+lcefa_ep <- dplyr::select(fa_ep, c(1:10, one_of(LCEFA)))
+lcefa_fu <- dplyr::select(fa_fu, c(1:10, one_of(LCEFA)))
+lcefa_ul <- dplyr::select(fa_ul, c(1:10, one_of(LCEFA)))
+lcefa_sk <- dplyr::select(fa_sk, c(1:10, one_of(LCEFA)))
+lcefa_pm <- dplyr::select(fa_pm, c(1:10, one_of(LCEFA)))
+
+## Primary Consumers ##
+lcefa_ido <- dplyr::select(fa_ido, c(1:10, one_of(LCEFA)))
+lcefa_lmp <- dplyr::select(fa_lmp, c(1:10, one_of(LCEFA)))
+lcefa_but <- dplyr::select(fa_but, c(1:10, one_of(LCEFA)))
+lcefa_mac <- dplyr::select(fa_mac, c(1:10, one_of(LCEFA)))
+
+## Secondar consumers ##
+lcefa_dsh <- dplyr::select(fa_dsh, c(1:10, one_of(LCEFA)))
+lcefa_hel <- dplyr::select(fa_hel, c(1:10, one_of(LCEFA)))
+lcefa_grc <- dplyr::select(fa_grc, c(1:10, one_of(LCEFA)))
+lcefa_shn <- dplyr::select(fa_shn, c(1:10, one_of(LCEFA)))
+lcefa_snk <- dplyr::select(fa_snk, c(1:10, one_of(LCEFA)))
+lcefa_stg <- dplyr::select(fa_stg, c(1:10, one_of(LCEFA)))
+```
+
+##### Transform - LCEFA
+```{r}
+## Primary Producers ##
+lcefa_eg_trs <- asin(sqrt(lcefa_eg[, 11:22]))
+lcefa_ep_trs <- asin(sqrt(lcefa_ep[, 11:22]))
+lcefa_fu_trs <- asin(sqrt(lcefa_fu[, 11:22]))
+lcefa_pm_trs <- asin(sqrt(lcefa_pm[, 11:22]))
+lcefa_sk_trs <- asin(sqrt(lcefa_sk[, 11:22]))
+lcefa_ul_trs <- asin(sqrt(lcefa_ul[, 11:22]))
+
+## Primary Consumers ##
+lcefa_ido_trs <- asin(sqrt(lcefa_ido[, 11:22]))
+lcefa_lmp_trs <- asin(sqrt(lcefa_lmp[, 11:22]))
+lcefa_but_trs <- asin(sqrt(lcefa_but[, 11:22]))
+lcefa_mac_trs <- asin(sqrt(lcefa_mac[, 11:22]))
+
+## Secondary consumers ##
+lcefa_dsh_trs <- asin(sqrt(lcefa_dsh[, 11:22]))
+lcefa_hel_trs <- asin(sqrt(lcefa_hel[, 11:22]))
+lcefa_grc_trs <- asin(sqrt(lcefa_grc[, 11:22]))
+lcefa_shn_trs <- asin(sqrt(lcefa_shn[, 11:22]))
+lcefa_snk_trs <- asin(sqrt(lcefa_snk[, 11:22]))
+lcefa_stg_trs <- asin(sqrt(lcefa_stg[, 11:22]))
+```
+
+##### Ordination - LCEFA
+```{r}
+## Primary Producers ##
+lcefa_eg_dist <- vegdist(lcefa_eg_trs, method = "euclidean")
+lcefa_ep_dist <- vegdist(lcefa_ep_trs, method = "euclidean")
+lcefa_fu_dist <- vegdist(lcefa_fu_trs, method = "euclidean")
+lcefa_pm_dist <- vegdist(lcefa_pm_trs, method = "euclidean")
+lcefa_sk_dist <- vegdist(lcefa_sk_trs, method = "euclidean")
+lcefa_ul_dist <- vegdist(lcefa_ul_trs, method = "euclidean")
+
+## Primary Consumers ##
+lcefa_ido_dist <- vegdist(lcefa_ido_trs, method = "euclidean")
+lcefa_lmp_dist <- vegdist(lcefa_lmp_trs, method = "euclidean")
+lcefa_but_dist <- vegdist(lcefa_but_trs, method = "euclidean")
+lcefa_mac_dist <- vegdist(lcefa_mac_trs, method = "euclidean")
+
+## Secondary Consumers ##
+lcefa_dsh_dist <- vegdist(lcefa_dsh_trs, method = "euclidean")
+lcefa_hel_dist <- vegdist(lcefa_hel_trs, method = "euclidean")
+lcefa_grc_dist <- vegdist(lcefa_grc_trs, method = "euclidean")
+lcefa_shn_dist <- vegdist(lcefa_shn_trs, method = "euclidean")
+lcefa_snk_dist <- vegdist(lcefa_snk_trs, method = "euclidean")
+lcefa_stg_dist <- vegdist(lcefa_stg_trs, method = "euclidean")
+```
+
+##### PERMANOVA
+###### Primary Producers
+```{r permanova, echo = FLASE}
+## Producers ##
+# Eelgrass #
+perm.lceaf.eg <- adonis2(lcefa_eg_dist ~ Sea_otter_tr, data = lcefa_eg, perm = 9999) 
+perm.lceaf.eg
+
+# Epiphytes #
+perm.lcefa.ep <- adonis2(lcefa_ep_dist ~ Sea_otter_tr, data = lcefa_ep, perm = 9999) 
+perm.lcefa.ep
+
+# Fucus #
+perm.lcefa.fu <- adonis2(lcefa_fu_dist ~ Sea_otter_tr, data = lcefa_fu, perm = 9999)
+perm.lcefa.fu
+
+# POM #
+perm.lcefa.pm <- adonis2(lcefa_pm_dist ~ Sea_otter_tr, data = lcefa_pm, perm = 9999)
+perm.lcefa.pm
+
+# Sugar kelp #
+perm.lcefa.sk <- adonis2(lcefa_sk_dist ~ Sea_otter_tr, data = lcefa_sk, perm = 9999)
+perm.lcefa.sk
+
+# Ulva #
+perm.lcefa.ul <- adonis2(lcefa_ul_dist ~ Sea_otter_tr, data = lcefa_ul, perm = 9999)
+perm.lcefa.ul
+```
+
+###### Primary Consumers
+```{r}
+## All primary consumers ##
+# Pentidotea #
+perm.lcefa.ido <- adonis2(lcefa_ido_dist ~ Sea_otter_tr, data = lcefa_ido, perm = 9999)
+perm.lcefa.ido
+
+# Limpet #
+perm.lcefa.lmp <- adonis2(lcefa_lmp_dist ~ Sea_otter_tr, data = lcefa_lmp, perm = 9999)
+perm.lcefa.lmp
+
+# Butter clam #
+perm.lcefa.but <- adonis2(lcefa_but_dist ~ Sea_otter_tr, data = lcefa_but, perm = 9999)
+perm.lcefa.but
+
+# Macoma clam #
+perm.lcefa.mac <- adonis2(lcefa_mac_dist ~ Sea_otter_tr, data = lcefa_mac, perm = 9999)
+perm.lcefa.mac
+```
+
+###### Secondary Consumers
+```{r}
+## All secondary consumers ##
+# Dock shrimp #
+perm.lcefa.dsh <- adonis2(lcefa_dsh_dist ~ Sea_otter_tr, data = lcefa_dsh, perm = 9999)
+perm.lcefa.dsh
+
+# Helmet crabs #
+perm.lcefa.hel <- adonis2(lcefa_hel_dist ~ Sea_otter_tr, data = lcefa_hel, perm = 9999)
+perm.lcefa.hel
+
+# Graceful crabs #
+perm.lcefa.grc <- adonis2(lcefa_grc_dist ~ Sea_otter_tr, data = lcefa_grc, perm = 9999)
+perm.lcefa.grc
+
+# Shiner perch #
+perm.lcefa.shn <- adonis2(lcefa_shn_dist ~ Sea_otter_tr, data = lcefa_shn, perm = 9999)
+perm.lcefa.shn
+
+# Snake prickleback
+perm.lcefa.snk <- adonis2(lcefa_snk_dist ~ Sea_otter_tr, data = lcefa_snk, perm = 9999)
+perm.lcefa.snk
+
+# Staghorn sculpin #
+perm.lcefa.stg <- adonis2(lcefa_stg_dist ~ Sea_otter_tr, data = lcefa_stg, perm = 9999)
+perm.lcefa.stg
+```
+
+##### SIMPER - LCEFA
+###### Data prep
+Remove undetermined FA from *untranformed* FA data. * NOTE * Run initial FA data preperation lines BEFORE these so that the correct subset is used.
+```{r}
+## Primary Producers ##
+# Eelgrass #
+lcefa_eg_simp <- lcefa_eg 
+
+# Fucus #
+lcefa_fu_simp <- lcefa_fu
+
+# POM #
+lcefa_pm_simp <- lcefa_pm
+
+# Ulva #
+lcefa_ul_simp <- lcefa_ul
+
+## Primary Consumers ##
+# Pentidotea #
+lcefa_ido_simp <- lcefa_ido
+
+# Limpet #
+lcefa_lmp_simp <- lcefa_lmp
+
+# Butter Clams ##
+lcefa_but_simp <- lcefa_but
+
+## Secondary Consumers ##
+# Dock Shrimp #
+lcefa_dsh_simp <- lcefa_dsh
+
+# Helmet crab #
+lcefa_hel_simp <- lcefa_hel
+
+# Graceful crabs #
+lcefa_grc_simp <- lcefa_grc
+
+# Snake prickleback #
+lcefa_snk_simp <- lcefa_snk
+
+# Staghorn sculpin #
+lcefa_stg_simp <- lcefa_stg
+```
+
+###### Primary Producers
+```{r}
+## Eelgrass ##
+simp.lcefa.eg <- simper(lcefa_eg_simp[, 11:22], lcefa_eg_simp$Sea_otter_tr, permutations = 9999)
+simp.lcefa.eg.dat <- summary(simp.lcefa.eg, ordered = TRUE, digits = 4)
+simp.lcefa.eg.dat <- data.frame(simp.lcefa.eg.dat$Low_High)
+simp.lcefa.eg.dat$FA <- row.names(simp.lcefa.eg.dat)
+simp.lcefa.eg.dat$average_scaled <- simp.lcefa.eg.dat$average / sum(simp.lcefa.eg.dat$average)
+simp.lcefa.eg.dat$taxa <- "Eelgrass"
+
+simp.lcefa.eg.redu <- simp.lcefa.eg.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+## Fucus ##
+simp.lcefa.fu <- simper(lcefa_fu_simp[, 11:22], lcefa_fu_simp$Sea_otter_tr, permutations = 9999)
+simp.lcefa.fu.dat <- summary(simp.lcefa.fu, ordered = TRUE, digits = 4)
+simp.lcefa.fu.dat <- data.frame(simp.lcefa.fu.dat$Low_High)
+simp.lcefa.fu.dat$FA <- row.names(simp.lcefa.fu.dat)
+simp.lcefa.fu.dat$average_scaled <- simp.lcefa.fu.dat$average / sum(simp.lcefa.fu.dat$average)
+simp.lcefa.fu$Low_High$overall
+simp.lcefa.fu.dat$taxa <- "Fucus"
+
+simp.lcefa.fu.redu <- simp.lcefa.fu.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+## POM ##
+simp.pm <- simper(fa_pm_simp[, 11:52], fa_pm_simp$Sea_otter_tr, permutations = 9999)
+simp.pm.dat <- summary(simp.pm, ordered = TRUE, digits = 4)
+simp.pm.dat <- data.frame(simp.pm.dat$Low_High)
+simp.pm.dat$FA <- row.names(simp.pm.dat)
+simp.pm.dat$average_scaled <- simp.pm.dat$average / sum(simp.pm.dat$average)
+simp.pm$Low_High$overall
+simp.pm.dat$taxa <- "POM"
+
+simp.pm.redu <- simp.pm.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+## Ulva ##
+simp.ul <- simper(fa_ul_simp[, 11:52], fa_ul_simp$Sea_otter_tr, permutations = 9999)
+simp.ul.dat <- summary(simp.ul, ordered = TRUE, digits = 4)
+simp.ul.dat <- data.frame(simp.ul.dat$Low_High)
+simp.ul.dat$FA <- row.names(simp.ul.dat)
+simp.ul.dat$average_scaled <- simp.ul.dat$average / sum(simp.ul.dat$average)
+simp.ul$Low_High$overall
+simp.ul.dat$taxa <- "Ulva"
+
+simp.ul.redu <- simp.ul.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+```
+
+###### Primary Consumers
+```{r}
+## Pentidotea ##
+simp.ido <- simper(fa_ido_simp[, 11:52], fa_ido_simp$Sea_otter_tr, permutations = 9999)
+simp.ido.dat <- summary(simp.ido, ordered = TRUE, digits = 4)
+simp.ido.dat <- data.frame(simp.ido.dat$Low_High)
+simp.ido.dat$FA <- row.names(simp.ido.dat)
+simp.ido.dat$average_scaled <- simp.ido.dat$average / sum(simp.ido.dat$average)
+simp.ido$Low_High$overall
+simp.ido.dat$taxa <- "Pentidotea"
+
+simp.ido.redu <- simp.ido.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+## Limpets ##
+simp.lmp <- simper(fa_lmp_simp[, 11:52], fa_lmp_simp$Sea_otter_tr, permutations = 9999)
+simp.lmp.dat <- summary(simp.lmp, ordered = TRUE, digits = 4)
+simp.lmp.dat <- data.frame(simp.lmp.dat$Low_High)
+simp.lmp.dat$FA <- row.names(simp.lmp.dat)
+simp.lmp.dat$average_scaled <- simp.lmp.dat$average / sum(simp.lmp.dat$average)
+simp.lmp$Low_High$overall
+simp.lmp.dat$taxa <- "Limpet"
+
+simp.lmp.redu <- simp.lmp.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+# Butter clams #
+simp.but <- simper(fa_but_simp[, 11:52], fa_but_simp$Sea_otter_tr, permutations = 9999)
+simp.but.dat <- summary(simp.but, ordered = TRUE, digits = 4)
+simp.but.dat <- data.frame(simp.but.dat$Low_High)
+simp.but.dat$FA <- row.names(simp.but.dat)
+simp.but.dat$average_scaled <- simp.but.dat$average / sum(simp.but.dat$average)
+simp.but$Low_High$overall
+simp.but.dat$taxa <- "Butter clam"
+
+simp.but.redu <- simp.but.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+```
+
+###### Secondary consumers
+```{r}
+## Dock shrimp ##
+simp.dsh <- simper(fa_dsh_simp[, 11:52], fa_dsh_simp$Sea_otter_tr, permutations = 9999)
+simp.dsh.dat <- summary(simp.dsh, ordered = TRUE, digits = 4)
+simp.dsh.dat <- data.frame(simp.dsh.dat$Low_High)
+simp.dsh.dat$FA <- row.names(simp.dsh.dat)
+simp.dsh.dat$average_scaled <- simp.dsh.dat$average / sum(simp.dsh.dat$average)
+simp.dsh$Low_High$overall
+simp.dsh.dat$taxa <- "Dock shrimp"
+
+simp.dsh.redu <- simp.dsh.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+## Helmet crabs ##
+simp.hel <- simper(fa_hel_simp[, 11:52], fa_hel_simp$Sea_otter_tr, permutations = 9999)
+simp.hel.dat <- summary(simp.hel, ordered = TRUE, digits = 4)
+simp.hel.dat <- data.frame(simp.hel.dat$Low_High)
+simp.hel.dat$FA <- row.names(simp.hel.dat)
+simp.hel.dat$average_scaled <- simp.hel.dat$average / sum(simp.hel.dat$average)
+simp.hel$Low_High$overall
+simp.hel.dat$taxa <- "Helmet crab"
+
+simp.hel.redu <- simp.hel.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+## Graceful crabs ##
+simp.grc <- simper(fa_grc_simp[, 11:52], fa_grc_simp$Sea_otter_tr, permutations = 9999)
+simp.grc.dat <- summary(simp.grc, ordered = TRUE, digits = 4)
+simp.grc.dat <- data.frame(simp.grc.dat$Low_High)
+simp.grc.dat$FA <- row.names(simp.grc.dat)
+simp.grc.dat$average_scaled <- simp.grc.dat$average / sum(simp.grc.dat$average)
+simp.grc$Low_High$overall
+simp.grc.dat$taxa <- "Graceful crab"
+
+simp.grc.redu <- simp.grc.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+## Snake prickleback ##
+simp.snk <- simper(fa_snk_simp[, 11:52], fa_snk_simp$Sea_otter_tr, permutations = 9999)
+simp.snk.dat <- summary(simp.snk, ordered = TRUE, digits = 4)
+simp.snk.dat <- data.frame(simp.snk.dat$Low_High)
+simp.snk.dat$FA <- row.names(simp.snk.dat)
+simp.snk.dat$average_scaled <- simp.snk.dat$average / sum(simp.snk.dat$average)
+simp.snk$Low_High$overall
+simp.snk.dat$taxa <- "Snake prickleback"
+
+simp.snk.redu <- simp.snk.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+
+## Staghorn sculpin ##
+simp.stg <- simper(fa_stg_simp[, 11:52], fa_stg_simp$Sea_otter_tr, permutations = 9999)
+simp.stg.dat <- summary(simp.stg, ordered = TRUE, digits = 4)
+simp.stg.dat <- data.frame(simp.stg.dat$High_Low)
+simp.stg.dat$FA <- row.names(simp.stg.dat)
+simp.stg.dat$average_scaled <- simp.stg.dat$average / sum(simp.stg.dat$average)
+simp.stg$High_Low$overall
+simp.stg.dat$taxa <- "Staghorn sculpin"
+
+simp.stg.redu <- simp.stg.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("High" = ava) %>% 
+  rename("Low" = avb)
+```
+
+##### SIMPER summaries
+```{r}
+## Combine ##
+simp.sum <- rbind(simp.eg.dat,
+                  simp.fu.dat,
+                  simp.pm.dat,
+                  simp.ul.dat,
+                  simp.ido.dat,
+                  simp.lmp.dat,
+                  simp.but.dat,
+                  simp.dsh.dat,
+                  simp.hel.dat,
+                  simp.grc.dat,
+                  simp.snk.dat,
+                  simp.stg.dat)
+
+## Export ##
+write.csv(simp.sum, "../ALL_DATA/FA_SIMPER_output.csv", row.names = FALSE)
+
+## Read in ##
+simp.sum <- read.csv("../ALL_DATA/FA_SIMPER_output.csv", header = TRUE, stringsAsFactors = FALSE)
+```
+
+Looking for SIMPER patterns
+```{r simp pat}
+## Filter top FAs ##
+simp.top <- simp.sum %>% 
+  filter(cumsum < 0.9) %>% 
+  group_by(taxa) %>% 
+  top_n(-5, cumsum) %>% 
+  mutate(FA = FA) %>% 
+  mutate(cumsum = cumsum) 
+
+## Top summaries ##
+simp.redu.tab <- data.frame(TI = simp.top$taxa,
+                            FA = simp.top$FA,
+                            H.SO = round(simp.top$avb * 100, 1),
+                            L.SO = round(simp.top$ava * 100, 1),
+                            AVG = round(simp.top$average * 100, 1),
+                            SD = round(simp.top$sd * 100, 1),
+                            DISS = round(simp.top$average_scaled * 100, 1),
+                            CUM = round(simp.top$cumsum * 100, 1),
+                            P = round(simp.top$p, 3))
+
+simp.top.sum <- simp.top %>% 
+  filter(taxa == "Eelgrass" | taxa == "Fucus" | taxa == "POM" | taxa == "Sugar kelp" | taxa == "Ulva" | taxa == "Pentidotea" | taxa == "Limpet" | taxa == "Butter clam" | taxa == "Dock shrimp" | taxa == "Graceful crab" | taxa == "Staghorn sculpin") %>% 
+  group_by(FA) %>% 
+  summarize(n = n())
+
+simp.top$taxa[simp.top$FA == "C20.5w3"]
+## 
+
+## 90% summaries ##
+simp.90 <- simp.sum %>% 
+  filter(cumsum <= 0.92)
+
+simp.90.tab <- data.frame(TI = simp.90$taxa,
+                            FA = simp.90$FA,
+                            H.SO = round(simp.90$avb * 100, 1),
+                            L.SO = round(simp.90$ava * 100, 1),
+                            AVG = paste(round(simp.90$average * 100, 1), "(",round(simp.90$sd * 100, 1),")"), 
+                            CUM = round(simp.90$cumsum * 100, 1))
+```
+
+
 #### FA Concentration
 ##### Data prep and normalize
 ```{r}
@@ -3751,7 +4278,7 @@ fa_c_tll_epa <- fa_c_tll %>%
 hist(fa_c_tll_epa$conc)
 hist(sqrt(fa_c_tll_epa$conc))
 
-epa.mod.1 <- lm(sqrt(conc) ~ Sea_otter_region * Species_common, data = fa_c_tll_epa)
+epa.mod.1 <- lm(conc ~ Sea_otter_region * Species_common, data = fa_c_tll_epa)
 
 anova(epa.mod.1)
 
