@@ -271,8 +271,8 @@ fa_stg <- cbind(fa_stg[, c(1, 49:52, 2:48)])
 colnames(fa_stg)[5] <- "Sea_otter_tr"
 ```
 
-### Marker FA
-#### Proportions data prep
+## Marker FA
+### Proportions data prep
 Filter data for FA which have known sources.
 ```{r}
 ## Specific Markers ##
@@ -293,7 +293,7 @@ fa_mrk <- fa_mrk  %>%
 fa_mrk$Species_common <- factor(fa_mrk$Species_common, levels = c("Eelgrass", "Eelgrass diatoms", "Fucus", "Particulate organic matter", "Sugar kelp", "Ulva", "Pentidotea", "Limpet", "Butter clam", "Macoma sp.", "Dock shrimp", "Helmet crab", "Graceful crab", "Shiner perch", "Snake prickleback", "Staghorn sculpin"))
 ```
 
-#### FA groups
+### FA groups
 LC-PUFAs, 18C EFA, omega-3 and omega-6, PUFA, Bacterial
 
 Make groups
@@ -309,7 +309,7 @@ PUFA <- names(fa[str_detect(names(fa), paste(c(".2w", ".3w", ".4w", ".5w", ".6w"
 BAC <- c("a.C17.0", "a.C18.0",  "C15.0", "C17.0", "C17.1w9", "C18.1w7", "i.C15.0", "i.C16.0", "i.C17.0")
 ```
 
-#### Make comparisons
+### Make comparisons
 ```{r}
 fa_mrk <- merge(bimrk[, c(1, 2, 3, 4, 7)], fa, by.x = "Biomarker_ID", by.y = "ID")
 fa_mrk$EPA.DHA <- fa_mrk$C20.5w3 / fa_mrk$C22.6w3
@@ -505,7 +505,7 @@ fa_grp_low_sd_wide <- fa_grp %>%
 fa_grp_low_sd_wide[, 3:10] <- round(fa_grp_low_sd_wide[, 3:10], 3)
 ```
 
-#### Mann-Whitney tests
+### Mann-Whitney tests
 ```{r}
 ## PUFA ##
 PUFA.MWU <- fa_PUFA_all %>% 
@@ -571,7 +571,7 @@ fa_grp_MWU_t$Species_common <- factor(fa_grp_MWU_t$Species_common, levels = c("E
 fa_grp_MWU_t <- tidyr::spread(fa_grp_MWU_t, key = FA_grp, value = statistic)
 ```
 
-#### Plots
+### Plots
 ```{r}
 ## All Groups ##
 ggplot(fa_grp, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
@@ -610,7 +610,7 @@ ggplot(fa_grp_redu2, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
   facet_wrap(~Species_common, scales = "free_x")
 ```
 
-## Multivariate analyses
+## Multivariate analyses - Proportions
 ### Transformations
 I will use and arcsine sqrt transformation.
 ```{r fa trans std, echo = FALSE}
@@ -3131,7 +3131,7 @@ fa_grp_MWU_c_t <- tidyr::spread(fa_grp_MWU_c_t, key = FA_grp, value = statistic)
 ```
 
 
-##### Plots
+#### Plots
 ```{r}
 ## Simple Names ##
 sp_simp <- c("BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "LMP", "MAC", "POM", "SHN", "SNK", "STG", "SK", "UL")
@@ -3205,6 +3205,141 @@ ggplot(epa.conc.sp.tr, aes(x = Sea_otter_region, y = mean, fill = Sea_otter_regi
   ylab("Mean Concentration (ug/mg DW)") +
   facet_wrap(~Species_common, scales = "free_x")
 ```
+
+
+### Multivariate comparisons - concentration
+#### Data prep
+##### Primary Producers
+```{r fa subsets, echo = FALSE}
+# Eelgrass #
+fac_eg <- fa_c_tll %>%
+  dplyr::select(-conc) %>% 
+  filter(Species_common == "Eelgrass") %>% 
+  spread(FA, conc_norm)
+
+# Eelgrass diatoms / epiphytes #
+fac_ep <- fa_c_tll %>%
+  dplyr::select(-conc) %>% 
+  filter(Species_common == "Eelgrass diatoms") %>% 
+  spread(FA, conc_norm)
+
+# Fucus #
+fac_fu <- fa_c_tll %>%
+    dplyr::select(-conc) %>% 
+  filter(Species_common == "Fucus") %>% 
+  spread(FA, conc_norm)
+
+# POM #
+fac_pm <- fa_c_tll %>%
+    dplyr::select(-conc) %>% 
+  filter(Species_common == "Particulate organic matter") %>% 
+  spread(FA, conc_norm)
+
+# Sugar Kelp #
+fac_sk <- fa_c_tll %>%
+    dplyr::select(-conc) %>% 
+  filter(Species_common == "Sugar kelp") %>% 
+  spread(FA, conc_norm)
+
+# Ulva #
+fac_ul <- fa_c_tll %>%
+    dplyr::select(-conc) %>% 
+  filter(Species_common == "Ulva") %>% 
+  spread(FA, conc_norm)
+```
+
+##### Primary Consumers
+```{r}
+# Pentidotea #
+fac_ido <- fa_c_tll %>%
+    dplyr::select(-conc) %>% 
+  filter(Species_common == "Idotea") %>% 
+  spread(FA, conc_norm)
+
+# Limpet #
+fac_lmp <- fa_c_tll %>%
+    dplyr::select(-conc) %>% 
+  filter(Species_common == "Limpet") %>% 
+  spread(FA, conc_norm)
+
+# Butter Clams ##
+fac_but <- fa_c_tll %>%
+    dplyr::select(-conc) %>% 
+  filter(Species_common == "Butter clam") %>% 
+  spread(FA, conc_norm)
+
+# Macoma Clams #
+fac_mac <- fa_c_tll %>%
+    dplyr::select(-conc) %>% 
+  filter(Species_common == "Macoma sp.") %>% 
+  spread(FA, conc_norm)
+```
+
+##### Secondary Consumers
+Omitting B_271 - Shiner and B_277 Staghorn due to strange values.
+```{r}
+# Dock Shrimp #
+fac_dsh <- fa_c_tll %>%
+  dplyr::select(-conc) %>% 
+  filter(Species_common == "Dock shrimp") %>% 
+  spread(FA, conc_norm)
+
+# Helmet crabs #
+fac_hel <- fa_c_tll %>%
+  dplyr::select(-conc) %>% 
+  filter(Species_common == "Helmet crab") %>% 
+  spread(FA, conc_norm)
+
+# Graceful crabs #
+fac_grc <- fa_c_tll %>%
+  dplyr::select(-conc) %>% 
+  filter(Species_common == "Graceful crab") %>% 
+  spread(FA, conc_norm)
+
+# Shiner Perch #
+fac_shn <- fa_c_tll %>% 
+  dplyr::select(-conc) %>% 
+  filter(Species_common == "Shiner perch" & Biomarker_ID != "B_271") %>% 
+  spread(FA, conc_norm)
+
+# Snake prickleback #
+fac_snk <- fa_c_tll %>%
+  dplyr::select(-conc) %>% 
+  filter(Species_common == "Snake prickleback") %>% 
+  spread(FA, conc_norm)
+
+# Staghorn sculpin #
+fac_stg <- fa_c_tll %>% 
+  dplyr::select(-conc) %>%
+  filter(Species_common == "Staghorn sculpin" & Biomarker_ID != "B_277") %>% 
+  spread(FA, conc_norm)
+```
+
+#### SIMPER
+
+```{r}
+## Eelgrass ##
+simp.eg.c <- simper(fac_eg[, 12:53], fac_eg$Sea_otter_region, permutations = 9999)
+simp.eg.c.dat <- summary(simp.eg.c, ordered = TRUE, digits = 4)
+simp.eg.c.dat <- data.frame(simp.eg.c.dat$Low_High)
+simp.eg.c.dat$FA <- row.names(simp.eg.c.dat)
+simp.eg.c.dat$average_scaled <- simp.eg.c.dat$average / sum(simp.eg.c.dat$average)
+simp.eg.c$Low_High$overall
+simp.eg.c.dat$taxa <- "Eelgrass"
+
+simp.eg.c.redu <- simp.eg.c.dat %>% 
+  filter(cumsum <= 0.9) %>% 
+  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
+  mutate_if(is.numeric, round, 4) %>% 
+  mutate(ava = ava * 100) %>% 
+  mutate(avb = avb * 100) %>% 
+  mutate(average = average * 100) %>% 
+  mutate(sd = sd * 100) %>% 
+  mutate(cumsum = cumsum * 100) %>% 
+  rename("Low" = ava) %>% 
+  rename("High" = avb)
+```
+
 
 ### FA Conc Linear Models
 Build models of FA concentration as a funciton of sea otter region and species
