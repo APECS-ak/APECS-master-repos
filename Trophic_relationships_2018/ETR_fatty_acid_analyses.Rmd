@@ -1255,7 +1255,7 @@ p1.EFA <- ggplot(EFA.sum) +
 
 ## LCEFA ##
 LCEFA.sum <- simp.sum %>% 
-  filter(FA %in% LCEFA) %>% 
+  filter(FA %in% c(LCEFA, "C20.4w6")) %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled))
@@ -1264,12 +1264,19 @@ p2.EFA <- ggplot(LCEFA.sum) +
   geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
   theme(axis.text.x = element_text(angle = 90)) +
   xlab("Taxa") +
-  ylab(expression(atop("DHA + EPA contrib", paste("to dissimilarity"))))
+  ylab(expression(atop("DHA + EPA + ARA contrib", paste("to dissimilarity"))))
 
-p2.2.EFA <-ggplot(LCEFA.sum) +
+p2.2.EFA <- ggplot(LCEFA.sum) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
-  ylab(expression(atop("DHA + EPA contrib", paste("to dissimilarity"))))
+  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
+  ylab(expression(atop("DHA + EPA + ARA contrib", paste("to dissimilarity"))))
+
+p2.3.EFA <- ggplot(subset(LCEFA.sum, taxa != "Particulate organic matter")) +
+  geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
+  xlab("Taxa") +
+  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
+  ylab(expression(atop("DHA + EPA + ARA contrib", paste("to dissimilarity"))))
 
 ## EPA ##
 EPA.sum <- simp.sum %>% 
@@ -1287,6 +1294,13 @@ p3.EFA <- ggplot(EPA.sum) +
 p3.2.EFA <- ggplot(EPA.sum) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
+  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
+  ylab(expression(atop("EPA contrib", paste("to dissimilarity"))))
+
+p3.3.EFA <- ggplot(subset(EPA.sum, taxa != "Particulate organic matter")) +
+  geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
+  xlab("Taxa") +
+  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
   ylab(expression(atop("EPA contrib", paste("to dissimilarity"))))
 
 ## DHA ##
@@ -1305,6 +1319,13 @@ p4.EFA <- ggplot(DHA.sum) +
 p4.2.EFA <- ggplot(DHA.sum) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
+  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
+  ylab(expression(atop("DHA contrib", paste("to dissimilarity"))))
+
+p4.3.EFA <- ggplot(subset(DHA.sum, taxa != "Particulate organic matter")) +
+  geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
+  xlab("Taxa") +
+  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
   ylab(expression(atop("DHA contrib", paste("to dissimilarity"))))
 
 ## ARA ##
@@ -1323,6 +1344,13 @@ p5.EFA <- ggplot(ARA.sum) +
 p5.2.EFA <- ggplot(ARA.sum) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
+  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
+  ylab(expression(atop("ARA contrib", paste("to dissimilarity"))))
+
+p5.3.EFA <- ggplot(subset(ARA.sum, taxa != "Particulate organic matter")) +
+  geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
+  xlab("Taxa") +
+  scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
   ylab(expression(atop("ARA contrib", paste("to dissimilarity"))))
 
 ## ALL EFA ##
@@ -1341,6 +1369,7 @@ pxxxx.EFA <- ggplot(ALLEFA.sum) +
 ## Panel ##
 plot_grid(p2.EFA, p3.EFA, p4.EFA, p5.EFA, nrow = 2, ncol = 2)
 plot_grid(p2.2.EFA, p3.2.EFA, p4.2.EFA, p5.2.EFA, nrow = 2, ncol = 2)
+plot_grid(p2.3.EFA, p3.3.EFA, p4.3.EFA, p5.3.EFA, nrow = 2, ncol = 2, labels = "No POM")
 
 ```
 
@@ -2850,6 +2879,7 @@ BAC <- c("a.C17.0", "a.C18.0",  "C15.0", "C17.0", "C17.1w9", "C18.1w7", "i.C15.0
 ```
 
 #### Make comparisons
+
 ```{r}
 ## ALA.LIN ##
 fa_ALA.LIN_c_all <- fa_c_tll %>% 
@@ -3303,3 +3333,23 @@ par(mfrow = c(1, 1))
 ## Examine output ##
 anova(dha.mod.3.1)
 ```
+
+### Concentration plots
+```{r}
+DHA_conc_sum <- fa_c_tll_dha %>% 
+  group_by(Sea_otter_region, Species_common) %>% 
+  summarise(mean_DHA = mean(conc_norm),
+            sd_DHA = sd(conc_norm),
+            ster_DHA = st.er(conc_norm))
+  
+
+ggplot(DHA_conc_sum, aes(x = reorder(Species_common, -mean_DHA), y = mean_DHA, fill = Sea_otter_region)) +
+  geom_bar(position = position_dodge(), stat = "identity") +
+  geom_errorbar(aes(ymin = mean_DHA - sd_DHA, ymax = mean_DHA + sd_DHA), width = 0, position = position_dodge(.7)) +
+  scale_fill_manual("Sea otter \n region", c("High", "Low"), values = so.pal) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(limits = c(0, 5), breaks = seq(0, 5, by = 1)) + 
+  xlab("Taxa") +
+  ylab("Mean DHA concentration (ug/mg DW)")
+```
+
