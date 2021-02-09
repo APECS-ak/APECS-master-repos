@@ -39,7 +39,7 @@ st.er <- function(x, na.rm = TRUE) {
 
 ```{r}
 shape.pal <- c(15, 16, 17)
-so.pal <- (c(c("#A326B3", "#3AE67F")))
+so.pal <- (c("#0E24C7", "#F7C318"))
 ```
 
 ## Data
@@ -1234,8 +1234,10 @@ simp.90.tab <- data.frame(TI = simp.90$taxa,
 define EFA
 ```{r}
 EFA <- c("C18.2w6", "C18.3w3")
-LCEFA <- c("C20.5w3", "C22.6w3")
+LCEFA <- c("C20.5w3", "C22.6w3", "C20.4w6")
 ALLEFA <- c("C18.2w6", "C18.3w3", "C20.4w6", "C20.5w3", "C22.6w3")
+
+grp.pal <- c("#FFA500", "#00CD00", "#483D8B")
 ```
 
 Sum contribution of EFAs to dissimilarity
@@ -1255,16 +1257,23 @@ p1.EFA <- ggplot(EFA.sum) +
 
 ## LCEFA ##
 LCEFA.sum <- simp.sum %>% 
-  filter(FA %in% c(LCEFA, "C20.4w6")) %>% 
+  filter(FA %in% c(LCEFA)) %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled))
 
-p2.EFA <- ggplot(LCEFA.sum) +
+LCEFA.sum[4, 1] <- "Epiphytes"
+LCEFA.sum[8, 1] <- "Pentidotea"
+LCEFA.sum[11, 1] <- "POM"
+
+p.LCEFA <- ggplot(LCEFA.sum) +
   geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
-  theme(axis.text.x = element_text(angle = 90)) +
+  scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(limits = c(0, 0.5)) +
   xlab("Taxa") +
-  ylab(expression(atop("DHA + EPA + ARA contrib", paste("to dissimilarity"))))
+  ylab("LCEFA contribution to dissimilarity") +
+  theme(legend.position = "none")
 
 p2.2.EFA <- ggplot(LCEFA.sum) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
@@ -1285,19 +1294,26 @@ EPA.sum <- simp.sum %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled))
 
-p3.EFA <- ggplot(EPA.sum) +
-  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
-  theme(axis.text.x = element_text(angle = 90)) +
-  xlab("Taxa") +
-  ylab(expression(atop("EPA contrib", paste("to dissimilarity"))))
+EPA.sum[4, 1] <- "Epiphytes"
+EPA.sum[8, 1] <- "Pentidotea"
+EPA.sum[11, 1] <- "POM"
 
-p3.2.EFA <- ggplot(EPA.sum) +
+p.EPA <- ggplot(EPA.sum) +
+  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
+  scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(limits = c(0, 0.5)) +
+  xlab("Taxa") +
+  ylab("EPA contribution to dissimilarity") +
+  theme(legend.position = "none")
+
+ggplot(EPA.sum) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
   scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
   ylab(expression(atop("EPA contrib", paste("to dissimilarity"))))
 
-p3.3.EFA <- ggplot(subset(EPA.sum, taxa != "Particulate organic matter")) +
+ggplot(subset(EPA.sum, taxa != "Particulate organic matter")) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
   scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
@@ -1310,19 +1326,26 @@ DHA.sum <- simp.sum %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled))
 
-p4.EFA <- ggplot(DHA.sum) +
-  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
-  theme(axis.text.x = element_text(angle = 90)) +
-  xlab("Taxa") +
-  ylab(expression(atop("DHA contrib", paste("to dissimilarity"))))
+DHA.sum[4, 1] <- "Epiphytes"
+DHA.sum[8, 1] <- "Pentidotea"
+DHA.sum[11, 1] <- "POM"
 
-p4.2.EFA <- ggplot(DHA.sum) +
+p.DHA <- ggplot(DHA.sum) +
+  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
+  scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(limits = c(0, 0.5)) +
+  xlab("Taxa") +
+  ylab("DHA contribution to dissimilarity") +
+  theme(legend.position = "none")
+
+ggplot(DHA.sum) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
   scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
   ylab(expression(atop("DHA contrib", paste("to dissimilarity"))))
 
-p4.3.EFA <- ggplot(subset(DHA.sum, taxa != "Particulate organic matter")) +
+ggplot(subset(DHA.sum, taxa != "Particulate organic matter")) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
   scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
@@ -1335,19 +1358,19 @@ ARA.sum <- simp.sum %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled))
 
-p5.EFA <- ggplot(ARA.sum) +
+ggplot(ARA.sum) +
   geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
   theme(axis.text.x = element_text(angle = 90)) +
   xlab("Taxa") +
   ylab(expression(atop("ARA contrib", paste("to dissimilarity"))))
 
-p5.2.EFA <- ggplot(ARA.sum) +
+ggplot(ARA.sum) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
   scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
   ylab(expression(atop("ARA contrib", paste("to dissimilarity"))))
 
-p5.3.EFA <- ggplot(subset(ARA.sum, taxa != "Particulate organic matter")) +
+ggplot(subset(ARA.sum, taxa != "Particulate organic matter")) +
   geom_boxplot(aes(x = sp_group, y = sum_EFA_contrib, fill = sp_group)) +
   xlab("Taxa") +
   scale_y_continuous(limits = c(0, 0.5), breaks = seq(0, 0.5, by = 0.1)) +
@@ -1360,16 +1383,33 @@ ALLEFA.sum <- simp.sum %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled))
 
-pxxxx.EFA <- ggplot(ALLEFA.sum) +
+ALLEFA.sum[4, 1] <- "Epiphytes"
+ALLEFA.sum[8, 1] <- "Pentidotea"
+ALLEFA.sum[11, 1] <- "POM"
+
+p.ALLEFA <- ggplot(ALLEFA.sum) +
   geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
-  theme(axis.text.x = element_text(angle = 90)) +
+  scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(limits = c(0, 0.5)) +
   xlab("Taxa") +
-  ylab(expression(atop("All EFA contrib", paste("to dissimilarity"))))
+  ylab("EFA contribution to dissimilarity") +
+  theme(legend.position = "none")
+
+p.ALLEFA.lgnd <- ggplot(ALLEFA.sum) +
+  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
+  scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_y_continuous(limits = c(0, 0.5)) +
+  xlab("Taxa") +
+  ylab("EFA contribution to dissimilarity")
 
 ## Panel ##
-plot_grid(p2.EFA, p3.EFA, p4.EFA, p5.EFA, nrow = 2, ncol = 2)
-plot_grid(p2.2.EFA, p3.2.EFA, p4.2.EFA, p5.2.EFA, nrow = 2, ncol = 2)
-plot_grid(p2.3.EFA, p3.3.EFA, p4.3.EFA, p5.3.EFA, nrow = 2, ncol = 2, labels = "No POM")
+legend <- get_legend(p.ALLEFA.lgnd)
+
+efa.pan1 <- cowplot::plot_grid(p.ALLEFA, p.LCEFA, p.EPA, p.DHA, labels = c("a", "b", "c", "d"), nrow = 2, ncol = 2, label_size = 10, label_x = 0.12)
+
+cowplot::plot_grid(efa.pan1, legend, rel_widths = c(3, 3, 0.5))
 
 ```
 
@@ -3247,7 +3287,6 @@ ggplot(epa.conc.sp.tr, aes(x = Sea_otter_region, y = mean, fill = Sea_otter_regi
   facet_wrap(~Species_common, scales = "free_x")
 ```
 
-
 ### Multivariate comparisons - concentration
 #### Data prep
 ##### Primary Producers
@@ -3880,5 +3919,6 @@ ggplot(DHA_conc_sum, aes(x = reorder(Species_common, -mean_DHA), y = mean_DHA, f
   scale_y_continuous(limits = c(0, 5), breaks = seq(0, 5, by = 1)) + 
   xlab("Taxa") +
   ylab("Mean DHA concentration (ug/mg DW)")
+
 ```
 
