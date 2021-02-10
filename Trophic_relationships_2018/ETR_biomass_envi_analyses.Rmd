@@ -61,7 +61,7 @@ abiot17 <- read.csv(url("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/urn%
 
 pom <- read.csv("../ALL_DATA/POM_filter_mass_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 
-oce <- read.csv("../ALL_DATA/Site_oceanography_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
+oce18 <- read.csv("../ALL_DATA/Site_oceanography_2018_RAW.csv", header = TRUE, stringsAsFactors = FALSE)
 
 site <- read.csv("../ALL_DATA/Eelgrass_trophic_relationships_site_metadata_2018.csv", header = TRUE, stringsAsFactors = FALSE)
 ```
@@ -213,25 +213,15 @@ ggplot(subset(nut.all, Depth_m == "1")) +
 
 #### Oceanography
 ```{r}
-oce <- merge(oce, site[, c(1, 5)], by.x = "site", by.y = "site")
-oce$Depth_m <- as.character(oce$Depth_m)
+## 2018 ##
+oce18 <- merge(oce18, site[, c(1, 5)], by.x = "site", by.y = "site")
+oce18$Depth_m <- as.character(oce18$Depth_m)
 
-oce$light_percent <- oce$X5m_PAR / oce$X1m_PAR * 100
+oce18$light_percent <- oce18$X5m_PAR / oce18$X1m_PAR * 100
 
-oce.sum.tr <- oce %>% 
-  group_by(sea_otter_tr, Depth_m) %>% 
-  summarise(DO_m = mean(DO_mgl),
-            DO_sd = sd(DO_mgl),
-            sal_m = mean(sal_ppt),
-            sal_sd = sd(sal_ppt),
-            temp_m = mean(temp_C),
-            temp_sd = sd(temp_C))
-
-light.sum.tr <- oce %>% 
-  filter(Depth_m == "1") %>% 
-  group_by(sea_otter_tr) %>% 
-  summarise(light_pr_m = mean(light_percent),
-            light_pr_sd = sd(light_percent))
+## 2017 ##
+abiot17$sampling_type <- ifelse(abiot17$date_YYYYMMDD == 20170814, "nutday", "eelgrass")
+abiot17$depth_m <- as.character(abiot17$depth_m)
 ```
 
 #### Sediment
@@ -262,7 +252,7 @@ p.nox17 <- ggplot(nut17.sum) +
   scale_y_continuous(limits = c(0, 3)) +
   theme(legend.position = "none")
 
-plot_grid(p.nox18, p.nox17, nrow = 1, ncol = 2)
+pan.nox <- plot_grid(p.nox18, p.nox17, nrow = 1, ncol = 2)
 
 ## Phosphate ##
 p.po418 <- ggplot(nut18.sum) +
@@ -279,18 +269,71 @@ p.po417 <- ggplot(nut17.sum) +
   scale_y_continuous(limits = c(0, 1)) +
   theme(legend.position = "none")
 
-plot_grid(p.po418, p.po417, nrow = 1, ncol = 2)
+pan.pho <- plot_grid(p.po418, p.po417, nrow = 1, ncol = 2)
 
 ## Temperature ##
-ggplot(oce) +
+p.tmp18 <- ggplot(oce18) +
   geom_boxplot(aes(x = sea_otter_tr, y = temp_C, fill = sea_otter_tr, alpha = Depth_m)) +
   scale_fill_manual("Depth", labels = c("1m", "5m"), values = so.pal) +
   scale_alpha_discrete(range = c(0.5, 1)) +
-  scale_y_continuous(limits = c(0.0, 16)) +
+  scale_y_continuous(limits = c(8, 16)) +
   scale_x_discrete(labels = c("High", "Low")) +
   ylab("Temperature") +
   xlab("Sea otter region") +
   theme(legend.position = "none")
+
+p.tmp17 <- ggplot(subset(abiot17, depth_m != 0)) +
+  geom_boxplot(aes(x = sampling_type, y = temperature_c, fill = sampling_type, alpha = depth_m)) +
+  scale_fill_manual("Depth", labels = c("1m", "4m"), values = ext.pal) +
+  scale_alpha_discrete(range = c(0.5, 1)) +
+  scale_y_continuous(limits = c(8, 16)) +
+  theme(legend.position = "none")
+
+pan.tmp <- plot_grid(p.tmp18, p.tmp17, nrow = 1, ncol = 2)
+
+## DO ##
+p.do18 <- ggplot(oce18) +
+  geom_boxplot(aes(x = sea_otter_tr, y = DO_mgl, fill = sea_otter_tr, alpha = Depth_m)) +
+  scale_fill_manual("Depth", labels = c("1m", "5m"), values = so.pal) +
+  scale_alpha_discrete(range = c(0.5, 1)) +
+  scale_y_continuous(limits = c(4, 12)) +
+  scale_x_discrete(labels = c("High", "Low")) +
+  ylab("Dissolved oxygen") +
+  xlab("Sea otter region") +
+  theme(legend.position = "none")
+
+p.do17 <- ggplot(subset(abiot17, depth_m != 0)) +
+  geom_boxplot(aes(x = sampling_type, y = DO_mg.L, fill = sampling_type, alpha = depth_m)) +
+  scale_fill_manual("Depth", labels = c("1m", "4m"), values = ext.pal) +
+  scale_alpha_discrete(range = c(0.5, 1)) +
+  scale_y_continuous(limits = c(4, 12)) +
+  theme(legend.position = "none")
+
+pan.do <- plot_grid(p.do18, p.do17, nrow = 1, ncol = 2)
+
+## Salinity ##
+p.sal18 <- ggplot(oce18) +
+  geom_boxplot(aes(x = sea_otter_tr, y = sal_ppt, fill = sea_otter_tr, alpha = Depth_m)) +
+  scale_fill_manual("Depth", labels = c("1m", "5m"), values = so.pal) +
+  scale_alpha_discrete(range = c(0.5, 1)) +
+  scale_y_continuous(limits = c(30, 34), seq(30, 34, by = 2)) +
+  scale_x_discrete(labels = c("High", "Low")) +
+  ylab("Salinity (ppt)") +
+  xlab("Sea otter region") +
+  theme(legend.position = "none")
+
+p.sal17 <- ggplot(subset(abiot17, depth_m != 0)) +
+  geom_boxplot(aes(x = sampling_type, y = salinity_ppt, fill = sampling_type, alpha = depth_m)) +
+  scale_fill_manual("Depth", labels = c("1m", "4m"), values = ext.pal) +
+  scale_alpha_discrete(range = c(0.5, 1)) +
+  scale_y_continuous(limits = c(14, 34), seq(14, 34, by = 2)) +
+  ylab("Salinity (ppt)") +
+  theme(legend.position = "none")
+
+pan.sal <- plot_grid(p.sal18, p.sal17, nrow = 1, ncol = 2)
+
+### Final Panel ###
+plot_grid(pan.tmp, pan.sal, pan.nox, pan.do, pan.pho, nrow = 5, ncol = 1, align = "v")
 ```
 
 
