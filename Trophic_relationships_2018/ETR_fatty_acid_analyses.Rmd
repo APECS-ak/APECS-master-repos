@@ -1260,14 +1260,23 @@ LCEFA.sum <- simp.sum %>%
   filter(FA %in% c(LCEFA)) %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
-            sum_EFA_contrib = sum(average_scaled))
+            sum_EFA_contrib = sum(average_scaled)) %>% 
+  arrange(sp_group, sum_EFA_contrib) %>% 
+  group_by(sp_group) %>% 
+  mutate(rank = rank(-sum_EFA_contrib, ties.method = "first"))
 
-LCEFA.sum[4, 1] <- "Epiphytes"
-LCEFA.sum[8, 1] <- "Pentidotea"
-LCEFA.sum[11, 1] <- "POM"
+LCEFA.sum$base <- ifelse(LCEFA.sum$sp_group == "PC", 6, NA)
+LCEFA.sum$base <- ifelse(LCEFA.sum$sp_group == "SC", 10, LCEFA.sum$base)
+LCEFA.sum$base <- ifelse(LCEFA.sum$sp_group == "PP", 0, LCEFA.sum$base)
+
+LCEFA.sum$rank <- LCEFA.sum$rank + LCEFA.sum$base
+
+LCEFA.sum[7, 1] <- "Epiphytes"
+LCEFA.sum[4, 1] <- "Pentidotea"
+LCEFA.sum[10, 1] <- "POM"
 
 p.LCEFA <- ggplot(LCEFA.sum) +
-  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
+  geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
   scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_y_continuous(limits = c(0, 0.5)) +
@@ -1292,14 +1301,23 @@ EPA.sum <- simp.sum %>%
   filter(FA == "C20.5w3") %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
-            sum_EFA_contrib = sum(average_scaled))
+            sum_EFA_contrib = sum(average_scaled)) %>% 
+  arrange(sp_group, sum_EFA_contrib) %>% 
+  group_by(sp_group) %>% 
+  mutate(rank = rank(-sum_EFA_contrib, ties.method = "first"))
 
-EPA.sum[4, 1] <- "Epiphytes"
-EPA.sum[8, 1] <- "Pentidotea"
-EPA.sum[11, 1] <- "POM"
+EPA.sum$base <- ifelse(EPA.sum$sp_group == "PC", 6, NA)
+EPA.sum$base <- ifelse(EPA.sum$sp_group == "SC", 10, EPA.sum$base)
+EPA.sum$base <- ifelse(EPA.sum$sp_group == "PP", 0, EPA.sum$base)
+
+EPA.sum$rank <- EPA.sum$rank + EPA.sum$base
+
+EPA.sum[9, 1] <- "Epiphytes"
+EPA.sum[3, 1] <- "Pentidotea"
+EPA.sum[10, 1] <- "POM"
 
 p.EPA <- ggplot(EPA.sum) +
-  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
+  geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
   scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_y_continuous(limits = c(0, 0.5)) +
@@ -1324,14 +1342,23 @@ DHA.sum <- simp.sum %>%
   filter(FA == "C22.6w3") %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
-            sum_EFA_contrib = sum(average_scaled))
+            sum_EFA_contrib = sum(average_scaled)) %>% 
+  arrange(sp_group, sum_EFA_contrib) %>% 
+  group_by(sp_group) %>% 
+  mutate(rank = rank(-sum_EFA_contrib, ties.method = "first"))
 
-DHA.sum[4, 1] <- "Epiphytes"
-DHA.sum[8, 1] <- "Pentidotea"
-DHA.sum[11, 1] <- "POM"
+DHA.sum$base <- ifelse(DHA.sum$sp_group == "PC", 6, NA)
+DHA.sum$base <- ifelse(DHA.sum$sp_group == "SC", 10, DHA.sum$base)
+DHA.sum$base <- ifelse(DHA.sum$sp_group == "PP", 0, DHA.sum$base)
+
+DHA.sum$rank <- DHA.sum$rank + DHA.sum$base
+
+DHA.sum[9, 1] <- "Epiphytes"
+DHA.sum[2, 1] <- "Pentidotea"
+DHA.sum[10, 1] <- "POM"
 
 p.DHA <- ggplot(DHA.sum) +
-  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
+  geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
   scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_y_continuous(limits = c(0, 0.5)) +
@@ -1381,14 +1408,23 @@ ALLEFA.sum <- simp.sum %>%
  filter(FA %in% ALLEFA) %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
-            sum_EFA_contrib = sum(average_scaled))
+            sum_EFA_contrib = sum(average_scaled)) %>%
+  arrange(sp_group, sum_EFA_contrib) %>% 
+  group_by(sp_group) %>% 
+  mutate(rank = rank(-sum_EFA_contrib, ties.method = "first"))
 
-ALLEFA.sum[4, 1] <- "Epiphytes"
-ALLEFA.sum[8, 1] <- "Pentidotea"
-ALLEFA.sum[11, 1] <- "POM"
+ALLEFA.sum$base <- ifelse(ALLEFA.sum$sp_group == "PC", 6, NA)
+ALLEFA.sum$base <- ifelse(ALLEFA.sum$sp_group == "SC", 10, ALLEFA.sum$base)
+ALLEFA.sum$base <- ifelse(ALLEFA.sum$sp_group == "PP", 0, ALLEFA.sum$base)
+
+ALLEFA.sum$rank <- ALLEFA.sum$rank + ALLEFA.sum$base
+
+ALLEFA.sum[5, 1] <- "Epiphytes"
+ALLEFA.sum[4, 1] <- "Pentidotea"
+ALLEFA.sum[9, 1] <- "POM"
 
 p.ALLEFA <- ggplot(ALLEFA.sum) +
-  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
+  geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
   scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_y_continuous(limits = c(0, 0.5)) +
@@ -1397,7 +1433,7 @@ p.ALLEFA <- ggplot(ALLEFA.sum) +
   theme(legend.position = "none")
 
 p.ALLEFA.lgnd <- ggplot(ALLEFA.sum) +
-  geom_col(aes(x = reorder(taxa, -sum_EFA_contrib), y = sum_EFA_contrib, fill = sp_group)) +
+  geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
   scale_fill_manual(values = grp.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_y_continuous(limits = c(0, 0.5)) +
@@ -2009,918 +2045,6 @@ ggplot(fa_dsh_mds_dat) +
 ggplot(fa_grc_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 4) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
-  theme(legend.position = "none")
-```
-
-
-#### Long-chain essential FA
-Preform PERMANOVA of the effect of sea otter region on EFAs only for each species.
-
-##### Filter to LCEFA
-Reduce _fa files from above to only include LCEFA. LCEFA are defines here as >20C w3 and w6 FA.
-18:2w6, 18:3w3, 18:3w6, 18:4w3, C20:2w3, C20:2w6, 20:3w3, 20:3w6, 20:4w3, 20:4w6, 20:5w3, 22:6w3
-```{r}
-LCEFA <- c("C18.2w6", "C18.3w3", "C18.3w6", "C18.4w3", "C20.2w3", "C20.2w6", "C20.3w3", "C20.3w6", "C20.4w3", "C20.4w6", "C20.5w3", "C22.6w3")
-
-## Primray producers ##
-lcefa_eg <- dplyr::select(fa_eg, c(1:10, one_of(LCEFA)))
-lcefa_ep <- dplyr::select(fa_ep, c(1:10, one_of(LCEFA)))
-lcefa_fu <- dplyr::select(fa_fu, c(1:10, one_of(LCEFA)))
-lcefa_ul <- dplyr::select(fa_ul, c(1:10, one_of(LCEFA)))
-lcefa_sk <- dplyr::select(fa_sk, c(1:10, one_of(LCEFA)))
-lcefa_pm <- dplyr::select(fa_pm, c(1:10, one_of(LCEFA)))
-
-## Primary Consumers ##
-lcefa_ido <- dplyr::select(fa_ido, c(1:10, one_of(LCEFA)))
-lcefa_lmp <- dplyr::select(fa_lmp, c(1:10, one_of(LCEFA)))
-lcefa_but <- dplyr::select(fa_but, c(1:10, one_of(LCEFA)))
-lcefa_mac <- dplyr::select(fa_mac, c(1:10, one_of(LCEFA)))
-
-## Secondar consumers ##
-lcefa_dsh <- dplyr::select(fa_dsh, c(1:10, one_of(LCEFA)))
-lcefa_hel <- dplyr::select(fa_hel, c(1:10, one_of(LCEFA)))
-lcefa_grc <- dplyr::select(fa_grc, c(1:10, one_of(LCEFA)))
-lcefa_shn <- dplyr::select(fa_shn, c(1:10, one_of(LCEFA)))
-lcefa_snk <- dplyr::select(fa_snk, c(1:10, one_of(LCEFA)))
-lcefa_stg <- dplyr::select(fa_stg, c(1:10, one_of(LCEFA)))
-```
-
-##### Transform - LCEFA
-```{r}
-## Primary Producers ##
-lcefa_eg_trs <- asin(sqrt(lcefa_eg[, 11:22]))
-lcefa_ep_trs <- asin(sqrt(lcefa_ep[, 11:22]))
-lcefa_fu_trs <- asin(sqrt(lcefa_fu[, 11:22]))
-lcefa_pm_trs <- asin(sqrt(lcefa_pm[, 11:22]))
-lcefa_sk_trs <- asin(sqrt(lcefa_sk[, 11:22]))
-lcefa_ul_trs <- asin(sqrt(lcefa_ul[, 11:22]))
-
-## Primary Consumers ##
-lcefa_ido_trs <- asin(sqrt(lcefa_ido[, 11:22]))
-lcefa_lmp_trs <- asin(sqrt(lcefa_lmp[, 11:22]))
-lcefa_but_trs <- asin(sqrt(lcefa_but[, 11:22]))
-lcefa_mac_trs <- asin(sqrt(lcefa_mac[, 11:22]))
-
-## Secondary consumers ##
-lcefa_dsh_trs <- asin(sqrt(lcefa_dsh[, 11:22]))
-lcefa_hel_trs <- asin(sqrt(lcefa_hel[, 11:22]))
-lcefa_grc_trs <- asin(sqrt(lcefa_grc[, 11:22]))
-lcefa_shn_trs <- asin(sqrt(lcefa_shn[, 11:22]))
-lcefa_snk_trs <- asin(sqrt(lcefa_snk[, 11:22]))
-lcefa_stg_trs <- asin(sqrt(lcefa_stg[, 11:22]))
-```
-
-##### Ordination - LCEFA
-```{r}
-## Primary Producers ##
-lcefa_eg_dist <- vegdist(lcefa_eg_trs, method = "euclidean")
-lcefa_ep_dist <- vegdist(lcefa_ep_trs, method = "euclidean")
-lcefa_fu_dist <- vegdist(lcefa_fu_trs, method = "euclidean")
-lcefa_pm_dist <- vegdist(lcefa_pm_trs, method = "euclidean")
-lcefa_sk_dist <- vegdist(lcefa_sk_trs, method = "euclidean")
-lcefa_ul_dist <- vegdist(lcefa_ul_trs, method = "euclidean")
-
-## Primary Consumers ##
-lcefa_ido_dist <- vegdist(lcefa_ido_trs, method = "euclidean")
-lcefa_lmp_dist <- vegdist(lcefa_lmp_trs, method = "euclidean")
-lcefa_but_dist <- vegdist(lcefa_but_trs, method = "euclidean")
-lcefa_mac_dist <- vegdist(lcefa_mac_trs, method = "euclidean")
-
-## Secondary Consumers ##
-lcefa_dsh_dist <- vegdist(lcefa_dsh_trs, method = "euclidean")
-lcefa_hel_dist <- vegdist(lcefa_hel_trs, method = "euclidean")
-lcefa_grc_dist <- vegdist(lcefa_grc_trs, method = "euclidean")
-lcefa_shn_dist <- vegdist(lcefa_shn_trs, method = "euclidean")
-lcefa_snk_dist <- vegdist(lcefa_snk_trs, method = "euclidean")
-lcefa_stg_dist <- vegdist(lcefa_stg_trs, method = "euclidean")
-```
-
-##### PERMANOVA
-###### Primary Producers
-```{r permanova, echo = FLASE}
-## Producers ##
-# Eelgrass #
-perm.lceaf.eg <- adonis2(lcefa_eg_dist ~ Sea_otter_tr, data = lcefa_eg, perm = 9999) 
-perm.lceaf.eg
-
-# Epiphytes #
-perm.lcefa.ep <- adonis2(lcefa_ep_dist ~ Sea_otter_tr, data = lcefa_ep, perm = 9999) 
-perm.lcefa.ep
-
-# Fucus #
-perm.lcefa.fu <- adonis2(lcefa_fu_dist ~ Sea_otter_tr, data = lcefa_fu, perm = 9999)
-perm.lcefa.fu
-
-# POM #
-perm.lcefa.pm <- adonis2(lcefa_pm_dist ~ Sea_otter_tr, data = lcefa_pm, perm = 9999)
-perm.lcefa.pm
-
-# Sugar kelp #
-perm.lcefa.sk <- adonis2(lcefa_sk_dist ~ Sea_otter_tr, data = lcefa_sk, perm = 9999)
-perm.lcefa.sk
-
-# Ulva #
-perm.lcefa.ul <- adonis2(lcefa_ul_dist ~ Sea_otter_tr, data = lcefa_ul, perm = 9999)
-perm.lcefa.ul
-```
-
-###### Primary Consumers
-```{r}
-## All primary consumers ##
-# Pentidotea #
-perm.lcefa.ido <- adonis2(lcefa_ido_dist ~ Sea_otter_tr, data = lcefa_ido, perm = 9999)
-perm.lcefa.ido
-
-# Limpet #
-perm.lcefa.lmp <- adonis2(lcefa_lmp_dist ~ Sea_otter_tr, data = lcefa_lmp, perm = 9999)
-perm.lcefa.lmp
-
-# Butter clam #
-perm.lcefa.but <- adonis2(lcefa_but_dist ~ Sea_otter_tr, data = lcefa_but, perm = 9999)
-perm.lcefa.but
-
-# Macoma clam #
-perm.lcefa.mac <- adonis2(lcefa_mac_dist ~ Sea_otter_tr, data = lcefa_mac, perm = 9999)
-perm.lcefa.mac
-```
-
-###### Secondary Consumers
-```{r}
-## All secondary consumers ##
-# Dock shrimp #
-perm.lcefa.dsh <- adonis2(lcefa_dsh_dist ~ Sea_otter_tr, data = lcefa_dsh, perm = 9999)
-perm.lcefa.dsh
-
-# Helmet crabs #
-perm.lcefa.hel <- adonis2(lcefa_hel_dist ~ Sea_otter_tr, data = lcefa_hel, perm = 9999)
-perm.lcefa.hel
-
-# Graceful crabs #
-perm.lcefa.grc <- adonis2(lcefa_grc_dist ~ Sea_otter_tr, data = lcefa_grc, perm = 9999)
-perm.lcefa.grc
-
-# Shiner perch #
-perm.lcefa.shn <- adonis2(lcefa_shn_dist ~ Sea_otter_tr, data = lcefa_shn, perm = 9999)
-perm.lcefa.shn
-
-# Snake prickleback
-perm.lcefa.snk <- adonis2(lcefa_snk_dist ~ Sea_otter_tr, data = lcefa_snk, perm = 9999)
-perm.lcefa.snk
-
-# Staghorn sculpin #
-perm.lcefa.stg <- adonis2(lcefa_stg_dist ~ Sea_otter_tr, data = lcefa_stg, perm = 9999)
-perm.lcefa.stg
-```
-
-##### SIMPER - LCEFA
-###### Data prep
-Remove undetermined FA from *untranformed* FA data. * NOTE * Run initial FA data preperation lines BEFORE these so that the correct subset is used.
-```{r}
-## Primary Producers ##
-# Eelgrass #
-lcefa_eg_simp <- lcefa_eg 
-
-# Fucus #
-lcefa_fu_simp <- lcefa_fu
-
-# POM #
-lcefa_pm_simp <- lcefa_pm
-
-# Ulva #
-lcefa_ul_simp <- lcefa_ul
-
-## Primary Consumers ##
-# Pentidotea #
-lcefa_ido_simp <- lcefa_ido
-
-# Limpet #
-lcefa_lmp_simp <- lcefa_lmp
-
-# Butter Clams ##
-lcefa_but_simp <- lcefa_but
-
-## Secondary Consumers ##
-# Dock Shrimp #
-lcefa_dsh_simp <- lcefa_dsh
-
-# Helmet crab #
-lcefa_hel_simp <- lcefa_hel
-
-# Graceful crabs #
-lcefa_grc_simp <- lcefa_grc
-
-# Snake prickleback #
-lcefa_snk_simp <- lcefa_snk
-
-# Staghorn sculpin #
-lcefa_stg_simp <- lcefa_stg
-```
-
-###### Primary Producers
-```{r}
-## Eelgrass ##
-simp.lcefa.eg <- simper(lcefa_eg_simp[, 11:22], lcefa_eg_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.eg.dat <- summary(simp.lcefa.eg, ordered = TRUE, digits = 4)
-simp.lcefa.eg.dat <- data.frame(simp.lcefa.eg.dat$Low_High)
-simp.lcefa.eg.dat$FA <- row.names(simp.lcefa.eg.dat)
-simp.lcefa.eg.dat$average_scaled <- simp.lcefa.eg.dat$average / sum(simp.lcefa.eg.dat$average)
-simp.lcefa.eg.dat$taxa <- "Eelgrass"
-
-simp.lcefa.eg.redu <- simp.lcefa.eg.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## Fucus ##
-simp.lcefa.fu <- simper(lcefa_fu_simp[, 11:22], lcefa_fu_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.fu.dat <- summary(simp.lcefa.fu, ordered = TRUE, digits = 4)
-simp.lcefa.fu.dat <- data.frame(simp.lcefa.fu.dat$Low_High)
-simp.lcefa.fu.dat$FA <- row.names(simp.lcefa.fu.dat)
-simp.lcefa.fu.dat$average_scaled <- simp.lcefa.fu.dat$average / sum(simp.lcefa.fu.dat$average)
-simp.lcefa.fu$Low_High$overall
-simp.lcefa.fu.dat$taxa <- "Fucus"
-
-simp.lcefa.fu.redu <- simp.lcefa.fu.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## POM ##
-simp.lcefa.pm <- simper(lcefa_pm_simp[, 11:22], lcefa_pm_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.pm.dat <- summary(simp.lcefa.pm, ordered = TRUE, digits = 4)
-simp.lcefa.pm.dat <- data.frame(simp.lcefa.pm.dat$Low_High)
-simp.lcefa.pm.dat$FA <- row.names(simp.lcefa.pm.dat)
-simp.lcefa.pm.dat$average_scaled <- simp.lcefa.pm.dat$average / sum(simp.lcefa.pm.dat$average)
-simp.lcefa.pm$Low_High$overall
-simp.lcefa.pm.dat$taxa <- "POM"
-
-simp.lcefa.pm.redu <- simp.lcefa.pm.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## Ulva ##
-simp.lcefa.ul <- simper(lcefa_ul_simp[, 11:22], lcefa_ul_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.ul.dat <- summary(simp.lcefa.ul, ordered = TRUE, digits = 4)
-simp.lcefa.ul.dat <- data.frame(simp.lcefa.ul.dat$Low_High)
-simp.lcefa.ul.dat$FA <- row.names(simp.lcefa.ul.dat)
-simp.lcefa.ul.dat$average_scaled <- simp.lcefa.ul.dat$average / sum(simp.lcefa.ul.dat$average)
-simp.lcefa.ul$Low_High$overall
-simp.lcefa.ul.dat$taxa <- "Ulva"
-
-simp.lcefa.ul.redu <- simp.lcefa.ul.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-```
-
-###### Primary Consumers
-```{r}
-## Pentidotea ##
-simp.lcefa.ido <- simper(lcefa_ido_simp[, 11:22], lcefa_ido_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.ido.dat <- summary(simp.lcefa.ido, ordered = TRUE, digits = 4)
-simp.lcefa.ido.dat <- data.frame(simp.lcefa.ido.dat$Low_High)
-simp.lcefa.ido.dat$FA <- row.names(simp.lcefa.ido.dat)
-simp.lcefa.ido.dat$average_scaled <- simp.lcefa.ido.dat$average / sum(simp.lcefa.ido.dat$average)
-simp.lcefa.ido$Low_High$overall
-simp.lcefa.ido.dat$taxa <- "Pentidotea"
-
-simp.lcefa.ido.redu <- simp.lcefa.ido.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## Limpets ##
-simp.lcefa.lmp <- simper(lcefa_lmp_simp[, 11:22], lcefa_lmp_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.lmp.dat <- summary(simp.lcefa.lmp, ordered = TRUE, digits = 4)
-simp.lcefa.lmp.dat <- data.frame(simp.lcefa.lmp.dat$Low_High)
-simp.lcefa.lmp.dat$FA <- row.names(simp.lcefa.lmp.dat)
-simp.lcefa.lmp.dat$average_scaled <- simp.lcefa.lmp.dat$average / sum(simp.lcefa.lmp.dat$average)
-simp.lcefa.lmp$Low_High$overall
-simp.lcefa.lmp.dat$taxa <- "Limpet"
-
-simp.lcefa.lmp.redu <- simp.lcefa.lmp.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-# Butter clams #
-simp.lcefa.but <- simper(lcefa_but_simp[, 11:22], lcefa_but_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.but.dat <- summary(simp.lcefa.but, ordered = TRUE, digits = 4)
-simp.lcefa.but.dat <- data.frame(simp.lcefa.but.dat$Low_High)
-simp.lcefa.but.dat$FA <- row.names(simp.lcefa.but.dat)
-simp.lcefa.but.dat$average_scaled <- simp.lcefa.but.dat$average / sum(simp.lcefa.but.dat$average)
-simp.lcefa.but$Low_High$overall
-simp.lcefa.but.dat$taxa <- "Butter clam"
-
-simp.lcefa.but.redu <- simp.lcefa.but.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-```
-
-###### Secondary consumers
-```{r}
-## Dock shrimp ##
-simp.lcefa.dsh <- simper(lcefa_dsh_simp[, 11:22], lcefa_dsh_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.dsh.dat <- summary(simp.lcefa.dsh, ordered = TRUE, digits = 4)
-simp.lcefa.dsh.dat <- data.frame(simp.lcefa.dsh.dat$Low_High)
-simp.lcefa.dsh.dat$FA <- row.names(simp.lcefa.dsh.dat)
-simp.lcefa.dsh.dat$average_scaled <- simp.lcefa.dsh.dat$average / sum(simp.lcefa.dsh.dat$average)
-simp.lcefa.dsh$Low_High$overall
-simp.lcefa.dsh.dat$taxa <- "Dock shrimp"
-
-simp.lcefa.dsh.redu <- simp.lcefa.dsh.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## Helmet crabs ##
-simp.lcefa.hel <- simper(lcefa_hel_simp[, 11:22], lcefa_hel_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.hel.dat <- summary(simp.lcefa.hel, ordered = TRUE, digits = 4)
-simp.lcefa.hel.dat <- data.frame(simp.lcefa.hel.dat$Low_High)
-simp.lcefa.hel.dat$FA <- row.names(simp.lcefa.hel.dat)
-simp.lcefa.hel.dat$average_scaled <- simp.lcefa.hel.dat$average / sum(simp.lcefa.hel.dat$average)
-simp.lcefa.hel$Low_High$overall
-simp.lcefa.hel.dat$taxa <- "Helmet crab"
-
-simp.lcefa.hel.redu <- simp.lcefa.hel.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## Graceful crabs ##
-simp.lcefa.grc <- simper(lcefa_grc_simp[, 11:22], lcefa_grc_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.grc.dat <- summary(simp.lcefa.grc, ordered = TRUE, digits = 4)
-simp.lcefa.grc.dat <- data.frame(simp.lcefa.grc.dat$Low_High)
-simp.lcefa.grc.dat$FA <- row.names(simp.lcefa.grc.dat)
-simp.lcefa.grc.dat$average_scaled <- simp.lcefa.grc.dat$average / sum(simp.lcefa.grc.dat$average)
-simp.lcefa.grc$Low_High$overall
-simp.lcefa.grc.dat$taxa <- "Graceful crab"
-
-simp.lcefa.grc.redu <- simp.lcefa.grc.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## Snake prickleback ##
-simp.lcefa.snk <- simper(lcefa_snk_simp[, 11:22], lcefa_snk_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.snk.dat <- summary(simp.lcefa.snk, ordered = TRUE, digits = 4)
-simp.lcefa.snk.dat <- data.frame(simp.lcefa.snk.dat$Low_High)
-simp.lcefa.snk.dat$FA <- row.names(simp.lcefa.snk.dat)
-simp.lcefa.snk.dat$average_scaled <- simp.lcefa.snk.dat$average / sum(simp.lcefa.snk.dat$average)
-simp.lcefa.snk$Low_High$overall
-simp.lcefa.snk.dat$taxa <- "Snake prickleback"
-
-simp.lcefa.snk.redu <- simp.lcefa.snk.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("Low" = ava) %>% 
-  rename("High" = avb)
-
-## Staghorn sculpin ##
-simp.lcefa.stg <- simper(lcefa_stg_simp[, 11:22], lcefa_stg_simp$Sea_otter_tr, permutations = 9999)
-simp.lcefa.stg.dat <- summary(simp.lcefa.stg, ordered = TRUE, digits = 4)
-simp.lcefa.stg.dat <- data.frame(simp.lcefa.stg.dat$High_Low)
-simp.lcefa.stg.dat$FA <- row.names(simp.lcefa.stg.dat)
-simp.lcefa.stg.dat$average_scaled <- simp.lcefa.stg.dat$average / sum(simp.lcefa.stg.dat$average)
-simp.lcefa.stg$High_Low$overall
-simp.lcefa.stg.dat$taxa <- "Staghorn sculpin"
-
-simp.lcefa.stg.redu <- simp.lcefa.stg.dat %>% 
-  filter(cumsum <= 0.9) %>% 
-  dplyr::select(FA, ava, avb, average, sd, cumsum, p) %>% 
-  mutate_if(is.numeric, round, 4) %>% 
-  mutate(ava = ava * 100) %>% 
-  mutate(avb = avb * 100) %>% 
-  mutate(average = average * 100) %>% 
-  mutate(sd = sd * 100) %>% 
-  mutate(cumsum = cumsum * 100) %>% 
-  rename("High" = ava) %>% 
-  rename("Low" = avb)
-```
-
-###### SIMPER summaries
-```{r}
-## Combine ##
-simp.sum <- rbind(simp.eg.dat,
-                  simp.fu.dat,
-                  simp.pm.dat,
-                  simp.ul.dat,
-                  simp.ido.dat,
-                  simp.lmp.dat,
-                  simp.but.dat,
-                  simp.dsh.dat,
-                  simp.hel.dat,
-                  simp.grc.dat,
-                  simp.snk.dat,
-                  simp.stg.dat)
-
-## Export ##
-write.csv(simp.sum, "../ALL_DATA/FA_SIMPER_output.csv", row.names = FALSE)
-
-## Read in ##
-simp.sum <- read.csv("../ALL_DATA/FA_SIMPER_output.csv", header = TRUE, stringsAsFactors = FALSE)
-```
-
-Looking for SIMPER patterns
-```{r simp pat}
-## Filter top FAs ##
-simp.top <- simp.sum %>% 
-  filter(cumsum < 0.9) %>% 
-  group_by(taxa) %>% 
-  top_n(-5, cumsum) %>% 
-  mutate(FA = FA) %>% 
-  mutate(cumsum = cumsum) 
-
-## Top summaries ##
-simp.redu.tab <- data.frame(TI = simp.top$taxa,
-                            FA = simp.top$FA,
-                            H.SO = round(simp.top$avb * 100, 1),
-                            L.SO = round(simp.top$ava * 100, 1),
-                            AVG = round(simp.top$average * 100, 1),
-                            SD = round(simp.top$sd * 100, 1),
-                            DISS = round(simp.top$average_scaled * 100, 1),
-                            CUM = round(simp.top$cumsum * 100, 1),
-                            P = round(simp.top$p, 3))
-
-simp.top.sum <- simp.top %>% 
-  filter(taxa == "Eelgrass" | taxa == "Fucus" | taxa == "POM" | taxa == "Sugar kelp" | taxa == "Ulva" | taxa == "Pentidotea" | taxa == "Limpet" | taxa == "Butter clam" | taxa == "Dock shrimp" | taxa == "Graceful crab" | taxa == "Staghorn sculpin") %>% 
-  group_by(FA) %>% 
-  summarize(n = n())
-
-simp.top$taxa[simp.top$FA == "C20.5w3"]
-## 
-
-## 90% summaries ##
-simp.90 <- simp.sum %>% 
-  filter(cumsum <= 0.92)
-
-simp.90.tab <- data.frame(TI = simp.90$taxa,
-                            FA = simp.90$FA,
-                            H.SO = round(simp.90$avb * 100, 1),
-                            L.SO = round(simp.90$ava * 100, 1),
-                            AVG = paste(round(simp.90$average * 100, 1), "(",round(simp.90$sd * 100, 1),")"), 
-                            CUM = round(simp.90$cumsum * 100, 1))
-```
-
-##### NMDS plots - LCEFA
-With Vectors of significant <0.05 PERMANOVAs
-
-###### Ordination
-Calculate NMDS 
-```{r MDS, echo = FALSE}
-## Primary Producers ##
-lcefa_fu_mds <- metaMDS(lcefa_fu_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-lcefa_pm_mds <- metaMDS(lcefa_pm_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-lcefa_eg_mds <- metaMDS(lcefa_eg_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-lcefa_ep_mds <- metaMDS(lcefa_ep_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-
-## Primary Consumers
-lcefa_lmp_mds <- metaMDS(lcefa_lmp_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-lcefa_but_mds <- metaMDS(lcefa_but_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-
-## Secondary consumers ##
-lcefa_dsh_mds <- metaMDS(lcefa_dsh_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-lcefa_grc_mds <- metaMDS(lcefa_grc_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-lcefa_snk_mds <- metaMDS(lcefa_snk_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-lcefa_stg_mds <- metaMDS(lcefa_stg_dist, k = 2, distance = "euclidean", autotransform = FALSE)
-```
-
-Stress. so stressful
-```{r}
-## Primary Producers ##
-lcefa_fu_mds$stress
-lcefa_pm_mds$stress
-lcefa_eg_mds$stress
-lcefa_ep_mds$stress
-
-## Primary Consumers
-lcefa_lmp_mds$stress
-lcefa_but_mds$stress
-
-## Secondary consumers ##
-lcefa_dsh_mds$stress
-lcefa_grc_mds$stress
-lcefa_snk_mds$stress
-lcefa_stg_mds$stress
-```
-
-###### Data Prep
-```{r}
-## Producers ##
-# Fucus #
-lcefa_fu_mds_dat <- as.data.frame(scores(lcefa_fu_mds))
-lcefa_fu_mds_dat$ID <- lcefa_fu$ID 
-lcefa_fu_mds_dat <- merge(lcefa_fu_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-
-# POM #
-lcefa_pm_mds_dat <- as.data.frame(scores(lcefa_pm_mds))
-lcefa_pm_mds_dat$ID <- lcefa_pm$ID 
-lcefa_pm_mds_dat <- merge(lcefa_pm_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-
-# Epiphytes #
-lcefa_ep_mds_dat <- as.data.frame(scores(lcefa_ep_mds))
-lcefa_ep_mds_dat$ID <- lcefa_ep$ID 
-lcefa_ep_mds_dat <- merge(lcefa_ep_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-
-# Eelgrass #
-lcefa_eg_mds_dat <- as.data.frame(scores(lcefa_eg_mds))
-lcefa_eg_mds_dat$ID <- lcefa_eg$ID 
-lcefa_eg_mds_dat <- merge(lcefa_eg_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-
-## Primary consumers ##
-# Limpet #
-lcefa_lmp_mds_dat <- as.data.frame(scores(lcefa_lmp_mds))
-lcefa_lmp_mds_dat$ID <- lcefa_lmp$ID 
-lcefa_lmp_mds_dat <- merge(lcefa_lmp_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-
-# Butter clam #
-lcefa_but_mds_dat <- as.data.frame(scores(lcefa_but_mds))
-lcefa_but_mds_dat$ID <- lcefa_but$ID 
-lcefa_but_mds_dat <- merge(lcefa_but_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-
-## Secondary Consumers ##
-# Dock Shrimp #
-lcefa_dsh_mds_dat <- as.data.frame(scores(lcefa_dsh_mds))
-lcefa_dsh_mds_dat$ID <- lcefa_dsh$ID 
-lcefa_dsh_mds_dat <- merge(lcefa_dsh_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-
-# Graceful crabs #
-lcefa_grc_mds_dat <- as.data.frame(scores(lcefa_grc_mds))
-lcefa_grc_mds_dat$ID <- lcefa_grc$ID 
-lcefa_grc_mds_dat <- merge(lcefa_grc_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-
-# Snake prickleback #
-lcefa_snk_mds_dat <- as.data.frame(scores(lcefa_snk_mds))
-lcefa_snk_mds_dat$ID <- lcefa_snk$ID 
-lcefa_snk_mds_dat <- merge(lcefa_snk_mds_dat, bimrk[, c(1:4, 7, 9, 10)], by.x = "ID", by.y = "Biomarker_ID")
-
-# Staghorn #
-lcefa_stg_mds_dat <- as.data.frame(scores(lcefa_stg_mds))
-lcefa_stg_mds_dat$ID <- lcefa_stg$ID 
-lcefa_stg_mds_dat <- merge(lcefa_stg_mds_dat, bimrk[, c(1:4, 7:10)], by.x = "ID", by.y = "Biomarker_ID")
-```
-
-###### FA Vectors
-```{r fa vector, echo = FALSE, eval = FALSE}
-## Primary producer Vectors ##
-# Fucus #
-vec.lcefa.fu <- envfit(lcefa_fu_mds$points, lcefa_fu[, 11:22], perm = 9999)
-vec.lcefa.fu.arrows <- scores(vec.lcefa.fu, display = "vectors")
-vec.lcefa.fu.dat <- data.frame(vec.lcefa.fu.arrows)
-vec.lcefa.fu.dat$pvals <- vec.lcefa.fu$vectors$pvals
-vec.lcefa.fu.dat$FA <- row.names(vec.lcefa.fu.dat)
-vec.lcefa.fu.dat$r2 <- vec.lcefa.fu$vectors$r
-
-scalefactor <- min(max(lcefa_fu_mds_dat$NMDS1) - min(lcefa_fu_mds_dat$NMDS1), max(lcefa_fu_mds_dat$NMDS2) - min(lcefa_fu_mds_dat$NMDS2))
-vec.lcefa.fu.dat$MDS1_sc <- vec.lcefa.fu.dat$MDS1 * (scalefactor * vec.lcefa.fu.dat$r2)
-vec.lcefa.fu.dat$MDS2_sc <- vec.lcefa.fu.dat$MDS2 * (scalefactor * vec.lcefa.fu.dat$r2)
-
-vec.lcefa.fu.dat.sig <- vec.lcefa.fu.dat %>% 
-  filter(r2 >= 0.8)
-
-fu_lcefa_arrow_angle <- 90 - ((atan2(vec.lcefa.fu.dat.sig$MDS1_sc, vec.lcefa.fu.dat.sig$MDS2_sc)* 180)/pi)
-fu_lcefa_arrow_angle <- ifelse(fu_lcefa_arrow_angle > 90 & fu_lcefa_arrow_angle < 270, fu_lcefa_arrow_angle + 180, fu_lcefa_arrow_angle)
-fu_lcefa_arrow_hjust <- ifelse(fu_lcefa_arrow_angle > 90, 1, 0)
-vec.lcefa.fu.dat.sig$FA = gsub("C", "", vec.lcefa.fu.dat.sig$FA)
-vec.lcefa.fu.dat.sig$FA = sub("w", "*omega*-", vec.lcefa.fu.dat.sig$FA)
-vec.lcefa.fu.dat.sig$FA = sub("\\.", ":", vec.lcefa.fu.dat.sig$FA)
-
-# POM #
-vec.pm <- envfit(fa_pm_mds$points, fa_pm[, 11:52], perm = 9999)
-vec.pm.arrows <- scores(vec.pm, display = "vectors")
-vec.pm.dat <- data.frame(vec.pm.arrows)
-vec.pm.dat$pvals <- vec.pm$vectors$pvals
-vec.pm.dat$FA <- row.names(vec.pm.dat)
-vec.pm.dat$r2 <- vec.pm$vectors$r
-
-scalefactor <- min(max(fa_pm_mds_dat$NMDS1) - min(fa_pm_mds_dat$NMDS1), max(fa_pm_mds_dat$NMDS2) - min(fa_pm_mds_dat$NMDS2))
-vec.pm.dat$MDS1_sc <- vec.pm.dat$MDS1 * (scalefactor * vec.pm.dat$r2)
-vec.pm.dat$MDS2_sc <- vec.pm.dat$MDS2 * (scalefactor * vec.pm.dat$r2)
-
-vec.pm.dat.sig <- vec.pm.dat %>% 
-  filter(r2 >= 0.95)
-
-pm_arrow_angle <- 90 - ((atan2(vec.pm.dat.sig$MDS1_sc, vec.pm.dat.sig$MDS2_sc)* 180)/pi)
-pm_arrow_angle <- ifelse(pm_arrow_angle > 90 & pm_arrow_angle < 270, pm_arrow_angle + 180, pm_arrow_angle)
-pm_arrow_hjust <- ifelse(pm_arrow_angle > 90, 1, 0)
-vec.pm.dat.sig$FA = gsub("C", "", vec.pm.dat.sig$FA)
-vec.pm.dat.sig$FA = sub("w", "*omega*-", vec.pm.dat.sig$FA)
-vec.pm.dat.sig$FA = sub("\\.", ":", vec.pm.dat.sig$FA)
-
-# Eelgrass #
-vec.eg <- envfit(fa_eg_mds$points, fa_eg[, 11:52], perm = 9999)
-vec.eg.arrows <- scores(vec.eg, display = "vectors")
-vec.eg.dat <- data.frame(vec.eg.arrows)
-vec.eg.dat$pvals <- vec.eg$vectors$pvals
-vec.eg.dat$FA <- row.names(vec.eg.dat)
-vec.eg.dat$r2 <- vec.eg$vectors$r
-
-scalefactor <- min(max(fa_eg_mds_dat$NMDS1) - min(fa_eg_mds_dat$NMDS1), max(fa_eg_mds_dat$NMDS2) - min(fa_eg_mds_dat$NMDS2))
-vec.eg.dat$MDS1_sc <- vec.eg.dat$MDS1 * (scalefactor * vec.eg.dat$r2)
-vec.eg.dat$MDS2_sc <- vec.eg.dat$MDS2 * (scalefactor * vec.eg.dat$r2)
-
-vec.eg.dat.sig <- vec.eg.dat %>% 
-  filter(r2 >= 0.8)
-
-eg_arrow_angle <- 90 - ((atan2(vec.eg.dat.sig$MDS1_sc, vec.eg.dat.sig$MDS2_sc)* 180)/pi)
-eg_arrow_angle <- ifelse(eg_arrow_angle > 90 & eg_arrow_angle < 270, eg_arrow_angle + 180, eg_arrow_angle)
-eg_arrow_hjust <- ifelse(eg_arrow_angle > 90, 1, 0)
-vec.eg.dat.sig$FA = gsub("C", "", vec.eg.dat.sig$FA)
-vec.eg.dat.sig$FA = sub("w", "*omega*-", vec.eg.dat.sig$FA)
-vec.eg.dat.sig$FA = sub("\\.", ":", vec.eg.dat.sig$FA)
-
-# Ulva #
-vec.ul <- envfit(fa_ul_mds$points, fa_ul[, 11:52], perm = 9999)
-vec.ul.arrows <- scores(vec.ul, display = "vectors")
-vec.ul.dat <- data.frame(vec.ul.arrows)
-vec.ul.dat$pvals <- vec.ul$vectors$pvals
-vec.ul.dat$FA <- row.names(vec.ul.dat)
-vec.ul.dat$r2 <- vec.ul$vectors$r
-
-scalefactor <- min(max(fa_ul_mds_dat$NMDS1) - min(fa_ul_mds_dat$NMDS1), max(fa_ul_mds_dat$NMDS2) - min(fa_ul_mds_dat$NMDS2))
-vec.ul.dat$MDS1_sc <- vec.ul.dat$MDS1 * (scalefactor * vec.ul.dat$r2)
-vec.ul.dat$MDS2_sc <- vec.ul.dat$MDS2 * (scalefactor * vec.ul.dat$r2)
-
-vec.ul.dat.sig <- vec.ul.dat %>% 
-  filter(r2 >= 0.8)
-
-ul_arrow_angle <- 90 - ((atan2(vec.ul.dat.sig$MDS1_sc, vec.ul.dat.sig$MDS2_sc)* 180)/pi)
-ul_arrow_angle <- ifelse(ul_arrow_angle > 90 & ul_arrow_angle < 270, ul_arrow_angle + 180, ul_arrow_angle)
-ul_arrow_hjust <- ifelse(ul_arrow_angle > 90, 1, 0)
-vec.ul.dat.sig$FA = gsub("C", "", vec.ul.dat.sig$FA)
-vec.ul.dat.sig$FA = sub("w", "*omega*-", vec.ul.dat.sig$FA)
-vec.ul.dat.sig$FA = sub("\\.", ":", vec.ul.dat.sig$FA)
-
-## Primary Consumers ##
-# Pentidotea #
-vec.ido <- envfit(fa_ido_mds$points, fa_ido[, 11:52], perm = 9999)
-vec.ido.arrows <- scores(vec.ido, display = "vectors")
-vec.ido.dat <- data.frame(vec.ido.arrows)
-vec.ido.dat$pvals <- vec.ido$vectors$pvals
-vec.ido.dat$FA <- row.names(vec.ido.dat)
-vec.ido.dat$r2 <- vec.ido$vectors$r
-
-scalefactor <- min(max(fa_ido_mds_dat$NMDS1) - min(fa_ido_mds_dat$NMDS1), max(fa_ido_mds_dat$NMDS2) - min(fa_ido_mds_dat$NMDS2))
-vec.ido.dat$MDS1_sc <- vec.ido.dat$MDS1 * (scalefactor * vec.ido.dat$r2)
-vec.ido.dat$MDS2_sc <- vec.ido.dat$MDS2 * (scalefactor * vec.ido.dat$r2)
-
-vec.ido.dat.sig <- vec.ido.dat %>% 
-  filter(r2 >= 0.8)
-
-ido_arrow_angle <- 90 - ((atan2(vec.ido.dat.sig$MDS1_sc, vec.ido.dat.sig$MDS2_sc)* 180)/pi)
-ido_arrow_angle <- ifelse(ido_arrow_angle > 90 & ido_arrow_angle < 270, ido_arrow_angle + 180, ido_arrow_angle)
-ido_arrow_hjust <- ifelse(ido_arrow_angle > 90, 1, 0)
-vec.ido.dat.sig$FA = gsub("C", "", vec.ido.dat.sig$FA)
-vec.ido.dat.sig$FA = sub("w", "*omega*-", vec.ido.dat.sig$FA)
-vec.ido.dat.sig$FA = sub("\\.", ":", vec.ido.dat.sig$FA)
-
-# Limpet #
-vec.lmp <- envfit(fa_lmp_mds$points, fa_lmp[, 11:52], perm = 9999)
-vec.lmp.arrows <- scores(vec.lmp, display = "vectors")
-vec.lmp.dat <- data.frame(vec.lmp.arrows)
-vec.lmp.dat$pvals <- vec.lmp$vectors$pvals
-vec.lmp.dat$FA <- row.names(vec.lmp.dat)
-vec.lmp.dat$r2 <- vec.lmp$vectors$r
-
-scalefactor <- min(max(fa_lmp_mds_dat$NMDS1) - min(fa_lmp_mds_dat$NMDS1), max(fa_lmp_mds_dat$NMDS2) - min(fa_lmp_mds_dat$NMDS2))
-vec.lmp.dat$MDS1_sc <- vec.lmp.dat$MDS1 * (scalefactor * vec.lmp.dat$r2)
-vec.lmp.dat$MDS2_sc <- vec.lmp.dat$MDS2 * (scalefactor * vec.lmp.dat$r2)
-
-vec.lmp.dat.sig <- vec.lmp.dat %>% 
-  filter(r2 >= 0.8)
-
-lmp_arrow_angle <- 90 - ((atan2(vec.lmp.dat.sig$MDS1_sc, vec.lmp.dat.sig$MDS2_sc)* 180)/pi)
-lmp_arrow_angle <- ifelse(lmp_arrow_angle > 90 & lmp_arrow_angle < 270, lmp_arrow_angle + 180, lmp_arrow_angle)
-lmp_arrow_hjust <- ifelse(lmp_arrow_angle > 90, 1, 0)
-vec.lmp.dat.sig$FA = gsub("C", "", vec.lmp.dat.sig$FA)
-vec.lmp.dat.sig$FA = sub("w", "*omega*-", vec.lmp.dat.sig$FA)
-vec.lmp.dat.sig$FA = sub("\\.", ":", vec.lmp.dat.sig$FA)
-
-# Butter clam #
-vec.but <- envfit(fa_but_mds$points, fa_but[, 11:52], perm = 9999)
-vec.but.arrows <- scores(vec.but, display = "vectors")
-vec.but.dat <- data.frame(vec.but.arrows)
-vec.but.dat$pvals <- vec.but$vectors$pvals
-vec.but.dat$FA <- row.names(vec.but.dat)
-vec.but.dat$r2 <- vec.but$vectors$r
-
-scalefactor <- min(max(fa_but_mds_dat$NMDS1) - min(fa_but_mds_dat$NMDS1), max(fa_but_mds_dat$NMDS2) - min(fa_but_mds_dat$NMDS2))
-vec.but.dat$MDS1_sc <- vec.but.dat$MDS1 * (scalefactor * vec.but.dat$r2)
-vec.but.dat$MDS2_sc <- vec.but.dat$MDS2 * (scalefactor * vec.but.dat$r2)
-
-vec.but.dat.sig <- vec.but.dat %>% 
-  filter(r2 >= 0.8)
-
-but_arrow_angle <- 90 - ((atan2(vec.but.dat.sig$MDS1_sc, vec.but.dat.sig$MDS2_sc)* 180)/pi)
-but_arrow_angle <- ifelse(but_arrow_angle > 90 & but_arrow_angle < 270, but_arrow_angle + 180, but_arrow_angle)
-but_arrow_hjust <- ifelse(but_arrow_angle > 90, 1, 0)
-vec.but.dat.sig$FA = gsub("C", "", vec.but.dat.sig$FA)
-vec.but.dat.sig$FA = sub("w", "*omega*-", vec.but.dat.sig$FA)
-vec.but.dat.sig$FA = sub("\\.", ":", vec.but.dat.sig$FA)
-
-## Secondary Consumers ##
-# Dock Shrimp #
-vec.dsh <- envfit(fa_dsh_mds$points, fa_dsh[, 11:52], perm = 9999)
-vec.dsh.arrows <- scores(vec.dsh, display = "vectors")
-vec.dsh.dat <- data.frame(vec.dsh.arrows)
-vec.dsh.dat$pvals <- vec.dsh$vectors$pvals
-vec.dsh.dat$FA <- row.names(vec.dsh.dat)
-vec.dsh.dat$r2 <- vec.dsh$vectors$r
-
-scalefactor <- min(max(fa_dsh_mds_dat$NMDS1) - min(fa_dsh_mds_dat$NMDS1), max(fa_dsh_mds_dat$NMDS2) - min(fa_dsh_mds_dat$NMDS2))
-vec.dsh.dat$MDS1_sc <- vec.dsh.dat$MDS1 * (scalefactor * vec.dsh.dat$r2)
-vec.dsh.dat$MDS2_sc <- vec.dsh.dat$MDS2 * (scalefactor * vec.dsh.dat$r2)
-
-vec.dsh.dat.sig <- vec.dsh.dat %>% 
-  filter(r2 >= 0.8)
-
-dsh_arrow_angle <- 90 - ((atan2(vec.dsh.dat.sig$MDS1_sc, vec.dsh.dat.sig$MDS2_sc)* 180)/pi)
-dsh_arrow_angle <- ifelse(dsh_arrow_angle > 90 & dsh_arrow_angle < 270, dsh_arrow_angle + 180, dsh_arrow_angle)
-dsh_arrow_hjust <- ifelse(dsh_arrow_angle > 90, 1, 0)
-vec.dsh.dat.sig$FA = gsub("C", "", vec.dsh.dat.sig$FA)
-vec.dsh.dat.sig$FA = sub("w", "*omega*-", vec.dsh.dat.sig$FA)
-vec.dsh.dat.sig$FA = sub("\\.", ":", vec.dsh.dat.sig$FA)
-
-# Helmet crab #
-vec.hel <- envfit(fa_hel_mds$points, fa_hel[, 11:52], perm = 9999)
-vec.hel.arrows <- scores(vec.hel, display = "vectors")
-vec.hel.dat <- data.frame(vec.hel.arrows)
-vec.hel.dat$pvals <- vec.hel$vectors$pvals
-vec.hel.dat$FA <- row.names(vec.hel.dat)
-vec.hel.dat$r2 <- vec.hel$vectors$r
-
-scalefactor <- min(max(fa_hel_mds_dat$NMDS1) - min(fa_hel_mds_dat$NMDS1), max(fa_hel_mds_dat$NMDS2) - min(fa_hel_mds_dat$NMDS2))
-vec.hel.dat$MDS1_sc <- vec.hel.dat$MDS1 * (scalefactor * vec.hel.dat$r2)
-vec.hel.dat$MDS2_sc <- vec.hel.dat$MDS2 * (scalefactor * vec.hel.dat$r2)
-
-vec.hel.dat.sig <- vec.hel.dat %>% 
-  filter(r2 >= 0.8)
-
-hel_arrow_angle <- 90 - ((atan2(vec.hel.dat.sig$MDS1_sc, vec.hel.dat.sig$MDS2_sc)* 180)/pi)
-hel_arrow_angle <- ifelse(hel_arrow_angle > 90 & hel_arrow_angle < 270, hel_arrow_angle + 180, hel_arrow_angle)
-hel_arrow_hjust <- ifelse(hel_arrow_angle > 90, 1, 0)
-vec.hel.dat.sig$FA = gsub("C", "", vec.hel.dat.sig$FA)
-vec.hel.dat.sig$FA = sub("w", "*omega*-", vec.hel.dat.sig$FA)
-vec.hel.dat.sig$FA = sub("\\.", ":", vec.hel.dat.sig$FA)
-
-# Graceful crabs #
-vec.grc <- envfit(fa_grc_mds$points, fa_grc[, 11:52], perm = 9999)
-vec.grc.arrows <- scores(vec.grc, display = "vectors")
-vec.grc.dat <- data.frame(vec.grc.arrows)
-vec.grc.dat$pvals <- vec.grc$vectors$pvals
-vec.grc.dat$FA <- row.names(vec.grc.dat)
-vec.grc.dat$r2 <- vec.grc$vectors$r
-
-scalefactor <- min(max(fa_grc_mds_dat$NMDS1) - min(fa_grc_mds_dat$NMDS1), max(fa_grc_mds_dat$NMDS2) - min(fa_grc_mds_dat$NMDS2))
-vec.grc.dat$MDS1_sc <- vec.grc.dat$MDS1 * (scalefactor * vec.grc.dat$r2)
-vec.grc.dat$MDS2_sc <- vec.grc.dat$MDS2 * (scalefactor * vec.grc.dat$r2)
-
-vec.grc.dat.sig <- vec.grc.dat %>% 
-  filter(r2 >= 0.8)
-
-grc_arrow_angle <- 90 - ((atan2(vec.grc.dat.sig$MDS1_sc, vec.grc.dat.sig$MDS2_sc)* 180)/pi)
-grc_arrow_angle <- ifelse(grc_arrow_angle > 90 & grc_arrow_angle < 270, grc_arrow_angle + 180, grc_arrow_angle)
-grc_arrow_hjust <- ifelse(grc_arrow_angle > 90, 1, 0)
-vec.grc.dat.sig$FA = gsub("C", "", vec.grc.dat.sig$FA)
-vec.grc.dat.sig$FA = sub("w", "*omega*-", vec.grc.dat.sig$FA)
-vec.grc.dat.sig$FA = sub("\\.", ":", vec.grc.dat.sig$FA)
-
-# Snake prickleback #
-vec.snk <- envfit(fa_snk_mds$points, fa_snk[, 11:52], perm = 9999)
-vec.snk.arrows <- scores(vec.snk, display = "vectors")
-vec.snk.dat <- data.frame(vec.snk.arrows)
-vec.snk.dat$pvals <- vec.snk$vectors$pvals
-vec.snk.dat$FA <- row.names(vec.snk.dat)
-vec.snk.dat$r2 <- vec.snk$vectors$r
-
-scalefactor <- min(max(fa_snk_mds_dat$NMDS1) - min(fa_snk_mds_dat$NMDS1), max(fa_snk_mds_dat$NMDS2) - min(fa_snk_mds_dat$NMDS2))
-vec.snk.dat$MDS1_sc <- vec.snk.dat$MDS1 * (scalefactor * vec.snk.dat$r2)
-vec.snk.dat$MDS2_sc <- vec.snk.dat$MDS2 * (scalefactor * vec.snk.dat$r2)
-
-vec.snk.dat.sig <- vec.snk.dat %>% 
-  filter(r2 >= 0.8)
-
-snk_arrow_angle <- 90 - ((atan2(vec.snk.dat.sig$MDS1_sc, vec.snk.dat.sig$MDS2_sc)* 180)/pi)
-snk_arrow_angle <- ifelse(snk_arrow_angle > 90 & snk_arrow_angle < 270, snk_arrow_angle + 180, snk_arrow_angle)
-snk_arrow_hjust <- ifelse(snk_arrow_angle > 90, 1, 0)
-vec.snk.dat.sig$FA = gsub("C", "", vec.snk.dat.sig$FA)
-vec.snk.dat.sig$FA = sub("w", "*omega*-", vec.snk.dat.sig$FA)
-vec.snk.dat.sig$FA = sub("\\.", ":", vec.snk.dat.sig$FA)
-
-# Staghorn sculpin #
-vec.stg <- envfit(fa_stg_mds$points, fa_stg[, 11:52], perm = 9999)
-vec.stg.arrows <- scores(vec.stg, display = "vectors")
-vec.stg.dat <- data.frame(vec.stg.arrows)
-vec.stg.dat$pvals <- vec.stg$vectors$pvals
-vec.stg.dat$FA <- row.names(vec.stg.dat)
-vec.stg.dat$r2 <- vec.stg$vectors$r
-
-scalefactor <- min(max(fa_stg_mds_dat$NMDS1) - min(fa_stg_mds_dat$NMDS1), max(fa_stg_mds_dat$NMDS2) - min(fa_stg_mds_dat$NMDS2))
-vec.stg.dat$MDS1_sc <- vec.stg.dat$MDS1 * (scalefactor * vec.stg.dat$r2)
-vec.stg.dat$MDS2_sc <- vec.stg.dat$MDS2 * (scalefactor * vec.stg.dat$r2)
-
-vec.stg.dat.sig <- vec.stg.dat %>% 
-  filter(r2 >= 0.8)
-
-stg_arrow_angle <- 90 - ((atan2(vec.stg.dat.sig$MDS1_sc, vec.stg.dat.sig$MDS2_sc)* 180)/pi)
-stg_arrow_angle <- ifelse(stg_arrow_angle > 90 & stg_arrow_angle < 270, stg_arrow_angle + 180, stg_arrow_angle)
-stg_arrow_hjust <- ifelse(stg_arrow_angle > 90, 1, 0)
-vec.stg.dat.sig$FA = gsub("C", "", vec.stg.dat.sig$FA)
-vec.stg.dat.sig$FA = sub("w", "*omega*-", vec.stg.dat.sig$FA)
-vec.stg.dat.sig$FA = sub("\\.", ":", vec.stg.dat.sig$FA)
-```
-
-###### Plots
-NOTE that axes limits are very specific to allow for plotting a 6 X 8 in pdf panel plot
-```{r}
-## Primary Producers ##
-# Fucus #
-fu.nmds <- ggplot(lcefa_fu_mds_dat) +
-  geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
-  scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.lcefa.fu.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
-  geom_text(data = vec.lcefa.fu.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = fu_lcefa_arrow_angle, hjust = fu_lcefa_arrow_hjust) +
-  scale_x_continuous(limits = c(-0.04, 0.05)) +
-  scale_y_continuous(limits = c(-0.03, 0.07)) +
   theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank()) +
   theme(legend.position = "none")
 ```
