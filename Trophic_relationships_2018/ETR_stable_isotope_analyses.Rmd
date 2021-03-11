@@ -78,7 +78,7 @@ si <- si %>%
 si$Species_common <- ifelse(str_detect(si$Species_common, "Macoma"), "Macoma sp.", si$Species_common)
 
 si.n <- si %>% 
-  group_by(Sea_otter_region, Species_common) %>% 
+  group_by(Sea_otter_tr, Species_common) %>% 
   summarise(n = n())
 ```
 
@@ -472,4 +472,346 @@ plots
 ggplot(si_eg) +
   geom_point(aes(x = del_C, y = del_N, color = si_eg$Sea_otter_tr), size = 3) +
   scale_color_manual(values = so.pal, "Sea otter region")
+```
+
+### Normalized SI data
+subtract mean C and N value of primary producers from individual species. As Reviewer 2 suggests
+
+```{r}
+## Calculate mean PP values ##
+mean_pp_CN <- si %>% 
+  filter(sp_group == "PP") %>% 
+  group_by(Sea_otter_tr) %>% 
+  summarize(mean_PP_C = mean(del_C),
+            mean_PP_N = mean(del_N))
+
+## Add normaized values to master data ##
+si <- merge(si, mean_pp_CN, by = "Sea_otter_tr", all.x = TRUE)
+
+## Calcualte normalized values ##
+si$del_C_norm <- si$del_C - si$mean_PP_C
+si$del_N_norm <- si$del_N - si$mean_PP_N
+```
+
+#### Convex hulls
+First calcualte mean values by species by sea otter treatment
+```{r c hulls all, echo = FALSE}
+si.sum.norm <- si %>% 
+  group_by(Sea_otter_tr, Species_common) %>% 
+  summarise(Species_scientific = first(Species_scientific),
+            sp_code = first(sp_code),
+            sp_group = first(sp_group),
+            n = n(),
+            del_N_mean = mean(del_N_norm),
+            del_N_sd = sd(del_N_norm),
+            del_C_mean = mean(del_C_norm),
+            del_C_sd = sd(del_C_norm))
+
+si.sum.norm$sp_code <- ifelse(si.sum.norm$Species_common == "Macoma sp.", "CLMMAC", si.sum.norm$sp_code)
+
+si.sum.norm$del_N_ord_high <- sort(si.sum.norm$del_N_mean)
+
+## nice for ms tabel ##
+si.sum.norm.tab <- data.frame(Taxon = si.sum.norm$Species_common,
+                              Sea_otter_tr = si.sum.norm$Sea_otter_tr,
+                              del_C = paste(round(si.sum.norm$del_C_mean, 1), "(",round(si.sum.norm$del_C_sd, 1),")"),
+                              del_N = paste(round(si.sum.norm$del_N_mean, 1), "(",round(si.sum.norm$del_N_sd, 1),")"))
+
+## High sea otter ##
+high.c.area.norm <- convexhull(si.sum.norm$del_C_mean[si.sum.norm$Sea_otter_tr == "High"], si.sum.norm$del_N_mean[si.sum.norm$Sea_otter_tr == "High"])
+
+## Low sea otter ##
+low.c.area.norm <- convexhull(si.sum.norm$del_C_mean[si.sum.norm$Sea_otter_tr == "Low"], si.sum.norm$del_N_mean[si.sum.norm$Sea_otter_tr == "Low"])
+
+## Percent difference ##
+(low.c.area.norm$TA - high.c.area.norm$TA) / low.c.area.norm$TA
+```
+
+#### Plots
+```{r plots si all, echo = FALSE}
+## All data ##
+ggplot() +
+  geom_point(aes(x = si$del_C_norm, y = si$del_N_norm, shape = si$sp_group, color = si$Sea_otter_tr), size = 3) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_polygon(aes(x = high.c.area.raw$xcoords, y = high.c.area.raw$ycoords), fill = so.pal[1], alpha = 0.4) +
+  geom_polygon(aes(x = low.c.area.raw$xcoords, y = low.c.area.raw$ycoords), fill = so.pal[2], alpha = 0.4)
+
+## new names ##
+si.names <- c("BUT", "DSH", "SG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "SHN", "SNK", "STG", "SK", "UL", "BUT", "DSH", "SG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "RRC", "SHN", "SNK", "STG", "SK", "UL")
+si.sum.norm$si.names <- si.names
+si.sum.norm$si.names <- factor(si.sum.norm$si.names, levels = c("SG", "EP", "FU", "POM", "SK", "UL", "IDO", "BUT", "MAC", "DSH", "HEL", "GRC", "RRC", "SHN", "SNK", "STG"))
+
+## Mean values and hulls ##
+# High and Low #
+si.all.h <- ggplot() +
+  geom_point(aes(x = si.sum.norm$del_C_mean, y = si.sum.norm$del_N_mean, shape = si.sum.norm$sp_group, color = si.sum.norm$Sea_otter_tr), size = 2) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_polygon(aes(x = high.c.area.norm$xcoords, y = high.c.area.norm$ycoords), fill = so.pal[1], alpha = 0.4) +
+  geom_polygon(aes(x = low.c.area.norm$xcoords, y = low.c.area.norm$ycoords), fill = so.pal[2], alpha = 0.4) +
+  scale_x_continuous(limits = c(-4, 8), breaks = seq(-4, 8, by = 2)) +
+  scale_y_continuous(limits = c(-2, 8), breaks = seq(-2, 8, by = 2)) +
+  geom_text_repel(aes(x = si.sum.norm$del_C_mean, y = si.sum.norm$del_N_mean, label = si.sum.norm$si.names), size = 2) +
+  xlab(expression({delta}^13*C~'\u2030')) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  theme(legend.position = "none")
+
+si.all.h.lgnd <- ggplot() +
+  geom_point(aes(x = si.sum.norm$del_C_mean, y = si.sum.norm$del_N_mean, shape = si.sum.norm$sp_group, color = si.sum.norm$Sea_otter_tr), size = 2) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_polygon(aes(x = high.c.area.norm$xcoords, y = high.c.area.norm$ycoords), fill = so.pal[1], alpha = 0.4) +
+  geom_polygon(aes(x = low.c.area.norm$xcoords, y = low.c.area.norm$ycoords), fill = so.pal[2], alpha = 0.4) +
+  scale_x_continuous(limits = c(-4, 8), breaks = seq(-4, 8, by = 2)) +
+  scale_y_continuous(limits = c(-2, 8), breaks = seq(-2, 8, by = 2)) +
+  geom_text_repel(aes(x = si.sum.norm$del_C_mean, y = si.sum.norm$del_N_mean, label = si.sum.norm$si.names), size = 2) +
+  xlab(expression({delta}^13*C~'\u2030')) +
+  ylab(expression({delta}^15*N~'\u2030'))
+
+# High Only #
+si.sum.h <- subset(si.sum, Sea_otter_tr == "High")
+
+si.high.all <- ggplot() +
+  geom_point(aes(x = si.sum.h$del_C_mean, y = si.sum.h$del_N_mean, shape = si.sum.h$sp_group, color = si.sum.h$Sea_otter_tr), size = 2) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_polygon(aes(x = high.c.area$xcoords, y = high.c.area$ycoords), fill = so.pal[1], alpha = 0.4) +
+  scale_x_continuous(limits = c(-20, -6), breaks = seq(-20, -6, by = 2)) +
+  scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
+  geom_text_repel(aes(x = si.sum.h$del_C_mean, y = si.sum.h$del_N_mean, label = si.sum.h$si.names), size = 2) +
+  xlab(expression({delta}^13*C~'\u2030')) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  theme(legend.position = "none")
+
+# Low Only #
+si.sum.l <- subset(si.sum, Sea_otter_tr == "Low")
+
+si.low.all <- ggplot() +
+  geom_point(aes(x = si.sum.l$del_C_mean, y = si.sum.l$del_N_mean, shape = si.sum.l$sp_group, color = si.sum.l$Sea_otter_tr), size = 2) +
+  scale_color_manual(values = so.pal[2], "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_polygon(aes(x = low.c.area$xcoords, y = low.c.area$ycoords), fill = so.pal[2], alpha = 0.4) +
+  scale_x_continuous(limits = c(-20, -6), breaks = seq(-20, -6, by = 2)) +
+  scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
+  geom_text_repel(aes(x = si.sum.l$del_C_mean, y = si.sum.l$del_N_mean, label = si.sum.l$si.names), size = 2) +
+  xlab(expression({delta}^13*C~'\u2030')) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  theme(legend.position = "none")
+
+## C plots by treatment ##
+si.c.all <- ggplot(si.sum.norm) +
+  geom_errorbar(aes(x = si.names, ymin = del_C_mean - del_C_sd, ymax = del_C_mean + del_C_sd, group = Sea_otter_tr), width = 0, position = position_dodge(0.7)) +
+  geom_point(aes(x = si.names, y = del_C_mean, shape = sp_group, color = Sea_otter_tr), size = 2, position = position_dodge(0.7)) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  scale_y_continuous(limits = c(-6, 10), breaks = seq(-6, 10, by = 2)) +
+  ylab(expression({delta}^13*C~'\u2030')) +
+  xlab("Species") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "none")
+
+## N plots by treatment ##
+si.n.all <- ggplot(si.sum.norm) +
+  geom_errorbar(aes(x = si.names, ymin = del_N_mean - del_N_sd, ymax = del_N_mean + del_N_sd, group = Sea_otter_tr), width = 0, position = position_dodge(0.7)) +
+  geom_point(aes(x = si.names, y = del_N_mean, shape = sp_group, color = Sea_otter_tr), size = 2, position = position_dodge(0.7)) +
+  scale_color_manual(values = so.pal, "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  scale_y_continuous(limits = c(-3, 8), breaks = seq(-2, 8, by = 2)) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  xlab("Species") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(legend.position = "none")
+
+
+## N ranks ##
+si.sum.h$N_rank <- NA
+order.N.h <- order(si.sum.h$del_N_mean)
+si.sum.h$N_rank[order.N.h] <- 1:nrow(si.sum.h)
+
+si.sum.l$N_rank <- NA
+order.N.l <- order(si.sum.l$del_N_mean)
+si.sum.l$N_rank[order.N.l] <- 1:nrow(si.sum.l)
+
+si.high.n <- ggplot(si.sum.h) +
+  geom_errorbar(aes(x = N_rank, ymin = del_N_mean - del_N_sd, ymax = del_N_mean + del_N_sd), width = 0) +
+  geom_point(aes(x = N_rank, y = del_N_mean, shape = sp_group, color = Sea_otter_tr), size = 2) +
+  scale_color_manual(values = so.pal[1], "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_text_repel(aes(x = N_rank, y = del_N_mean, label = si.names), size = 2) +
+  scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
+  scale_x_continuous(limits = c(1, 15), breaks = seq(1, 15, by = 1)) +
+  xlab(expression(paste({delta}^15*N~'\u2030', " rank"))) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  theme(legend.position = "none")
+
+si.low.n <- ggplot(si.sum.l) +
+  geom_errorbar(aes(x = N_rank, ymin = del_N_mean - del_N_sd, ymax = del_N_mean + del_N_sd), width = 0) +
+  geom_point(aes(x = N_rank, y = del_N_mean, shape = sp_group, color = Sea_otter_tr), size = 2) +
+  scale_color_manual(values = so.pal[2], "Sea otter region") +
+  scale_shape_manual(values = shape.pal, "Trophic role", labels = c("Primary consumer", "Primary producer", "Secondary consumer")) +
+  geom_text_repel(aes(x = N_rank, y = del_N_mean, label = si.names), size = 2) +
+  scale_y_continuous(limits = c(5, 15), breaks = seq(5, 15, by = 2)) +
+   scale_x_continuous(limits = c(1, 16), breaks = seq(1, 16, by = 1)) +
+  xlab(expression(paste({delta}^15*N~'\u2030', " rank"))) +
+  ylab(expression({delta}^15*N~'\u2030')) +
+  theme(legend.position = "none")
+  
+```
+
+#### Panel - SI
+```{r}
+legend <- get_legend(si.all.h.lgnd)
+
+si.pan1 <- cowplot::plot_grid(si.all.h, si.c.all, si.n.all, labels = c("a", "b", "c"), nrow = 3, ncol = 1, label_size = 10, label_x = 0.12)
+
+cowplot::plot_grid(si.pan1, legend, rel_widths = c(2.5, 1))
+```
+
+### Species specific
+#### Subsets
+```{r}
+## Primary Producers ##
+# Eelgrass #
+si_eg <- si %>%
+  filter(Species_common == "Eelgrass")
+
+# Eelgrass diatoms / epiphytes #
+si_ep <- si %>%
+  filter(Species_common == "Eelgrass diatoms")
+
+# Fucus #
+si_fu <- si %>%
+  filter(Species_common == "Fucus")
+
+# POM #
+si_pm <- si %>%
+  filter(Species_common == "Particulate organic matter")
+
+# Sugar Kelp #
+si_sk <- si %>%
+  filter(Species_common == "Sugar kelp")
+
+# Ulva #
+si_ul <- si %>%
+  filter(Species_common == "Ulva")
+
+## Primary Consumers ##
+# Pentidotea #
+si_ido <- si %>% 
+  filter(Species_common == "Idotea")
+
+# Butter Clams ##
+si_but <- si %>% 
+  filter(Species_common == "Butter clam")
+
+# Macoma Clams #
+si_mac <- si %>% 
+  filter(Species_common == "Macoma sp.")
+
+## Secondary Consumers ##
+# Dock Shrimp #
+si_dsh <- si %>% 
+  filter(Species_common == "Dock shrimp")
+
+# Helmet crabs #
+si_hel <- si %>% 
+  filter(Species_common == "Helmet crab")
+
+# Graceful crabs #
+si_grc <- si %>% 
+  filter(Species_common == "Graceful crab")
+
+# Shiner Perch #
+si_shn <- si %>% 
+  filter(Species_common == "Shiner perch")
+
+# Snake prickleback #
+si_snk <- si %>% 
+  filter(Species_common == "Snake prickleback")
+
+# Staghorn sculpin #
+si_stg <- si %>% 
+  filter(Species_common == "Staghorn sculpin")
+```
+
+#### T tests of treatment
+```{r}
+## Primary Producers ##
+# Eelgrass #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_eg)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_eg)
+
+# Epiphytes #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_ep)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_ep)
+
+# Fucus #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_fu)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_fu)
+
+# POM #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_pm)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_pm)
+
+# Sugar kelp #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_sk)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_sk)
+
+# Ulva #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_ul)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_ul)
+
+## Primary consumers ##
+# Pentidotea #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_ido)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_ido)
+
+# Butter Clams #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_but)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_but)
+
+# Macoma sp. clams #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_mac)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_mac)
+
+## Seconday consumers ##
+# Dock Shrimp #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_dsh)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_dsh)
+
+# Helmet crabs #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_hel)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_hel)
+
+# Graceful crabs #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_grc)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_grc)
+
+# Shiner perch #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_shn)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_shn)
+
+# Snake prickleback #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_snk)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_snk)
+
+# Staghorn sculpin #
+t.test(del_C_norm ~ Sea_otter_tr, data = si_stg)
+
+t.test(del_N_norm ~ Sea_otter_tr, data = si_stg)
 ```
