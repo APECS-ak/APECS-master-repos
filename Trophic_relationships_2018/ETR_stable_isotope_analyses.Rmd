@@ -96,7 +96,8 @@ low.c.area.raw <- convexhull(si$del_C[si$Sea_otter_tr == "Low"], si$del_N[si$Sea
 
 Convex hulls. First calcualte mean values by species by sea otter treatment
 ```{r c hulls all, echo = FALSE}
-si.sum <- si %>% 
+si.sum <- si %>%
+  filter(Species_common != "Particulate organic matter") %>% 
   group_by(Sea_otter_tr, Species_common) %>% 
   summarise(Species_scientific = first(Species_scientific),
             sp_code = first(sp_code),
@@ -132,9 +133,9 @@ ggplot() +
   geom_polygon(aes(x = low.c.area.raw$xcoords, y = low.c.area.raw$ycoords), fill = so.pal[2], alpha = 0.4)
 
 ## new names ##
-si.names <- c("BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "SHN", "SNK", "STG", "SK", "UL", "BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "POM", "RRC", "SHN", "SNK", "STG", "SK", "UL")
+si.names <- c("BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "SHN", "SNK", "STG", "SK", "UL", "BUT", "DSH", "EG", "EP", "FU", "GRC", "HEL", "IDO", "MAC", "RRC", "SHN", "SNK", "STG", "SK", "UL")
 si.sum$si.names <- si.names
-si.sum$si.names <- factor(si.sum$si.names, levels = c("EG", "EP", "FU", "POM", "SK", "UL", "IDO", "BUT", "MAC", "DSH", "HEL", "GRC", "RRC", "SHN", "SNK", "STG"))
+si.sum$si.names <- factor(si.sum$si.names, levels = c("EG", "EP", "FU", "SK", "UL", "IDO", "BUT", "MAC", "DSH", "HEL", "GRC", "RRC", "SHN", "SNK", "STG"))
 
 ## Mean values and hulls ##
 # High and Low #

@@ -876,12 +876,12 @@ elg.m <- ggplot() +
   geom_errorbar(data = eg.sum, aes(x = site, ymin = shoot_mass_m_mean - shoot_mass_m_sd, ymax = shoot_mass_m_mean + shoot_mass_m_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = eg.sum, aes(x = site, y = shoot_mass_m_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = shoot_mass_m_mean, xend = 3, yend = shoot_mass_m_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = shoot_mass_m_mean + shoot_mass_m_sd, xend = 3, yend = shoot_mass_m_mean + shoot_mass_m_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = shoot_mass_m_mean - shoot_mass_m_sd, xend = 3, yend = shoot_mass_m_mean - shoot_mass_m_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = shoot_mass_m_mean, xend = 6, yend = shoot_mass_m_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = shoot_mass_m_mean + shoot_mass_m_sd, xend = 6, yend = shoot_mass_m_mean + shoot_mass_m_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = shoot_mass_m_mean - shoot_mass_m_sd, xend = 6, yend = shoot_mass_m_mean - shoot_mass_m_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = shoot_mass_m_mean, xend = 3, yend = shoot_mass_m_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = shoot_mass_m_mean + shoot_mass_m_sd, xend = 3, yend = shoot_mass_m_mean + shoot_mass_m_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = shoot_mass_m_mean - shoot_mass_m_sd, xend = 3, yend = shoot_mass_m_mean - shoot_mass_m_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = shoot_mass_m_mean, xend = 6, yend = shoot_mass_m_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = shoot_mass_m_mean + shoot_mass_m_sd, xend = 6, yend = shoot_mass_m_mean + shoot_mass_m_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = shoot_mass_m_mean - shoot_mass_m_sd, xend = 6, yend = shoot_mass_m_mean - shoot_mass_m_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_y_continuous(limits = c(0, 400), breaks = seq(0, 400, by = 100)) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   ylab(bquote("Eelgrass mass" ~(g/m^-2))) +
@@ -912,12 +912,12 @@ epi.m <- ggplot() +
   geom_errorbar(data = eg.sum, aes(x = site, ymin = epi_load_mean - epi_load_sd, ymax = epi_load_mean + epi_load_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = eg.sum, aes(x = site, y = epi_load_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = epi_load_mean, xend = 3, yend = epi_load_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = epi_load_mean + epi_load_sd, xend = 3, yend = epi_load_mean + epi_load_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = epi_load_mean - epi_load_sd, xend = 3, yend = epi_load_mean - epi_load_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = epi_load_mean, xend = 6, yend = epi_load_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = epi_load_mean + epi_load_sd, xend = 6, yend = epi_load_mean + epi_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = epi_load_mean - epi_load_sd, xend = 6, yend = epi_load_mean - epi_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = epi_load_mean, xend = 3, yend = epi_load_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = epi_load_mean + epi_load_sd, xend = 3, yend = epi_load_mean + epi_load_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = epi_load_mean - epi_load_sd, xend = 3, yend = epi_load_mean - epi_load_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = epi_load_mean, xend = 6, yend = epi_load_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = epi_load_mean + epi_load_sd, xend = 6, yend = epi_load_mean + epi_load_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = epi_load_mean - epi_load_sd, xend = 6, yend = epi_load_mean - epi_load_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 0.012), breaks = seq(0, 0.012, by = 0.003)) +
   ylab("Epiphyte load (g/g)") +
@@ -975,12 +975,12 @@ grz.all <- ggplot() +
   geom_errorbar(data = eg.sum, aes(x = site, ymin = grz_load_mean - grz_load_sd, ymax = grz_load_mean + grz_load_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = eg.sum, aes(x = site, y = grz_load_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grz_load_mean, xend = 3, yend = grz_load_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grz_load_mean + grz_load_sd, xend = 3, yend = grz_load_mean + grz_load_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grz_load_mean - grz_load_sd, xend = 3, yend = grz_load_mean - grz_load_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grz_load_mean, xend = 6, yend = grz_load_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grz_load_mean + grz_load_sd, xend = 6, yend = grz_load_mean + grz_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grz_load_mean - grz_load_sd, xend = 6, yend = grz_load_mean - grz_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grz_load_mean, xend = 3, yend = grz_load_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grz_load_mean + grz_load_sd, xend = 3, yend = grz_load_mean + grz_load_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grz_load_mean - grz_load_sd, xend = 3, yend = grz_load_mean - grz_load_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grz_load_mean, xend = 6, yend = grz_load_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grz_load_mean + grz_load_sd, xend = 6, yend = grz_load_mean + grz_load_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grz_load_mean - grz_load_sd, xend = 6, yend = grz_load_mean - grz_load_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-0.002, 0.35), breaks = seq(0, 0.35, by = 0.1)) +
   ylab("Epifauna load (g/g)") +
@@ -1002,12 +1002,12 @@ ido.m <- ggplot() +
   geom_errorbar(data = eg.sum, aes(x = site, ymin = ido_load_mean - ido_load_sd, ymax = ido_load_mean + ido_load_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = eg.sum, aes(x = site, y = ido_load_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = ido_load_mean, xend = 3, yend = ido_load_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = ido_load_mean + ido_load_sd, xend = 3, yend = ido_load_mean + ido_load_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = ido_load_mean - ido_load_sd, xend = 3, yend = ido_load_mean - ido_load_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = ido_load_mean, xend = 6, yend = ido_load_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = ido_load_mean + ido_load_sd, xend = 6, yend = ido_load_mean + ido_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = ido_load_mean - ido_load_sd, xend = 6, yend = ido_load_mean - ido_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = ido_load_mean, xend = 3, yend = ido_load_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = ido_load_mean + ido_load_sd, xend = 3, yend = ido_load_mean + ido_load_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = ido_load_mean - ido_load_sd, xend = 3, yend = ido_load_mean - ido_load_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = ido_load_mean, xend = 6, yend = ido_load_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = ido_load_mean + ido_load_sd, xend = 6, yend = ido_load_mean + ido_load_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = ido_load_mean - ido_load_sd, xend = 6, yend = ido_load_mean - ido_load_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-0.02, 0.2), breaks = seq(0, 0.2, by = 0.05)) +
   ylab("Pentidotea load (g/g)") +
@@ -1029,12 +1029,12 @@ lmp.m <- ggplot() +
   geom_errorbar(data = eg.sum, aes(x = site, ymin = lmp_load_mean - lmp_load_sd, ymax = lmp_load_mean + lmp_load_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = eg.sum, aes(x = site, y = lmp_load_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = lmp_load_mean, xend = 3, yend = lmp_load_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = lmp_load_mean + lmp_load_sd, xend = 3, yend = lmp_load_mean + lmp_load_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = lmp_load_mean - lmp_load_sd, xend = 3, yend = lmp_load_mean - lmp_load_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = lmp_load_mean, xend = 6, yend = lmp_load_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = lmp_load_mean + lmp_load_sd, xend = 6, yend = lmp_load_mean + lmp_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = lmp_load_mean - lmp_load_sd, xend = 6, yend = lmp_load_mean - lmp_load_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = lmp_load_mean, xend = 3, yend = lmp_load_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = lmp_load_mean + lmp_load_sd, xend = 3, yend = lmp_load_mean + lmp_load_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = lmp_load_mean - lmp_load_sd, xend = 3, yend = lmp_load_mean - lmp_load_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = lmp_load_mean, xend = 6, yend = lmp_load_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = lmp_load_mean + lmp_load_sd, xend = 6, yend = lmp_load_mean + lmp_load_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(eg.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = lmp_load_mean - lmp_load_sd, xend = 6, yend = lmp_load_mean - lmp_load_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-0.005, 0.04), breaks = seq(0, 0.04, by = 0.01)) +
   ylab("Limpet load (g/g)") +
@@ -1056,12 +1056,12 @@ clm.all <- ggplot() +
   geom_errorbar(data = clm.sum, aes(x = site, ymin = mass_g_mean - mass_g_sd, ymax = mass_g_mean + mass_g_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = clm.sum, aes(x = site, y = mass_g_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter regmion") +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean, xend = 3, yend = mass_g_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean + mass_g_sd, xend = 3, yend = mass_g_mean + mass_g_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean - mass_g_sd, xend = 3, yend = mass_g_mean - mass_g_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean, xend = 6, yend = mass_g_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean + mass_g_sd, xend = 6, yend = mass_g_mean + mass_g_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean - mass_g_sd, xend = 6, yend = mass_g_mean - mass_g_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean, xend = 3, yend = mass_g_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean + mass_g_sd, xend = 3, yend = mass_g_mean + mass_g_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean - mass_g_sd, xend = 3, yend = mass_g_mean - mass_g_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean, xend = 6, yend = mass_g_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean + mass_g_sd, xend = 6, yend = mass_g_mean + mass_g_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean - mass_g_sd, xend = 6, yend = mass_g_mean - mass_g_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(0, 800), breaks = seq(0, 800, by = 200)) +
   ylab(bquote("Clam mass" ~(g/m^-2))) +
@@ -1083,12 +1083,12 @@ but.m <- ggplot() +
   geom_errorbar(data = clm.sum, aes(x = site, ymin = but_mass_mean - but_mass_sd, ymax = but_mass_mean + but_mass_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = clm.sum, aes(x = site, y = but_mass_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter regmion") +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean, xend = 3, yend = but_mass_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean + but_mass_sd, xend = 3, yend = but_mass_mean + but_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean - but_mass_sd, xend = 3, yend = but_mass_mean - but_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean, xend = 6, yend = but_mass_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean + but_mass_sd, xend = 6, yend = but_mass_mean + but_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean - but_mass_sd, xend = 6, yend = but_mass_mean - but_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean, xend = 3, yend = but_mass_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean + but_mass_sd, xend = 3, yend = but_mass_mean + but_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = but_mass_mean - but_mass_sd, xend = 3, yend = but_mass_mean - but_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean, xend = 6, yend = but_mass_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean + but_mass_sd, xend = 6, yend = but_mass_mean + but_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = but_mass_mean - but_mass_sd, xend = 6, yend = but_mass_mean - but_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-30, 600), breaks = seq(0, 600, by = 100)) +
   ylab(bquote("Butter clam" ~(g/m^-2))) +
@@ -1110,12 +1110,12 @@ mac.m <- ggplot() +
   geom_errorbar(data = clm.sum, aes(x = site, ymin = mac_mass_mean - mac_mass_sd, ymax = mac_mass_mean + mac_mass_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = clm.sum, aes(x = site, y = mac_mass_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter regmion") +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mac_mass_mean, xend = 3, yend = mac_mass_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mac_mass_mean + mac_mass_sd, xend = 3, yend = mac_mass_mean + mac_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mac_mass_mean - mac_mass_sd, xend = 3, yend = mac_mass_mean - mac_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mac_mass_mean, xend = 6, yend = mac_mass_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mac_mass_mean + mac_mass_sd, xend = 6, yend = mac_mass_mean + mac_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mac_mass_mean - mac_mass_sd, xend = 6, yend = mac_mass_mean - mac_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mac_mass_mean, xend = 3, yend = mac_mass_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mac_mass_mean + mac_mass_sd, xend = 3, yend = mac_mass_mean + mac_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mac_mass_mean - mac_mass_sd, xend = 3, yend = mac_mass_mean - mac_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mac_mass_mean, xend = 6, yend = mac_mass_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mac_mass_mean + mac_mass_sd, xend = 6, yend = mac_mass_mean + mac_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(clm.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mac_mass_mean - mac_mass_sd, xend = 6, yend = mac_mass_mean - mac_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-30, 500), breaks = seq(0, 500, by = 100)) +
   ylab(bquote("Macoma sp. clam mass" ~(g/m^-2))) +
@@ -1137,12 +1137,12 @@ crb.all <- ggplot() +
   geom_errorbar(data = crb.sum, aes(x = site, ymin = mass_g_mean - mass_g_sd, ymax = mass_g_mean + mass_g_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = crb.sum, aes(x = site, y = mass_g_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter regmion") +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean, xend = 3, yend = mass_g_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean + mass_g_sd, xend = 3, yend = mass_g_mean + mass_g_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean - mass_g_sd, xend = 3, yend = mass_g_mean - mass_g_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean, xend = 6, yend = mass_g_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean + mass_g_sd, xend = 6, yend = mass_g_mean + mass_g_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean - mass_g_sd, xend = 6, yend = mass_g_mean - mass_g_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean, xend = 3, yend = mass_g_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean + mass_g_sd, xend = 3, yend = mass_g_mean + mass_g_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = mass_g_mean - mass_g_sd, xend = 3, yend = mass_g_mean - mass_g_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean, xend = 6, yend = mass_g_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean + mass_g_sd, xend = 6, yend = mass_g_mean + mass_g_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = mass_g_mean - mass_g_sd, xend = 6, yend = mass_g_mean - mass_g_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-200, 2600), breaks = seq(0, 2500, by = 500)) +
   ylab("Crab (g/string)")  +
@@ -1164,12 +1164,12 @@ grc.m <- ggplot() +
   geom_errorbar(data = crb.sum, aes(x = site, ymin = grc_mass_mean - grc_mass_sd, ymax = grc_mass_mean + grc_mass_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = crb.sum, aes(x = site, y = grc_mass_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter regmion") +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grc_mass_mean, xend = 3, yend = grc_mass_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grc_mass_mean + grc_mass_sd, xend = 3, yend = grc_mass_mean + grc_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grc_mass_mean - grc_mass_sd, xend = 3, yend = grc_mass_mean - grc_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grc_mass_mean, xend = 6, yend = grc_mass_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grc_mass_mean + grc_mass_sd, xend = 6, yend = grc_mass_mean + grc_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grc_mass_mean - grc_mass_sd, xend = 6, yend = grc_mass_mean - grc_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grc_mass_mean, xend = 3, yend = grc_mass_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grc_mass_mean + grc_mass_sd, xend = 3, yend = grc_mass_mean + grc_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = grc_mass_mean - grc_mass_sd, xend = 3, yend = grc_mass_mean - grc_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grc_mass_mean, xend = 6, yend = grc_mass_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grc_mass_mean + grc_mass_sd, xend = 6, yend = grc_mass_mean + grc_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = grc_mass_mean - grc_mass_sd, xend = 6, yend = grc_mass_mean - grc_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-100, 800), breaks = seq(0, 800, by = 200)) +
   ylab("Graceful crab (g/string)")  +
@@ -1191,12 +1191,12 @@ hel.m <- ggplot() +
   geom_errorbar(data = crb.sum, aes(x = site, ymin = hel_mass_mean - hel_mass_sd, ymax = hel_mass_mean + hel_mass_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = crb.sum, aes(x = site, y = hel_mass_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = hel_mass_mean, xend = 3, yend = hel_mass_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = hel_mass_mean + hel_mass_sd, xend = 3, yend = hel_mass_mean + hel_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = hel_mass_mean - hel_mass_sd, xend = 3, yend = hel_mass_mean - hel_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = hel_mass_mean, xend = 6, yend = hel_mass_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = hel_mass_mean + hel_mass_sd, xend = 6, yend = hel_mass_mean + hel_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = hel_mass_mean - hel_mass_sd, xend = 6, yend = hel_mass_mean - hel_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = hel_mass_mean, xend = 3, yend = hel_mass_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = hel_mass_mean + hel_mass_sd, xend = 3, yend = hel_mass_mean + hel_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = hel_mass_mean - hel_mass_sd, xend = 3, yend = hel_mass_mean - hel_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = hel_mass_mean, xend = 6, yend = hel_mass_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = hel_mass_mean + hel_mass_sd, xend = 6, yend = hel_mass_mean + hel_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = hel_mass_mean - hel_mass_sd, xend = 6, yend = hel_mass_mean - hel_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-30, 200), breaks = seq(0, 200, by = 50)) +
   ylab("Helmet crab (g/string)")  +
@@ -1218,12 +1218,12 @@ rrc.m <- ggplot() +
   geom_errorbar(data = crb.sum, aes(x = site, ymin = rrc_mass_mean - rrc_mass_sd, ymax = rrc_mass_mean + rrc_mass_sd), width = 0, position = position_dodge(width = 0.5)) +
   geom_point(data = crb.sum, aes(x = site, y = rrc_mass_mean, color = sea_otter_tr), size = 2, position = position_dodge(width = 0.5)) +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean, xend = 3, yend = rrc_mass_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean + rrc_mass_sd, xend = 3, yend = rrc_mass_mean + rrc_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean - rrc_mass_sd, xend = 3, yend = rrc_mass_mean - rrc_mass_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean, xend = 6, yend = rrc_mass_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean + rrc_mass_sd, xend = 6, yend = rrc_mass_mean + rrc_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean - rrc_mass_sd, xend = 6, yend = rrc_mass_mean - rrc_mass_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean, xend = 3, yend = rrc_mass_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean + rrc_mass_sd, xend = 3, yend = rrc_mass_mean + rrc_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "high"), aes(x = 1, y = rrc_mass_mean - rrc_mass_sd, xend = 3, yend = rrc_mass_mean - rrc_mass_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean, xend = 6, yend = rrc_mass_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean + rrc_mass_sd, xend = 6, yend = rrc_mass_mean + rrc_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(crb.sum.tr, sea_otter_tr == "low"), aes(x = 4, y = rrc_mass_mean - rrc_mass_sd, xend = 6, yend = rrc_mass_mean - rrc_mass_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("H1", "H2", "H3", "L1", "L2", "L3")) +
   scale_y_continuous(limits = c(-100, 2500), breaks = seq(0, 2500, by = 500)) +
   ylab("Red rock crab (g/string)")  +
@@ -1243,12 +1243,12 @@ ggplot(fsh.sum.1) +
 
 fsh.all <- ggplot() +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean, xend = 3, yend = mass_kg_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean + mass_kg_sd, xend = 3, yend = mass_kg_mean + mass_kg_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean - mass_kg_sd, xend = 3, yend = mass_kg_mean - mass_kg_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean, xend = 6, yend = mass_kg_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean + mass_kg_sd, xend = 6, yend = mass_kg_mean + mass_kg_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean - mass_kg_sd, xend = 6, yend = mass_kg_mean - mass_kg_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean, xend = 3, yend = mass_kg_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean + mass_kg_sd, xend = 3, yend = mass_kg_mean + mass_kg_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean - mass_kg_sd, xend = 3, yend = mass_kg_mean - mass_kg_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean, xend = 6, yend = mass_kg_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean + mass_kg_sd, xend = 6, yend = mass_kg_mean + mass_kg_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(fsh.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean - mass_kg_sd, xend = 6, yend = mass_kg_mean - mass_kg_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(-2, 40), breaks = seq(0, 40, by = 10)) +
   ylab("Fish (kg/site)") +
@@ -1268,12 +1268,12 @@ ggplot(stg.sum.1) +
 
 stg.m <- ggplot() +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean, xend = 3, yend = mass_kg_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean + mass_kg_sd, xend = 3, yend = mass_kg_mean + mass_kg_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean - mass_kg_sd, xend = 3, yend = mass_kg_mean - mass_kg_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean, xend = 6, yend = mass_kg_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean + mass_kg_sd, xend = 6, yend = mass_kg_mean + mass_kg_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean - mass_kg_sd, xend = 6, yend = mass_kg_mean - mass_kg_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean, xend = 3, yend = mass_kg_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean + mass_kg_sd, xend = 3, yend = mass_kg_mean + mass_kg_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean - mass_kg_sd, xend = 3, yend = mass_kg_mean - mass_kg_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean, xend = 6, yend = mass_kg_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean + mass_kg_sd, xend = 6, yend = mass_kg_mean + mass_kg_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(stg.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean - mass_kg_sd, xend = 6, yend = mass_kg_mean - mass_kg_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(0, 3), breaks = seq(0, 3, by = 1)) +
   ylab("Staghorn sculpin (kg/site)") +
@@ -1293,12 +1293,12 @@ ggplot(shn.sum.1) +
 
 shn.m <- ggplot() +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean, xend = 3, yend = mass_kg_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean + mass_kg_sd, xend = 3, yend = mass_kg_mean + mass_kg_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean - mass_kg_sd, xend = 3, yend = mass_kg_mean - mass_kg_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean, xend = 6, yend = mass_kg_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean + mass_kg_sd, xend = 6, yend = mass_kg_mean + mass_kg_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean - mass_kg_sd, xend = 6, yend = mass_kg_mean - mass_kg_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean, xend = 3, yend = mass_kg_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean + mass_kg_sd, xend = 3, yend = mass_kg_mean + mass_kg_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean - mass_kg_sd, xend = 3, yend = mass_kg_mean - mass_kg_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean, xend = 6, yend = mass_kg_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean + mass_kg_sd, xend = 6, yend = mass_kg_mean + mass_kg_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(shn.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean - mass_kg_sd, xend = 6, yend = mass_kg_mean - mass_kg_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(-5, 22), breaks = seq(-5, 22, by = 5)) +
   ylab("Shiner perch (kg/set)") +
@@ -1318,12 +1318,12 @@ ggplot(snk.sum.1) +
 
 snk.m <- ggplot() +
   scale_color_manual(values = so.pal, "Sea otter region") +
-  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean, xend = 3, yend = mass_kg_mean),size = 1, color = so.pal[1]) +
-  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean + mass_kg_sd, xend = 3, yend = mass_kg_mean + mass_kg_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean - mass_kg_sd, xend = 3, yend = mass_kg_mean - mass_kg_sd), size = 1, linetype = "dotted", color = so.pal[1]) +
-  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean, xend = 6, yend = mass_kg_mean), size = 1 ,color = so.pal[2]) +
-  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean + mass_kg_sd, xend = 6, yend = mass_kg_mean + mass_kg_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
-  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean - mass_kg_sd, xend = 6, yend = mass_kg_mean - mass_kg_sd), size = 1 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean, xend = 3, yend = mass_kg_mean),size = 1.5, color = so.pal[1]) +
+  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean + mass_kg_sd, xend = 3, yend = mass_kg_mean + mass_kg_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "high"), aes(x = 1, y = mass_kg_mean - mass_kg_sd, xend = 3, yend = mass_kg_mean - mass_kg_sd), size = 1.5, linetype = "dotted", color = so.pal[1]) +
+  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean, xend = 6, yend = mass_kg_mean), size = 1.5 ,color = so.pal[2]) +
+  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean + mass_kg_sd, xend = 6, yend = mass_kg_mean + mass_kg_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
+  geom_segment(data = subset(snk.sum.1, sea_otter_tr == "low"), aes(x = 4, y = mass_kg_mean - mass_kg_sd, xend = 6, yend = mass_kg_mean - mass_kg_sd), size = 1.5 , linetype = "dotted", color = so.pal[2]) +
   scale_x_discrete(labels = c("High", "Low")) +
   scale_y_continuous(limits = c(-5, 15), breaks = seq(-5, 15, by = 5)) +
   ylab("Snake prickleback (kg/set)") +
@@ -1344,7 +1344,7 @@ ggplot(subset(fsh.prop.sum, sea_otter_tr == "low")) +
 
 ##### Panel - biomass
 ```{r}
-cowplot::plot_grid(elg.m, epi.m, pom.m, grz.all, ido.m, lmp.m, clm.all, but.m, mac.m, crb.all, grc.m, hel.m, rrc.m, fsh.all, stg.m, shn.m, snk.m, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q"), nrow = 6, ncol = 3, label_size = 10, align = "v", label_x = 0.26)
+cowplot::plot_grid(elg.m, epi.m, grz.all, ido.m, lmp.m, clm.all, but.m, mac.m, crb.all, grc.m, hel.m, rrc.m, fsh.all, stg.m, shn.m, snk.m, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q"), nrow = 4, ncol = 4, label_size = 10, align = "v", label_x = 0.26)
 ```
 
 ##### Extra plots

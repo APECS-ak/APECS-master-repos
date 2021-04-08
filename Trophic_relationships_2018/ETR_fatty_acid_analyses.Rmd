@@ -573,6 +573,10 @@ fa_grp_MWU_t <- tidyr::spread(fa_grp_MWU_t, key = FA_grp, value = statistic)
 
 ### Plots
 ```{r}
+## Remove POM ##
+fa_grp <- fa_grp %>%
+  filter(Species_common != "Particulate organic matter")
+
 ## All Groups ##
 ggplot(fa_grp, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
   geom_bar(position = position_dodge(), stat = "identity") +
@@ -587,6 +591,7 @@ ggplot(fa_grp, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
 ## Reduced Groups ##
 fa_grp_redu <- fa_grp %>%
   filter(FA_grp == "BAC" | FA_grp == "PUFA" | FA_grp == "PAL" | FA_grp == "ALA" | FA_grp == "LIN" | FA_grp == "ARA" | FA_grp == "EPA" | FA_grp == "DHA")
+
 ggplot(fa_grp_redu, aes(x = FA_grp, y = prop_sum_m, fill = Sea_otter_region)) +
   geom_bar(position = position_dodge(), stat = "identity") +
   geom_errorbar(aes(ymin = prop_sum_m - prop_sum_sd, ymax = prop_sum_m + prop_sum_sd), width = 0, position = position_dodge(.9)) +
@@ -1244,7 +1249,8 @@ Sum contribution of EFAs to dissimilarity
 ```{r}
 ## EFA ##
 EFA.sum <- simp.sum %>% 
-  filter(FA %in% EFA) %>% 
+  filter(FA %in% EFA) %>%
+  filter(taxa != "Particulate organic matter") %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled)) 
@@ -1257,7 +1263,8 @@ p1.EFA <- ggplot(EFA.sum) +
 
 ## LCEFA ##
 LCEFA.sum <- simp.sum %>% 
-  filter(FA %in% c(LCEFA)) %>% 
+  filter(FA %in% c(LCEFA)) %>%
+  filter(taxa != "Particulate organic matter") %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled)) %>% 
@@ -1273,7 +1280,6 @@ LCEFA.sum$rank <- LCEFA.sum$rank + LCEFA.sum$base
 
 LCEFA.sum[7, 1] <- "Epiphytes"
 LCEFA.sum[4, 1] <- "Pentidotea"
-LCEFA.sum[10, 1] <- "POM"
 
 p.LCEFA <- ggplot(LCEFA.sum) +
   geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
@@ -1299,6 +1305,7 @@ p2.3.EFA <- ggplot(subset(LCEFA.sum, taxa != "Particulate organic matter")) +
 ## EPA ##
 EPA.sum <- simp.sum %>% 
   filter(FA == "C20.5w3") %>% 
+  filter(taxa != "Particulate organic matter") %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled)) %>% 
@@ -1314,7 +1321,6 @@ EPA.sum$rank <- EPA.sum$rank + EPA.sum$base
 
 EPA.sum[9, 1] <- "Epiphytes"
 EPA.sum[3, 1] <- "Pentidotea"
-EPA.sum[10, 1] <- "POM"
 
 p.EPA <- ggplot(EPA.sum) +
   geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
@@ -1340,6 +1346,7 @@ ggplot(subset(EPA.sum, taxa != "Particulate organic matter")) +
 ## DHA ##
 DHA.sum <- simp.sum %>% 
   filter(FA == "C22.6w3") %>% 
+  filter(taxa != "Particulate organic matter") %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled)) %>% 
@@ -1355,7 +1362,6 @@ DHA.sum$rank <- DHA.sum$rank + DHA.sum$base
 
 DHA.sum[9, 1] <- "Epiphytes"
 DHA.sum[2, 1] <- "Pentidotea"
-DHA.sum[10, 1] <- "POM"
 
 p.DHA <- ggplot(DHA.sum) +
   geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
@@ -1406,6 +1412,7 @@ ggplot(subset(ARA.sum, taxa != "Particulate organic matter")) +
 ## ALL EFA ##
 ALLEFA.sum <- simp.sum %>% 
  filter(FA %in% ALLEFA) %>% 
+  filter(taxa != "Particulate organic matter") %>% 
   group_by(taxa) %>%
   summarise(sp_group = unique(sp_group),
             sum_EFA_contrib = sum(average_scaled)) %>%
@@ -1421,7 +1428,6 @@ ALLEFA.sum$rank <- ALLEFA.sum$rank + ALLEFA.sum$base
 
 ALLEFA.sum[5, 1] <- "Epiphytes"
 ALLEFA.sum[4, 1] <- "Pentidotea"
-ALLEFA.sum[9, 1] <- "POM"
 
 p.ALLEFA <- ggplot(ALLEFA.sum) +
   geom_col(aes(x = reorder(taxa, rank), y = sum_EFA_contrib, fill = sp_group)) +
@@ -2013,7 +2019,7 @@ stg.nmds <- ggplot(fa_stg_mds_dat) +
 
 #### Panel - FA
 ```{r}
-cowplot::plot_grid(eg.nmds, fu.nmds, pm.nmds, ul.nmds, ido.nmsd, lmp.nmds, but.nmds, dsh.nmds, hel.nmds, grc.nmds, snk.nmds, stg.nmds, nrow = 4, ncol = 3, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"), label_size = 10)
+cowplot::plot_grid(eg.nmds, fu.nmds, ul.nmds, ido.nmsd, lmp.nmds, but.nmds, dsh.nmds, hel.nmds, grc.nmds, snk.nmds, stg.nmds, nrow = 4, ncol = 3, labels = c("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k"), label_size = 10)
 ```
 
 #### Extra plots
