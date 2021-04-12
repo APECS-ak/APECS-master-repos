@@ -1630,7 +1630,7 @@ fu_arrow_angle <- 90 - ((atan2(vec.fu.dat.sig$MDS1_sc, vec.fu.dat.sig$MDS2_sc)* 
 fu_arrow_angle <- ifelse(fu_arrow_angle > 90 & fu_arrow_angle < 270, fu_arrow_angle + 180, fu_arrow_angle)
 fu_arrow_hjust <- ifelse(fu_arrow_angle > 90, 1, 0)
 vec.fu.dat.sig$FA = gsub("C", "", vec.fu.dat.sig$FA)
-vec.fu.dat.sig$FA = sub("w", "*omega*-", vec.fu.dat.sig$FA)
+vec.fu.dat.sig$FA = sub("w", "*omega*", vec.fu.dat.sig$FA)
 vec.fu.dat.sig$FA = sub("\\.", ":", vec.fu.dat.sig$FA)
 
 # POM #
@@ -1652,7 +1652,7 @@ pm_arrow_angle <- 90 - ((atan2(vec.pm.dat.sig$MDS1_sc, vec.pm.dat.sig$MDS2_sc)* 
 pm_arrow_angle <- ifelse(pm_arrow_angle > 90 & pm_arrow_angle < 270, pm_arrow_angle + 180, pm_arrow_angle)
 pm_arrow_hjust <- ifelse(pm_arrow_angle > 90, 1, 0)
 vec.pm.dat.sig$FA = gsub("C", "", vec.pm.dat.sig$FA)
-vec.pm.dat.sig$FA = sub("w", "*omega*-", vec.pm.dat.sig$FA)
+vec.pm.dat.sig$FA = sub("w", "*omega*", vec.pm.dat.sig$FA)
 vec.pm.dat.sig$FA = sub("\\.", ":", vec.pm.dat.sig$FA)
 
 # Eelgrass #
@@ -1674,7 +1674,7 @@ eg_arrow_angle <- 90 - ((atan2(vec.eg.dat.sig$MDS1_sc, vec.eg.dat.sig$MDS2_sc)* 
 eg_arrow_angle <- ifelse(eg_arrow_angle > 90 & eg_arrow_angle < 270, eg_arrow_angle + 180, eg_arrow_angle)
 eg_arrow_hjust <- ifelse(eg_arrow_angle > 90, 1, 0)
 vec.eg.dat.sig$FA = gsub("C", "", vec.eg.dat.sig$FA)
-vec.eg.dat.sig$FA = sub("w", "*omega*-", vec.eg.dat.sig$FA)
+vec.eg.dat.sig$FA = sub("w", "*omega*", vec.eg.dat.sig$FA)
 vec.eg.dat.sig$FA = sub("\\.", ":", vec.eg.dat.sig$FA)
 
 # Ulva #
@@ -1696,7 +1696,7 @@ ul_arrow_angle <- 90 - ((atan2(vec.ul.dat.sig$MDS1_sc, vec.ul.dat.sig$MDS2_sc)* 
 ul_arrow_angle <- ifelse(ul_arrow_angle > 90 & ul_arrow_angle < 270, ul_arrow_angle + 180, ul_arrow_angle)
 ul_arrow_hjust <- ifelse(ul_arrow_angle > 90, 1, 0)
 vec.ul.dat.sig$FA = gsub("C", "", vec.ul.dat.sig$FA)
-vec.ul.dat.sig$FA = sub("w", "*omega*-", vec.ul.dat.sig$FA)
+vec.ul.dat.sig$FA = sub("w", "*omega*", vec.ul.dat.sig$FA)
 vec.ul.dat.sig$FA = sub("\\.", ":", vec.ul.dat.sig$FA)
 
 ## Primary Consumers ##
@@ -1719,7 +1719,7 @@ ido_arrow_angle <- 90 - ((atan2(vec.ido.dat.sig$MDS1_sc, vec.ido.dat.sig$MDS2_sc
 ido_arrow_angle <- ifelse(ido_arrow_angle > 90 & ido_arrow_angle < 270, ido_arrow_angle + 180, ido_arrow_angle)
 ido_arrow_hjust <- ifelse(ido_arrow_angle > 90, 1, 0)
 vec.ido.dat.sig$FA = gsub("C", "", vec.ido.dat.sig$FA)
-vec.ido.dat.sig$FA = sub("w", "*omega*-", vec.ido.dat.sig$FA)
+vec.ido.dat.sig$FA = sub("w", "*omega*", vec.ido.dat.sig$FA)
 vec.ido.dat.sig$FA = sub("\\.", ":", vec.ido.dat.sig$FA)
 
 # Limpet #
@@ -1741,7 +1741,7 @@ lmp_arrow_angle <- 90 - ((atan2(vec.lmp.dat.sig$MDS1_sc, vec.lmp.dat.sig$MDS2_sc
 lmp_arrow_angle <- ifelse(lmp_arrow_angle > 90 & lmp_arrow_angle < 270, lmp_arrow_angle + 180, lmp_arrow_angle)
 lmp_arrow_hjust <- ifelse(lmp_arrow_angle > 90, 1, 0)
 vec.lmp.dat.sig$FA = gsub("C", "", vec.lmp.dat.sig$FA)
-vec.lmp.dat.sig$FA = sub("w", "*omega*-", vec.lmp.dat.sig$FA)
+vec.lmp.dat.sig$FA = sub("w", "*omega*", vec.lmp.dat.sig$FA)
 vec.lmp.dat.sig$FA = sub("\\.", ":", vec.lmp.dat.sig$FA)
 
 # Butter clam #
@@ -1763,7 +1763,7 @@ but_arrow_angle <- 90 - ((atan2(vec.but.dat.sig$MDS1_sc, vec.but.dat.sig$MDS2_sc
 but_arrow_angle <- ifelse(but_arrow_angle > 90 & but_arrow_angle < 270, but_arrow_angle + 180, but_arrow_angle)
 but_arrow_hjust <- ifelse(but_arrow_angle > 90, 1, 0)
 vec.but.dat.sig$FA = gsub("C", "", vec.but.dat.sig$FA)
-vec.but.dat.sig$FA = sub("w", "*omega*-", vec.but.dat.sig$FA)
+vec.but.dat.sig$FA = sub("w", "*omega*", vec.but.dat.sig$FA)
 vec.but.dat.sig$FA = sub("\\.", ":", vec.but.dat.sig$FA)
 
 ## Secondary Consumers ##
@@ -1786,7 +1786,7 @@ dsh_arrow_angle <- 90 - ((atan2(vec.dsh.dat.sig$MDS1_sc, vec.dsh.dat.sig$MDS2_sc
 dsh_arrow_angle <- ifelse(dsh_arrow_angle > 90 & dsh_arrow_angle < 270, dsh_arrow_angle + 180, dsh_arrow_angle)
 dsh_arrow_hjust <- ifelse(dsh_arrow_angle > 90, 1, 0)
 vec.dsh.dat.sig$FA = gsub("C", "", vec.dsh.dat.sig$FA)
-vec.dsh.dat.sig$FA = sub("w", "*omega*-", vec.dsh.dat.sig$FA)
+vec.dsh.dat.sig$FA = sub("w", "*omega*", vec.dsh.dat.sig$FA)
 vec.dsh.dat.sig$FA = sub("\\.", ":", vec.dsh.dat.sig$FA)
 
 # Helmet crab #
@@ -1808,7 +1808,7 @@ hel_arrow_angle <- 90 - ((atan2(vec.hel.dat.sig$MDS1_sc, vec.hel.dat.sig$MDS2_sc
 hel_arrow_angle <- ifelse(hel_arrow_angle > 90 & hel_arrow_angle < 270, hel_arrow_angle + 180, hel_arrow_angle)
 hel_arrow_hjust <- ifelse(hel_arrow_angle > 90, 1, 0)
 vec.hel.dat.sig$FA = gsub("C", "", vec.hel.dat.sig$FA)
-vec.hel.dat.sig$FA = sub("w", "*omega*-", vec.hel.dat.sig$FA)
+vec.hel.dat.sig$FA = sub("w", "*omega*", vec.hel.dat.sig$FA)
 vec.hel.dat.sig$FA = sub("\\.", ":", vec.hel.dat.sig$FA)
 
 # Graceful crabs #
@@ -1830,7 +1830,7 @@ grc_arrow_angle <- 90 - ((atan2(vec.grc.dat.sig$MDS1_sc, vec.grc.dat.sig$MDS2_sc
 grc_arrow_angle <- ifelse(grc_arrow_angle > 90 & grc_arrow_angle < 270, grc_arrow_angle + 180, grc_arrow_angle)
 grc_arrow_hjust <- ifelse(grc_arrow_angle > 90, 1, 0)
 vec.grc.dat.sig$FA = gsub("C", "", vec.grc.dat.sig$FA)
-vec.grc.dat.sig$FA = sub("w", "*omega*-", vec.grc.dat.sig$FA)
+vec.grc.dat.sig$FA = sub("w", "*omega*", vec.grc.dat.sig$FA)
 vec.grc.dat.sig$FA = sub("\\.", ":", vec.grc.dat.sig$FA)
 
 # Snake prickleback #
@@ -1852,7 +1852,7 @@ snk_arrow_angle <- 90 - ((atan2(vec.snk.dat.sig$MDS1_sc, vec.snk.dat.sig$MDS2_sc
 snk_arrow_angle <- ifelse(snk_arrow_angle > 90 & snk_arrow_angle < 270, snk_arrow_angle + 180, snk_arrow_angle)
 snk_arrow_hjust <- ifelse(snk_arrow_angle > 90, 1, 0)
 vec.snk.dat.sig$FA = gsub("C", "", vec.snk.dat.sig$FA)
-vec.snk.dat.sig$FA = sub("w", "*omega*-", vec.snk.dat.sig$FA)
+vec.snk.dat.sig$FA = sub("w", "*omega*", vec.snk.dat.sig$FA)
 vec.snk.dat.sig$FA = sub("\\.", ":", vec.snk.dat.sig$FA)
 
 # Staghorn sculpin #
@@ -1874,7 +1874,7 @@ stg_arrow_angle <- 90 - ((atan2(vec.stg.dat.sig$MDS1_sc, vec.stg.dat.sig$MDS2_sc
 stg_arrow_angle <- ifelse(stg_arrow_angle > 90 & stg_arrow_angle < 270, stg_arrow_angle + 180, stg_arrow_angle)
 stg_arrow_hjust <- ifelse(stg_arrow_angle > 90, 1, 0)
 vec.stg.dat.sig$FA = gsub("C", "", vec.stg.dat.sig$FA)
-vec.stg.dat.sig$FA = sub("w", "*omega*-", vec.stg.dat.sig$FA)
+vec.stg.dat.sig$FA = sub("w", "*omega*", vec.stg.dat.sig$FA)
 vec.stg.dat.sig$FA = sub("\\.", ":", vec.stg.dat.sig$FA)
 ```
 
@@ -1886,7 +1886,7 @@ NOTE that axes limits are very specific to allow for plotting a 6 X 8 in pdf pan
 fu.nmds <- ggplot(fa_fu_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.fu.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.fu.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.fu.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = fu_arrow_angle, hjust = fu_arrow_hjust) +
   scale_x_continuous(limits = c(-0.05, 0.1)) +
   scale_y_continuous(limits = c(-0.07, 0.15)) +
@@ -1897,7 +1897,7 @@ fu.nmds <- ggplot(fa_fu_mds_dat) +
 pm.nmds <- ggplot(fa_pm_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.pm.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.pm.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.pm.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = pm_arrow_angle, hjust = pm_arrow_hjust) +
   scale_x_continuous(limits = c(-0.18, 0.17)) +
   scale_y_continuous(limits = c(-0.15, 0.17)) +
@@ -1908,7 +1908,7 @@ pm.nmds <- ggplot(fa_pm_mds_dat) +
 eg.nmds <- ggplot(fa_eg_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.eg.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.eg.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.eg.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = eg_arrow_angle, hjust = eg_arrow_hjust) +
   scale_x_continuous(limits = c(-0.1, 0.2)) +
   scale_y_continuous(limits = c(-0.06, 0.12)) +
@@ -1919,7 +1919,7 @@ eg.nmds <- ggplot(fa_eg_mds_dat) +
 ul.nmds <- ggplot(fa_ul_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.ul.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.ul.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.ul.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = ul_arrow_angle, hjust = ul_arrow_hjust) +
   scale_x_continuous(limits = c(-0.35, 0.41)) +
   scale_y_continuous(limits = c(-0.22, 0.31)) +
@@ -1931,7 +1931,7 @@ ul.nmds <- ggplot(fa_ul_mds_dat) +
 ido.nmsd <- ggplot(fa_ido_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.ido.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.ido.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.ido.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = ido_arrow_angle, hjust = ido_arrow_hjust) +
   scale_x_continuous(limits = c(-0.24, 0.27)) +
   scale_y_continuous(limits = c(-0.19, 0.12)) +
@@ -1942,7 +1942,7 @@ ido.nmsd <- ggplot(fa_ido_mds_dat) +
 lmp.nmds <- ggplot(fa_lmp_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.lmp.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.lmp.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.lmp.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = lmp_arrow_angle, hjust = lmp_arrow_hjust) +
   scale_x_continuous(limits = c(-0.15, 0.19)) +
   scale_y_continuous(limits = c(-0.10, 0.12)) +
@@ -1953,7 +1953,7 @@ lmp.nmds <- ggplot(fa_lmp_mds_dat) +
 but.nmds <- ggplot(fa_but_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.but.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.but.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.but.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha=0.5, size = 2, parse = T, angle = but_arrow_angle, hjust = but_arrow_hjust) +
   scale_x_continuous(limits = c(-0.25, 0.15)) +
   scale_y_continuous(limits = c(-0.25, 0.25)) +
@@ -1965,7 +1965,7 @@ but.nmds <- ggplot(fa_but_mds_dat) +
 dsh.nmds <- ggplot(fa_dsh_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.dsh.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.dsh.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.dsh.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = dsh_arrow_angle, hjust = dsh_arrow_hjust) +
   scale_x_continuous(limits = c(-0.12, 0.075)) +
   scale_y_continuous(limits = c(-0.08, 0.085)) +
@@ -1976,7 +1976,7 @@ dsh.nmds <- ggplot(fa_dsh_mds_dat) +
 hel.nmds <- ggplot(fa_hel_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.hel.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.hel.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.hel.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = hel_arrow_angle, hjust = hel_arrow_hjust) +
   scale_x_continuous(limits = c(-0.1, 0.07)) +
   scale_y_continuous(limits = c(-0.08, 0.07)) +
@@ -1987,7 +1987,7 @@ hel.nmds <- ggplot(fa_hel_mds_dat) +
 grc.nmds <- ggplot(fa_grc_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.grc.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.grc.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.grc.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = grc_arrow_angle, hjust = grc_arrow_hjust) +
   scale_x_continuous(limits = c(-0.17, 0.24)) +
   scale_y_continuous(limits = c(-0.15, 0.13)) +
@@ -1998,7 +1998,7 @@ grc.nmds <- ggplot(fa_grc_mds_dat) +
 snk.nmds <- ggplot(fa_snk_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.snk.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.snk.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.snk.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = snk_arrow_angle, hjust = snk_arrow_hjust) +
   scale_x_continuous(limits = c(-0.24, 0.25)) +
   scale_y_continuous(limits = c(-0.15, 0.18)) +
@@ -2009,7 +2009,7 @@ snk.nmds <- ggplot(fa_snk_mds_dat) +
 stg.nmds <- ggplot(fa_stg_mds_dat) +
   geom_point(aes(x = NMDS1, y = NMDS2, color = Sea_otter_region), size = 2) +
   scale_color_manual(values = so.pal, "Sea otter treatment") +
-  geom_segment(data = vec.stg.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray50", alpha = 1) +
+  geom_segment(data = vec.stg.dat.sig, aes(x = 0, y = 0, xend = MDS1_sc, yend = MDS2_sc), arrow = arrow(length = unit(0.07, "inches")), colour = "gray30", alpha = 1) +
   geom_text(data = vec.stg.dat.sig, aes(MDS1_sc * 1.02, MDS2_sc * 1.02, label = FA), alpha = 0.5, size = 2, parse = T, angle = stg_arrow_angle, hjust = stg_arrow_hjust) +
   scale_x_continuous(limits = c(-0.17, 0.16)) +
   scale_y_continuous(limits = c(-0.23, 0.14)) +
