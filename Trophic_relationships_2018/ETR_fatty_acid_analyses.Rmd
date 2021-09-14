@@ -2326,7 +2326,7 @@ DHA.MWU_c <- fa_DHA_c_all %>%
 DHA.MWU_c$FA_grp <- "DHA"
 
 ## Clean up ##
-fa_grp_MWU_c <- rbind(UFA.MWU_c, BAC.MWU_c, PAL.MWU_c, ALA.MWU_c, LIN.MWU_c, ARA.MWU_c, EPA.MWU_c, DHA.MWU_c)
+fa_grp_MWU_c <- rbind(PUFA.MWU_c, BAC.MWU_c, PAL.MWU_c, ALA.MWU_c, LIN.MWU_c, ARA.MWU_c, EPA.MWU_c, DHA.MWU_c)
 
 fa_grp_MWU_c_p <- fa_grp_MWU_c[, c(1, 3, 6)]
 fa_grp_MWU_c_p$p.value <- round(fa_grp_MWU_c_p$p.value, 3)
